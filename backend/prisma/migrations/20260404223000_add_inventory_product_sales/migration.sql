@@ -1,0 +1,3 @@
+ALTER TABLE "inventory_products"
+ADD COLUMN "soldQuantity" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN "lastSoldAt" TIMESTAMP(3);
