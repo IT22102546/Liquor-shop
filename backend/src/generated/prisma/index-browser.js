@@ -150,10 +150,22 @@ exports.Prisma.PosAdminScalarFieldEnum = {
   name: 'name',
   email: 'email',
   passwordHash: 'passwordHash',
+  role: 'role',
   isActive: 'isActive',
   lastLoginAt: 'lastLoginAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PosCounterSaleScalarFieldEnum = {
+  id: 'id',
+  invoiceGroupCode: 'invoiceGroupCode',
+  totalAmount: 'totalAmount',
+  amountReceived: 'amountReceived',
+  changeGiven: 'changeGiven',
+  paymentMethod: 'paymentMethod',
+  cashierId: 'cashierId',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.BikeBrandScalarFieldEnum = {
@@ -591,6 +603,19 @@ exports.Role = exports.$Enums.Role = {
   CUSTOMER: 'CUSTOMER'
 };
 
+exports.PosAdminRole = exports.$Enums.PosAdminRole = {
+  ADMIN: 'ADMIN',
+  CASHIER: 'CASHIER',
+  INVENTORY_MANAGER: 'INVENTORY_MANAGER',
+  ACCOUNTANT: 'ACCOUNTANT'
+};
+
+exports.PaymentMethod = exports.$Enums.PaymentMethod = {
+  CASH: 'CASH',
+  CHEQUE: 'CHEQUE',
+  BANK_TRANSFER: 'BANK_TRANSFER'
+};
+
 exports.PosPurchaseItemType = exports.$Enums.PosPurchaseItemType = {
   BIKE: 'BIKE',
   INVENTORY: 'INVENTORY',
@@ -644,12 +669,6 @@ exports.AccountLevel = exports.$Enums.AccountLevel = {
   SUB: 'SUB'
 };
 
-exports.PaymentMethod = exports.$Enums.PaymentMethod = {
-  CASH: 'CASH',
-  CHEQUE: 'CHEQUE',
-  BANK_TRANSFER: 'BANK_TRANSFER'
-};
-
 exports.ChequeStatus = exports.$Enums.ChequeStatus = {
   PENDING: 'PENDING',
   CLEARED: 'CLEARED',
@@ -687,6 +706,7 @@ exports.Prisma.ModelName = {
   User: 'User',
   Bike: 'Bike',
   PosAdmin: 'PosAdmin',
+  PosCounterSale: 'PosCounterSale',
   BikeBrand: 'BikeBrand',
   BikeModel: 'BikeModel',
   BikeColor: 'BikeColor',

@@ -41,6 +41,7 @@ exports.publicContactRequestsRouter = (0, express_1.Router)();
 exports.publicContactRequestsRouter.post("/", ctrl.submitContactRequest);
 const posRouter = (0, express_1.Router)();
 posRouter.use(pos_auth_middleware_1.authenticatePosAdmin);
+posRouter.use((0, pos_auth_middleware_1.authorizePosRoles)("ADMIN", "INVENTORY_MANAGER"));
 posRouter.get("/stats", ctrl.getContactRequestStats);
 posRouter.get("/", ctrl.listContactRequests);
 posRouter.get("/:id", ctrl.getContactRequest);

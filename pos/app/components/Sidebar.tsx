@@ -17,11 +17,14 @@ import {
   IconSupplier,
   IconUsers,
 } from "../lib/icons";
+import { useAdmin } from "./AdminContext";
+import { canAccessPath } from "../lib/roles";
 
 const NAV_ITEMS = [
   { key: "inventory", label: "Sell Products", href: "/dashboard/inventory", Icon: IconBottle },
   { key: "dashboard", label: "Dashboard", href: "/dashboard", Icon: IconBar },
-  { key: "users", label: "User Management", href: "/dashboard/users", Icon: IconUsers },
+  { key: "staff", label: "Staff & Roles", href: "/dashboard/staff", Icon: IconUsers },
+  { key: "users", label: "Customer Management", href: "/dashboard/users", Icon: IconUsers },
   { key: "suppliers", label: "Beverage Suppliers", href: "/dashboard/suppliers", Icon: IconSupplier },
   { key: "purchasing", label: "Purchasing & Requests", href: "/dashboard/purchasing-requests", Icon: IconPreOrders },
   { key: "wholesale", label: "Wholesale Accounts", href: "/dashboard/wholesale-accounts", Icon: IconLeasing },
@@ -40,6 +43,7 @@ const GROUPS = {
 const SIDEBAR_COLLAPSED_KEY = "pos-sidebar-collapsed";
 
 export function Sidebar() {
+  const { admin } = useAdmin();
   const pathname = usePathname();
   const isCounter = pathname === "/dashboard/inventory";
   const [collapsed, setCollapsed] = useState(false);
@@ -55,6 +59,10 @@ export function Sidebar() {
 
   const isActive = (href: string) => pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
   const toggleGroup = (key: string) => setOpenGroups((current) => ({ ...current, [key]: !current[key] }));
+  const visibleNavItems = NAV_ITEMS.filter((item) => {
+    const group = GROUPS[item.key as keyof typeof GROUPS];
+    return canAccessPath(admin.role, item.href) || Boolean(group?.some(([, href]) => canAccessPath(admin.role, href)));
+  });
 
   return (
     <aside className={`sidebar${collapsed ? " collapsed" : ""}`}>
@@ -72,11 +80,11 @@ export function Sidebar() {
           <>
             <Link href="/dashboard/inventory" className="nav-item active"><span className="nav-icon"><IconBottle /></span>{!collapsed && <span className="nav-label">Bar Counter</span>}</Link>
             <Link href="/dashboard/inventory/sold" className="nav-item"><span className="nav-icon"><IconReceipt /></span>{!collapsed && <span className="nav-label">Recent Sales</span>}</Link>
-            <Link href="/dashboard/inventory/manage" className="nav-item"><span className="nav-icon"><IconPreOrders /></span>{!collapsed && <span className="nav-label">Product Setup</span>}</Link>
-            <Link href="/dashboard" className="nav-item"><span className="nav-icon"><IconBar /></span>{!collapsed && <span className="nav-label">Dashboard</span>}</Link>
+            {canAccessPath(admin.role, "/dashboard/inventory/manage") && <Link href="/dashboard/inventory/manage" className="nav-item"><span className="nav-icon"><IconPreOrders /></span>{!collapsed && <span className="nav-label">Product Setup</span>}</Link>}
+            {canAccessPath(admin.role, "/dashboard") && <Link href="/dashboard" className="nav-item"><span className="nav-icon"><IconBar /></span>{!collapsed && <span className="nav-label">Dashboard</span>}</Link>}
           </>
-        ) : NAV_ITEMS.map(({ key, label, href, Icon }) => {
-          const group = GROUPS[key as keyof typeof GROUPS];
+        ) : visibleNavItems.map(({ key, label, href, Icon }) => {
+          const group = GROUPS[key as keyof typeof GROUPS]?.filter(([, itemHref]) => canAccessPath(admin.role, itemHref));
           const active = isActive(href);
           if (!group || collapsed) {
             return <Link key={key} href={href} className={`nav-item${active ? " active" : ""}`} title={collapsed ? label : undefined}><span className="nav-icon"><Icon /></span>{!collapsed && <span className="nav-label">{label}</span>}{!collapsed && active && <span className="nav-dot" />}</Link>;

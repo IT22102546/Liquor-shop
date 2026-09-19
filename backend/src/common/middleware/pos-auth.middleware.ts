@@ -3,7 +3,8 @@ import jwt from "jsonwebtoken";
 import { env } from "../../config/env";
 import { AppError } from "../utils/errors";
 
-type PosJwtPayload = { sub: number; email: string; type: "pos_admin" };
+export type PosRole = "ADMIN" | "CASHIER" | "INVENTORY_MANAGER" | "ACCOUNTANT";
+type PosJwtPayload = { sub: number; email: string; role: PosRole; type: "pos_admin" };
 
 /**
  * Middleware that validates the POS admin JWT token (type === "pos_admin").
@@ -33,6 +34,16 @@ export function authenticatePosAdmin(req: Request, _res: Response, next: NextFun
 
   const p = decoded as PosJwtPayload;
   // Attach a minimal stub so code that reads req.user still works
-  (req as unknown as { user: unknown }).user = { id: p.sub, email: p.email, role: "POS_ADMIN" };
+  (req as unknown as { user: unknown }).user = { id: p.sub, email: p.email, role: p.role };
   return next();
+}
+
+export function authorizePosRoles(...allowedRoles: PosRole[]) {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    const role = (req as unknown as { user?: { role?: PosRole } }).user?.role;
+    if (!role || !allowedRoles.includes(role)) {
+      return next(AppError.forbidden("You do not have permission to access this section"));
+    }
+    return next();
+  };
 }

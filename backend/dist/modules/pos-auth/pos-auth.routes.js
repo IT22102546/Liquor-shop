@@ -35,7 +35,11 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const posAuthController = __importStar(require("./pos-auth.controller"));
+const pos_auth_middleware_1 = require("../../common/middleware/pos-auth.middleware");
 const router = (0, express_1.Router)();
 router.post("/login", posAuthController.login);
 router.get("/me", posAuthController.me);
+router.get("/staff", pos_auth_middleware_1.authenticatePosAdmin, (0, pos_auth_middleware_1.authorizePosRoles)("ADMIN"), posAuthController.listStaff);
+router.post("/staff", pos_auth_middleware_1.authenticatePosAdmin, (0, pos_auth_middleware_1.authorizePosRoles)("ADMIN"), posAuthController.createStaff);
+router.patch("/staff/:id", pos_auth_middleware_1.authenticatePosAdmin, (0, pos_auth_middleware_1.authorizePosRoles)("ADMIN"), posAuthController.updateStaff);
 exports.default = router;

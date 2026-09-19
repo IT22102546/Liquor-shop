@@ -38,6 +38,7 @@ const pos_auth_middleware_1 = require("../../common/middleware/pos-auth.middlewa
 const controller = __importStar(require("./accounts.controller"));
 const router = (0, express_1.Router)();
 router.use(pos_auth_middleware_1.authenticatePosAdmin);
+router.use((0, pos_auth_middleware_1.authorizePosRoles)("ADMIN", "ACCOUNTANT"));
 router.get("/chart", controller.getAccounts);
 router.post("/chart", controller.createAccount);
 router.patch("/chart/:id", controller.updateAccount);

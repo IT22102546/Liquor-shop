@@ -202,6 +202,7 @@ export const checkoutSaleSchema = z.object({
     .min(1, "Add at least one product")
     .max(100),
   paymentMethod: z.enum(["CASH", "CHEQUE", "BANK_TRANSFER"]).default("CASH"),
+  amountReceived: z.number().min(0).optional(),
 });
 
 export const createLeasingCompanySchema = z.object({

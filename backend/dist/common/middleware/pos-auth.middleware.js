@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authenticatePosAdmin = authenticatePosAdmin;
+exports.authorizePosRoles = authorizePosRoles;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const env_1 = require("../../config/env");
 const errors_1 = require("../utils/errors");
@@ -26,6 +27,15 @@ function authenticatePosAdmin(req, _res, next) {
         return next(errors_1.AppError.forbidden("POS admin access required"));
     }
     const p = decoded;
-    req.user = { id: p.sub, email: p.email, role: "POS_ADMIN" };
+    req.user = { id: p.sub, email: p.email, role: p.role };
     return next();
+}
+function authorizePosRoles(...allowedRoles) {
+    return (req, _res, next) => {
+        const role = req.user?.role;
+        if (!role || !allowedRoles.includes(role)) {
+            return next(errors_1.AppError.forbidden("You do not have permission to access this section"));
+        }
+        return next();
+    };
 }

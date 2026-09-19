@@ -1501,7 +1501,7 @@ function ViewProductModal({
 }
 
 export default function InventoryPage() {
-  const { token, logout } = useAdmin();
+  const { admin, token, logout } = useAdmin();
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1824,7 +1824,7 @@ export default function InventoryPage() {
           </button>
           <div className="pos-cart-shortcuts">
             <Link href="/dashboard/inventory/sold">Recent sales</Link>
-            <Link href="/dashboard/inventory/manage">Product setup</Link>
+            {admin.role === "ADMIN" && <Link href="/dashboard/inventory/manage">Product setup</Link>}
           </div>
         </div>
       </aside>

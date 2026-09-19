@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useTheme } from "./ThemeProvider";
 import { useAdmin } from "./AdminContext";
 import { API_URL } from "../lib/constants";
+import { ROLE_LABELS } from "../lib/roles";
 import {
   IconSun,
   IconMoon,
@@ -33,6 +34,7 @@ type InventoryProductAlert = {
 
 const BREADCRUMBS: Record<string, string> = {
   "/dashboard":            "Dashboard",
+  "/dashboard/staff":      "Staff & Role Management",
   "/dashboard/users":     "User Management",
   "/dashboard/users/history": "User Management - User History",
   "/dashboard/invoices":  "Invoice Management",
@@ -282,7 +284,7 @@ export function Topbar() {
           <div className="admin-avatar">{admin.name.charAt(0).toUpperCase()}</div>
           <div className="admin-info">
             <span className="admin-name">{admin.name}</span>
-            <span className="admin-role">Administrator</span>
+            <span className="admin-role">{ROLE_LABELS[admin.role] ?? "Staff"}</span>
           </div>
           <IconChevronDown />
         </div>

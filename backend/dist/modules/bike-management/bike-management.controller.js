@@ -306,7 +306,33 @@ async function deleteProductCategory(req, res, next) {
 }
 async function getProducts(req, res, next) {
     try {
-        return (0, response_1.sendSuccess)(res, await service.listProducts((0, errors_1.validate)(product_dto_1.productQuerySchema, req.query)));
+        const result = await service.listProducts((0, errors_1.validate)(product_dto_1.productQuerySchema, req.query));
+        const role = req.user?.role;
+        if (role !== "CASHIER")
+            return (0, response_1.sendSuccess)(res, result);
+        return (0, response_1.sendSuccess)(res, {
+            ...result,
+            products: result.products.map((product) => ({
+                id: product.id,
+                displayId: product.displayId,
+                brandId: product.brandId,
+                categoryId: product.categoryId,
+                name: product.name,
+                partNumber: product.partNumber,
+                compatibleWith: product.compatibleWith,
+                quantity: product.quantity,
+                soldQuantity: product.soldQuantity,
+                lowStockThreshold: product.lowStockThreshold,
+                sellingPrice: product.sellingPrice,
+                description: product.description,
+                lastSoldAt: product.lastSoldAt,
+                createdAt: product.createdAt,
+                updatedAt: product.updatedAt,
+                brand: product.brand,
+                category: product.category,
+                images: product.images,
+            })),
+        });
     }
     catch (err) {
         return next(err);

@@ -17,6 +17,7 @@ import {
 } from "../lib/icons";
 import { API_URL, STORAGE_TOKEN, STORAGE_ADMIN } from "../lib/constants";
 import type { PosAdmin } from "../lib/types";
+import { ROLE_HOME } from "../lib/roles";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -29,8 +30,15 @@ export default function SignInPage() {
 
   // If already logged in, redirect immediately
   useEffect(() => {
-    if (localStorage.getItem(STORAGE_TOKEN)) {
-      router.replace("/dashboard/inventory");
+    const savedAdmin = localStorage.getItem(STORAGE_ADMIN);
+    if (localStorage.getItem(STORAGE_TOKEN) && savedAdmin) {
+      try {
+        const admin = JSON.parse(savedAdmin) as PosAdmin;
+        router.replace(ROLE_HOME[admin.role] ?? "/dashboard/inventory");
+      } catch {
+        localStorage.removeItem(STORAGE_TOKEN);
+        localStorage.removeItem(STORAGE_ADMIN);
+      }
     }
   }, [router]);
 
@@ -51,7 +59,7 @@ export default function SignInPage() {
       if (!res.ok || !payload.data) throw new Error(payload.message ?? "Invalid credentials");
       localStorage.setItem(STORAGE_TOKEN, payload.data.accessToken);
       localStorage.setItem(STORAGE_ADMIN, JSON.stringify(payload.data.admin));
-      router.push("/dashboard/inventory");
+      router.push(ROLE_HOME[payload.data.admin.role]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to sign in");
     } finally {
@@ -106,8 +114,8 @@ export default function SignInPage() {
             <div className="auth-form-card-accent" />
             <div className="auth-card-inner">
               <p className="eyebrow">Welcome back</p>
-              <h2>Admin Sign In</h2>
-              <p className="auth-subtitle">Enter your bar shop administrator credentials to continue.</p>
+              <h2>Staff Sign In</h2>
+              <p className="auth-subtitle">Enter your bar shop staff credentials to continue.</p>
 
               <form onSubmit={handleLogin} className="auth-form">
                 <div className="field-group">

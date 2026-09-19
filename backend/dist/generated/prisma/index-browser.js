@@ -150,6 +150,7 @@ exports.Prisma.PosAdminScalarFieldEnum = {
   name: 'name',
   email: 'email',
   passwordHash: 'passwordHash',
+  role: 'role',
   isActive: 'isActive',
   lastLoginAt: 'lastLoginAt',
   createdAt: 'createdAt',
@@ -589,6 +590,13 @@ exports.Role = exports.$Enums.Role = {
   ADMIN: 'ADMIN',
   STAFF: 'STAFF',
   CUSTOMER: 'CUSTOMER'
+};
+
+exports.PosAdminRole = exports.$Enums.PosAdminRole = {
+  ADMIN: 'ADMIN',
+  CASHIER: 'CASHIER',
+  INVENTORY_MANAGER: 'INVENTORY_MANAGER',
+  ACCOUNTANT: 'ACCOUNTANT'
 };
 
 exports.PosPurchaseItemType = exports.$Enums.PosPurchaseItemType = {

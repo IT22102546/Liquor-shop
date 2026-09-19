@@ -762,7 +762,7 @@ export async function deletePosUser(id: number) {
   await prisma.posCustomer.delete({ where: { id } });
 }
 
-export async function checkoutSale(dto: CheckoutSaleDto) {
+export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
   const mergedItems = Array.from(
     dto.items.reduce((items, item) => {
       const existing = items.get(item.productId);
@@ -800,6 +800,17 @@ export async function checkoutSale(dto: CheckoutSaleDto) {
       0,
     ),
   );
+  const amountReceived = dto.paymentMethod === "CASH"
+    ? roundCurrency(dto.amountReceived ?? Number.NaN)
+    : total;
+  if (!Number.isFinite(amountReceived) || amountReceived < total) {
+    throw AppError.validation({
+      amountReceived: ["Cash received must be equal to or greater than the sale total"],
+    });
+  }
+  const changeGiven = dto.paymentMethod === "CASH"
+    ? roundCurrency(amountReceived - total)
+    : 0;
 
   const result = await prisma.$transaction(async (tx) => {
     const customer = await tx.posCustomer.upsert({
@@ -870,13 +881,33 @@ export async function checkoutSale(dto: CheckoutSaleDto) {
       });
     }
 
-    return { customerId: customer.id, purchases };
+    const counterSale = await tx.posCounterSale.create({
+      data: {
+        invoiceGroupCode,
+        totalAmount: total,
+        amountReceived,
+        changeGiven,
+        paymentMethod: dto.paymentMethod,
+        cashierId,
+      },
+      select: {
+        totalAmount: true,
+        amountReceived: true,
+        changeGiven: true,
+        paymentMethod: true,
+        createdAt: true,
+      },
+    });
+
+    return { customerId: customer.id, purchases, counterSale };
   });
 
   return {
     invoiceGroupCode,
     paymentMethod: dto.paymentMethod,
     total,
+    amountReceived,
+    changeGiven,
     itemCount: mergedItems.reduce((sum, item) => sum + item.quantity, 0),
     ...result,
   };

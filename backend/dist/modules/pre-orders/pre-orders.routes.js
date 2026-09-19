@@ -84,6 +84,7 @@ exports.publicPreOrdersRouter.get("/", ctrl.listPublicPreOrders);
 exports.publicPreOrdersRouter.get("/:id", ctrl.getPublicPreOrder);
 const posRouter = (0, express_1.Router)();
 posRouter.use(pos_auth_middleware_1.authenticatePosAdmin);
+posRouter.use((0, pos_auth_middleware_1.authorizePosRoles)("ADMIN", "INVENTORY_MANAGER"));
 posRouter.get("/", ctrl.listPreOrders);
 posRouter.get("/:id", ctrl.getPreOrder);
 posRouter.post("/", ctrl.createPreOrder);

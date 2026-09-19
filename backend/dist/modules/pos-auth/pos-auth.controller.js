@@ -35,9 +35,13 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.login = login;
 exports.me = me;
+exports.listStaff = listStaff;
+exports.createStaff = createStaff;
+exports.updateStaff = updateStaff;
 const errors_1 = require("../../common/utils/errors");
 const response_1 = require("../../common/utils/response");
 const pos_login_dto_1 = require("./dto/pos-login.dto");
+const pos_staff_dto_1 = require("./dto/pos-staff.dto");
 const posAuthService = __importStar(require("./pos-auth.service"));
 async function login(req, res, next) {
     try {
@@ -53,6 +57,31 @@ async function me(req, res, next) {
     try {
         const admin = await posAuthService.getPosAdminFromToken(req.headers.authorization);
         return (0, response_1.sendSuccess)(res, admin);
+    }
+    catch (error) {
+        return next(error);
+    }
+}
+async function listStaff(_req, res, next) {
+    try {
+        return (0, response_1.sendSuccess)(res, await posAuthService.listPosStaff());
+    }
+    catch (error) {
+        return next(error);
+    }
+}
+async function createStaff(req, res, next) {
+    try {
+        return (0, response_1.sendSuccess)(res, await posAuthService.createPosStaff((0, errors_1.validate)(pos_staff_dto_1.createPosStaffSchema, req.body)));
+    }
+    catch (error) {
+        return next(error);
+    }
+}
+async function updateStaff(req, res, next) {
+    try {
+        const currentAdminId = req.user.id;
+        return (0, response_1.sendSuccess)(res, await posAuthService.updatePosStaff(Number(req.params.id), currentAdminId, (0, errors_1.validate)(pos_staff_dto_1.updatePosStaffSchema, req.body)));
     }
     catch (error) {
         return next(error);

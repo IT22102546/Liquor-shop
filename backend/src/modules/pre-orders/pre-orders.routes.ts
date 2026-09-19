@@ -3,7 +3,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import crypto from "crypto";
-import { authenticatePosAdmin } from "../../common/middleware/pos-auth.middleware";
+import { authenticatePosAdmin, authorizePosRoles } from "../../common/middleware/pos-auth.middleware";
 import * as ctrl from "./pre-orders.controller";
 
 // ── Upload dir ─────────────────────────────────────────────────────────────
@@ -50,6 +50,7 @@ publicPreOrdersRouter.get("/:id", ctrl.getPublicPreOrder);
 // ── POS Management router (auth required) ─────────────────────────────────
 const posRouter = Router();
 posRouter.use(authenticatePosAdmin);
+posRouter.use(authorizePosRoles("ADMIN", "INVENTORY_MANAGER"));
 
 posRouter.get("/", ctrl.listPreOrders);
 posRouter.get("/:id", ctrl.getPreOrder);
