@@ -54,10 +54,7 @@ export function errorHandler(
         : [String(err.meta?.target ?? "")].filter(Boolean);
 
       const labelMap: Record<string, string> = {
-        displayId: "Bike ID",
-        registerNo: "Register number",
-        chassisNo: "Chassis number",
-        engineNo: "Engine number",
+        displayId: "ID",
         code: "Code",
         email: "Email",
       };

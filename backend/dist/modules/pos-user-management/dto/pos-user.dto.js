@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updatePurchaseSchema = exports.updateInvoiceTermSchema = exports.createInvoiceTermSchema = exports.updateInvoiceAccountSchema = exports.createInvoiceAccountSchema = exports.settlePurchaseSchema = exports.purchaseQuerySchema = exports.updateLeasingCompanySchema = exports.createLeasingCompanySchema = exports.checkoutSaleSchema = exports.createPurchaseSchema = exports.posUserQuerySchema = exports.updatePosUserSchema = exports.createPosUserSchema = void 0;
+exports.updatePurchaseSchema = exports.updateInvoiceTermSchema = exports.createInvoiceTermSchema = exports.updateInvoiceAccountSchema = exports.createInvoiceAccountSchema = exports.settlePurchaseSchema = exports.purchaseQuerySchema = exports.checkoutSaleSchema = exports.createPurchaseSchema = exports.posUserQuerySchema = exports.updatePosUserSchema = exports.createPosUserSchema = void 0;
 const zod_1 = require("zod");
 const requiredTrimmedText = (field) => zod_1.z
     .string()
@@ -35,14 +35,6 @@ exports.createPosUserSchema = zod_1.z.object({
         .trim()
         .min(5, "Address is required")
         .max(1000, "Address is too long"),
-    dreamBikeIds: zod_1.z
-        .preprocess((value) => {
-        if (value == null)
-            return [];
-        return value;
-    }, zod_1.z.array(zod_1.z.number().int().positive()).max(100))
-        .optional()
-        .default([]),
 });
 exports.updatePosUserSchema = exports.createPosUserSchema.partial();
 exports.posUserQuerySchema = zod_1.z.object({
@@ -52,16 +44,14 @@ exports.posUserQuerySchema = zod_1.z.object({
 });
 exports.createPurchaseSchema = zod_1.z
     .object({
-    purchaseType: zod_1.z.enum(["BIKE", "INVENTORY", "PRE_ORDER", "CUSTOM"]).default("BIKE"),
+    purchaseType: zod_1.z.enum(["INVENTORY", "CUSTOM"]).default("INVENTORY"),
     purchaseMode: zod_1.z.enum(["SINGLE", "BULK"]).default("SINGLE"),
     invoiceGroupCode: zod_1.z.string().trim().max(80).optional(),
-    bikeVehicleId: zod_1.z.number().int().positive("Bike is required").optional(),
     inventoryProductId: zod_1.z
         .number()
         .int()
         .positive("Inventory product is required")
         .optional(),
-    preOrderId: zod_1.z.number().int().positive("Pre-order is required").optional(),
     customCategory: zod_1.z.string().trim().max(120).optional(),
     customDescription: zod_1.z.string().trim().max(500).optional(),
     quantity: zod_1.z.number().int().min(1).default(1),
@@ -70,21 +60,6 @@ exports.createPurchaseSchema = zod_1.z
     downPaymentAmount: zod_1.z
         .number()
         .min(0, "Downpayment amount must be >= 0")
-        .optional(),
-    purchaseChannel: zod_1.z.enum(["PERSONAL", "LEASING"]).default("PERSONAL"),
-    leasingCompanyId: zod_1.z
-        .number()
-        .int()
-        .positive("Leasing company is required")
-        .optional(),
-    leasingDownPaymentAmount: zod_1.z
-        .number()
-        .min(0, "Leasing downpayment amount must be >= 0")
-        .optional(),
-    hasRegistrationFee: zod_1.z.boolean().optional().default(false),
-    registrationFeeAmount: zod_1.z
-        .number()
-        .min(0, "Registration fee must be >= 0")
         .optional(),
     extraCosts: zod_1.z
         .array(zod_1.z.object({
@@ -110,25 +85,11 @@ exports.createPurchaseSchema = zod_1.z
     chequeDate: zod_1.z.string().trim().optional(),
 })
     .superRefine((data, ctx) => {
-    if (data.purchaseType === "BIKE" && !data.bikeVehicleId) {
-        ctx.addIssue({
-            code: zod_1.z.ZodIssueCode.custom,
-            message: "Bike is required",
-            path: ["bikeVehicleId"],
-        });
-    }
     if (data.purchaseType === "INVENTORY" && !data.inventoryProductId) {
         ctx.addIssue({
             code: zod_1.z.ZodIssueCode.custom,
             message: "Inventory product is required",
             path: ["inventoryProductId"],
-        });
-    }
-    if (data.purchaseType === "PRE_ORDER" && !data.preOrderId) {
-        ctx.addIssue({
-            code: zod_1.z.ZodIssueCode.custom,
-            message: "Pre-order is required",
-            path: ["preOrderId"],
         });
     }
     if (data.purchaseType === "CUSTOM" && !data.customDescription?.trim()) {
@@ -137,47 +98,6 @@ exports.createPurchaseSchema = zod_1.z
             message: "Description is required for custom invoices",
             path: ["customDescription"],
         });
-    }
-    if (data.purchaseType === "CUSTOM" && data.purchaseChannel === "LEASING") {
-        ctx.addIssue({
-            code: zod_1.z.ZodIssueCode.custom,
-            message: "Leasing is not available for custom invoices",
-            path: ["purchaseChannel"],
-        });
-    }
-    if (data.hasRegistrationFee &&
-        (!Number.isFinite(data.registrationFeeAmount) ||
-            (data.registrationFeeAmount ?? 0) <= 0)) {
-        ctx.addIssue({
-            code: zod_1.z.ZodIssueCode.custom,
-            message: "Registration fee amount is required when registration is enabled",
-            path: ["registrationFeeAmount"],
-        });
-    }
-    if (!data.hasRegistrationFee &&
-        data.registrationFeeAmount != null &&
-        data.registrationFeeAmount > 0) {
-        ctx.addIssue({
-            code: zod_1.z.ZodIssueCode.custom,
-            message: "Enable registration fee option first",
-            path: ["hasRegistrationFee"],
-        });
-    }
-    if (data.purchaseChannel === "LEASING") {
-        if (data.purchaseType !== "BIKE" && data.purchaseType !== "PRE_ORDER") {
-            ctx.addIssue({
-                code: zod_1.z.ZodIssueCode.custom,
-                message: "Leasing is supported only for bike and pre-order purchases",
-                path: ["purchaseType"],
-            });
-        }
-        if (!data.leasingCompanyId) {
-            ctx.addIssue({
-                code: zod_1.z.ZodIssueCode.custom,
-                message: "Leasing company is required",
-                path: ["leasingCompanyId"],
-            });
-        }
     }
 });
 exports.checkoutSaleSchema = zod_1.z.object({
@@ -190,31 +110,17 @@ exports.checkoutSaleSchema = zod_1.z.object({
         .min(1, "Add at least one product")
         .max(100),
     paymentMethod: zod_1.z.enum(["CASH", "CHEQUE", "BANK_TRANSFER"]).default("CASH"),
-});
-exports.createLeasingCompanySchema = zod_1.z.object({
-    name: zod_1.z
-        .string()
-        .trim()
-        .min(1, "Leasing company name is required")
-        .max(120, "Leasing company name is too long"),
-});
-exports.updateLeasingCompanySchema = exports.createLeasingCompanySchema
-    .partial()
-    .refine((data) => Object.keys(data).length > 0, {
-    message: "At least one field is required",
+    amountReceived: zod_1.z.number().min(0).optional(),
 });
 exports.purchaseQuerySchema = zod_1.z.object({
     page: zod_1.z.coerce.number().int().min(1).default(1),
     limit: zod_1.z.coerce.number().int().min(1).max(500).default(50),
     search: zod_1.z.string().trim().optional(),
 });
-exports.settlePurchaseSchema = zod_1.z.object({
+exports.settlePurchaseSchema = zod_1.z
+    .object({
     amount: zod_1.z.number().min(0, "Settlement amount must be greater than or equal to 0"),
-    settlementMethod: zod_1.z.enum(["FULL_PAYMENT", "LEASING"]).default("FULL_PAYMENT"),
-    leasingSettlementType: zod_1.z
-        .enum(["DOWNPAYMENT_AND_LEASE", "FULL_LEASE"])
-        .optional(),
-    leasingCompanyId: zod_1.z.number().int().positive().optional(),
+    settlementMethod: zod_1.z.enum(["FULL_PAYMENT"]).default("FULL_PAYMENT"),
     installmentId: zod_1.z.number().int().positive().optional(),
     isPartial: zod_1.z.boolean().optional(),
     penaltyRate: zod_1.z.number().min(0).max(100).optional(),
@@ -222,44 +128,14 @@ exports.settlePurchaseSchema = zod_1.z.object({
     chequeNo: zod_1.z.string().trim().max(80).optional(),
     chequeBank: zod_1.z.string().trim().max(80).optional(),
     chequeDate: zod_1.z.string().trim().optional(),
-}).superRefine((data, ctx) => {
-    if (data.settlementMethod === "FULL_PAYMENT" && data.amount <= 0) {
+})
+    .superRefine((data, ctx) => {
+    if (data.amount <= 0) {
         ctx.addIssue({
             code: zod_1.z.ZodIssueCode.custom,
             message: "Settlement amount must be greater than 0",
             path: ["amount"],
         });
-    }
-    if (data.settlementMethod === "LEASING") {
-        if (!data.leasingSettlementType) {
-            ctx.addIssue({
-                code: zod_1.z.ZodIssueCode.custom,
-                message: "Select a leasing settlement option",
-                path: ["leasingSettlementType"],
-            });
-        }
-        if (!data.leasingCompanyId) {
-            ctx.addIssue({
-                code: zod_1.z.ZodIssueCode.custom,
-                message: "Leasing company is required",
-                path: ["leasingCompanyId"],
-            });
-        }
-        if (data.leasingSettlementType === "DOWNPAYMENT_AND_LEASE" &&
-            data.amount <= 0) {
-            ctx.addIssue({
-                code: zod_1.z.ZodIssueCode.custom,
-                message: "Additional downpayment must be greater than 0",
-                path: ["amount"],
-            });
-        }
-        if (data.leasingSettlementType === "FULL_LEASE" && data.amount !== 0) {
-            ctx.addIssue({
-                code: zod_1.z.ZodIssueCode.custom,
-                message: "Customer payment must be 0 for a full lease",
-                path: ["amount"],
-            });
-        }
     }
 });
 exports.createInvoiceAccountSchema = zod_1.z.object({
@@ -294,7 +170,6 @@ exports.updatePurchaseSchema = zod_1.z
     .object({
     finalSellingPrice: zod_1.z.number().min(0).optional(),
     downPaymentAmount: zod_1.z.number().min(0).optional(),
-    registrationFeeAmount: zod_1.z.number().min(0).optional(),
     mobileNumber: zod_1.z
         .string()
         .trim()

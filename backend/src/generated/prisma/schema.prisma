@@ -22,9 +22,7 @@ enum PosAdminRole {
 }
 
 enum PosPurchaseItemType {
-  BIKE
   INVENTORY
-  PRE_ORDER
   CUSTOM
 }
 
@@ -45,7 +43,6 @@ enum PosSettlementStatus {
 
 enum PosPurchaseChannel {
   PERSONAL
-  LEASING
 }
 
 enum InstallmentStatus {
@@ -77,15 +74,12 @@ enum ChequeStatus {
 }
 
 enum VoucherType {
-  VEHICLE_CLEARANCE
   BILL
   OTHER_PAYMENT
   PERMIT
-  LEASING_PAYMENT
   LOAN_PAYMENT
   SALARY
   CUSTOMER_REFUND
-  VEHICLE_PURCHASE
   ADVANCE_REFUND
   ACCOUNT_TRANSFER
 }
@@ -114,20 +108,6 @@ model User {
   updatedAt    DateTime @updatedAt
 
   @@map("users")
-}
-
-model Bike {
-  id        Int      @id @default(autoincrement())
-  name      String
-  brand     String
-  model     String?
-  year      Int?
-  price     Float
-  inStock   Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("bikes")
 }
 
 model PosAdmin {
@@ -161,44 +141,9 @@ model PosCounterSale {
   @@map("pos_counter_sales")
 }
 
-// ── Bike Management ───────────────────────────────────────────────
+// ── Suppliers ──────────────────────────────────────────────────────
 
-model BikeBrand {
-  id        Int           @id @default(autoincrement())
-  name      String        @unique
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  models    BikeModel[]
-  vehicles  BikeVehicle[]
-
-  @@map("bike_brands")
-}
-
-model BikeModel {
-  id                Int           @id @default(autoincrement())
-  name              String
-  brandId           Int
-  lowStockThreshold Int?
-  brand             BikeBrand     @relation(fields: [brandId], references: [id], onDelete: Cascade)
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  vehicles          BikeVehicle[]
-
-  @@unique([name, brandId])
-  @@map("bike_models")
-}
-
-/// Reusable colour palette for bike inventory
-model BikeColor {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("bike_colors")
-}
-
-model BikeSupplier {
+model Supplier {
   id                Int                @id @default(autoincrement())
   name              String
   code              String             @unique
@@ -210,69 +155,9 @@ model BikeSupplier {
   vatRegistrationNo String?
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
-  vehicles          BikeVehicle[]
   products          InventoryProduct[]
 
-  @@map("bike_suppliers")
-}
-
-model BikeVehicle {
-  id                Int                    @id @default(autoincrement())
-  displayId         String                 @unique
-  brandId           Int
-  modelId           Int
-  supplierId        Int?
-  brand             BikeBrand              @relation(fields: [brandId], references: [id], onDelete: Cascade)
-  model             BikeModel              @relation(fields: [modelId], references: [id], onDelete: Cascade)
-  supplier          BikeSupplier?          @relation(fields: [supplierId], references: [id], onDelete: SetNull)
-  colour            String
-  engineCapacityCc  Int?
-  year              Int?
-  fileNo            String?
-  manufactureDate   String?
-  registerNo        String?                @unique
-  chassisNo         String?                @unique
-  engineNo          String?                @unique
-  registrationType  String                 @default("unregistered")
-  condition         String                 @default("brandnew")
-  mileage           Int                    @default(0)
-  description       String?
-  purchasePrice     Float?
-  taxAmount         Float?
-  sellingPrice      Float?
-  status            String                 @default("available")
-  soldAt            DateTime?
-  createdAt         DateTime               @default(now())
-  updatedAt         DateTime               @updatedAt
-  expenses          BikeVehicleExpense[]
-  images            BikeVehicleImage[]
-  dreamUsers        PosCustomerDreamBike[]
-  customerPurchases PosCustomerPurchase[]
-
-  @@map("bike_vehicles")
-}
-
-model BikeVehicleImage {
-  id        Int         @id @default(autoincrement())
-  vehicleId Int
-  vehicle   BikeVehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
-  url       String
-  isPrimary Boolean     @default(false)
-  sortOrder Int         @default(0)
-  createdAt DateTime    @default(now())
-
-  @@map("bike_vehicle_images")
-}
-
-model BikeVehicleExpense {
-  id          Int         @id @default(autoincrement())
-  vehicleId   Int
-  vehicle     BikeVehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
-  description String
-  amount      Float
-  createdAt   DateTime    @default(now())
-
-  @@map("bike_vehicle_expenses")
+  @@map("suppliers")
 }
 
 model InventoryBrand {
@@ -303,7 +188,7 @@ model InventoryProduct {
   supplierId         Int?
   brand              InventoryBrand            @relation(fields: [brandId], references: [id], onDelete: Cascade)
   category           InventoryCategory         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  supplier           BikeSupplier?             @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  supplier           Supplier?                 @relation(fields: [supplierId], references: [id], onDelete: SetNull)
   name               String
   partNumber         String?
   compatibleWith     String?
@@ -352,18 +237,17 @@ model InventoryProductImage {
 }
 
 model PosCustomer {
-  id           Int                    @id @default(autoincrement())
+  id           Int                   @id @default(autoincrement())
   firstName    String
   lastName     String
-  nic          String                 @unique
-  mobileNumber String                 @unique
-  email        String?                @unique
+  nic          String                @unique
+  mobileNumber String                @unique
+  email        String?               @unique
   province     String
   district     String
   address      String
-  createdAt    DateTime               @default(now())
-  updatedAt    DateTime               @updatedAt
-  dreamBikes   PosCustomerDreamBike[]
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
   purchases    PosCustomerPurchase[]
 
   @@index([firstName])
@@ -373,38 +257,13 @@ model PosCustomer {
   @@map("pos_customers")
 }
 
-model PosLeasingCompany {
-  id        Int                   @id @default(autoincrement())
-  name      String                @unique
-  createdAt DateTime              @default(now())
-  updatedAt DateTime              @updatedAt
-  purchases PosCustomerPurchase[]
-
-  @@map("pos_leasing_companies")
-}
-
-model PosCustomerDreamBike {
-  id            Int         @id @default(autoincrement())
-  customerId    Int
-  bikeVehicleId Int
-  customer      PosCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  bikeVehicle   BikeVehicle @relation(fields: [bikeVehicleId], references: [id], onDelete: Cascade)
-  createdAt     DateTime    @default(now())
-
-  @@unique([customerId, bikeVehicleId])
-  @@index([bikeVehicleId])
-  @@map("pos_customer_dream_bikes")
-}
-
 model PosCustomerPurchase {
   id                       Int                 @id @default(autoincrement())
   customerId               Int
-  itemType                 PosPurchaseItemType @default(BIKE)
+  itemType                 PosPurchaseItemType @default(INVENTORY)
   purchaseMode             PosPurchaseMode     @default(SINGLE)
   invoiceGroupCode         String?
-  bikeVehicleId            Int?
   inventoryProductId       Int?
-  preOrderId               Int?
   customCategory           String?
   customDescription        String?
   currentSellingPrice      Float?
@@ -414,11 +273,6 @@ model PosCustomerPurchase {
   remainingAmount          Float               @default(0)
   settlementStatus         PosSettlementStatus @default(SETTLED)
   purchaseChannel          PosPurchaseChannel  @default(PERSONAL)
-  leasingCompanyId         Int?
-  leasingDownPaymentAmount Float               @default(0)
-  leasingFinancedAmount    Float               @default(0)
-  hasRegistrationFee       Boolean             @default(false)
-  registrationFeeAmount    Float               @default(0)
   extraCosts               Json                @default("[]")
   interestRate             Float?
   installmentMonths        Int?
@@ -427,20 +281,14 @@ model PosCustomerPurchase {
   quantity                 Int                 @default(1)
   purchasedAt              DateTime            @default(now())
   customer                 PosCustomer         @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  bikeVehicle              BikeVehicle?        @relation(fields: [bikeVehicleId], references: [id], onDelete: SetNull)
   inventoryProduct         InventoryProduct?   @relation(fields: [inventoryProductId], references: [id], onDelete: SetNull)
-  preOrder                 PreOrder?           @relation(fields: [preOrderId], references: [id], onDelete: SetNull)
-  leasingCompany           PosLeasingCompany?  @relation(fields: [leasingCompanyId], references: [id], onDelete: SetNull)
   receipts                 AccountReceipt[]
   installments             PosInstallment[]
   invoicePayments          InvoicePayment[]
 
   @@index([customerId])
   @@index([invoiceGroupCode])
-  @@index([bikeVehicleId])
   @@index([inventoryProductId])
-  @@index([preOrderId])
-  @@index([leasingCompanyId])
   @@index([purchaseChannel])
   @@map("pos_customer_purchases")
 }
@@ -499,46 +347,6 @@ model PosInstallmentPayment {
   @@map("pos_installment_payments")
 }
 
-// ── Pre Orders ────────────────────────────────────────────────────────────────
-
-model PreOrder {
-  id              Int                   @id @default(autoincrement())
-  displayId       String                @unique
-  brand           String
-  model           String
-  year            Int?
-  cc              String?
-  colour          String?
-  price           Float?
-  depositRequired String?
-  expectedArrival String?
-  status          String                @default("pre-order")
-  description     String?
-  pdfUrl          String?
-  isPublished     Boolean               @default(true)
-  sortOrder       Int                   @default(0)
-  createdAt       DateTime              @default(now())
-  updatedAt       DateTime              @updatedAt
-  images          PreOrderImage[]
-  purchases       PosCustomerPurchase[]
-
-  @@index([status])
-  @@index([isPublished])
-  @@map("pre_orders")
-}
-
-model PreOrderImage {
-  id         Int      @id @default(autoincrement())
-  preOrderId Int
-  preOrder   PreOrder @relation(fields: [preOrderId], references: [id], onDelete: Cascade)
-  url        String
-  isPrimary  Boolean  @default(false)
-  sortOrder  Int      @default(0)
-  createdAt  DateTime @default(now())
-
-  @@map("pre_order_images")
-}
-
 // ── Contact Requests ──────────────────────────────────────────────────────────
 
 model ContactRequest {
@@ -557,48 +365,6 @@ model ContactRequest {
 
   @@index([status])
   @@map("contact_requests")
-}
-
-// ── International Export Vehicles (Automobiles & Heavy Machinery) ─────────────
-
-enum ExportVehicleCategory {
-  AUTOMOBILE
-  HEAVY_MACHINERY
-}
-
-model ExportVehicle {
-  id          Int                   @id @default(autoincrement())
-  displayId   String                @unique
-  category    ExportVehicleCategory
-  brand       String
-  model       String
-  year        Int?
-  colour      String?
-  engineCc    Int?
-  mileage     Int                   @default(0)
-  condition   String                @default("used")
-  description String?
-  price       Float?
-  status      String                @default("available")
-  createdAt   DateTime              @default(now())
-  updatedAt   DateTime              @updatedAt
-  images      ExportVehicleImage[]
-
-  @@index([category])
-  @@index([status])
-  @@map("export_vehicles")
-}
-
-model ExportVehicleImage {
-  id        Int           @id @default(autoincrement())
-  vehicleId Int
-  vehicle   ExportVehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
-  url       String
-  isPrimary Boolean       @default(false)
-  sortOrder Int           @default(0)
-  createdAt DateTime      @default(now())
-
-  @@map("export_vehicle_images")
 }
 
 // ── Accounts Module ───────────────────────────────────────────────────────────

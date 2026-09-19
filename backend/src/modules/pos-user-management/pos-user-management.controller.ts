@@ -3,7 +3,6 @@ import { sendCreated, sendSuccess } from "../../common/utils/response";
 import { AppError, validate } from "../../common/utils/errors";
 import {
   createInvoiceAccountSchema,
-  createLeasingCompanySchema,
   createPurchaseSchema,
   createInvoiceTermSchema,
   createPosUserSchema,
@@ -12,7 +11,6 @@ import {
   posUserQuerySchema,
   settlePurchaseSchema,
   updateInvoiceAccountSchema,
-  updateLeasingCompanySchema,
   updateInvoiceTermSchema,
   updatePosUserSchema,
   updatePurchaseSchema,
@@ -40,18 +38,6 @@ export async function getProvinceDistrictMeta(
 ) {
   try {
     return sendSuccess(res, service.getProvinceDistrictMeta());
-  } catch (error) {
-    return next(error);
-  }
-}
-
-export async function getDreamBikeOptions(
-  _req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  try {
-    return sendSuccess(res, await service.listDreamBikeOptions());
   } catch (error) {
     return next(error);
   }
@@ -334,72 +320,3 @@ export async function deleteInvoiceTerm(
   }
 }
 
-export async function getLeasingCompanies(
-  _req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  try {
-    return sendSuccess(res, await service.listLeasingCompanies());
-  } catch (error) {
-    return next(error);
-  }
-}
-
-export async function createLeasingCompany(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  try {
-    const dto = validate(createLeasingCompanySchema, req.body);
-    return sendCreated(res, await service.createLeasingCompany(dto));
-  } catch (error) {
-    return next(error);
-  }
-}
-
-export async function updateLeasingCompany(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  try {
-    const dto = validate(updateLeasingCompanySchema, req.body);
-    const companyId = parsePositiveIntParam("companyId", req.params.companyId);
-    return sendSuccess(res, await service.updateLeasingCompany(companyId, dto));
-  } catch (error) {
-    return next(error);
-  }
-}
-
-export async function deleteLeasingCompany(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  try {
-    const companyId = parsePositiveIntParam("companyId", req.params.companyId);
-    await service.deleteLeasingCompany(companyId);
-    return sendSuccess(res, { message: "Leasing company deleted" });
-  } catch (error) {
-    return next(error);
-  }
-}
-
-export async function getLeasingCompanyApplications(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  try {
-    const query = validate(purchaseQuerySchema, req.query);
-    const companyId = parsePositiveIntParam("companyId", req.params.companyId);
-    return sendSuccess(
-      res,
-      await service.listLeasingApplicationsByCompany(companyId, query),
-    );
-  } catch (error) {
-    return next(error);
-  }
-}

@@ -34,7 +34,6 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getProvinceDistrictMeta = getProvinceDistrictMeta;
-exports.getDreamBikeOptions = getDreamBikeOptions;
 exports.getPosUsers = getPosUsers;
 exports.getPosUser = getPosUser;
 exports.createPosUser = createPosUser;
@@ -55,11 +54,6 @@ exports.getInvoiceTerms = getInvoiceTerms;
 exports.createInvoiceTerm = createInvoiceTerm;
 exports.updateInvoiceTerm = updateInvoiceTerm;
 exports.deleteInvoiceTerm = deleteInvoiceTerm;
-exports.getLeasingCompanies = getLeasingCompanies;
-exports.createLeasingCompany = createLeasingCompany;
-exports.updateLeasingCompany = updateLeasingCompany;
-exports.deleteLeasingCompany = deleteLeasingCompany;
-exports.getLeasingCompanyApplications = getLeasingCompanyApplications;
 const response_1 = require("../../common/utils/response");
 const errors_1 = require("../../common/utils/errors");
 const pos_user_dto_1 = require("./dto/pos-user.dto");
@@ -77,14 +71,6 @@ function parsePositiveIntParam(paramName, raw) {
 async function getProvinceDistrictMeta(_req, res, next) {
     try {
         return (0, response_1.sendSuccess)(res, service.getProvinceDistrictMeta());
-    }
-    catch (error) {
-        return next(error);
-    }
-}
-async function getDreamBikeOptions(_req, res, next) {
-    try {
-        return (0, response_1.sendSuccess)(res, await service.listDreamBikeOptions());
     }
     catch (error) {
         return next(error);
@@ -151,7 +137,8 @@ async function createPurchase(req, res, next) {
 async function checkoutSale(req, res, next) {
     try {
         const dto = (0, errors_1.validate)(pos_user_dto_1.checkoutSaleSchema, req.body);
-        return (0, response_1.sendCreated)(res, await service.checkoutSale(dto));
+        const cashierId = req.user.id;
+        return (0, response_1.sendCreated)(res, await service.checkoutSale(dto, cashierId));
     }
     catch (error) {
         return next(error);
@@ -275,53 +262,6 @@ async function deleteInvoiceTerm(req, res, next) {
         const termId = parsePositiveIntParam("termId", req.params.termId);
         await service.deleteInvoiceTerm(termId);
         return (0, response_1.sendSuccess)(res, { message: "Invoice term deleted" });
-    }
-    catch (error) {
-        return next(error);
-    }
-}
-async function getLeasingCompanies(_req, res, next) {
-    try {
-        return (0, response_1.sendSuccess)(res, await service.listLeasingCompanies());
-    }
-    catch (error) {
-        return next(error);
-    }
-}
-async function createLeasingCompany(req, res, next) {
-    try {
-        const dto = (0, errors_1.validate)(pos_user_dto_1.createLeasingCompanySchema, req.body);
-        return (0, response_1.sendCreated)(res, await service.createLeasingCompany(dto));
-    }
-    catch (error) {
-        return next(error);
-    }
-}
-async function updateLeasingCompany(req, res, next) {
-    try {
-        const dto = (0, errors_1.validate)(pos_user_dto_1.updateLeasingCompanySchema, req.body);
-        const companyId = parsePositiveIntParam("companyId", req.params.companyId);
-        return (0, response_1.sendSuccess)(res, await service.updateLeasingCompany(companyId, dto));
-    }
-    catch (error) {
-        return next(error);
-    }
-}
-async function deleteLeasingCompany(req, res, next) {
-    try {
-        const companyId = parsePositiveIntParam("companyId", req.params.companyId);
-        await service.deleteLeasingCompany(companyId);
-        return (0, response_1.sendSuccess)(res, { message: "Leasing company deleted" });
-    }
-    catch (error) {
-        return next(error);
-    }
-}
-async function getLeasingCompanyApplications(req, res, next) {
-    try {
-        const query = (0, errors_1.validate)(pos_user_dto_1.purchaseQuerySchema, req.query);
-        const companyId = parsePositiveIntParam("companyId", req.params.companyId);
-        return (0, response_1.sendSuccess)(res, await service.listLeasingApplicationsByCompany(companyId, query));
     }
     catch (error) {
         return next(error);

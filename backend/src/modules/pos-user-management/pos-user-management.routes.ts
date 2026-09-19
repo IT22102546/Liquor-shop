@@ -10,12 +10,6 @@ const finance = authorizePosRoles("ADMIN", "ACCOUNTANT");
 const management = authorizePosRoles("ADMIN");
 
 router.get("/meta/provinces", management, controller.getProvinceDistrictMeta);
-router.get("/dream-bikes", management, controller.getDreamBikeOptions);
-router.get("/leasing-companies", finance, controller.getLeasingCompanies);
-router.post("/leasing-companies", finance, controller.createLeasingCompany);
-router.patch("/leasing-companies/:companyId", finance, controller.updateLeasingCompany);
-router.delete("/leasing-companies/:companyId", finance, controller.deleteLeasingCompany);
-router.get("/leasing-companies/:companyId/applications", finance, controller.getLeasingCompanyApplications);
 router.get("/purchases", authorizePosRoles("ADMIN", "CASHIER", "ACCOUNTANT"), controller.getPurchases);
 router.post("/checkout", sales, controller.checkoutSale);
 router.patch("/purchases/:purchaseId", finance, controller.updatePurchase);

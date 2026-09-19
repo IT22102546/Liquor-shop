@@ -133,18 +133,6 @@ exports.Prisma.UserScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.BikeScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  brand: 'brand',
-  model: 'model',
-  year: 'year',
-  price: 'price',
-  inStock: 'inStock',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
 exports.Prisma.PosAdminScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -157,30 +145,18 @@ exports.Prisma.PosAdminScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.BikeBrandScalarFieldEnum = {
+exports.Prisma.PosCounterSaleScalarFieldEnum = {
   id: 'id',
-  name: 'name',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  invoiceGroupCode: 'invoiceGroupCode',
+  totalAmount: 'totalAmount',
+  amountReceived: 'amountReceived',
+  changeGiven: 'changeGiven',
+  paymentMethod: 'paymentMethod',
+  cashierId: 'cashierId',
+  createdAt: 'createdAt'
 };
 
-exports.Prisma.BikeModelScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  brandId: 'brandId',
-  lowStockThreshold: 'lowStockThreshold',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.BikeColorScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.BikeSupplierScalarFieldEnum = {
+exports.Prisma.SupplierScalarFieldEnum = {
   id: 'id',
   name: 'name',
   code: 'code',
@@ -192,50 +168,6 @@ exports.Prisma.BikeSupplierScalarFieldEnum = {
   vatRegistrationNo: 'vatRegistrationNo',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
-};
-
-exports.Prisma.BikeVehicleScalarFieldEnum = {
-  id: 'id',
-  displayId: 'displayId',
-  brandId: 'brandId',
-  modelId: 'modelId',
-  supplierId: 'supplierId',
-  colour: 'colour',
-  engineCapacityCc: 'engineCapacityCc',
-  year: 'year',
-  fileNo: 'fileNo',
-  manufactureDate: 'manufactureDate',
-  registerNo: 'registerNo',
-  chassisNo: 'chassisNo',
-  engineNo: 'engineNo',
-  registrationType: 'registrationType',
-  condition: 'condition',
-  mileage: 'mileage',
-  description: 'description',
-  purchasePrice: 'purchasePrice',
-  taxAmount: 'taxAmount',
-  sellingPrice: 'sellingPrice',
-  status: 'status',
-  soldAt: 'soldAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.BikeVehicleImageScalarFieldEnum = {
-  id: 'id',
-  vehicleId: 'vehicleId',
-  url: 'url',
-  isPrimary: 'isPrimary',
-  sortOrder: 'sortOrder',
-  createdAt: 'createdAt'
-};
-
-exports.Prisma.BikeVehicleExpenseScalarFieldEnum = {
-  id: 'id',
-  vehicleId: 'vehicleId',
-  description: 'description',
-  amount: 'amount',
-  createdAt: 'createdAt'
 };
 
 exports.Prisma.InventoryBrandScalarFieldEnum = {
@@ -305,29 +237,13 @@ exports.Prisma.PosCustomerScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.PosLeasingCompanyScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.PosCustomerDreamBikeScalarFieldEnum = {
-  id: 'id',
-  customerId: 'customerId',
-  bikeVehicleId: 'bikeVehicleId',
-  createdAt: 'createdAt'
-};
-
 exports.Prisma.PosCustomerPurchaseScalarFieldEnum = {
   id: 'id',
   customerId: 'customerId',
   itemType: 'itemType',
   purchaseMode: 'purchaseMode',
   invoiceGroupCode: 'invoiceGroupCode',
-  bikeVehicleId: 'bikeVehicleId',
   inventoryProductId: 'inventoryProductId',
-  preOrderId: 'preOrderId',
   customCategory: 'customCategory',
   customDescription: 'customDescription',
   currentSellingPrice: 'currentSellingPrice',
@@ -337,11 +253,6 @@ exports.Prisma.PosCustomerPurchaseScalarFieldEnum = {
   remainingAmount: 'remainingAmount',
   settlementStatus: 'settlementStatus',
   purchaseChannel: 'purchaseChannel',
-  leasingCompanyId: 'leasingCompanyId',
-  leasingDownPaymentAmount: 'leasingDownPaymentAmount',
-  leasingFinancedAmount: 'leasingFinancedAmount',
-  hasRegistrationFee: 'hasRegistrationFee',
-  registrationFeeAmount: 'registrationFeeAmount',
   extraCosts: 'extraCosts',
   interestRate: 'interestRate',
   installmentMonths: 'installmentMonths',
@@ -387,35 +298,6 @@ exports.Prisma.PosInstallmentPaymentScalarFieldEnum = {
   paidAt: 'paidAt'
 };
 
-exports.Prisma.PreOrderScalarFieldEnum = {
-  id: 'id',
-  displayId: 'displayId',
-  brand: 'brand',
-  model: 'model',
-  year: 'year',
-  cc: 'cc',
-  colour: 'colour',
-  price: 'price',
-  depositRequired: 'depositRequired',
-  expectedArrival: 'expectedArrival',
-  status: 'status',
-  description: 'description',
-  pdfUrl: 'pdfUrl',
-  isPublished: 'isPublished',
-  sortOrder: 'sortOrder',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.PreOrderImageScalarFieldEnum = {
-  id: 'id',
-  preOrderId: 'preOrderId',
-  url: 'url',
-  isPrimary: 'isPrimary',
-  sortOrder: 'sortOrder',
-  createdAt: 'createdAt'
-};
-
 exports.Prisma.ContactRequestScalarFieldEnum = {
   id: 'id',
   displayId: 'displayId',
@@ -429,33 +311,6 @@ exports.Prisma.ContactRequestScalarFieldEnum = {
   notes: 'notes',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
-};
-
-exports.Prisma.ExportVehicleScalarFieldEnum = {
-  id: 'id',
-  displayId: 'displayId',
-  category: 'category',
-  brand: 'brand',
-  model: 'model',
-  year: 'year',
-  colour: 'colour',
-  engineCc: 'engineCc',
-  mileage: 'mileage',
-  condition: 'condition',
-  description: 'description',
-  price: 'price',
-  status: 'status',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.ExportVehicleImageScalarFieldEnum = {
-  id: 'id',
-  vehicleId: 'vehicleId',
-  url: 'url',
-  isPrimary: 'isPrimary',
-  sortOrder: 'sortOrder',
-  createdAt: 'createdAt'
 };
 
 exports.Prisma.AccountScalarFieldEnum = {
@@ -599,10 +454,14 @@ exports.PosAdminRole = exports.$Enums.PosAdminRole = {
   ACCOUNTANT: 'ACCOUNTANT'
 };
 
+exports.PaymentMethod = exports.$Enums.PaymentMethod = {
+  CASH: 'CASH',
+  CHEQUE: 'CHEQUE',
+  BANK_TRANSFER: 'BANK_TRANSFER'
+};
+
 exports.PosPurchaseItemType = exports.$Enums.PosPurchaseItemType = {
-  BIKE: 'BIKE',
   INVENTORY: 'INVENTORY',
-  PRE_ORDER: 'PRE_ORDER',
   CUSTOM: 'CUSTOM'
 };
 
@@ -622,8 +481,7 @@ exports.PosSettlementStatus = exports.$Enums.PosSettlementStatus = {
 };
 
 exports.PosPurchaseChannel = exports.$Enums.PosPurchaseChannel = {
-  PERSONAL: 'PERSONAL',
-  LEASING: 'LEASING'
+  PERSONAL: 'PERSONAL'
 };
 
 exports.InvoiceTermType = exports.$Enums.InvoiceTermType = {
@@ -637,11 +495,6 @@ exports.InstallmentStatus = exports.$Enums.InstallmentStatus = {
   PAID: 'PAID'
 };
 
-exports.ExportVehicleCategory = exports.$Enums.ExportVehicleCategory = {
-  AUTOMOBILE: 'AUTOMOBILE',
-  HEAVY_MACHINERY: 'HEAVY_MACHINERY'
-};
-
 exports.AccountType = exports.$Enums.AccountType = {
   BANK: 'BANK',
   CASH: 'CASH'
@@ -652,12 +505,6 @@ exports.AccountLevel = exports.$Enums.AccountLevel = {
   SUB: 'SUB'
 };
 
-exports.PaymentMethod = exports.$Enums.PaymentMethod = {
-  CASH: 'CASH',
-  CHEQUE: 'CHEQUE',
-  BANK_TRANSFER: 'BANK_TRANSFER'
-};
-
 exports.ChequeStatus = exports.$Enums.ChequeStatus = {
   PENDING: 'PENDING',
   CLEARED: 'CLEARED',
@@ -665,15 +512,12 @@ exports.ChequeStatus = exports.$Enums.ChequeStatus = {
 };
 
 exports.VoucherType = exports.$Enums.VoucherType = {
-  VEHICLE_CLEARANCE: 'VEHICLE_CLEARANCE',
   BILL: 'BILL',
   OTHER_PAYMENT: 'OTHER_PAYMENT',
   PERMIT: 'PERMIT',
-  LEASING_PAYMENT: 'LEASING_PAYMENT',
   LOAN_PAYMENT: 'LOAN_PAYMENT',
   SALARY: 'SALARY',
   CUSTOMER_REFUND: 'CUSTOMER_REFUND',
-  VEHICLE_PURCHASE: 'VEHICLE_PURCHASE',
   ADVANCE_REFUND: 'ADVANCE_REFUND',
   ACCOUNT_TRANSFER: 'ACCOUNT_TRANSFER'
 };
@@ -693,32 +537,20 @@ exports.TransactionDirection = exports.$Enums.TransactionDirection = {
 
 exports.Prisma.ModelName = {
   User: 'User',
-  Bike: 'Bike',
   PosAdmin: 'PosAdmin',
-  BikeBrand: 'BikeBrand',
-  BikeModel: 'BikeModel',
-  BikeColor: 'BikeColor',
-  BikeSupplier: 'BikeSupplier',
-  BikeVehicle: 'BikeVehicle',
-  BikeVehicleImage: 'BikeVehicleImage',
-  BikeVehicleExpense: 'BikeVehicleExpense',
+  PosCounterSale: 'PosCounterSale',
+  Supplier: 'Supplier',
   InventoryBrand: 'InventoryBrand',
   InventoryCategory: 'InventoryCategory',
   InventoryProduct: 'InventoryProduct',
   InventoryProductExpense: 'InventoryProductExpense',
   InventoryProductImage: 'InventoryProductImage',
   PosCustomer: 'PosCustomer',
-  PosLeasingCompany: 'PosLeasingCompany',
-  PosCustomerDreamBike: 'PosCustomerDreamBike',
   PosCustomerPurchase: 'PosCustomerPurchase',
   PosInvoiceTerm: 'PosInvoiceTerm',
   PosInstallment: 'PosInstallment',
   PosInstallmentPayment: 'PosInstallmentPayment',
-  PreOrder: 'PreOrder',
-  PreOrderImage: 'PreOrderImage',
   ContactRequest: 'ContactRequest',
-  ExportVehicle: 'ExportVehicle',
-  ExportVehicleImage: 'ExportVehicleImage',
   Account: 'Account',
   AccountRelationship: 'AccountRelationship',
   AccountReceipt: 'AccountReceipt',

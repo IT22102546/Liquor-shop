@@ -42,10 +42,9 @@ const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const crypto_1 = __importDefault(require("crypto"));
 const pos_auth_middleware_1 = require("../../common/middleware/pos-auth.middleware");
-const ctrl = __importStar(require("./bike-management.controller"));
+const ctrl = __importStar(require("./inventory-management.controller"));
 const router = (0, express_1.Router)();
 router.use(pos_auth_middleware_1.authenticatePosAdmin);
-const adminOnly = (0, pos_auth_middleware_1.authorizePosRoles)("ADMIN");
 const inventory = (0, pos_auth_middleware_1.authorizePosRoles)("ADMIN", "INVENTORY_MANAGER");
 const inventoryAndAccounts = (0, pos_auth_middleware_1.authorizePosRoles)("ADMIN", "INVENTORY_MANAGER", "ACCOUNTANT");
 const productCatalog = (0, pos_auth_middleware_1.authorizePosRoles)("ADMIN", "CASHIER", "INVENTORY_MANAGER", "ACCOUNTANT");
@@ -53,26 +52,14 @@ const sales = (0, pos_auth_middleware_1.authorizePosRoles)("ADMIN", "CASHIER");
 const backendRoot = process.cwd().endsWith("backend")
     ? process.cwd()
     : path_1.default.join(process.cwd(), "apps", "backend");
-const uploadDir = path_1.default.join(backendRoot, "uploads", "bikes");
 const productUploadDir = path_1.default.join(backendRoot, "uploads", "products");
-for (const dir of [uploadDir, productUploadDir]) {
-    if (!fs_1.default.existsSync(dir)) {
-        fs_1.default.mkdirSync(dir, { recursive: true });
-        console.log("[bike-management] Created upload dir:", dir);
-    }
+if (!fs_1.default.existsSync(productUploadDir)) {
+    fs_1.default.mkdirSync(productUploadDir, { recursive: true });
+    console.log("[inventory-management] Created upload dir:", productUploadDir);
 }
-console.log("[bike-management] Upload dir:", uploadDir, "exists:", fs_1.default.existsSync(uploadDir));
-console.log("[bike-management] Product upload dir:", productUploadDir, "exists:", fs_1.default.existsSync(productUploadDir));
-const MAX_IMAGE_COUNT = 6;
+console.log("[inventory-management] Product upload dir:", productUploadDir, "exists:", fs_1.default.existsSync(productUploadDir));
 const MAX_PRODUCT_IMAGE_COUNT = 3;
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
-const storage = multer_1.default.diskStorage({
-    destination: (_req, _file, cb) => cb(null, uploadDir),
-    filename: (_req, file, cb) => {
-        const ext = path_1.default.extname(file.originalname).toLowerCase();
-        cb(null, `${crypto_1.default.randomUUID()}${ext}`);
-    },
-});
 const productStorage = multer_1.default.diskStorage({
     destination: (_req, _file, cb) => cb(null, productUploadDir),
     filename: (_req, file, cb) => {
@@ -81,19 +68,6 @@ const productStorage = multer_1.default.diskStorage({
     },
 });
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
-const upload = (0, multer_1.default)({
-    storage,
-    limits: {
-        fileSize: MAX_IMAGE_SIZE_BYTES,
-        files: MAX_IMAGE_COUNT,
-    },
-    fileFilter: (_req, file, cb) => {
-        if (ALLOWED_TYPES.includes(file.mimetype))
-            cb(null, true);
-        else
-            cb(new Error("Only JPEG, PNG, WebP, and AVIF images are allowed"));
-    },
-});
 const productUpload = (0, multer_1.default)({
     storage: productStorage,
     limits: {
@@ -107,19 +81,6 @@ const productUpload = (0, multer_1.default)({
             cb(new Error("Only JPEG, PNG, WebP, and AVIF images are allowed"));
     },
 });
-router.get("/brands", adminOnly, ctrl.getBrands);
-router.post("/brands", adminOnly, ctrl.createBrand);
-router.patch("/brands/:id", adminOnly, ctrl.updateBrand);
-router.delete("/brands/:id", adminOnly, ctrl.deleteBrand);
-router.get("/brands/:brandId/models", adminOnly, ctrl.getModels);
-router.post("/brands/:brandId/models", adminOnly, ctrl.createModel);
-router.get("/models", adminOnly, ctrl.getAllModels);
-router.patch("/models/:id", adminOnly, ctrl.updateModel);
-router.delete("/models/:id", adminOnly, ctrl.deleteModel);
-router.get("/colors", adminOnly, ctrl.getColors);
-router.post("/colors", adminOnly, ctrl.createColor);
-router.patch("/colors/:id", adminOnly, ctrl.updateColor);
-router.delete("/colors/:id", adminOnly, ctrl.deleteColor);
 router.get("/suppliers", inventory, ctrl.getSuppliers);
 router.post("/suppliers", inventory, ctrl.createSupplier);
 router.patch("/suppliers/:id", inventory, ctrl.updateSupplier);
@@ -139,23 +100,6 @@ router.post("/products", inventory, ctrl.createProduct);
 router.patch("/products/:id", inventory, ctrl.updateProduct);
 router.post("/products/:id/sell", sales, ctrl.recordProductSale);
 router.delete("/products/:id", inventory, ctrl.deleteProduct);
-router.get("/vehicles/summary", adminOnly, ctrl.getVehicleSummary);
-router.get("/vehicles/filenos", adminOnly, ctrl.getFileNos);
-router.patch("/vehicles/filenos", adminOnly, ctrl.renameFileNo);
-router.delete("/vehicles/filenos", adminOnly, ctrl.deleteFileNo);
-router.get("/vehicles", adminOnly, ctrl.getVehicles);
-router.get("/vehicles/:id", adminOnly, ctrl.getVehicle);
-router.post("/vehicles", adminOnly, ctrl.createVehicle);
-router.post("/vehicles/bulk", adminOnly, ctrl.bulkCreateVehicles);
-router.patch("/vehicles/:id", adminOnly, ctrl.updateVehicle);
-router.delete("/vehicles/:id", adminOnly, ctrl.deleteVehicle);
-router.get("/vehicles/:vehicleId/expenses", adminOnly, ctrl.getExpenses);
-router.post("/vehicles/:vehicleId/expenses", adminOnly, ctrl.addExpense);
-router.delete("/vehicles/:vehicleId/expenses/:expenseId", adminOnly, ctrl.deleteExpense);
-router.get("/vehicles/:vehicleId/images", adminOnly, ctrl.getVehicleImages);
-router.post("/vehicles/:vehicleId/images", adminOnly, upload.array("images", MAX_IMAGE_COUNT), ctrl.uploadVehicleImages);
-router.delete("/vehicles/:vehicleId/images/:imageId", adminOnly, ctrl.deleteVehicleImage);
-router.patch("/vehicles/:vehicleId/images/:imageId/primary", adminOnly, ctrl.setPrimaryImage);
 router.get("/products/:productId/images", inventory, ctrl.getProductImages);
 router.post("/products/:productId/images", inventory, productUpload.array("images", MAX_PRODUCT_IMAGE_COUNT), ctrl.uploadProductImages);
 router.delete("/products/:productId/images/:imageId", inventory, ctrl.deleteProductImage);

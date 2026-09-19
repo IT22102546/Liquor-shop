@@ -1,12 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getProvinceDistrictMeta = getProvinceDistrictMeta;
-exports.listDreamBikeOptions = listDreamBikeOptions;
-exports.listLeasingCompanies = listLeasingCompanies;
-exports.createLeasingCompany = createLeasingCompany;
-exports.updateLeasingCompany = updateLeasingCompany;
-exports.deleteLeasingCompany = deleteLeasingCompany;
-exports.listLeasingApplicationsByCompany = listLeasingApplicationsByCompany;
 exports.listPosUsers = listPosUsers;
 exports.getPosUser = getPosUser;
 exports.createPosUser = createPosUser;
@@ -30,7 +24,6 @@ exports.deleteInvoiceTerm = deleteInvoiceTerm;
 const prisma_1 = require("../../generated/prisma");
 const prisma_client_1 = require("../../database/prisma.client");
 const errors_1 = require("../../common/utils/errors");
-const prisma_model_1 = require("../../common/utils/prisma-model");
 const PROVINCE_DISTRICT_MAP = {
     Western: ["Colombo", "Gampaha", "Kalutara"],
     Central: ["Kandy", "Matale", "Nuwara Eliya"],
@@ -41,25 +34,6 @@ const PROVINCE_DISTRICT_MAP = {
     "North Central": ["Anuradhapura", "Polonnaruwa"],
     Uva: ["Badulla", "Monaragala"],
     Sabaragamuwa: ["Ratnapura", "Kegalle"],
-};
-const customerInclude = {
-    dreamBikes: {
-        include: {
-            bikeVehicle: {
-                select: {
-                    id: true,
-                    displayId: true,
-                    status: true,
-                    colour: true,
-                    year: true,
-                    sellingPrice: true,
-                    brand: { select: { name: true } },
-                    model: { select: { name: true } },
-                },
-            },
-        },
-        orderBy: { id: "desc" },
-    },
 };
 function normalizeSearch(search) {
     const value = search?.trim();
@@ -76,16 +50,6 @@ function normalizeExtraCosts(costs) {
 }
 function getExtraCostsTotal(costs) {
     return roundCurrency(normalizeExtraCosts(costs).reduce((sum, cost) => sum + cost.amount, 0));
-}
-function getStoredExtraCostsTotal(value) {
-    if (!Array.isArray(value))
-        return 0;
-    return roundCurrency(value.reduce((sum, cost) => {
-        if (!cost || typeof cost !== "object")
-            return sum;
-        const amount = Number(cost.amount);
-        return Number.isFinite(amount) && amount > 0 ? sum + amount : sum;
-    }, 0));
 }
 function nullableTrimmedText(value) {
     const normalized = value?.trim();
@@ -239,13 +203,6 @@ function getInvoiceTermModelClient(db) {
     }
     return model;
 }
-function getLeasingCompanyModelClient(db) {
-    const model = db?.posLeasingCompany;
-    if (!model) {
-        throw new errors_1.AppError("Leasing company model is unavailable. Run 'npm run db:generate' in apps/backend and restart the backend server.", 500);
-    }
-    return model;
-}
 function getInstallmentModelClient(db) {
     const model = db?.posInstallment;
     if (!model) {
@@ -281,19 +238,6 @@ function ensureDistrictInProvince(province, district) {
         });
     }
 }
-async function ensureDreamBikesExist(dreamBikeIds) {
-    if (dreamBikeIds.length === 0)
-        return;
-    const found = await prisma_client_1.prisma.bikeVehicle.findMany({
-        where: { id: { in: dreamBikeIds } },
-        select: { id: true },
-    });
-    if (found.length !== dreamBikeIds.length) {
-        throw errors_1.AppError.validation({
-            dreamBikeIds: ["One or more selected dream bikes are invalid"],
-        });
-    }
-}
 function mapCustomer(customer) {
     return {
         id: customer.id,
@@ -307,17 +251,6 @@ function mapCustomer(customer) {
         address: customer.address,
         createdAt: customer.createdAt,
         updatedAt: customer.updatedAt,
-        dreamBikes: customer.dreamBikes.map((entry) => ({
-            relationId: entry.id,
-            bikeId: entry.bikeVehicleId,
-            displayId: entry.bikeVehicle.displayId,
-            brandName: entry.bikeVehicle.brand.name,
-            modelName: entry.bikeVehicle.model.name,
-            colour: entry.bikeVehicle.colour,
-            year: entry.bikeVehicle.year,
-            sellingPrice: entry.bikeVehicle.sellingPrice,
-            availability: entry.bikeVehicle.status,
-        })),
     };
 }
 function getProvinceDistrictMeta() {
@@ -326,170 +259,6 @@ function getProvinceDistrictMeta() {
             name,
             districts,
         })),
-    };
-}
-async function listDreamBikeOptions() {
-    const bikes = await prisma_client_1.prisma.bikeVehicle.findMany({
-        orderBy: [{ createdAt: "desc" }],
-        take: 5000,
-        select: {
-            id: true,
-            displayId: true,
-            status: true,
-            colour: true,
-            year: true,
-            sellingPrice: true,
-            brand: { select: { name: true } },
-            model: { select: { name: true } },
-        },
-    });
-    return bikes.map((bike) => ({
-        id: bike.id,
-        displayId: bike.displayId,
-        brandName: bike.brand.name,
-        modelName: bike.model.name,
-        colour: bike.colour,
-        year: bike.year,
-        sellingPrice: bike.sellingPrice,
-        availability: bike.status,
-    }));
-}
-async function listLeasingCompanies() {
-    const model = getLeasingCompanyModelClient(prisma_client_1.prisma);
-    const companies = await model.findMany({
-        orderBy: [{ name: "asc" }],
-    });
-    return {
-        companies,
-    };
-}
-async function createLeasingCompany(dto) {
-    const model = getLeasingCompanyModelClient(prisma_client_1.prisma);
-    try {
-        return await model.create({
-            data: {
-                name: dto.name,
-            },
-        });
-    }
-    catch (error) {
-        if (error instanceof prisma_1.Prisma.PrismaClientKnownRequestError &&
-            error.code === "P2002") {
-            throw errors_1.AppError.conflict("Leasing company name already exists");
-        }
-        throw error;
-    }
-}
-async function updateLeasingCompany(companyId, dto) {
-    const model = getLeasingCompanyModelClient(prisma_client_1.prisma);
-    try {
-        return await model.update({
-            where: { id: companyId },
-            data: {
-                ...(dto.name != null ? { name: dto.name } : {}),
-            },
-        });
-    }
-    catch (error) {
-        if (error instanceof prisma_1.Prisma.PrismaClientKnownRequestError &&
-            error.code === "P2002") {
-            throw errors_1.AppError.conflict("Leasing company name already exists");
-        }
-        if (error instanceof prisma_1.Prisma.PrismaClientKnownRequestError &&
-            error.code === "P2025") {
-            throw errors_1.AppError.notFound("Leasing company not found");
-        }
-        throw error;
-    }
-}
-async function deleteLeasingCompany(companyId) {
-    const model = getLeasingCompanyModelClient(prisma_client_1.prisma);
-    try {
-        await model.delete({ where: { id: companyId } });
-    }
-    catch (error) {
-        if (error instanceof prisma_1.Prisma.PrismaClientKnownRequestError &&
-            error.code === "P2025") {
-            throw errors_1.AppError.notFound("Leasing company not found");
-        }
-        throw error;
-    }
-}
-async function listLeasingApplicationsByCompany(companyId, query) {
-    const companyModel = getLeasingCompanyModelClient(prisma_client_1.prisma);
-    const purchaseModel = getPurchaseModelClient(prisma_client_1.prisma);
-    const company = await companyModel.findUnique({ where: { id: companyId } });
-    if (!company)
-        throw errors_1.AppError.notFound("Leasing company not found");
-    const { page, limit } = query;
-    const skip = (page - 1) * limit;
-    const [rows, total] = await Promise.all([
-        purchaseModel.findMany({
-            where: {
-                purchaseChannel: "LEASING",
-                leasingCompanyId: companyId,
-            },
-            skip,
-            take: limit,
-            orderBy: { purchasedAt: "desc" },
-            include: {
-                customer: {
-                    select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        nic: true,
-                        mobileNumber: true,
-                        address: true,
-                        province: true,
-                        district: true,
-                    },
-                },
-                bikeVehicle: {
-                    select: {
-                        id: true,
-                        displayId: true,
-                        colour: true,
-                        brand: { select: { name: true } },
-                        model: { select: { name: true } },
-                    },
-                },
-            },
-        }),
-        purchaseModel.count({
-            where: {
-                purchaseChannel: "LEASING",
-                leasingCompanyId: companyId,
-            },
-        }),
-    ]);
-    return {
-        company,
-        applications: rows.map((row) => ({
-            id: row.id,
-            purchasedAt: row.purchasedAt,
-            invoiceGroupCode: row.invoiceGroupCode,
-            purchaseMode: row.purchaseMode,
-            finalSellingPrice: row.finalSellingPrice,
-            downPaymentAmount: row.downPaymentAmount,
-            remainingAmount: row.remainingAmount,
-            settlementStatus: row.settlementStatus,
-            leasingDownPaymentAmount: row.leasingDownPaymentAmount,
-            leasingFinancedAmount: row.leasingFinancedAmount,
-            customer: row.customer,
-            bike: row.bikeVehicle
-                ? {
-                    id: row.bikeVehicle.id,
-                    displayId: row.bikeVehicle.displayId,
-                    brand: row.bikeVehicle.brand.name,
-                    model: row.bikeVehicle.model.name,
-                    colour: row.bikeVehicle.colour,
-                }
-                : null,
-        })),
-        total,
-        page,
-        limit,
     };
 }
 async function listPosUsers(query) {
@@ -515,7 +284,6 @@ async function listPosUsers(query) {
             skip,
             take: limit,
             orderBy: { createdAt: "desc" },
-            include: customerInclude,
         }),
         prisma_client_1.prisma.posCustomer.count({ where }),
     ]);
@@ -529,16 +297,13 @@ async function listPosUsers(query) {
 async function getPosUser(id) {
     const user = await prisma_client_1.prisma.posCustomer.findUnique({
         where: { id },
-        include: customerInclude,
     });
     if (!user)
         throw errors_1.AppError.notFound("User not found");
     return mapCustomer(user);
 }
 async function createPosUser(dto) {
-    const dreamBikeIds = dto.dreamBikeIds ?? [];
     ensureDistrictInProvince(dto.province, dto.district);
-    await ensureDreamBikesExist(dreamBikeIds);
     try {
         const created = await prisma_client_1.prisma.posCustomer.create({
             data: {
@@ -550,11 +315,7 @@ async function createPosUser(dto) {
                 province: dto.province,
                 district: dto.district,
                 address: dto.address,
-                dreamBikes: {
-                    create: dreamBikeIds.map((bikeId) => ({ bikeVehicleId: bikeId })),
-                },
             },
-            include: customerInclude,
         });
         return mapCustomer(created);
     }
@@ -604,19 +365,10 @@ async function updatePosUser(id, dto) {
             throw errors_1.AppError.notFound("User not found");
         ensureDistrictInProvince(effectiveProvince ?? current.province, effectiveDistrict ?? current.district);
     }
-    if (dto.dreamBikeIds !== undefined) {
-        const dreamBikeIds = dto.dreamBikeIds ?? [];
-        await ensureDreamBikesExist(dreamBikeIds);
-        updateData.dreamBikes = {
-            deleteMany: {},
-            create: dreamBikeIds.map((bikeId) => ({ bikeVehicleId: bikeId })),
-        };
-    }
     try {
         const updated = await prisma_client_1.prisma.posCustomer.update({
             where: { id },
             data: updateData,
-            include: customerInclude,
         });
         return mapCustomer(updated);
     }
@@ -637,7 +389,7 @@ async function deletePosUser(id) {
         throw errors_1.AppError.notFound("User not found");
     await prisma_client_1.prisma.posCustomer.delete({ where: { id } });
 }
-async function checkoutSale(dto) {
+async function checkoutSale(dto, cashierId) {
     const mergedItems = Array.from(dto.items.reduce((items, item) => {
         const existing = items.get(item.productId);
         if (existing) {
@@ -667,6 +419,17 @@ async function checkoutSale(dto) {
     }
     const invoiceGroupCode = `POS-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
     const total = roundCurrency(mergedItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0));
+    const amountReceived = dto.paymentMethod === "CASH"
+        ? roundCurrency(dto.amountReceived ?? Number.NaN)
+        : total;
+    if (!Number.isFinite(amountReceived) || amountReceived < total) {
+        throw errors_1.AppError.validation({
+            amountReceived: ["Cash received must be equal to or greater than the sale total"],
+        });
+    }
+    const changeGiven = dto.paymentMethod === "CASH"
+        ? roundCurrency(amountReceived - total)
+        : 0;
     const result = await prisma_client_1.prisma.$transaction(async (tx) => {
         const customer = await tx.posCustomer.upsert({
             where: { nic: "WALK-IN" },
@@ -733,29 +496,42 @@ async function checkoutSale(dto) {
                 lineTotal,
             });
         }
-        return { customerId: customer.id, purchases };
+        const counterSale = await tx.posCounterSale.create({
+            data: {
+                invoiceGroupCode,
+                totalAmount: total,
+                amountReceived,
+                changeGiven,
+                paymentMethod: dto.paymentMethod,
+                cashierId,
+            },
+            select: {
+                totalAmount: true,
+                amountReceived: true,
+                changeGiven: true,
+                paymentMethod: true,
+                createdAt: true,
+            },
+        });
+        return { customerId: customer.id, purchases, counterSale };
     });
     return {
         invoiceGroupCode,
         paymentMethod: dto.paymentMethod,
         total,
+        amountReceived,
+        changeGiven,
         itemCount: mergedItems.reduce((sum, item) => sum + item.quantity, 0),
         ...result,
     };
 }
 async function createInvoicePaymentRecord(purchaseId, dto, invoiceGroupCode) {
     let amount = 0;
-    if (dto.purchaseChannel === "LEASING") {
-        amount = dto.leasingDownPaymentAmount ?? 0;
-    }
-    else if (dto.paymentType === "DOWNPAYMENT" || (dto.downPaymentAmount != null && dto.downPaymentAmount > 0 && dto.downPaymentAmount < dto.finalSellingPrice)) {
+    if (dto.paymentType === "DOWNPAYMENT" || (dto.downPaymentAmount != null && dto.downPaymentAmount > 0 && dto.downPaymentAmount < dto.finalSellingPrice)) {
         amount = dto.downPaymentAmount ?? 0;
     }
     else {
-        amount =
-            dto.finalSellingPrice +
-                (dto.hasRegistrationFee ? (dto.registrationFeeAmount ?? 0) : 0) +
-                getExtraCostsTotal(dto.extraCosts);
+        amount = dto.finalSellingPrice + getExtraCostsTotal(dto.extraCosts);
     }
     if (amount <= 0)
         return;
@@ -783,6 +559,60 @@ async function createInvoicePaymentRecord(purchaseId, dto, invoiceGroupCode) {
     )
   `;
 }
+async function createInstallmentScheduleAndApplyDownPayment(tx, purchase, installmentMonths, monthlyInstallmentAmount, totalWithInterest, finalSellingPrice) {
+    const baseDate = new Date(purchase.purchasedAt);
+    const installmentData = Array.from({ length: installmentMonths }, (_, i) => {
+        const dueDate = new Date(baseDate);
+        dueDate.setMonth(dueDate.getMonth() + i + 1);
+        const isLast = i === installmentMonths - 1;
+        const dueAmount = isLast
+            ? roundCurrency((totalWithInterest ?? finalSellingPrice) -
+                monthlyInstallmentAmount * (installmentMonths - 1))
+            : monthlyInstallmentAmount;
+        return { purchaseId: purchase.id, installmentNo: i + 1, dueDate, dueAmount };
+    });
+    await tx.posInstallment.createMany({ data: installmentData });
+    const initialDownPayment = roundCurrency(purchase.downPaymentAmount ?? 0);
+    if (initialDownPayment > 0) {
+        const createdInstallments = await tx.posInstallment.findMany({
+            where: { purchaseId: purchase.id },
+            orderBy: { installmentNo: "asc" },
+        });
+        let remainingDP = initialDownPayment;
+        for (const inst of createdInstallments) {
+            if (remainingDP <= 0)
+                break;
+            const pay = roundCurrency(Math.min(remainingDP, inst.dueAmount));
+            remainingDP = roundCurrency(remainingDP - pay);
+            if (pay >= inst.dueAmount) {
+                await tx.posInstallment.update({
+                    where: { id: inst.id },
+                    data: {
+                        paidAmount: pay,
+                        status: "PAID",
+                        isPartial: false,
+                        settledAt: purchase.purchasedAt,
+                    },
+                });
+            }
+            else {
+                await tx.posInstallment.update({
+                    where: { id: inst.id },
+                    data: { paidAmount: pay, status: "PARTIAL", isPartial: true },
+                });
+            }
+            await tx.posInstallmentPayment.create({
+                data: {
+                    installmentId: inst.id,
+                    amount: pay,
+                    penaltyAmount: 0,
+                    note: "Initial advance payment",
+                    paidAt: purchase.purchasedAt,
+                },
+            });
+        }
+    }
+}
 async function createPurchase(customerId, dto) {
     const customer = await prisma_client_1.prisma.posCustomer.findUnique({
         where: { id: customerId },
@@ -797,7 +627,6 @@ async function createPurchase(customerId, dto) {
     });
     if (!customer)
         throw errors_1.AppError.notFound("User not found");
-    const purchaseChannel = dto.purchaseChannel ?? "PERSONAL";
     const requestedPaymentType = dto.paymentType ?? "DIRECT";
     const inferredDownPayment = dto.downPaymentAmount != null &&
         Number.isFinite(dto.downPaymentAmount) &&
@@ -808,69 +637,7 @@ async function createPurchase(customerId, dto) {
         : "DIRECT";
     const purchaseMode = dto.purchaseMode ?? "SINGLE";
     const invoiceGroupCode = dto.invoiceGroupCode?.trim() || undefined;
-    const hasRegistrationFee = dto.hasRegistrationFee === true;
-    const registrationFeeAmount = hasRegistrationFee
-        ? roundCurrency(dto.registrationFeeAmount ?? 0)
-        : 0;
-    if (hasRegistrationFee && registrationFeeAmount <= 0) {
-        throw errors_1.AppError.validation({
-            registrationFeeAmount: ["Registration fee amount must be greater than 0"],
-        });
-    }
     const extraCosts = normalizeExtraCosts(dto.extraCosts);
-    const leasingCompanyId = purchaseChannel === "LEASING" ? dto.leasingCompanyId : undefined;
-    const leasingDownPaymentAmount = purchaseChannel === "LEASING"
-        ? roundCurrency(dto.leasingDownPaymentAmount ?? 0)
-        : 0;
-    if (purchaseChannel === "LEASING") {
-        if (dto.purchaseType !== "BIKE" && dto.purchaseType !== "PRE_ORDER") {
-            throw errors_1.AppError.validation({
-                purchaseType: ["Leasing is supported only for bike and pre-order purchases"],
-            });
-        }
-        if (!leasingCompanyId) {
-            throw errors_1.AppError.validation({
-                leasingCompanyId: ["Leasing company is required"],
-            });
-        }
-        if (!Number.isFinite(leasingDownPaymentAmount) ||
-            leasingDownPaymentAmount < 0 ||
-            (dto.purchaseType === "BIKE" && leasingDownPaymentAmount <= 0)) {
-            throw errors_1.AppError.validation({
-                leasingDownPaymentAmount: [
-                    dto.purchaseType === "BIKE"
-                        ? "Leasing advance payment must be greater than 0"
-                        : "Leasing downpayment amount must be a valid value",
-                ],
-            });
-        }
-        if (leasingDownPaymentAmount >= dto.finalSellingPrice) {
-            throw errors_1.AppError.validation({
-                leasingDownPaymentAmount: [
-                    "Leasing downpayment must be less than final selling price",
-                ],
-            });
-        }
-        const leasingCompanyExists = await getLeasingCompanyModelClient(prisma_client_1.prisma).findUnique({
-            where: { id: leasingCompanyId },
-            select: { id: true },
-        });
-        if (!leasingCompanyExists) {
-            throw errors_1.AppError.validation({
-                leasingCompanyId: ["Selected leasing company does not exist"],
-            });
-        }
-    }
-    if (dto.purchaseType === "BIKE" &&
-        purchaseChannel === "PERSONAL" &&
-        paymentType === "DOWNPAYMENT" &&
-        (dto.downPaymentAmount ?? 0) >= dto.finalSellingPrice) {
-        throw errors_1.AppError.validation({
-            downPaymentAmount: [
-                "Advance payment must be less than the final selling price",
-            ],
-        });
-    }
     const interestRate = paymentType === "DOWNPAYMENT" &&
         dto.interestRate != null &&
         dto.interestRate > 0
@@ -888,215 +655,7 @@ async function createPurchase(customerId, dto) {
         ? roundCurrency(totalWithInterest / installmentMonths)
         : undefined;
     const effectiveTotal = totalWithInterest ?? dto.finalSellingPrice;
-    const paymentDetails = purchaseChannel === "LEASING"
-        ? {
-            downPaymentAmount: leasingDownPaymentAmount,
-            remainingAmount: roundCurrency(effectiveTotal - leasingDownPaymentAmount),
-            settlementStatus: roundCurrency(effectiveTotal - leasingDownPaymentAmount) > 0
-                ? "TO_SETTLE"
-                : "SETTLED",
-        }
-        : resolvePaymentDetails(effectiveTotal, paymentType, dto.downPaymentAmount);
-    const leasingFinancedAmount = purchaseChannel === "LEASING"
-        ? dto.purchaseType === "BIKE"
-            ? 0
-            : roundCurrency(effectiveTotal - leasingDownPaymentAmount)
-        : 0;
-    if (dto.purchaseType === "BIKE") {
-        const bikeId = dto.bikeVehicleId;
-        if (!bikeId)
-            throw errors_1.AppError.validation({ bikeVehicleId: ["Bike is required"] });
-        const bike = await prisma_client_1.prisma.bikeVehicle.findUnique({
-            where: { id: bikeId },
-            select: {
-                id: true,
-                status: true,
-                sellingPrice: true,
-                displayId: true,
-                colour: true,
-                year: true,
-                engineCapacityCc: true,
-                mileage: true,
-                condition: true,
-                registrationType: true,
-                fileNo: true,
-                registerNo: true,
-                chassisNo: true,
-                engineNo: true,
-                description: true,
-                brand: { select: { name: true } },
-                model: { select: { name: true } },
-            },
-        });
-        if (!bike)
-            throw errors_1.AppError.notFound("Selected bike not found");
-        if (bike.status !== "available")
-            throw errors_1.AppError.validation({
-                bikeVehicleId: ["Selected bike is not available"],
-            });
-        const result = await prisma_client_1.prisma.$transaction(async (tx) => {
-            const purchase = await getPurchaseModelClient(tx).create({
-                data: {
-                    customerId,
-                    itemType: "BIKE",
-                    purchaseMode,
-                    invoiceGroupCode,
-                    bikeVehicleId: bikeId,
-                    quantity: 1,
-                    currentSellingPrice: bike.sellingPrice,
-                    finalSellingPrice: dto.finalSellingPrice,
-                    paymentType: purchaseChannel === "LEASING"
-                        ? paymentDetails.remainingAmount > 0
-                            ? "DOWNPAYMENT"
-                            : "DIRECT"
-                        : paymentType,
-                    downPaymentAmount: paymentDetails.downPaymentAmount,
-                    remainingAmount: paymentDetails.remainingAmount,
-                    settlementStatus: paymentDetails.settlementStatus,
-                    purchaseChannel,
-                    leasingCompanyId,
-                    leasingDownPaymentAmount,
-                    leasingFinancedAmount,
-                    hasRegistrationFee,
-                    registrationFeeAmount,
-                    extraCosts,
-                    interestRate,
-                    installmentMonths,
-                    monthlyInstallmentAmount,
-                    totalWithInterest,
-                },
-            });
-            if (installmentMonths != null && monthlyInstallmentAmount != null) {
-                const baseDate = new Date(purchase.purchasedAt);
-                const installmentData = Array.from({ length: installmentMonths }, (_, i) => {
-                    const dueDate = new Date(baseDate);
-                    dueDate.setMonth(dueDate.getMonth() + i + 1);
-                    const isLast = i === installmentMonths - 1;
-                    const dueAmount = isLast
-                        ? roundCurrency((totalWithInterest ?? dto.finalSellingPrice) -
-                            monthlyInstallmentAmount * (installmentMonths - 1))
-                        : monthlyInstallmentAmount;
-                    return {
-                        purchaseId: purchase.id,
-                        installmentNo: i + 1,
-                        dueDate,
-                        dueAmount,
-                    };
-                });
-                await tx.posInstallment.createMany({ data: installmentData });
-                const initialDownPayment = roundCurrency(purchase.downPaymentAmount ?? 0);
-                if (initialDownPayment > 0) {
-                    const createdInstallments = await tx.posInstallment.findMany({
-                        where: { purchaseId: purchase.id },
-                        orderBy: { installmentNo: "asc" },
-                    });
-                    let remainingDP = initialDownPayment;
-                    for (const inst of createdInstallments) {
-                        if (remainingDP <= 0)
-                            break;
-                        const pay = roundCurrency(Math.min(remainingDP, inst.dueAmount));
-                        remainingDP = roundCurrency(remainingDP - pay);
-                        if (pay >= inst.dueAmount) {
-                            await tx.posInstallment.update({
-                                where: { id: inst.id },
-                                data: {
-                                    paidAmount: pay,
-                                    status: "PAID",
-                                    isPartial: false,
-                                    settledAt: purchase.purchasedAt,
-                                },
-                            });
-                            await tx.posInstallmentPayment.create({
-                                data: {
-                                    installmentId: inst.id,
-                                    amount: pay,
-                                    penaltyAmount: 0,
-                                    note: "Initial advance payment",
-                                    paidAt: purchase.purchasedAt,
-                                },
-                            });
-                        }
-                        else {
-                            await tx.posInstallment.update({
-                                where: { id: inst.id },
-                                data: { paidAmount: pay, status: "PARTIAL", isPartial: true },
-                            });
-                            await tx.posInstallmentPayment.create({
-                                data: {
-                                    installmentId: inst.id,
-                                    amount: pay,
-                                    penaltyAmount: 0,
-                                    note: "Initial advance payment",
-                                    paidAt: purchase.purchasedAt,
-                                },
-                            });
-                        }
-                    }
-                }
-            }
-            await tx.bikeVehicle.update({
-                where: { id: bikeId },
-                data: {
-                    status: "sold",
-                    soldAt: new Date(),
-                    sellingPrice: dto.finalSellingPrice,
-                },
-            });
-            return purchase;
-        });
-        await createInvoicePaymentRecord(result.id, dto, result.invoiceGroupCode);
-        return {
-            id: result.id,
-            itemType: "BIKE",
-            customerId,
-            quantity: 1,
-            purchaseMode: result.purchaseMode,
-            invoiceGroupCode: result.invoiceGroupCode,
-            bikeVehicleId: bikeId,
-            customer: {
-                firstName: customer.firstName,
-                lastName: customer.lastName,
-                nic: customer.nic,
-                mobileNumber: customer.mobileNumber,
-                address: customer.address,
-            },
-            bikeDisplayId: bike.displayId,
-            bikeName: `${bike.brand.name} ${bike.model.name}`,
-            bikeDetails: {
-                brand: bike.brand.name,
-                model: bike.model.name,
-                colour: bike.colour,
-                year: bike.year,
-                engineCapacityCc: bike.engineCapacityCc,
-                mileage: bike.mileage,
-                condition: bike.condition,
-                registrationType: bike.registrationType,
-                fileNo: bike.fileNo,
-                registerNo: bike.registerNo,
-                chassisNo: bike.chassisNo,
-                engineNo: bike.engineNo,
-                description: bike.description,
-            },
-            currentSellingPrice: bike.sellingPrice,
-            finalSellingPrice: dto.finalSellingPrice,
-            paymentType: result.paymentType,
-            downPaymentAmount: result.downPaymentAmount,
-            remainingAmount: result.remainingAmount,
-            settlementStatus: result.settlementStatus,
-            purchaseChannel: result.purchaseChannel,
-            leasingCompanyId: result.leasingCompanyId,
-            leasingDownPaymentAmount: result.leasingDownPaymentAmount,
-            leasingFinancedAmount: result.leasingFinancedAmount,
-            hasRegistrationFee: result.hasRegistrationFee,
-            registrationFeeAmount: result.registrationFeeAmount,
-            extraCosts: result.extraCosts,
-            interestRate: result.interestRate,
-            installmentMonths: result.installmentMonths,
-            monthlyInstallmentAmount: result.monthlyInstallmentAmount,
-            totalWithInterest: result.totalWithInterest,
-            purchasedAt: result.purchasedAt,
-        };
-    }
+    const paymentDetails = resolvePaymentDetails(effectiveTotal, paymentType, dto.downPaymentAmount);
     if (dto.purchaseType === "INVENTORY") {
         const productId = dto.inventoryProductId;
         if (!productId)
@@ -1118,11 +677,6 @@ async function createPurchase(customerId, dto) {
                 quantity: [`Only ${product.quantity} item(s) available`],
             });
         }
-        if (purchaseChannel === "LEASING") {
-            throw errors_1.AppError.validation({
-                purchaseType: ["Leasing is not available for inventory purchases"],
-            });
-        }
         const result = await prisma_client_1.prisma.$transaction(async (tx) => {
             const purchase = await getPurchaseModelClient(tx).create({
                 data: {
@@ -1139,11 +693,6 @@ async function createPurchase(customerId, dto) {
                     remainingAmount: paymentDetails.remainingAmount,
                     settlementStatus: paymentDetails.settlementStatus,
                     purchaseChannel: "PERSONAL",
-                    leasingCompanyId: null,
-                    leasingDownPaymentAmount: 0,
-                    leasingFinancedAmount: 0,
-                    hasRegistrationFee,
-                    registrationFeeAmount,
                     extraCosts,
                     interestRate,
                     installmentMonths,
@@ -1152,72 +701,7 @@ async function createPurchase(customerId, dto) {
                 },
             });
             if (installmentMonths != null && monthlyInstallmentAmount != null) {
-                const baseDate = new Date(purchase.purchasedAt);
-                const installmentData = Array.from({ length: installmentMonths }, (_, i) => {
-                    const dueDate = new Date(baseDate);
-                    dueDate.setMonth(dueDate.getMonth() + i + 1);
-                    const isLast = i === installmentMonths - 1;
-                    const dueAmount = isLast
-                        ? roundCurrency((totalWithInterest ?? dto.finalSellingPrice) -
-                            monthlyInstallmentAmount * (installmentMonths - 1))
-                        : monthlyInstallmentAmount;
-                    return {
-                        purchaseId: purchase.id,
-                        installmentNo: i + 1,
-                        dueDate,
-                        dueAmount,
-                    };
-                });
-                await tx.posInstallment.createMany({ data: installmentData });
-                const initialDownPayment = roundCurrency(purchase.downPaymentAmount ?? 0);
-                if (initialDownPayment > 0) {
-                    const createdInstallments = await tx.posInstallment.findMany({
-                        where: { purchaseId: purchase.id },
-                        orderBy: { installmentNo: "asc" },
-                    });
-                    let remainingDP = initialDownPayment;
-                    for (const inst of createdInstallments) {
-                        if (remainingDP <= 0)
-                            break;
-                        const pay = roundCurrency(Math.min(remainingDP, inst.dueAmount));
-                        remainingDP = roundCurrency(remainingDP - pay);
-                        if (pay >= inst.dueAmount) {
-                            await tx.posInstallment.update({
-                                where: { id: inst.id },
-                                data: {
-                                    paidAmount: pay,
-                                    status: "PAID",
-                                    isPartial: false,
-                                    settledAt: purchase.purchasedAt,
-                                },
-                            });
-                            await tx.posInstallmentPayment.create({
-                                data: {
-                                    installmentId: inst.id,
-                                    amount: pay,
-                                    penaltyAmount: 0,
-                                    note: "Initial advance payment",
-                                    paidAt: purchase.purchasedAt,
-                                },
-                            });
-                        }
-                        else {
-                            await tx.posInstallment.update({
-                                where: { id: inst.id },
-                                data: { paidAmount: pay, status: "PARTIAL", isPartial: true },
-                            });
-                            await tx.posInstallmentPayment.create({
-                                data: {
-                                    installmentId: inst.id,
-                                    amount: pay,
-                                    penaltyAmount: 0,
-                                    note: "Initial advance payment",
-                                    paidAt: purchase.purchasedAt,
-                                },
-                            });
-                        }
-                    }
-                }
+                await createInstallmentScheduleAndApplyDownPayment(tx, purchase, installmentMonths, monthlyInstallmentAmount, totalWithInterest, dto.finalSellingPrice);
             }
             await tx.inventoryProduct.update({
                 where: { id: productId },
@@ -1264,148 +748,17 @@ async function createPurchase(customerId, dto) {
             remainingAmount: result.remainingAmount,
             settlementStatus: result.settlementStatus,
             purchaseChannel: result.purchaseChannel,
-            leasingCompanyId: result.leasingCompanyId,
-            leasingDownPaymentAmount: result.leasingDownPaymentAmount,
-            leasingFinancedAmount: result.leasingFinancedAmount,
-            hasRegistrationFee: result.hasRegistrationFee,
-            registrationFeeAmount: result.registrationFeeAmount,
             extraCosts: result.extraCosts,
             interestRate: result.interestRate,
             installmentMonths: result.installmentMonths,
             monthlyInstallmentAmount: result.monthlyInstallmentAmount,
             totalWithInterest: result.totalWithInterest,
-            purchasedAt: result.purchasedAt,
-        };
-    }
-    if (dto.purchaseType === "PRE_ORDER") {
-        const preOrderId = dto.preOrderId;
-        const preOrder = await prisma_client_1.prisma.preOrder.findUnique({
-            where: { id: preOrderId },
-            select: { id: true, displayId: true, brand: true, model: true, colour: true, price: true },
-        });
-        if (!preOrder)
-            throw errors_1.AppError.notFound("Selected pre-order not found");
-        const result = await prisma_client_1.prisma.$transaction(async (tx) => {
-            const purchase = await getPurchaseModelClient(tx).create({
-                data: {
-                    customerId,
-                    itemType: "PRE_ORDER",
-                    purchaseMode: "SINGLE",
-                    invoiceGroupCode,
-                    preOrderId,
-                    quantity: 1,
-                    currentSellingPrice: preOrder.price,
-                    finalSellingPrice: dto.finalSellingPrice,
-                    paymentType: purchaseChannel === "LEASING"
-                        ? paymentDetails.remainingAmount > 0
-                            ? "DOWNPAYMENT"
-                            : "DIRECT"
-                        : paymentType,
-                    downPaymentAmount: paymentDetails.downPaymentAmount,
-                    remainingAmount: paymentDetails.remainingAmount,
-                    settlementStatus: paymentDetails.settlementStatus,
-                    purchaseChannel,
-                    leasingCompanyId,
-                    leasingDownPaymentAmount,
-                    leasingFinancedAmount,
-                    hasRegistrationFee: false,
-                    registrationFeeAmount: 0,
-                    extraCosts,
-                    interestRate,
-                    installmentMonths,
-                    monthlyInstallmentAmount,
-                    totalWithInterest,
-                },
-            });
-            if (installmentMonths != null && monthlyInstallmentAmount != null) {
-                const baseDate = new Date(purchase.purchasedAt);
-                const installmentData = Array.from({ length: installmentMonths }, (_, i) => {
-                    const dueDate = new Date(baseDate);
-                    dueDate.setMonth(dueDate.getMonth() + i + 1);
-                    const isLast = i === installmentMonths - 1;
-                    const dueAmount = isLast
-                        ? roundCurrency((totalWithInterest ?? dto.finalSellingPrice) -
-                            monthlyInstallmentAmount * (installmentMonths - 1))
-                        : monthlyInstallmentAmount;
-                    return { purchaseId: purchase.id, installmentNo: i + 1, dueDate, dueAmount };
-                });
-                await tx.posInstallment.createMany({ data: installmentData });
-                const initialDownPayment = roundCurrency(purchase.downPaymentAmount ?? 0);
-                if (initialDownPayment > 0) {
-                    const createdInstallments = await tx.posInstallment.findMany({
-                        where: { purchaseId: purchase.id },
-                        orderBy: { installmentNo: "asc" },
-                    });
-                    let remainingDP = initialDownPayment;
-                    for (const inst of createdInstallments) {
-                        if (remainingDP <= 0)
-                            break;
-                        const pay = roundCurrency(Math.min(remainingDP, inst.dueAmount));
-                        remainingDP = roundCurrency(remainingDP - pay);
-                        if (pay >= inst.dueAmount) {
-                            await tx.posInstallment.update({
-                                where: { id: inst.id },
-                                data: { paidAmount: pay, status: "PAID", isPartial: false, settledAt: purchase.purchasedAt },
-                            });
-                            await tx.posInstallmentPayment.create({
-                                data: { installmentId: inst.id, amount: pay, penaltyAmount: 0, note: "Initial advance payment", paidAt: purchase.purchasedAt },
-                            });
-                        }
-                        else {
-                            await tx.posInstallment.update({
-                                where: { id: inst.id },
-                                data: { paidAmount: pay, status: "PARTIAL", isPartial: true },
-                            });
-                            await tx.posInstallmentPayment.create({
-                                data: { installmentId: inst.id, amount: pay, penaltyAmount: 0, note: "Initial advance payment", paidAt: purchase.purchasedAt },
-                            });
-                        }
-                    }
-                }
-            }
-            return purchase;
-        });
-        await createInvoicePaymentRecord(result.id, dto, result.invoiceGroupCode);
-        return {
-            id: result.id,
-            itemType: "PRE_ORDER",
-            customerId,
-            quantity: 1,
-            purchaseMode: result.purchaseMode,
-            invoiceGroupCode: result.invoiceGroupCode,
-            preOrderId,
-            customer: {
-                firstName: customer.firstName,
-                lastName: customer.lastName,
-                nic: customer.nic,
-                mobileNumber: customer.mobileNumber,
-                address: customer.address,
-            },
-            preOrderDisplayId: preOrder.displayId,
-            preOrderName: `${preOrder.brand} ${preOrder.model}`,
-            finalSellingPrice: dto.finalSellingPrice,
-            paymentType: result.paymentType,
-            downPaymentAmount: result.downPaymentAmount,
-            remainingAmount: result.remainingAmount,
-            settlementStatus: result.settlementStatus,
-            purchaseChannel: result.purchaseChannel,
-            leasingCompanyId: result.leasingCompanyId,
-            leasingDownPaymentAmount: result.leasingDownPaymentAmount,
-            leasingFinancedAmount: result.leasingFinancedAmount,
-            interestRate: result.interestRate,
-            installmentMonths: result.installmentMonths,
-            monthlyInstallmentAmount: result.monthlyInstallmentAmount,
-            totalWithInterest: result.totalWithInterest,
-            extraCosts: result.extraCosts,
             purchasedAt: result.purchasedAt,
         };
     }
     if (dto.purchaseType === "CUSTOM") {
         const customCategory = dto.customCategory?.trim() || "Miscellaneous";
         const customDescription = dto.customDescription.trim();
-        if (purchaseChannel === "LEASING") {
-            throw errors_1.AppError.validation({ purchaseChannel: ["Leasing is not available for custom invoices"] });
-        }
         const result = await prisma_client_1.prisma.$transaction(async (tx) => {
             const purchase = await getPurchaseModelClient(tx).create({
                 data: {
@@ -1423,11 +776,6 @@ async function createPurchase(customerId, dto) {
                     remainingAmount: paymentDetails.remainingAmount,
                     settlementStatus: paymentDetails.settlementStatus,
                     purchaseChannel: "PERSONAL",
-                    leasingCompanyId: null,
-                    leasingDownPaymentAmount: 0,
-                    leasingFinancedAmount: 0,
-                    hasRegistrationFee: false,
-                    registrationFeeAmount: 0,
                     extraCosts,
                     interestRate,
                     installmentMonths,
@@ -1436,50 +784,7 @@ async function createPurchase(customerId, dto) {
                 },
             });
             if (installmentMonths != null && monthlyInstallmentAmount != null) {
-                const baseDate = new Date(purchase.purchasedAt);
-                const installmentData = Array.from({ length: installmentMonths }, (_, i) => {
-                    const dueDate = new Date(baseDate);
-                    dueDate.setMonth(dueDate.getMonth() + i + 1);
-                    const isLast = i === installmentMonths - 1;
-                    const dueAmount = isLast
-                        ? roundCurrency((totalWithInterest ?? dto.finalSellingPrice) -
-                            monthlyInstallmentAmount * (installmentMonths - 1))
-                        : monthlyInstallmentAmount;
-                    return { purchaseId: purchase.id, installmentNo: i + 1, dueDate, dueAmount };
-                });
-                await tx.posInstallment.createMany({ data: installmentData });
-                const initialDownPayment = roundCurrency(purchase.downPaymentAmount ?? 0);
-                if (initialDownPayment > 0) {
-                    const createdInstallments = await tx.posInstallment.findMany({
-                        where: { purchaseId: purchase.id },
-                        orderBy: { installmentNo: "asc" },
-                    });
-                    let remainingDP = initialDownPayment;
-                    for (const inst of createdInstallments) {
-                        if (remainingDP <= 0)
-                            break;
-                        const pay = roundCurrency(Math.min(remainingDP, inst.dueAmount));
-                        remainingDP = roundCurrency(remainingDP - pay);
-                        if (pay >= inst.dueAmount) {
-                            await tx.posInstallment.update({
-                                where: { id: inst.id },
-                                data: { paidAmount: pay, status: "PAID", isPartial: false, settledAt: purchase.purchasedAt },
-                            });
-                            await tx.posInstallmentPayment.create({
-                                data: { installmentId: inst.id, amount: pay, penaltyAmount: 0, note: "Initial advance payment", paidAt: purchase.purchasedAt },
-                            });
-                        }
-                        else {
-                            await tx.posInstallment.update({
-                                where: { id: inst.id },
-                                data: { paidAmount: pay, status: "PARTIAL", isPartial: true },
-                            });
-                            await tx.posInstallmentPayment.create({
-                                data: { installmentId: inst.id, amount: pay, penaltyAmount: 0, note: "Initial advance payment", paidAt: purchase.purchasedAt },
-                            });
-                        }
-                    }
-                }
+                await createInstallmentScheduleAndApplyDownPayment(tx, purchase, installmentMonths, monthlyInstallmentAmount, totalWithInterest, dto.finalSellingPrice);
             }
             return purchase;
         });
@@ -1526,24 +831,6 @@ async function listPurchases(query) {
                 { customer: { nic: { contains: search, mode: "insensitive" } } },
                 { customer: { mobileNumber: { contains: search, mode: "insensitive" } } },
                 {
-                    bikeVehicle: {
-                        displayId: { contains: search, mode: "insensitive" },
-                    },
-                },
-                {
-                    bikeVehicle: {
-                        brand: { name: { contains: search, mode: "insensitive" } },
-                    },
-                },
-                {
-                    bikeVehicle: {
-                        model: { name: { contains: search, mode: "insensitive" } },
-                    },
-                },
-                {
-                    leasingCompany: { name: { contains: search, mode: "insensitive" } },
-                },
-                {
                     inventoryProduct: {
                         displayId: { contains: search, mode: "insensitive" },
                     },
@@ -1576,25 +863,6 @@ async function listPurchases(query) {
                 district: true,
             },
         },
-        bikeVehicle: {
-            select: {
-                id: true,
-                displayId: true,
-                colour: true,
-                year: true,
-                engineCapacityCc: true,
-                mileage: true,
-                condition: true,
-                registrationType: true,
-                fileNo: true,
-                registerNo: true,
-                chassisNo: true,
-                engineNo: true,
-                description: true,
-                brand: { select: { name: true } },
-                model: { select: { name: true } },
-            },
-        },
         inventoryProduct: {
             select: {
                 id: true,
@@ -1608,24 +876,7 @@ async function listPurchases(query) {
                 supplier: { select: { name: true, code: true } },
             },
         },
-        leasingCompany: {
-            select: {
-                id: true,
-                name: true,
-            },
-        },
     };
-    if ((0, prisma_model_1.prismaModelHasObjectField)(prisma_client_1.prisma, "PosCustomerPurchase", "preOrder")) {
-        purchaseInclude.preOrder = {
-            select: {
-                id: true,
-                displayId: true,
-                brand: true,
-                model: true,
-                colour: true,
-            },
-        };
-    }
     const [rows, total] = await Promise.all([
         getPurchaseModelClient(prisma_client_1.prisma).findMany({
             where,
@@ -1651,41 +902,12 @@ async function listPurchases(query) {
             remainingAmount: row.remainingAmount,
             settlementStatus: row.settlementStatus,
             purchaseChannel: row.purchaseChannel,
-            leasingCompany: row.leasingCompany
-                ? {
-                    id: row.leasingCompany.id,
-                    name: row.leasingCompany.name,
-                }
-                : null,
-            leasingDownPaymentAmount: row.leasingDownPaymentAmount,
-            leasingFinancedAmount: row.leasingFinancedAmount,
-            hasRegistrationFee: row.hasRegistrationFee,
-            registrationFeeAmount: row.registrationFeeAmount,
             extraCosts: Array.isArray(row.extraCosts) ? row.extraCosts : [],
             interestRate: row.interestRate,
             installmentMonths: row.installmentMonths,
             monthlyInstallmentAmount: row.monthlyInstallmentAmount,
             totalWithInterest: row.totalWithInterest,
             customer: row.customer,
-            bike: row.bikeVehicle
-                ? {
-                    id: row.bikeVehicle.id,
-                    displayId: row.bikeVehicle.displayId,
-                    brand: row.bikeVehicle.brand.name,
-                    model: row.bikeVehicle.model.name,
-                    colour: row.bikeVehicle.colour,
-                    year: row.bikeVehicle.year,
-                    engineCapacityCc: row.bikeVehicle.engineCapacityCc,
-                    mileage: row.bikeVehicle.mileage,
-                    condition: row.bikeVehicle.condition,
-                    registrationType: row.bikeVehicle.registrationType,
-                    fileNo: row.bikeVehicle.fileNo,
-                    registerNo: row.bikeVehicle.registerNo,
-                    chassisNo: row.bikeVehicle.chassisNo,
-                    engineNo: row.bikeVehicle.engineNo,
-                    description: row.bikeVehicle.description,
-                }
-                : null,
             inventory: row.inventoryProduct
                 ? {
                     id: row.inventoryProduct.id,
@@ -1697,15 +919,6 @@ async function listPurchases(query) {
                         ? `${row.inventoryProduct.supplier.name} (${row.inventoryProduct.supplier.code})`
                         : null,
                     description: row.inventoryProduct.description,
-                }
-                : null,
-            preOrder: row.preOrder
-                ? {
-                    id: row.preOrder.id,
-                    displayId: row.preOrder.displayId,
-                    brand: row.preOrder.brand,
-                    model: row.preOrder.model,
-                    colour: row.preOrder.colour,
                 }
                 : null,
             customCategory: row.customCategory ?? null,
@@ -1732,21 +945,6 @@ async function listPurchasesByUser(customerId, query) {
             ? {
                 OR: [
                     {
-                        bikeVehicle: {
-                            displayId: { contains: search, mode: "insensitive" },
-                        },
-                    },
-                    {
-                        bikeVehicle: {
-                            brand: { name: { contains: search, mode: "insensitive" } },
-                        },
-                    },
-                    {
-                        bikeVehicle: {
-                            model: { name: { contains: search, mode: "insensitive" } },
-                        },
-                    },
-                    {
                         inventoryProduct: {
                             displayId: { contains: search, mode: "insensitive" },
                         },
@@ -1766,88 +964,45 @@ async function listPurchasesByUser(customerId, query) {
                             category: { name: { contains: search, mode: "insensitive" } },
                         },
                     },
-                    {
-                        leasingCompany: {
-                            name: { contains: search, mode: "insensitive" },
-                        },
-                    },
                 ],
             }
             : {}),
     };
+    const purchaseInclude = {
+        customer: {
+            select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                nic: true,
+                mobileNumber: true,
+                address: true,
+                province: true,
+                district: true,
+            },
+        },
+        inventoryProduct: {
+            select: {
+                id: true,
+                displayId: true,
+                name: true,
+                quantity: true,
+                soldQuantity: true,
+                description: true,
+                brand: { select: { name: true } },
+                category: { select: { name: true } },
+                supplier: { select: { name: true, code: true } },
+            },
+        },
+    };
     const [rows, total] = await Promise.all([
-        (() => {
-            const purchaseInclude = {
-                customer: {
-                    select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        nic: true,
-                        mobileNumber: true,
-                        address: true,
-                        province: true,
-                        district: true,
-                    },
-                },
-                bikeVehicle: {
-                    select: {
-                        id: true,
-                        displayId: true,
-                        colour: true,
-                        year: true,
-                        engineCapacityCc: true,
-                        mileage: true,
-                        condition: true,
-                        registrationType: true,
-                        fileNo: true,
-                        registerNo: true,
-                        chassisNo: true,
-                        engineNo: true,
-                        description: true,
-                        brand: { select: { name: true } },
-                        model: { select: { name: true } },
-                    },
-                },
-                inventoryProduct: {
-                    select: {
-                        id: true,
-                        displayId: true,
-                        name: true,
-                        quantity: true,
-                        soldQuantity: true,
-                        description: true,
-                        brand: { select: { name: true } },
-                        category: { select: { name: true } },
-                        supplier: { select: { name: true, code: true } },
-                    },
-                },
-                leasingCompany: {
-                    select: {
-                        id: true,
-                        name: true,
-                    },
-                },
-            };
-            if ((0, prisma_model_1.prismaModelHasObjectField)(prisma_client_1.prisma, "PosCustomerPurchase", "preOrder")) {
-                purchaseInclude.preOrder = {
-                    select: {
-                        id: true,
-                        displayId: true,
-                        brand: true,
-                        model: true,
-                        colour: true,
-                    },
-                };
-            }
-            return getPurchaseModelClient(prisma_client_1.prisma).findMany({
-                where,
-                skip,
-                take: limit,
-                orderBy: { purchasedAt: "desc" },
-                include: purchaseInclude,
-            });
-        })(),
+        getPurchaseModelClient(prisma_client_1.prisma).findMany({
+            where,
+            skip,
+            take: limit,
+            orderBy: { purchasedAt: "desc" },
+            include: purchaseInclude,
+        }),
         getPurchaseModelClient(prisma_client_1.prisma).count({ where }),
     ]);
     return {
@@ -1865,41 +1020,12 @@ async function listPurchasesByUser(customerId, query) {
             remainingAmount: row.remainingAmount,
             settlementStatus: row.settlementStatus,
             purchaseChannel: row.purchaseChannel,
-            leasingCompany: row.leasingCompany
-                ? {
-                    id: row.leasingCompany.id,
-                    name: row.leasingCompany.name,
-                }
-                : null,
-            leasingDownPaymentAmount: row.leasingDownPaymentAmount,
-            leasingFinancedAmount: row.leasingFinancedAmount,
-            hasRegistrationFee: row.hasRegistrationFee,
-            registrationFeeAmount: row.registrationFeeAmount,
             extraCosts: Array.isArray(row.extraCosts) ? row.extraCosts : [],
             interestRate: row.interestRate,
             installmentMonths: row.installmentMonths,
             monthlyInstallmentAmount: row.monthlyInstallmentAmount,
             totalWithInterest: row.totalWithInterest,
             customer: row.customer,
-            bike: row.bikeVehicle
-                ? {
-                    id: row.bikeVehicle.id,
-                    displayId: row.bikeVehicle.displayId,
-                    brand: row.bikeVehicle.brand.name,
-                    model: row.bikeVehicle.model.name,
-                    colour: row.bikeVehicle.colour,
-                    year: row.bikeVehicle.year,
-                    engineCapacityCc: row.bikeVehicle.engineCapacityCc,
-                    mileage: row.bikeVehicle.mileage,
-                    condition: row.bikeVehicle.condition,
-                    registrationType: row.bikeVehicle.registrationType,
-                    fileNo: row.bikeVehicle.fileNo,
-                    registerNo: row.bikeVehicle.registerNo,
-                    chassisNo: row.bikeVehicle.chassisNo,
-                    engineNo: row.bikeVehicle.engineNo,
-                    description: row.bikeVehicle.description,
-                }
-                : null,
             inventory: row.inventoryProduct
                 ? {
                     id: row.inventoryProduct.id,
@@ -1911,15 +1037,6 @@ async function listPurchasesByUser(customerId, query) {
                         ? `${row.inventoryProduct.supplier.name} (${row.inventoryProduct.supplier.code})`
                         : null,
                     description: row.inventoryProduct.description,
-                }
-                : null,
-            preOrder: row.preOrder
-                ? {
-                    id: row.preOrder.id,
-                    displayId: row.preOrder.displayId,
-                    brand: row.preOrder.brand,
-                    model: row.preOrder.model,
-                    colour: row.preOrder.colour,
                 }
                 : null,
             customCategory: row.customCategory ?? null,
@@ -1968,7 +1085,6 @@ async function settlePurchase(customerId, purchaseId, dto) {
             remainingAmount: true,
             downPaymentAmount: true,
             finalSellingPrice: true,
-            leasingDownPaymentAmount: true,
         },
     });
     const totalRemainingBefore = roundCurrency(targets.reduce((sum, row) => sum + (row.remainingAmount ?? 0), 0));
@@ -1978,9 +1094,7 @@ async function settlePurchase(customerId, purchaseId, dto) {
         });
     }
     const customerPaymentAmount = roundCurrency(dto.amount);
-    const isLeasingSettlement = dto.settlementMethod === "LEASING";
-    const isBikeInvoice = targets.every((row) => row.itemType === "BIKE");
-    if (!isLeasingSettlement && customerPaymentAmount <= 0) {
+    if (customerPaymentAmount <= 0) {
         throw errors_1.AppError.validation({
             amount: ["Settlement amount must be greater than 0"],
         });
@@ -1992,46 +1106,7 @@ async function settlePurchase(customerId, purchaseId, dto) {
             ],
         });
     }
-    if (!isLeasingSettlement &&
-        isBikeInvoice &&
-        customerPaymentAmount !== totalRemainingBefore) {
-        throw errors_1.AppError.validation({
-            amount: ["The full remaining amount is required for a bike settlement"],
-        });
-    }
-    if (isLeasingSettlement) {
-        if (!isBikeInvoice) {
-            throw errors_1.AppError.validation({
-                settlementMethod: ["Leasing settlement is available only for bike purchases"],
-            });
-        }
-        if (!dto.leasingCompanyId) {
-            throw errors_1.AppError.validation({
-                leasingCompanyId: ["Leasing company is required"],
-            });
-        }
-        if (dto.leasingSettlementType === "DOWNPAYMENT_AND_LEASE" &&
-            (customerPaymentAmount <= 0 || customerPaymentAmount >= totalRemainingBefore)) {
-            throw errors_1.AppError.validation({
-                amount: ["Additional downpayment must be greater than 0 and less than the remaining amount"],
-            });
-        }
-        const leasingCompany = await getLeasingCompanyModelClient(prisma_client_1.prisma).findUnique({
-            where: { id: dto.leasingCompanyId },
-            select: { id: true },
-        });
-        if (!leasingCompany) {
-            throw errors_1.AppError.validation({
-                leasingCompanyId: ["Selected leasing company does not exist"],
-            });
-        }
-    }
-    const settleAmount = isLeasingSettlement
-        ? totalRemainingBefore
-        : customerPaymentAmount;
-    const leasingFinancedAmount = isLeasingSettlement
-        ? roundCurrency(totalRemainingBefore - customerPaymentAmount)
-        : 0;
+    const settleAmount = customerPaymentAmount;
     let remainingToApply = settleAmount;
     let customerPaymentToApply = customerPaymentAmount;
     const updates = targets.map((row) => {
@@ -2049,16 +1124,13 @@ async function settlePurchase(customerId, purchaseId, dto) {
         const newRemainingAmount = roundCurrency(rowRemaining - appliedAmount);
         const customerPaymentApplied = roundCurrency(Math.min(appliedAmount, customerPaymentToApply));
         customerPaymentToApply = roundCurrency(customerPaymentToApply - customerPaymentApplied);
-        const leasingApplied = roundCurrency(appliedAmount - customerPaymentApplied);
         const newDownPaymentAmount = roundCurrency((row.downPaymentAmount ?? 0) + customerPaymentApplied);
         return {
             id: row.id,
             appliedAmount,
             customerPaymentApplied,
-            leasingApplied,
             newDownPaymentAmount,
             newRemainingAmount,
-            newLeasingDownPaymentAmount: roundCurrency((row.leasingDownPaymentAmount ?? 0) + customerPaymentApplied),
         };
     });
     await prisma_client_1.prisma.$transaction(async (tx) => {
@@ -2072,38 +1144,10 @@ async function settlePurchase(customerId, purchaseId, dto) {
                     downPaymentAmount: update.newDownPaymentAmount,
                     remainingAmount: update.newRemainingAmount,
                     settlementStatus: update.newRemainingAmount > 0 ? "TO_SETTLE" : "SETTLED",
-                    ...(isLeasingSettlement
-                        ? {
-                            purchaseChannel: "LEASING",
-                            leasingCompanyId: dto.leasingCompanyId,
-                            leasingDownPaymentAmount: update.newLeasingDownPaymentAmount,
-                            leasingFinancedAmount: update.leasingApplied,
-                        }
-                        : isBikeInvoice
-                            ? {
-                                purchaseChannel: "PERSONAL",
-                                leasingCompanyId: null,
-                                leasingDownPaymentAmount: 0,
-                                leasingFinancedAmount: 0,
-                            }
-                            : {}),
                 },
             });
         }
-        if (isLeasingSettlement) {
-            await tx.posInstallment.updateMany({
-                where: {
-                    purchaseId: { in: targets.map((row) => row.id) },
-                    status: { in: ["PENDING", "PARTIAL"] },
-                },
-                data: {
-                    status: "PAID",
-                    isPartial: false,
-                    settledAt: new Date(),
-                },
-            });
-        }
-        else if (dto.installmentId) {
+        if (dto.installmentId) {
             const installment = await tx.posInstallment.findFirst({
                 where: { id: dto.installmentId, purchaseId: basePurchase.id },
             });
@@ -2252,9 +1296,7 @@ async function settlePurchase(customerId, purchaseId, dto) {
                 chequeNo: dto.chequeNo,
                 chequeBank: dto.chequeBank,
                 chequeDate: dto.chequeDate ? new Date(dto.chequeDate) : undefined,
-                description: isLeasingSettlement
-                    ? `Additional downpayment before leasing — ${invoiceRef}`
-                    : `Settlement payment — ${invoiceRef}`,
+                description: `Settlement payment — ${invoiceRef}`,
             },
         });
     }
@@ -2280,7 +1322,6 @@ async function settlePurchase(customerId, purchaseId, dto) {
         purchaseId: basePurchase.id,
         appliedAmount: settleAmount,
         customerPaymentAmount,
-        leasingFinancedAmount,
         totalRemainingBefore,
         totalRemainingAfter,
         settlementStatus: totalRemainingAfter > 0 ? "TO_SETTLE" : "SETTLED",
@@ -2294,8 +1335,7 @@ async function updatePurchase(purchaseId, dto) {
     if (!purchase)
         throw errors_1.AppError.notFound("Purchase not found");
     const hasFinancialEdits = dto.finalSellingPrice !== undefined ||
-        dto.downPaymentAmount !== undefined ||
-        dto.registrationFeeAmount !== undefined;
+        dto.downPaymentAmount !== undefined;
     if (dto.mobileNumber !== undefined && !hasFinancialEdits) {
         try {
             await prisma_client_1.prisma.posCustomer.update({
@@ -2338,9 +1378,6 @@ async function updatePurchase(purchaseId, dto) {
             orderBy: { id: "asc" },
         })
         : [];
-    if (purchase.purchaseChannel === "LEASING") {
-        throw new errors_1.AppError("Leasing purchases cannot be edited via this endpoint", 400);
-    }
     if (purchase.purchaseMode === "BULK") {
         throw new errors_1.AppError("Bulk purchases cannot be edited via this endpoint", 400);
     }
@@ -2350,21 +1387,12 @@ async function updatePurchase(purchaseId, dto) {
             downPaymentAmount: ["Only applicable to DOWNPAYMENT purchases"],
         });
     }
-    if (dto.registrationFeeAmount !== undefined &&
-        !purchase.hasRegistrationFee) {
-        throw errors_1.AppError.validation({
-            registrationFeeAmount: ["This purchase has no registration fee"],
-        });
-    }
     const oldFSP = purchase.finalSellingPrice;
     const newFSP = roundCurrency(dto.finalSellingPrice ?? oldFSP);
     const oldDown = purchase.downPaymentAmount ?? 0;
     const newDown = purchase.paymentType === "DIRECT"
         ? newFSP
         : roundCurrency(dto.downPaymentAmount ?? oldDown);
-    const newRegFee = purchase.hasRegistrationFee
-        ? roundCurrency(dto.registrationFeeAmount ?? purchase.registrationFeeAmount ?? 0)
-        : (purchase.registrationFeeAmount ?? 0);
     const newRemaining = purchase.paymentType === "DIRECT"
         ? 0
         : roundCurrency((purchase.remainingAmount ?? 0) + (newFSP - oldFSP));
@@ -2390,11 +1418,7 @@ async function updatePurchase(purchaseId, dto) {
     const allInstallmentsPending = installments.length > 0 &&
         installments.every((installment) => installment.status === "PENDING" && installment.paidAmount === 0);
     const initialPayment = invoicePayments[0] ?? null;
-    const newPaymentAmount = purchase.paymentType === "DIRECT"
-        ? roundCurrency(newFSP +
-            (purchase.hasRegistrationFee ? newRegFee : 0) +
-            getStoredExtraCostsTotal(purchase.extraCosts))
-        : newDown;
+    const newPaymentAmount = purchase.paymentType === "DIRECT" ? newFSP : newDown;
     try {
         await prisma_client_1.prisma.$transaction(async (tx) => {
             await getPurchaseModelClient(tx).update({
@@ -2404,7 +1428,6 @@ async function updatePurchase(purchaseId, dto) {
                     downPaymentAmount: newDown,
                     remainingAmount: newRemaining,
                     settlementStatus: newStatus,
-                    registrationFeeAmount: newRegFee,
                     ...(newTotalWithInterest != null
                         ? { totalWithInterest: newTotalWithInterest }
                         : {}),
@@ -2489,7 +1512,6 @@ async function updatePurchase(purchaseId, dto) {
             downPaymentAmount: true,
             remainingAmount: true,
             settlementStatus: true,
-            registrationFeeAmount: true,
             totalWithInterest: true,
             monthlyInstallmentAmount: true,
             customer: { select: { id: true, mobileNumber: true } },

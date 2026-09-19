@@ -26,15 +26,12 @@ const accountLevelValues = ["MAIN", "SUB"] as const;
 const paymentMethodValues = ["CASH", "CHEQUE", "BANK_TRANSFER"] as const;
 const accountTransferType = "ACCOUNT_TRANSFER";
 const voucherTypeValues = [
-  "VEHICLE_CLEARANCE",
   "BILL",
   "OTHER_PAYMENT",
   "PERMIT",
-  "LEASING_PAYMENT",
   "LOAN_PAYMENT",
   "SALARY",
   "CUSTOMER_REFUND",
-  "VEHICLE_PURCHASE",
   "ADVANCE_REFUND",
   accountTransferType,
 ] as const;
