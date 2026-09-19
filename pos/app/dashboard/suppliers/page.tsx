@@ -62,7 +62,7 @@ function ViewInventoryProductModal({ product, token, onClose }: { product: Inven
   const [detail, setDetail] = useState<InventoryProduct>(product);
   const [images, setImages] = useState<ProductImage[]>(product.images ?? []);
   const [loading, setLoading] = useState(true);
-  const base = `${API_URL}/api/pos/bike-management`;
+  const base = `${API_URL}/api/pos/inventory-management`;
   const auth = { Authorization: `Bearer ${token}` };
 
   useEffect(() => {
@@ -148,7 +148,7 @@ function ViewSupplierModal({ supplier, token, onClose }: { supplier: Supplier; t
   const [products, setProducts] = useState<InventoryProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<InventoryProduct | null>(null);
-  const base = `${API_URL}/api/pos/bike-management`;
+  const base = `${API_URL}/api/pos/inventory-management`;
   const auth = { Authorization: `Bearer ${token}` };
   const linkedProducts = products.length || supplier._count?.products || 0;
   const hasContactDetails = !!(supplier.contactPerson || supplier.telephone || supplier.email || supplier.fax);
@@ -298,7 +298,7 @@ export default function SupplierManagementPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 
-  const base = `${API_URL}/api/pos/bike-management`;
+  const base = `${API_URL}/api/pos/inventory-management`;
   const authHeader = { Authorization: `Bearer ${token}` };
 
   const loadSuppliers = useCallback(async () => {

@@ -118,7 +118,7 @@ export function Topbar() {
     const loadNotifications = async () => {
       try {
         const auth = { Authorization: `Bearer ${token}` };
-        const inventoryResponse = await fetch(`${API_URL}/api/pos/bike-management/products?limit=5000`, { headers: auth, cache: "no-store" });
+        const inventoryResponse = await fetch(`${API_URL}/api/pos/inventory-management/products?limit=5000`, { headers: auth, cache: "no-store" });
 
         if (inventoryResponse.status === 401 || inventoryResponse.status === 403) {
           logout();

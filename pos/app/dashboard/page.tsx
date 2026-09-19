@@ -23,15 +23,11 @@ type RevenueViewMode = "DAILY" | "MONTHLY" | "YEARLY";
 type Purchase = {
   id: number;
   purchasedAt: string;
-  itemType: "BIKE" | "INVENTORY";
+  itemType: "INVENTORY" | "CUSTOM";
   quantity: number;
   finalSellingPrice: number;
-  purchaseChannel?: "PERSONAL" | "LEASING";
   remainingAmount?: number;
-  hasRegistrationFee?: boolean;
-  registrationFeeAmount?: number;
   inventory?: { id: number };
-  bike?: { id: number };
   customer: { id: number };
 };
 
@@ -48,13 +44,6 @@ type InventoryHealth = {
   inStock: number;
   lowStock: number;
   outOfStock: number;
-};
-
-type VehicleSummary = {
-  id: number;
-  status: "available" | "sold";
-  taxAmount?: number;
-  expenses?: Array<{ amount: number }>;
 };
 
 function formatDateForInput(date: Date) {
@@ -127,9 +116,8 @@ function formatCurrency(value: number) {
 
 function getSettledRevenue(purchase: Purchase) {
   const remaining = Math.max(0, purchase.remainingAmount ?? 0);
-  const registrationFee = purchase.hasRegistrationFee ? Math.max(0, purchase.registrationFeeAmount ?? 0) : 0;
-  const settled = purchase.finalSellingPrice - remaining + registrationFee;
-  return Math.max(0, Math.min(purchase.finalSellingPrice + registrationFee, settled));
+  const settled = purchase.finalSellingPrice - remaining;
+  return Math.max(0, Math.min(purchase.finalSellingPrice, settled));
 }
 
 function clampMoney(value: number) {
@@ -209,7 +197,7 @@ export default function DashboardPage() {
     queryKey: ["pos", "dashboard", "products", token],
     enabled: Boolean(token),
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/api/pos/bike-management/products?page=1&limit=500`, {
+      const response = await fetch(`${API_URL}/api/pos/inventory-management/products?page=1&limit=500`, {
         headers: auth,
         cache: "no-store",
       });
@@ -222,7 +210,7 @@ export default function DashboardPage() {
     queryKey: ["pos", "dashboard", "inventory-health", token],
     enabled: Boolean(token),
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/api/pos/bike-management/products/health`, {
+      const response = await fetch(`${API_URL}/api/pos/inventory-management/products/health`, {
         headers: auth,
         cache: "no-store",
       });
@@ -230,22 +218,8 @@ export default function DashboardPage() {
     },
   });
 
-  const vehiclesQuery = useQuery({
-    queryKey: ["pos", "dashboard", "vehicles", token],
-    enabled: Boolean(token),
-    queryFn: async () => {
-      const response = await fetch(`${API_URL}/api/pos/bike-management/vehicles?limit=5000`, {
-        headers: auth,
-        cache: "no-store",
-      });
-      const payload = await readApiData<{ vehicles?: VehicleSummary[] }>(response, "Failed to load bike summary");
-      return payload.vehicles ?? [];
-    },
-  });
-
   const purchases: Purchase[] = purchasesQuery.data ?? [];
   const products: InventoryProduct[] = productsQuery.data ?? [];
-  const vehicles: VehicleSummary[] = vehiclesQuery.data ?? [];
   const inventoryHealth = inventoryHealthQuery.data ?? {
     totalProducts: 0,
     inStock: 0,
@@ -254,17 +228,14 @@ export default function DashboardPage() {
   };
   const loading = purchasesQuery.isPending
     || productsQuery.isPending
-    || inventoryHealthQuery.isPending
-    || vehiclesQuery.isPending;
+    || inventoryHealthQuery.isPending;
   const error = purchasesQuery.error instanceof Error
     ? purchasesQuery.error.message
     : productsQuery.error instanceof Error
       ? productsQuery.error.message
       : inventoryHealthQuery.error instanceof Error
         ? inventoryHealthQuery.error.message
-        : vehiclesQuery.error instanceof Error
-          ? vehiclesQuery.error.message
-          : null;
+        : null;
 
   const inventoryHealthPercent = (count: number) =>
     inventoryHealth.totalProducts > 0
@@ -285,11 +256,6 @@ export default function DashboardPage() {
     [products],
   );
 
-  const vehiclesById = useMemo(
-    () => new Map(vehicles.map((vehicle: VehicleSummary) => [vehicle.id, vehicle])),
-    [vehicles],
-  );
-
   const filteredFinancePurchases = useMemo(() => {
     if (financeDateRangeInvalid) return [];
     return purchases.filter((purchase: Purchase) =>
@@ -299,36 +265,23 @@ export default function DashboardPage() {
 
   const activeTaxes = useMemo(() => {
     const total = filteredFinancePurchases.reduce((sum: number, purchase: Purchase) => {
-      if (purchase.itemType === "INVENTORY") {
-        const productId = purchase.inventory?.id;
-        const product = productId ? productsById.get(productId) : undefined;
-        return sum + Math.max(0, product?.taxPaid ?? 0) * Math.max(0, purchase.quantity);
-      }
-
-      const bikeId = purchase.bike?.id;
-      const bike = bikeId ? vehiclesById.get(bikeId) : undefined;
-      return sum + Math.max(0, bike?.taxAmount ?? 0);
+      const productId = purchase.inventory?.id;
+      const product = productId ? productsById.get(productId) : undefined;
+      return sum + Math.max(0, product?.taxPaid ?? 0) * Math.max(0, purchase.quantity);
     }, 0);
 
     return clampMoney(total);
-  }, [filteredFinancePurchases, productsById, vehiclesById]);
+  }, [filteredFinancePurchases, productsById]);
 
   const activeOtherCosts = useMemo(() => {
     const total = filteredFinancePurchases.reduce((sum: number, purchase: Purchase) => {
-      if (purchase.itemType === "INVENTORY") {
-        const productId = purchase.inventory?.id;
-        const product = productId ? productsById.get(productId) : undefined;
-        return sum + Math.max(0, product?.additionalExpenses ?? 0) * Math.max(0, purchase.quantity);
-      }
-
-      const bikeId = purchase.bike?.id;
-      const bike = bikeId ? vehiclesById.get(bikeId) : undefined;
-      const expenses = bike?.expenses ?? [];
-      return sum + expenses.reduce((innerSum, item) => innerSum + Math.max(0, item.amount), 0);
+      const productId = purchase.inventory?.id;
+      const product = productId ? productsById.get(productId) : undefined;
+      return sum + Math.max(0, product?.additionalExpenses ?? 0) * Math.max(0, purchase.quantity);
     }, 0);
 
     return clampMoney(total);
-  }, [filteredFinancePurchases, productsById, vehiclesById]);
+  }, [filteredFinancePurchases, productsById]);
 
   const financialSummary = useMemo(() => {
     const now = new Date();
@@ -338,7 +291,6 @@ export default function DashboardPage() {
     let totalRevenue = 0;
     let dailyRevenue = 0;
     let monthlyRevenue = 0;
-    let leasingOutstanding = 0;
     let cashOutstanding = 0;
 
     filteredFinancePurchases.forEach((purchase: Purchase) => {
@@ -354,14 +306,10 @@ export default function DashboardPage() {
         monthlyRevenue += settledRevenue;
       }
 
-      if (purchase.purchaseChannel === "LEASING") {
-        leasingOutstanding += remaining;
-      } else {
-        cashOutstanding += remaining;
-      }
+      cashOutstanding += remaining;
     });
 
-    const totalOutstanding = cashOutstanding + leasingOutstanding;
+    const totalOutstanding = cashOutstanding;
     const grossProfit = totalRevenue - (activeTaxes + activeOtherCosts);
 
     return {
@@ -370,7 +318,6 @@ export default function DashboardPage() {
       monthlyRevenue,
       totalOutstanding,
       cashOutstanding,
-      leasingOutstanding,
       grossProfit,
     };
   }, [activeOtherCosts, activeTaxes, filteredFinancePurchases]);
@@ -454,18 +401,12 @@ export default function DashboardPage() {
     [groupedRevenue.revenueValues]
   );
 
-  const bikeSalesCount = useMemo(
-    () => purchases.filter((purchase: Purchase) => purchase.itemType === "BIKE").length,
-    [purchases]
-  );
-
   const inventorySalesCount = useMemo(
     () => purchases.filter((purchase: Purchase) => purchase.itemType === "INVENTORY").length,
     [purchases]
   );
 
   const totalSalesCount = purchases.length;
-  const bikeShare = totalSalesCount > 0 ? Math.round((bikeSalesCount / totalSalesCount) * 100) : 0;
   const inventoryShare = totalSalesCount > 0 ? Math.round((inventorySalesCount / totalSalesCount) * 100) : 0;
   const settledShare = totalSalesCount > 0
     ? Math.round((purchases.filter((purchase: Purchase) => (purchase.remainingAmount ?? 0) <= 0).length / totalSalesCount) * 100)
@@ -498,11 +439,10 @@ export default function DashboardPage() {
     const reportDate = new Date().toLocaleDateString("en-GB");
     const rowDescriptions: Record<string, string> = {
       "Total Revenue": "Settled revenue in the selected range",
-      Taxes: "Vehicle tax and inventory tax totals",
+      Taxes: "Inventory tax totals",
       "Other Costs": "Operating expenses and product extras",
       "Gross Profit": "Total Revenue - (Taxes + Other Costs)",
       "Total Outstanding": "Unsettled balances in the selected range",
-      "Leasing Outstanding": "Outstanding leasing balances only",
     };
     const rows = [
       {
@@ -524,10 +464,6 @@ export default function DashboardPage() {
       {
         label: "Total Outstanding",
         totalPrice: `LKR ${formatCurrency(financialSummary.totalOutstanding)}`,
-      },
-      {
-        label: "Leasing Outstanding",
-        totalPrice: `LKR ${formatCurrency(financialSummary.leasingOutstanding)}`,
       },
     ];
     const tableRows = rows
@@ -640,11 +576,6 @@ export default function DashboardPage() {
             <tr>
               <td>Cash Outstanding</td>
               <td style="text-align:center">Rs. ${formatCurrency(financialSummary.cashOutstanding)}</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>Leasing Outstanding</td>
-              <td style="text-align:center">Rs. ${formatCurrency(financialSummary.leasingOutstanding)}</td>
               <td></td>
             </tr>
           </tbody>
@@ -806,17 +737,12 @@ export default function DashboardPage() {
           {
             label: "Total Outstanding",
             value: `LKR ${formatCurrency(financialSummary.totalOutstanding)}`,
-            hint: "Cash + leasing balance",
+            hint: "Outstanding balance",
           },
           {
             label: "Cash Outstanding",
             value: `LKR ${formatCurrency(financialSummary.cashOutstanding)}`,
             hint: "Outstanding cash balance only",
-          },
-          {
-            label: "Leasing Outstanding",
-            value: `LKR ${formatCurrency(financialSummary.leasingOutstanding)}`,
-            hint: "Only leasing balance",
           },
           {
             label: "Taxes",
@@ -939,7 +865,6 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="donuts-grid">
-            <Donut pct={bikeShare} color="#D8892B" label="Drinks" sublabel="sold" size={84} stroke={10} />
             <Donut pct={inventoryShare} color="#3B82F6" label="Inventory" sublabel="sold" size={84} stroke={10} />
             <Donut pct={settledShare} color="#10B981" label="Settled" sublabel="invoices" size={84} stroke={10} />
             <Donut pct={pendingShare} color="#F59E0B" label="Pending" sublabel="invoices" size={84} stroke={10} />
@@ -1018,7 +943,7 @@ export default function DashboardPage() {
               <div key={entry.id} className="activity-row">
                 <span className="activity-dot" style={{ background: (entry.remainingAmount ?? 0) > 0 ? "#F59E0B" : "#10B981" }} />
                 <span className="activity-text">
-                  {entry.itemType === "BIKE" ? "Drink sale" : "Product sale"} • LKR {Math.round(entry.finalSellingPrice).toLocaleString()}
+                  Product sale • LKR {Math.round(entry.finalSellingPrice).toLocaleString()}
                 </span>
                 <span className="activity-time">{new Date(entry.purchasedAt).toLocaleString()}</span>
               </div>

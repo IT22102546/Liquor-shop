@@ -10,7 +10,7 @@ import { IconActivity } from "../../lib/icons";
 type Purchase = {
   id: number;
   purchasedAt: string;
-  itemType: "BIKE" | "INVENTORY";
+  itemType: "INVENTORY" | "CUSTOM";
   quantity: number;
   finalSellingPrice: number;
   customer: {
@@ -18,10 +18,6 @@ type Purchase = {
     firstName: string;
     lastName: string;
   };
-  bike?: {
-    brand?: string;
-    model?: string;
-  } | null;
   inventory?: {
     name?: string;
   } | null;
@@ -82,12 +78,10 @@ export function RecentActivitySection() {
                   {purchase.customer.firstName} {purchase.customer.lastName}
                 </td>
                 <td style={{ padding: "0.75rem", fontSize: "0.9rem" }}>
-                  {purchase.itemType === "BIKE" && purchase.bike
-                    ? `${purchase.bike.brand ?? "-"} ${purchase.bike.model ?? "-"}`
-                    : purchase.inventory?.name ?? "-"}
+                  {purchase.inventory?.name ?? "-"}
                 </td>
                 <td style={{ padding: "0.75rem", fontSize: "0.9rem" }}>
-                  {purchase.itemType === "BIKE" ? "Bike" : "Spare Part"}
+                  {purchase.itemType === "CUSTOM" ? "Custom" : "Product"}
                 </td>
                 <td style={{ padding: "0.75rem", fontSize: "0.9rem", textAlign: "right", fontWeight: 600 }}>
                   Rs. {purchase.finalSellingPrice.toLocaleString()}

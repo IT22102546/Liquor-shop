@@ -10,7 +10,6 @@ import {
   IconChevronLeft,
   IconChevronNav,
   IconChevronRight,
-  IconLeasing,
   IconPreOrders,
   IconReceipt,
   IconSearch,
@@ -26,8 +25,7 @@ const NAV_ITEMS = [
   { key: "staff", label: "Staff & Roles", href: "/dashboard/staff", Icon: IconUsers },
   { key: "users", label: "Customer Management", href: "/dashboard/users", Icon: IconUsers },
   { key: "suppliers", label: "Beverage Suppliers", href: "/dashboard/suppliers", Icon: IconSupplier },
-  { key: "purchasing", label: "Purchasing & Requests", href: "/dashboard/purchasing-requests", Icon: IconPreOrders },
-  { key: "wholesale", label: "Wholesale Accounts", href: "/dashboard/wholesale-accounts", Icon: IconLeasing },
+  { key: "purchasing", label: "Supplier Requests", href: "/dashboard/purchasing-requests", Icon: IconPreOrders },
   { key: "invoices", label: "Invoice Management", href: "/dashboard/invoices", Icon: IconReceipt },
   { key: "accounts", label: "Accounts", href: "/dashboard/accounts", Icon: IconAccounts },
 ] as const;
@@ -35,7 +33,6 @@ const NAV_ITEMS = [
 const GROUPS = {
   users: [["Users", "/dashboard/users"], ["User History", "/dashboard/users/history"]],
   inventory: [["Sell & Inventory", "/dashboard/inventory"], ["Sold Products", "/dashboard/inventory/sold"], ["Product Setup", "/dashboard/inventory/manage"]],
-  purchasing: [["Purchase Orders", "/dashboard/purchase-orders"], ["Supplier Requests", "/dashboard/purchasing-requests"]],
   invoices: [["Invoices", "/dashboard/invoices"], ["Account Details", "/dashboard/invoices/accounts"], ["Terms & Conditions", "/dashboard/invoices/terms"]],
   accounts: [["Receipts", "/dashboard/accounts/receipts"], ["Vouchers", "/dashboard/accounts/vouchers"], ["General Ledger", "/dashboard/accounts/ledger"], ["Manage Accounts", "/dashboard/accounts"]],
 } as const;

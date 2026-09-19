@@ -307,28 +307,6 @@ export const IconRevenue = () => (
   </svg>
 );
 
-export const IconBike = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="6" cy="17" r="3" />
-    <circle cx="18" cy="17" r="3" />
-    <path d="M9 17h6" />
-    <path d="M7 17l2.5-6h4l2.5 6" />
-    <path d="M10 11l-1.5-2.5h-2" />
-    <path d="M13 11l2-3h3" />
-    <path d="M12 8h3" />
-    <path d="M16.5 8.5l1.5 2.5" />
-  </svg>
-);
-
 export const IconActivity = () => (
   <svg
     width="18"
@@ -362,26 +340,6 @@ export const IconSupplier = () => (
     <path d="M15 9h.01" />
     <path d="M9 12h.01" />
     <path d="M15 12h.01" />
-  </svg>
-);
-
-export const IconLeasing = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M16 3h5v5" />
-    <path d="M8 21H3v-5" />
-    <path d="M21 3l-7 7" />
-    <path d="M3 21l7-7" />
-    <path d="M7 7h5v5H7z" />
-    <path d="M12 12h5v5h-5z" />
   </svg>
 );
 
