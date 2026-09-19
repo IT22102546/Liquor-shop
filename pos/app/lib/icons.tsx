@@ -16,6 +16,29 @@ export const IconUsers = () => (
   </svg>
 );
 
+export const IconBar = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 3h18l-7 8v7a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-7L3 3Z" />
+    <path d="M7 8h10" />
+    <path d="M12 12v6" />
+  </svg>
+);
+
+export const IconBottle = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 3h6" />
+    <path d="M10 3v4l-3 4v8a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-8l-3-4V3" />
+    <path d="M7 12h10" />
+  </svg>
+);
+
+export const IconReceipt = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 3h14v18l-3-2-4 2-4-2-3 2V3Z" />
+    <path d="M8 8h8M8 12h8M8 16h4" />
+  </svg>
+);
+
 export const IconInvoice = () => (
   <svg
     width="18"

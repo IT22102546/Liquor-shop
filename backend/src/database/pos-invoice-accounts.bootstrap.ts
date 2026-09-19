@@ -26,37 +26,8 @@ const createPosInvoiceAccountsSortIndexSql = `
     ON "pos_invoice_accounts"("sortOrder")
 `;
 
-const seedPosInvoiceAccountsSql = `
-  INSERT INTO "pos_invoice_accounts" (
-    "accountHolder",
-    "accountNumber",
-    "bankName",
-    "branchName",
-    "sortOrder",
-    "isActive",
-    "createdAt",
-    "updatedAt"
-  )
-  SELECT
-    'JL Racing',
-    '019010033205',
-    'HNB',
-    NULL,
-    1,
-    true,
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
-  WHERE NOT EXISTS (
-    SELECT 1
-    FROM "pos_invoice_accounts"
-    WHERE "bankName" = 'HNB'
-      AND "accountNumber" = '019010033205'
-  )
-`;
-
 export async function ensurePosInvoiceAccountsTable() {
   await prisma.$executeRawUnsafe(createPosInvoiceAccountsTableSql);
   await prisma.$executeRawUnsafe(createPosInvoiceAccountsUniqueIndexSql);
   await prisma.$executeRawUnsafe(createPosInvoiceAccountsSortIndexSql);
-  await prisma.$executeRawUnsafe(seedPosInvoiceAccountsSql);
 }

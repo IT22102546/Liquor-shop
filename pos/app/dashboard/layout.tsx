@@ -1,16 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "../components/Sidebar";
 import { Topbar } from "../components/Topbar";
 import { AdminCtx } from "../components/AdminContext";
 import { QueryProvider } from "../components/QueryProvider";
 import { API_URL, STORAGE_TOKEN, STORAGE_ADMIN } from "../lib/constants";
 import type { PosAdmin } from "../lib/types";
+import { canAccessPath, ROLE_HOME } from "../lib/roles";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [admin, setAdmin] = useState<PosAdmin | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
@@ -61,6 +63,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (admin && !canAccessPath(admin.role, pathname)) {
+      router.replace(ROLE_HOME[admin.role] ?? "/signin");
+    }
+  }, [admin, pathname, router]);
+
   const logout = () => {
     localStorage.removeItem(STORAGE_TOKEN);
     localStorage.removeItem(STORAGE_ADMIN);
@@ -68,6 +76,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   if (!checked || !admin || !token) {
+    return <main className="pos-shell" />;
+  }
+
+  if (!canAccessPath(admin.role, pathname)) {
     return <main className="pos-shell" />;
   }
 

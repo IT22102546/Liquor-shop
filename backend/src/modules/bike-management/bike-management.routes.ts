@@ -3,11 +3,17 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import crypto from "crypto";
-import { authenticatePosAdmin } from "../../common/middleware/pos-auth.middleware";
+import { authenticatePosAdmin, authorizePosRoles } from "../../common/middleware/pos-auth.middleware";
 import * as ctrl from "./bike-management.controller";
 
 const router = Router();
 router.use(authenticatePosAdmin);
+
+const adminOnly = authorizePosRoles("ADMIN");
+const inventory = authorizePosRoles("ADMIN", "INVENTORY_MANAGER");
+const inventoryAndAccounts = authorizePosRoles("ADMIN", "INVENTORY_MANAGER", "ACCOUNTANT");
+const productCatalog = authorizePosRoles("ADMIN", "CASHIER", "INVENTORY_MANAGER", "ACCOUNTANT");
+const sales = authorizePosRoles("ADMIN", "CASHIER");
 
 // ── Multer config for bike images ───────────────────────────────────────────
 // Use process.cwd() for reliable path resolution in both tsx and compiled modes
@@ -69,77 +75,77 @@ const productUpload = multer({
 });
 
 // ── Brands ─────────────────────────────────────────────────────────────────
-router.get(   "/brands",                 ctrl.getBrands);
-router.post(  "/brands",                 ctrl.createBrand);
-router.patch( "/brands/:id",             ctrl.updateBrand);
-router.delete("/brands/:id",             ctrl.deleteBrand);
+router.get(   "/brands",                 adminOnly, ctrl.getBrands);
+router.post(  "/brands",                 adminOnly, ctrl.createBrand);
+router.patch( "/brands/:id",             adminOnly, ctrl.updateBrand);
+router.delete("/brands/:id",             adminOnly, ctrl.deleteBrand);
 
 // ── Models ──────────────────────────────────────────────────────────────────
-router.get(   "/brands/:brandId/models", ctrl.getModels);
-router.post(  "/brands/:brandId/models", ctrl.createModel);
-router.get(   "/models",                 ctrl.getAllModels);
-router.patch( "/models/:id",             ctrl.updateModel);
-router.delete("/models/:id",             ctrl.deleteModel);
+router.get(   "/brands/:brandId/models", adminOnly, ctrl.getModels);
+router.post(  "/brands/:brandId/models", adminOnly, ctrl.createModel);
+router.get(   "/models",                 adminOnly, ctrl.getAllModels);
+router.patch( "/models/:id",             adminOnly, ctrl.updateModel);
+router.delete("/models/:id",             adminOnly, ctrl.deleteModel);
 
 // ── Colors ──────────────────────────────────────────────────────────────────
-router.get(   "/colors",                 ctrl.getColors);
-router.post(  "/colors",                 ctrl.createColor);
-router.patch( "/colors/:id",             ctrl.updateColor);
-router.delete("/colors/:id",             ctrl.deleteColor);
+router.get(   "/colors",                 adminOnly, ctrl.getColors);
+router.post(  "/colors",                 adminOnly, ctrl.createColor);
+router.patch( "/colors/:id",             adminOnly, ctrl.updateColor);
+router.delete("/colors/:id",             adminOnly, ctrl.deleteColor);
 
 // ── Suppliers ───────────────────────────────────────────────────────────────
-router.get(   "/suppliers",              ctrl.getSuppliers);
-router.post(  "/suppliers",              ctrl.createSupplier);
-router.patch( "/suppliers/:id",          ctrl.updateSupplier);
-router.delete("/suppliers/:id",          ctrl.deleteSupplier);
+router.get(   "/suppliers",              inventory, ctrl.getSuppliers);
+router.post(  "/suppliers",              inventory, ctrl.createSupplier);
+router.patch( "/suppliers/:id",          inventory, ctrl.updateSupplier);
+router.delete("/suppliers/:id",          inventory, ctrl.deleteSupplier);
 
 // ── Inventory Product Brands & Categories ──────────────────────────────────
-router.get(   "/product-brands",         ctrl.getProductBrands);
-router.post(  "/product-brands",         ctrl.createProductBrand);
-router.patch( "/product-brands/:id",     ctrl.updateProductBrand);
-router.delete("/product-brands/:id",     ctrl.deleteProductBrand);
+router.get(   "/product-brands",         productCatalog, ctrl.getProductBrands);
+router.post(  "/product-brands",         inventory, ctrl.createProductBrand);
+router.patch( "/product-brands/:id",     inventory, ctrl.updateProductBrand);
+router.delete("/product-brands/:id",     inventory, ctrl.deleteProductBrand);
 
-router.get(   "/product-categories",     ctrl.getProductCategories);
-router.post(  "/product-categories",     ctrl.createProductCategory);
-router.patch( "/product-categories/:id", ctrl.updateProductCategory);
-router.delete("/product-categories/:id", ctrl.deleteProductCategory);
+router.get(   "/product-categories",     productCatalog, ctrl.getProductCategories);
+router.post(  "/product-categories",     inventory, ctrl.createProductCategory);
+router.patch( "/product-categories/:id", inventory, ctrl.updateProductCategory);
+router.delete("/product-categories/:id", inventory, ctrl.deleteProductCategory);
 
 // ── Inventory Products ──────────────────────────────────────────────────────
-router.get(   "/products",               ctrl.getProducts);
-router.get(   "/products/health",        ctrl.getInventoryHealth);
-router.get(   "/products/:id",           ctrl.getProduct);
-router.post(  "/products",               ctrl.createProduct);
-router.patch( "/products/:id",           ctrl.updateProduct);
-router.post(  "/products/:id/sell",      ctrl.recordProductSale);
-router.delete("/products/:id",           ctrl.deleteProduct);
+router.get(   "/products",               productCatalog, ctrl.getProducts);
+router.get(   "/products/health",        inventoryAndAccounts, ctrl.getInventoryHealth);
+router.get(   "/products/:id",           inventoryAndAccounts, ctrl.getProduct);
+router.post(  "/products",               inventory, ctrl.createProduct);
+router.patch( "/products/:id",           inventory, ctrl.updateProduct);
+router.post(  "/products/:id/sell",      sales, ctrl.recordProductSale);
+router.delete("/products/:id",           inventory, ctrl.deleteProduct);
 
 // ── Vehicles ────────────────────────────────────────────────────────────────
-router.get(   "/vehicles/summary",       ctrl.getVehicleSummary);
-router.get(   "/vehicles/filenos",       ctrl.getFileNos);
-router.patch( "/vehicles/filenos",       ctrl.renameFileNo);
-router.delete("/vehicles/filenos",       ctrl.deleteFileNo);
-router.get(   "/vehicles",               ctrl.getVehicles);
-router.get(   "/vehicles/:id",           ctrl.getVehicle);
-router.post(  "/vehicles",               ctrl.createVehicle);
-router.post(  "/vehicles/bulk",          ctrl.bulkCreateVehicles);
-router.patch( "/vehicles/:id",           ctrl.updateVehicle);
-router.delete("/vehicles/:id",           ctrl.deleteVehicle);
+router.get(   "/vehicles/summary",       adminOnly, ctrl.getVehicleSummary);
+router.get(   "/vehicles/filenos",       adminOnly, ctrl.getFileNos);
+router.patch( "/vehicles/filenos",       adminOnly, ctrl.renameFileNo);
+router.delete("/vehicles/filenos",       adminOnly, ctrl.deleteFileNo);
+router.get(   "/vehicles",               adminOnly, ctrl.getVehicles);
+router.get(   "/vehicles/:id",           adminOnly, ctrl.getVehicle);
+router.post(  "/vehicles",               adminOnly, ctrl.createVehicle);
+router.post(  "/vehicles/bulk",          adminOnly, ctrl.bulkCreateVehicles);
+router.patch( "/vehicles/:id",           adminOnly, ctrl.updateVehicle);
+router.delete("/vehicles/:id",           adminOnly, ctrl.deleteVehicle);
 
 // ── Vehicle Expenses ────────────────────────────────────────────────────────
-router.get(   "/vehicles/:vehicleId/expenses",              ctrl.getExpenses);
-router.post(  "/vehicles/:vehicleId/expenses",              ctrl.addExpense);
-router.delete("/vehicles/:vehicleId/expenses/:expenseId",   ctrl.deleteExpense);
+router.get(   "/vehicles/:vehicleId/expenses",              adminOnly, ctrl.getExpenses);
+router.post(  "/vehicles/:vehicleId/expenses",              adminOnly, ctrl.addExpense);
+router.delete("/vehicles/:vehicleId/expenses/:expenseId",   adminOnly, ctrl.deleteExpense);
 
 // ── Vehicle Images ──────────────────────────────────────────────────────────
-router.get(   "/vehicles/:vehicleId/images",                ctrl.getVehicleImages);
-router.post(  "/vehicles/:vehicleId/images",  upload.array("images", MAX_IMAGE_COUNT), ctrl.uploadVehicleImages);
-router.delete("/vehicles/:vehicleId/images/:imageId",       ctrl.deleteVehicleImage);
-router.patch( "/vehicles/:vehicleId/images/:imageId/primary", ctrl.setPrimaryImage);
+router.get(   "/vehicles/:vehicleId/images",                adminOnly, ctrl.getVehicleImages);
+router.post(  "/vehicles/:vehicleId/images", adminOnly, upload.array("images", MAX_IMAGE_COUNT), ctrl.uploadVehicleImages);
+router.delete("/vehicles/:vehicleId/images/:imageId",       adminOnly, ctrl.deleteVehicleImage);
+router.patch( "/vehicles/:vehicleId/images/:imageId/primary", adminOnly, ctrl.setPrimaryImage);
 
 // ── Product Images ──────────────────────────────────────────────────────────
-router.get(   "/products/:productId/images",                      ctrl.getProductImages);
-router.post(  "/products/:productId/images", productUpload.array("images", MAX_PRODUCT_IMAGE_COUNT), ctrl.uploadProductImages);
-router.delete("/products/:productId/images/:imageId",             ctrl.deleteProductImage);
-router.patch( "/products/:productId/images/:imageId/primary",     ctrl.setPrimaryProductImage);
+router.get(   "/products/:productId/images",                      inventory, ctrl.getProductImages);
+router.post(  "/products/:productId/images", inventory, productUpload.array("images", MAX_PRODUCT_IMAGE_COUNT), ctrl.uploadProductImages);
+router.delete("/products/:productId/images/:imageId",             inventory, ctrl.deleteProductImage);
+router.patch( "/products/:productId/images/:imageId/primary",     inventory, ctrl.setPrimaryProductImage);
 
 export default router;

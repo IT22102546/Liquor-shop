@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useTheme } from "./ThemeProvider";
 import { useAdmin } from "./AdminContext";
 import { API_URL } from "../lib/constants";
+import { ROLE_LABELS } from "../lib/roles";
 import {
   IconSun,
   IconMoon,
@@ -22,13 +23,6 @@ type LowStockNotification = {
   title: string;
   message: string;
   href: string;
-  type: "bike" | "inventory";
-};
-
-type BikeVehicleAlert = {
-  id: number;
-  brand: { name: string };
-  model: { id: number; name: string; lowStockThreshold?: number | null };
 };
 
 type InventoryProductAlert = {
@@ -40,6 +34,7 @@ type InventoryProductAlert = {
 
 const BREADCRUMBS: Record<string, string> = {
   "/dashboard":            "Dashboard",
+  "/dashboard/staff":      "Staff & Role Management",
   "/dashboard/users":     "User Management",
   "/dashboard/users/history": "User Management - User History",
   "/dashboard/invoices":  "Invoice Management",
@@ -123,60 +118,26 @@ export function Topbar() {
     const loadNotifications = async () => {
       try {
         const auth = { Authorization: `Bearer ${token}` };
-        const [bikeResponse, inventoryResponse] = await Promise.all([
-          fetch(`${API_URL}/api/pos/bike-management/vehicles?status=available&page=1&limit=5000`, { headers: auth, cache: "no-store" }),
-          fetch(`${API_URL}/api/pos/bike-management/products?limit=5000`, { headers: auth, cache: "no-store" }),
-        ]);
+        const inventoryResponse = await fetch(`${API_URL}/api/pos/bike-management/products?limit=5000`, { headers: auth, cache: "no-store" });
 
-        if ([bikeResponse.status, inventoryResponse.status].some((status) => status === 401 || status === 403)) {
+        if (inventoryResponse.status === 401 || inventoryResponse.status === 403) {
           logout();
           return;
         }
 
-        const [bikePayload, inventoryPayload] = await Promise.all([
-          bikeResponse.json(),
-          inventoryResponse.json(),
-        ]) as [
-          { data?: { vehicles?: BikeVehicleAlert[] } },
-          { data?: { products?: InventoryProductAlert[] } },
-        ];
-
-        const bikeVehicles = bikePayload.data?.vehicles ?? [];
-        const bikeGroups = new Map<string, { brandName: string; modelName: string; count: number; threshold: number }>();
-        for (const vehicle of bikeVehicles) {
-          const key = `${vehicle.brand.name}_${vehicle.model.id}`;
-          const existing = bikeGroups.get(key) ?? {
-            brandName: vehicle.brand.name,
-            modelName: vehicle.model.name,
-            count: 0,
-            threshold: vehicle.model.lowStockThreshold ?? 1,
-          };
-          existing.count += 1;
-          bikeGroups.set(key, existing);
-        }
-
-        const bikeNotifications: LowStockNotification[] = Array.from(bikeGroups.entries())
-          .filter(([, group]) => group.threshold > 0 && group.count <= group.threshold)
-          .map(([key, group]) => ({
-            id: `bike-${key}`,
-            type: "bike",
-            title: `${group.brandName} ${group.modelName}`,
-            message: `Only ${group.count} bikes left. Alert level: ${group.threshold}`,
-            href: "/dashboard/inventory",
-          }));
+        const inventoryPayload = await inventoryResponse.json() as { data?: { products?: InventoryProductAlert[] } };
 
         const inventoryNotifications: LowStockNotification[] = (inventoryPayload.data?.products ?? [])
           .filter((product) => (product.lowStockThreshold ?? 0) > 0 && product.quantity <= (product.lowStockThreshold ?? 0))
           .map((product) => ({
             id: `inventory-${product.id}`,
-            type: "inventory",
             title: product.name,
             message: `Only ${product.quantity} units left. Alert level: ${product.lowStockThreshold}`,
             href: "/dashboard/inventory",
           }));
 
         if (alive) {
-          const nextNotifications = [...bikeNotifications, ...inventoryNotifications];
+          const nextNotifications = inventoryNotifications;
           setNotifications(nextNotifications);
           setReadNotificationIds((current) => current.filter((id) => nextNotifications.some((notification) => notification.id === id)));
           setDeletedNotificationIds((current) => current.filter((id) => nextNotifications.some((notification) => notification.id === id)));
@@ -225,10 +186,12 @@ export function Topbar() {
           <IconChevronNav />
           <span className="topbar-breadcrumb-page">{pageLabel}</span>
         </div>
-        <div className="topbar-search">
-          <IconSearch />
-          <input type="text" placeholder="Search anything…" />
-        </div>
+        {pathname !== "/dashboard/inventory" && (
+          <div className="topbar-search">
+            <IconSearch />
+            <input type="text" placeholder="Search anything…" />
+          </div>
+        )}
       </div>
 
       {clockTime && (
@@ -275,7 +238,7 @@ export function Topbar() {
                       >
                         <div className="topbar-notification-item-head">
                           <strong className="topbar-notification-title">{notification.title}</strong>
-                          <span className={`badge ${notification.type === "bike" ? "badge-pending" : "badge-warning"}`}>{notification.type === "bike" ? "Bike" : "Inventory"}</span>
+                          <span className="badge badge-warning">Product</span>
                         </div>
                         <span className="topbar-notification-message">{notification.message}</span>
                         <div className="topbar-notification-footer">
@@ -321,7 +284,7 @@ export function Topbar() {
           <div className="admin-avatar">{admin.name.charAt(0).toUpperCase()}</div>
           <div className="admin-info">
             <span className="admin-name">{admin.name}</span>
-            <span className="admin-role">Administrator</span>
+            <span className="admin-role">{ROLE_LABELS[admin.role] ?? "Staff"}</span>
           </div>
           <IconChevronDown />
         </div>

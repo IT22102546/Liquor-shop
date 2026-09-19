@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import {
-  Fragment,
   useCallback,
   useEffect,
   useMemo,
@@ -11,10 +10,7 @@ import {
 } from "react";
 import { useAdmin } from "../../components/AdminContext";
 import { API_URL } from "../../lib/constants";
-import { exportTableToPdf } from "../../lib/pdf-export";
-import { IconActivity, IconInventory, IconInvoice, IconSupplier } from "../../lib/icons";
-import CustomerPurchaseModal from "../../components/CustomerPurchaseModal";
-import TablePagination, { paginateRows } from "../../components/TablePagination";
+import { IconInventory } from "../../lib/icons";
 
 type ProductBrand = { id: number; name: string; _count?: { products: number } };
 type ProductCategory = {
@@ -71,6 +67,16 @@ type Product = {
   images?: ProductImage[];
   createdAt: string;
 };
+type CartLine = { product: Product; quantity: number };
+type CompletedReceipt = {
+  invoiceNumber: string;
+  lines: Array<{ name: string; quantity: number; unitPrice: number; total: number }>;
+  paymentMethod: "CASH" | "BANK_TRANSFER";
+  total: number;
+  amountReceived: number;
+  change: number;
+  completedAt: string;
+};
 type SupplierFormState = {
   name: string;
   contactPerson: string;
@@ -116,6 +122,38 @@ function formatCurrency(value: number | undefined) {
   }
 
   return `Rs. ${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function roundCurrency(value: number) {
+  return Math.round(value * 100) / 100;
+}
+
+function escapeReceiptText(value: string) {
+  return value.replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
+  })[character] ?? character);
+}
+
+function printReceipt(receipt: CompletedReceipt) {
+  const frame = document.createElement("iframe");
+  frame.setAttribute("aria-hidden", "true");
+  Object.assign(frame.style, { position: "fixed", right: "0", bottom: "0", width: "0", height: "0", border: "0" });
+  const rows = receipt.lines.map((line) => `
+    <tr><td>${escapeReceiptText(line.name)}<br><small>${line.quantity} × Rs. ${line.unitPrice.toFixed(2)}</small></td><td>Rs. ${line.total.toFixed(2)}</td></tr>
+  `).join("");
+  frame.srcdoc = `<!doctype html><html><head><title>${escapeReceiptText(receipt.invoiceNumber)}</title><style>
+    @page{size:80mm auto;margin:4mm}*{box-sizing:border-box}body{width:72mm;margin:0;font:12px Arial,sans-serif;color:#000}.center{text-align:center}h1{margin:0;font-size:18px}p{margin:3px 0}.rule{border-top:1px dashed #000;margin:9px 0}table{width:100%;border-collapse:collapse}td{padding:5px 0;vertical-align:top}td:last-child{text-align:right;white-space:nowrap}.total{font-size:16px;font-weight:700}.summary{display:flex;justify-content:space-between;margin:5px 0}.thanks{margin-top:12px;font-weight:700}small{font-size:10px}
+  </style></head><body><div class="center"><h1>BAR SHOP</h1><p>No:154, Puttalam Road, Kurunegala</p><p>${escapeReceiptText(receipt.invoiceNumber)}</p><p>${new Date(receipt.completedAt).toLocaleString()}</p></div><div class="rule"></div><table>${rows}</table><div class="rule"></div><div class="summary total"><span>TOTAL</span><span>Rs. ${receipt.total.toFixed(2)}</span></div><div class="summary"><span>Payment</span><span>${receipt.paymentMethod === "CASH" ? "Cash" : "Card / Transfer"}</span></div>${receipt.paymentMethod === "CASH" ? `<div class="summary"><span>Cash received</span><span>Rs. ${receipt.amountReceived.toFixed(2)}</span></div><div class="summary"><span>Change</span><span>Rs. ${receipt.change.toFixed(2)}</span></div>` : ""}<div class="rule"></div><p class="center thanks">Thank you!</p></body></html>`;
+  frame.onload = () => {
+    frame.contentWindow?.focus();
+    frame.contentWindow?.print();
+    window.setTimeout(() => frame.remove(), 1000);
+  };
+  document.body.appendChild(frame);
 }
 
 function getDisplayDescriptionPoints(value?: string) {
@@ -706,8 +744,8 @@ function ProductModal({
         </button>
         <h3 className="bm-modal-title">
           {isEdit
-            ? `Edit Spare Part — ${product?.displayId}`
-            : "Add Spare Part"}
+            ? `Edit Product — ${product?.displayId}`
+            : "Add Product"}
         </h3>
         {error && <div className="bm-alert bm-alert-error">{error}</div>}
         <form className="bm-modal-form" onSubmit={submit}>
@@ -803,37 +841,37 @@ function ProductModal({
             </div>
 
             <div className="bm-field-group">
-              <label>Spare Part Name *</label>
+              <label>Product Name *</label>
               <input
                 className="bm-input"
                 value={form.name}
                 onChange={setEvent("name")}
-                placeholder="Enter product / spare part name"
+                placeholder="e.g. Lion Lager 330ml"
               />
             </div>
 
             <div className="bm-field-group">
-              <label>Part Number / OEM Code</label>
+              <label>SKU / Barcode</label>
               <input
                 className="bm-input"
                 value={form.partNumber}
                 onChange={setEvent("partNumber")}
-                placeholder="e.g. YZF-R15-CAM-001"
+                placeholder="e.g. 4792021001234"
               />
             </div>
 
             <div className="bm-field-group">
-              <label>Drink Style / Serving Notes</label>
+              <label>Size / Serving Notes</label>
               <input
                 className="bm-input"
                 value={form.compatibleWith}
                 onChange={setEvent("compatibleWith")}
-                placeholder="e.g. Yamaha R15 V3, Yamaha MT-15"
+                placeholder="e.g. 330ml bottle, serve chilled"
               />
             </div>
 
             <div className="bm-field-group">
-              <label>Quantity / Pieces *</label>
+              <label>Opening Stock *</label>
               <input
                 className="bm-input"
                 type="number"
@@ -844,7 +882,7 @@ function ProductModal({
               />
               {pricingUnitCount <= 0 && (
                 <span style={{ fontSize: 12, color: "var(--text-soft)" }}>
-                  Enter the number of pieces to preview the per-piece cost.
+                  Enter the number of units to preview the cost per unit.
                 </span>
               )}
             </div>
@@ -889,16 +927,16 @@ function ProductModal({
               <span style={{ fontSize: 12, color: "var(--text-soft)" }}>
                 Enter purchase price, tax, and additional expenses as the total
                 for the full stock set. The system will divide and save the
-                per-piece cost automatically, while selling price stays per
-                piece.
+                per-unit cost automatically, while selling price stays per
+                unit.
                 {pricingUnitCount > 0
-                  ? ` Current pricing batch: ${pricingUnitCount} piece${pricingUnitCount > 1 ? "s" : ""}.`
+                  ? ` Current pricing batch: ${pricingUnitCount} unit${pricingUnitCount > 1 ? "s" : ""}.`
                   : ""}
               </span>
             </div>
 
             <div className="bm-field-group">
-              <label>Selling Price (per piece)</label>
+              <label>Selling Price (per unit)</label>
               <input
                 className="bm-input"
                 type="number"
@@ -911,7 +949,7 @@ function ProductModal({
             </div>
 
             <div className="bm-field-group">
-              <label>Purchase Price (total for all pieces)</label>
+              <label>Purchase Price (batch total)</label>
               <input
                 className="bm-input"
                 type="number"
@@ -923,13 +961,13 @@ function ProductModal({
               />
               {perPiecePurchasePrice !== undefined && (
                 <span style={{ fontSize: 12, color: "var(--text-soft)" }}>
-                  Per piece: {formatCurrency(perPiecePurchasePrice)}
+                  Per unit: {formatCurrency(perPiecePurchasePrice)}
                 </span>
               )}
             </div>
 
             <div className="bm-field-group">
-              <label>Tax Paid (total for all pieces)</label>
+              <label>Tax Paid (batch total)</label>
               <input
                 className="bm-input"
                 type="number"
@@ -941,7 +979,7 @@ function ProductModal({
               />
               {perPieceTaxPaid !== undefined && (
                 <span style={{ fontSize: 12, color: "var(--text-soft)" }}>
-                  Per piece: {formatCurrency(perPieceTaxPaid)}
+                  Per unit: {formatCurrency(perPieceTaxPaid)}
                 </span>
               )}
             </div>
@@ -1011,7 +1049,7 @@ function ProductModal({
                 }}
               >
                 <label style={{ margin: 0 }}>
-                  Additional Expenses (total for all pieces)
+                  Additional Expenses (batch total)
                   {expenses.length > 0 && (
                     <span
                       style={{
@@ -1020,7 +1058,7 @@ function ProductModal({
                         color: "var(--text-soft)",
                       }}
                     >
-                      {` (Batch total: ${formatCurrency(totalAdditionalExpenses)}${perPieceAdditionalExpenses !== undefined ? ` · Per piece: ${formatCurrency(perPieceAdditionalExpenses)}` : ""})`}
+                      {` (Batch total: ${formatCurrency(totalAdditionalExpenses)}${perPieceAdditionalExpenses !== undefined ? ` · Per unit: ${formatCurrency(perPieceAdditionalExpenses)}` : ""})`}
                     </span>
                   )}
                 </label>
@@ -1119,31 +1157,6 @@ function ProductModal({
         />
       )}
     </div>
-  );
-}
-
-function RecordSaleModal({
-  product,
-  token,
-  onClose,
-  onSaved,
-}: {
-  product: Product;
-  token: string;
-  onClose: () => void;
-  onSaved: () => void;
-}) {
-  return (
-    <CustomerPurchaseModal
-      token={token}
-      itemType="INVENTORY"
-      itemId={product.id}
-      itemLabel={`${product.displayId} | ${product.name} (${product.brand.name})`}
-      currentSellingPrice={product.sellingPrice}
-      maxQuantity={product.quantity}
-      onClose={onClose}
-      onSaved={onSaved}
-    />
   );
 }
 
@@ -1308,20 +1321,20 @@ function ViewProductModal({
 
           <div className="bm-view-right">
             <div className="bm-view-section">
-              <h4 className="bm-view-section-title">Spare Part Information</h4>
+              <h4 className="bm-view-section-title">Product Information</h4>
               <div className="bm-view-detail-grid">
                 <div className="bm-view-detail">
-                  <span className="bm-view-detail-label">Part Name</span>
+                  <span className="bm-view-detail-label">Product Name</span>
                   <span className="bm-view-detail-value">{detail.name}</span>
                 </div>
                 <div className="bm-view-detail">
-                  <span className="bm-view-detail-label">Part Number</span>
+                  <span className="bm-view-detail-label">SKU / Barcode</span>
                   <span className="bm-view-detail-value">
                     {detail.partNumber ?? "—"}
                   </span>
                 </div>
                 <div className="bm-view-detail">
-                  <span className="bm-view-detail-label">Compatible With</span>
+                  <span className="bm-view-detail-label">Size / Serving Notes</span>
                   <span className="bm-view-detail-value">
                     {detail.compatibleWith ?? "—"}
                   </span>
@@ -1368,7 +1381,7 @@ function ViewProductModal({
                 }}
               >
                 Purchase price, tax, and extra expenses are shown as the
-                per-piece cost for this stock batch ({pricingUnitCount} piece
+                per-unit cost for this stock batch ({pricingUnitCount} unit
                 {pricingUnitCount > 1 ? "s" : ""}).
               </p>
               <div className="bm-view-detail-grid">
@@ -1400,7 +1413,7 @@ function ViewProductModal({
                 </div>
                 <div className="bm-view-detail">
                   <span className="bm-view-detail-label">
-                    Selling Price / Piece
+                    Selling Price / Unit
                   </span>
                   <span className="bm-view-detail-value bm-view-price bm-view-price-highlight">
                     {detail.sellingPrice != null
@@ -1488,25 +1501,20 @@ function ViewProductModal({
 }
 
 export default function InventoryPage() {
-  const { token, logout } = useAdmin();
-  const [brands, setBrands] = useState<ProductBrand[]>([]);
+  const { admin, token, logout } = useAdmin();
   const [categories, setCategories] = useState<ProductCategory[]>([]);
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
-  const [expanded, setExpanded] = useState<Record<number, boolean>>({});
-  const [showProductModal, setShowProductModal] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [viewProduct, setViewProduct] = useState<Product | null>(null);
-  const [saleProduct, setSaleProduct] = useState<Product | null>(null);
-  const [alertProduct, setAlertProduct] = useState<Product | null>(null);
-  const [alertEnabled, setAlertEnabled] = useState(false);
-  const [alertThreshold, setAlertThreshold] = useState("");
-  const [savingAlert, setSavingAlert] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<number | "all">("all");
+  const [cart, setCart] = useState<CartLine[]>([]);
+  const [paymentMethod, setPaymentMethod] = useState<"CASH" | "BANK_TRANSFER">("CASH");
+  const [amountTendered, setAmountTendered] = useState("");
+  const [checkingOut, setCheckingOut] = useState(false);
+  const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
+  const [completedReceipt, setCompletedReceipt] = useState<CompletedReceipt | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const base = `${API_URL}/api/pos/bike-management`;
   const auth = { Authorization: `Bearer ${token}` };
@@ -1515,58 +1523,34 @@ export default function InventoryPage() {
     setLoading(true);
     setError(null);
     try {
-      const searchParam = search.trim()
-        ? `&search=${encodeURIComponent(search.trim())}`
-        : "";
-      const [
-        brandResponse,
-        categoryResponse,
-        supplierResponse,
-        productResponse,
-      ] = await Promise.all([
-        fetch(`${base}/product-brands`, { headers: auth }),
+      const [categoryResponse, productResponse] = await Promise.all([
         fetch(`${base}/product-categories`, { headers: auth }),
-        fetch(`${base}/suppliers`, { headers: auth }),
-        fetch(`${base}/products?limit=5000${searchParam}`, { headers: auth }),
+        fetch(`${base}/products?limit=5000`, { headers: auth }),
       ]);
 
-      const [brandPayload, categoryPayload, supplierPayload, productPayload] =
-        (await Promise.all([
-          brandResponse.json(),
+      const [categoryPayload, productPayload] = (await Promise.all([
           categoryResponse.json(),
-          supplierResponse.json(),
           productResponse.json(),
         ])) as [
-          { data?: ProductBrand[]; message?: string },
           { data?: ProductCategory[]; message?: string },
-          { data?: Supplier[]; message?: string },
           { data?: { products?: Product[] }; message?: string },
         ];
 
       if (
-        [
-          brandResponse.status,
-          categoryResponse.status,
-          supplierResponse.status,
-          productResponse.status,
-        ].some((status) => status === 401 || status === 403)
+        [categoryResponse.status, productResponse.status].some(
+          (status) => status === 401 || status === 403,
+        )
       ) {
         logout();
         throw new Error("Session expired. Please sign in again.");
       }
 
-      if (!brandResponse.ok)
-        throw new Error(brandPayload.message ?? "Failed to load brands");
       if (!categoryResponse.ok)
         throw new Error(categoryPayload.message ?? "Failed to load categories");
-      if (!supplierResponse.ok)
-        throw new Error(supplierPayload.message ?? "Failed to load suppliers");
       if (!productResponse.ok)
         throw new Error(productPayload.message ?? "Failed to load products");
 
-      setBrands(brandPayload.data ?? []);
       setCategories(categoryPayload.data ?? []);
-      setSuppliers(supplierPayload.data ?? []);
       setProducts(productPayload.data?.products ?? []);
     } catch (err) {
       setError(
@@ -1576,165 +1560,126 @@ export default function InventoryPage() {
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, search]);
+  }, [token]);
 
   useEffect(() => {
     void loadData();
   }, [loadData]);
 
-  const groupedProducts = useMemo(() => {
-    const sortedProducts = [...products].sort((left, right) => {
-      const byCategory = left.category.name.localeCompare(right.category.name);
-      if (byCategory !== 0) return byCategory;
-      const byBrand = left.brand.name.localeCompare(right.brand.name);
-      if (byBrand !== 0) return byBrand;
-      return left.name.localeCompare(right.name);
-    });
-
-    const groups = new Map<
-      number,
-      { categoryName: string; products: Product[]; brandIds: Set<number> }
-    >();
-    for (const product of sortedProducts) {
-      const current = groups.get(product.category.id) ?? {
-        categoryName: product.category.name,
-        products: [],
-        brandIds: new Set<number>(),
-      };
-      current.products.push(product);
-      current.brandIds.add(product.brand.id);
-      groups.set(product.category.id, current);
-    }
-
-    return Array.from(groups.entries()).map(([categoryId, group]) => ({
-      categoryId,
-      categoryName: group.categoryName,
-      count: group.products.length,
-      brandCount: group.brandIds.size,
-      totalQty: group.products.reduce(
-        (sum, product) => sum + product.quantity,
-        0,
-      ),
-      soldQty: group.products.reduce(
-        (sum, product) => sum + (product.soldQuantity ?? 0),
-        0,
-      ),
-      supplierCount: group.products.filter((product) => product.supplier)
-        .length,
-      lowStockCount: group.products.filter(
-        (product) =>
-          (product.lowStockThreshold ?? 0) > 0 &&
-          product.quantity <= (product.lowStockThreshold ?? 0),
-      ).length,
-      products: group.products,
-    }));
-  }, [products]);
-  const pagedProductGroups = useMemo(() => paginateRows(groupedProducts, page, pageSize), [groupedProducts, page, pageSize]);
-  useEffect(() => { setPage(1); }, [search, pageSize]);
-
-  const totalQty = products.reduce((sum, product) => sum + product.quantity, 0);
-  const totalSoldQty = products.reduce(
-    (sum, product) => sum + (product.soldQuantity ?? 0),
-    0,
-  );
-  const soldProductCount = products.filter(
-    (product) => (product.soldQuantity ?? 0) > 0,
-  ).length;
   const lowStockProducts = products.filter(
     (product) =>
       (product.lowStockThreshold ?? 0) > 0 &&
       product.quantity <= (product.lowStockThreshold ?? 0),
   );
   const lowStockCount = lowStockProducts.length;
+  const visibleProducts = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    return products
+      .filter(
+        (product) =>
+          product.quantity > 0 &&
+          product.sellingPrice != null &&
+          (categoryFilter === "all" || product.category.id === categoryFilter) &&
+          (!needle || [
+            product.name,
+            product.brand.name,
+            product.category.name,
+            product.partNumber,
+            product.compatibleWith,
+          ].some((value) => value?.toLowerCase().includes(needle))),
+      )
+      .sort((left, right) => {
+        if ((left.quantity > 0) !== (right.quantity > 0)) {
+          return left.quantity > 0 ? -1 : 1;
+        }
+        const categoryOrder = left.category.name.localeCompare(
+          right.category.name,
+        );
+        return categoryOrder || left.name.localeCompare(right.name);
+      });
+  }, [categoryFilter, products, search]);
+  const cartItemCount = cart.reduce((sum, line) => sum + line.quantity, 0);
+  const cartTotal = roundCurrency(
+    cart.reduce(
+      (sum, line) => sum + (line.product.sellingPrice ?? 0) * line.quantity,
+      0,
+    ),
+  );
+  const tendered = Number(amountTendered || "0");
+  const changeDue = paymentMethod === "CASH" && Number.isFinite(tendered)
+    ? Math.max(0, roundCurrency(tendered - cartTotal))
+    : 0;
 
-  const exportInventoryPdf = () => {
-    exportTableToPdf({
-      fileName: "inventory-available-report",
-      title: "Inventory Available Report",
-      subtitle: "All inventory items currently loaded in Inventory tab",
-      rows: products,
-      columns: [
-        { header: "Display ID", value: (product) => product.displayId },
-        { header: "Product Name", value: (product) => product.name },
-        { header: "Category", value: (product) => product.category.name },
-        { header: "Brand", value: (product) => product.brand.name },
-        { header: "Supplier", value: (product) => product.supplier ? `${product.supplier.name} (${product.supplier.code})` : "-" },
-        { header: "In Stock", value: (product) => product.quantity },
-        { header: "Sold Qty", value: (product) => product.soldQuantity ?? 0 },
-        { header: "Purchase Price", value: (product) => product.purchasePrice ?? "-" },
-        { header: "Tax Paid", value: (product) => product.taxPaid ?? "-" },
-        { header: "Additional Expenses", value: (product) => product.additionalExpenses ?? "-" },
-        { header: "Selling Price", value: (product) => product.sellingPrice ?? "-" },
-        { header: "Low Stock Threshold", value: (product) => product.lowStockThreshold ?? 0 },
-        { header: "Last Sold At", value: (product) => product.lastSoldAt ? new Date(product.lastSoldAt).toLocaleString() : "-" },
-        { header: "Description", value: (product) => product.description ?? "-" },
-      ],
+  const addToCart = (product: Product) => {
+    if (product.quantity <= 0 || product.sellingPrice == null) return;
+    setCheckoutMessage(null);
+    setCart((current) => {
+      const existing = current.find((line) => line.product.id === product.id);
+      if (!existing) return [...current, { product, quantity: 1 }];
+      if (existing.quantity >= product.quantity) return current;
+      return current.map((line) => line.product.id === product.id ? { ...line, quantity: line.quantity + 1 } : line);
     });
+    window.setTimeout(() => searchInputRef.current?.focus(), 0);
   };
 
-  const removeProduct = async (id: number) => {
-    if (!window.confirm("Delete this inventory product?")) return;
-    const response = await fetch(`${base}/products/${id}`, {
-      method: "DELETE",
-      headers: auth,
-    });
-    if (!response.ok) {
-      const payload = (await response.json().catch(() => null)) as {
-        message?: string;
-      } | null;
-      setError(payload?.message ?? "Failed to delete product");
+  const changeCartQuantity = (productId: number, delta: number) => {
+    setCart((current) => current
+      .map((line) => line.product.id === productId
+        ? { ...line, quantity: Math.min(line.product.quantity, line.quantity + delta) }
+        : line)
+      .filter((line) => line.quantity > 0));
+    window.setTimeout(() => searchInputRef.current?.focus(), 0);
+  };
+
+  const checkout = async () => {
+    if (cart.length === 0) return;
+    if (paymentMethod === "CASH" && (!Number.isFinite(tendered) || tendered < cartTotal)) {
+      setError("Enter the cash received before completing the sale.");
       return;
     }
-    setProducts((current) => current.filter((product) => product.id !== id));
-  };
-
-  const openAlertEditor = (product: Product) => {
+    setCheckingOut(true);
     setError(null);
-    setAlertProduct(product);
-    setAlertEnabled((product.lowStockThreshold ?? 0) > 0);
-    setAlertThreshold(
-      (product.lowStockThreshold ?? 0) > 0
-        ? String(product.lowStockThreshold)
-        : "",
-    );
-  };
-
-  const saveAlertSettings = async () => {
-    if (!alertProduct) return;
-    if (
-      alertEnabled &&
-      (!alertThreshold.trim() || Number(alertThreshold) <= 0)
-    ) {
-      setError("Enter a stock count greater than 0 for the low stock alert.");
-      return;
-    }
-
-    setSavingAlert(true);
-    setError(null);
+    setCheckoutMessage(null);
     try {
-      const response = await fetch(`${base}/products/${alertProduct.id}`, {
-        method: "PATCH",
+      const response = await fetch(`${API_URL}/api/pos/user-management/checkout`, {
+        method: "POST",
         headers: { ...auth, "Content-Type": "application/json" },
         body: JSON.stringify({
-          lowStockThreshold:
-            alertEnabled && alertThreshold.trim() !== ""
-              ? Number(alertThreshold)
-              : 0,
+          items: cart.map((line) => ({
+            productId: line.product.id,
+            quantity: line.quantity,
+            unitPrice: line.product.sellingPrice ?? 0,
+          })),
+          paymentMethod,
         }),
       });
-      const payload = (await response.json().catch(() => null)) as {
-        message?: string;
-      } | null;
-      if (!response.ok) {
-        setError(payload?.message ?? "Failed to save low stock alert.");
-        return;
-      }
-      setAlertProduct(null);
+      const payload = await response.json().catch(() => null) as { data?: { invoiceGroupCode: string }; message?: string } | null;
+      if (!response.ok || !payload?.data) throw new Error(payload?.message ?? "Checkout failed");
+      const receipt: CompletedReceipt = {
+        invoiceNumber: payload.data.invoiceGroupCode,
+        lines: cart.map((line) => ({
+          name: line.product.name,
+          quantity: line.quantity,
+          unitPrice: line.product.sellingPrice ?? 0,
+          total: roundCurrency((line.product.sellingPrice ?? 0) * line.quantity),
+        })),
+        paymentMethod,
+        total: cartTotal,
+        amountReceived: paymentMethod === "CASH" ? tendered : cartTotal,
+        change: paymentMethod === "CASH" ? changeDue : 0,
+        completedAt: new Date().toISOString(),
+      };
+      setCheckoutMessage(`Sale complete · ${payload.data.invoiceGroupCode}`);
+      setCompletedReceipt(receipt);
+      setCart([]);
+      setAmountTendered("");
       await loadData();
-    } catch {
-      setError("Failed to save low stock alert.");
+      window.setTimeout(() => printReceipt(receipt), 100);
+      window.setTimeout(() => searchInputRef.current?.focus(), 1500);
+    } catch (checkoutError) {
+      setError(checkoutError instanceof Error ? checkoutError.message : "Checkout failed");
     } finally {
-      setSavingAlert(false);
+      setCheckingOut(false);
     }
   };
 
@@ -1746,388 +1691,145 @@ export default function InventoryPage() {
             <IconInventory />
           </div>
           <div>
-            <h2 className="page-title">Drinks & Products</h2>
+            <h2 className="page-title">Bar Counter</h2>
             <p className="page-subtitle">
-              Track drinks by category and brand, record sold counts,
-              manage part numbers and bike compatibility.
+              Tap products, check the order, and take payment.
             </p>
           </div>
         </div>
-        <button
-          type="button"
-          className="btn-accent"
-          onClick={() => {
-            setEditingProduct(null);
-            setShowProductModal(true);
-          }}
-        >
-          + Add Spare Part
-        </button>
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          gap: "0.75rem",
-          flexWrap: "wrap",
-          marginBottom: "1rem",
-        }}
-      >
-        <Link href="/dashboard/inventory" className="btn-accent">
-          Drink Inventory
-        </Link>
-        <Link href="/dashboard/inventory/sold" className="btn-outline">
-          Sold Drinks
-        </Link>
-        <Link href="/dashboard/inventory/manage" className="btn-outline">
-          Manage Data
-        </Link>
       </div>
 
       {error && <div className="bm-alert bm-alert-error">{error}</div>}
+      {checkoutMessage && (
+        <div className="pos-sale-success">
+          <span>✓ {checkoutMessage}</span>
+          {completedReceipt && <button type="button" onClick={() => printReceipt(completedReceipt)}>🖨 Print bill again</button>}
+        </div>
+      )}
 
-      <div className="bm-stats-grid">
-        <div className="bm-stat-card bm-stat-card-soft">
-          <div className="bm-stat-head">
-            <span className="bm-stat-icon">
-              <IconInventory />
-            </span>
-            <span className="bm-stat-label">Drinks & Products</span>
+      <div className="pos-register-layout">
+      <section className="pos-catalog" aria-label="Products available to sell">
+        <div className="pos-catalog-toolbar">
+          <div>
+            <h3>Products</h3>
+            <p>{visibleProducts.length} available · {lowStockCount} low stock</p>
           </div>
-          <strong className="bm-stat-value">{products.length}</strong>
-          <span className="bm-stat-sub">Active bar products</span>
-        </div>
-        <div className="bm-stat-card">
-          <div className="bm-stat-head">
-            <span className="bm-stat-icon">
-              <IconInvoice />
-            </span>
-            <span className="bm-stat-label">In Stock</span>
+          <div className="pos-catalog-search">
+            <input
+              ref={searchInputRef}
+              className="bm-input"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key !== "Enter") return;
+                const exactBarcode = products.find((product) => product.partNumber?.toLowerCase() === search.trim().toLowerCase() && product.quantity > 0 && product.sellingPrice != null);
+                const product = exactBarcode ?? (visibleProducts.length === 1 ? visibleProducts[0] : undefined);
+                if (product) { addToCart(product); setSearch(""); }
+              }}
+              placeholder="Scan barcode or search drinks"
+              aria-label="Search products"
+              autoFocus
+            />
+            <button type="button" className="pos-icon-action" onClick={() => void loadData()} aria-label="Refresh products">↻</button>
           </div>
-          <strong className="bm-stat-value">{totalQty}</strong>
-          <span className="bm-stat-sub">Units currently available</span>
         </div>
-        <div className="bm-stat-card bm-stat-card-soft">
-          <div className="bm-stat-head">
-            <span className="bm-stat-icon">
-              <IconActivity />
-            </span>
-            <span className="bm-stat-label">Sold Units</span>
+
+        <div className="pos-category-tabs" aria-label="Filter products by category">
+          <button type="button" className={categoryFilter === "all" ? "active" : ""} onClick={() => setCategoryFilter("all")}>All products</button>
+          {categories.map((category) => (
+            <button key={category.id} type="button" className={categoryFilter === category.id ? "active" : ""} onClick={() => setCategoryFilter(category.id)}>
+              {category.name}
+            </button>
+          ))}
+        </div>
+
+        {loading && <div className="pos-catalog-empty">Loading products…</div>}
+        {!loading && visibleProducts.length === 0 && <div className="pos-catalog-empty">No products match this selection.</div>}
+        {!loading && visibleProducts.length > 0 && (
+          <div className="pos-product-grid">
+            {visibleProducts.map((product) => {
+              const primaryImage = (product.images ?? []).find((image) => image.isPrimary) ?? product.images?.[0];
+              const lowStock = (product.lowStockThreshold ?? 0) > 0 && product.quantity <= (product.lowStockThreshold ?? 0);
+              return (
+                <article key={product.id} className={`pos-product-card${product.quantity <= 0 ? " sold-out" : ""}`}>
+                  <button type="button" className="pos-product-image" onClick={() => addToCart(product)} aria-label={`Add ${product.name} to order`}>
+                    {primaryImage ? <img src={`${API_URL}${primaryImage.url}`} alt={product.name} /> : <span aria-hidden="true">🍺</span>}
+                    <span className="pos-product-category">{product.category.name}</span>
+                  </button>
+                  <div className="pos-product-body">
+                    <div className="pos-product-meta">{product.brand.name}{product.compatibleWith ? ` · ${product.compatibleWith}` : ""}</div>
+                    <h4>{product.name}</h4>
+                    <div className="pos-product-price">{product.sellingPrice != null ? formatCurrency(product.sellingPrice) : "Price not set"}</div>
+                    <div className="pos-product-stock-row">
+                      <span className={`pos-stock${lowStock ? " low" : ""}${product.quantity <= 0 ? " out" : ""}`}>
+                        {product.quantity > 0 ? `${product.quantity} in stock` : "Out of stock"}
+                      </span>
+                      {product.partNumber && <span className="pos-product-sku">{product.partNumber}</span>}
+                    </div>
+                    <button type="button" className="pos-sell-button" disabled={product.quantity <= 0 || product.sellingPrice == null} onClick={() => addToCart(product)}>
+                      {product.quantity <= 0 ? "Out of stock" : product.sellingPrice == null ? "Set price first" : cart.some((line) => line.product.id === product.id) ? "Add another" : "+ Add to order"}
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
           </div>
-          <strong className="bm-stat-value">{totalSoldQty}</strong>
-          <span className="bm-stat-sub">
-            Across {soldProductCount} sold products
-          </span>
+        )}
+      </section>
+
+      <aside className="pos-cart" aria-label="Current order">
+        <div className="pos-cart-header">
+          <div><span>Current order</span><strong>{cartItemCount} item{cartItemCount === 1 ? "" : "s"}</strong></div>
+          {cart.length > 0 && <button type="button" onClick={() => { setCart([]); setAmountTendered(""); }}>Clear</button>}
         </div>
-        <div className="bm-stat-card">
-          <div className="bm-stat-head">
-            <span className="bm-stat-icon">
-              <IconSupplier />
-            </span>
-            <span className="bm-stat-label">Low Stock</span>
+        <div className="pos-cart-lines">
+          {cart.length === 0 ? (
+            <div className="pos-cart-empty"><span>🛒</span><strong>No items yet</strong><p>Tap a product to add it here.</p></div>
+          ) : cart.map((line) => (
+            <div key={line.product.id} className="pos-cart-line">
+              <div className="pos-cart-line-main">
+                <strong>{line.product.name}</strong>
+                <span>{formatCurrency(line.product.sellingPrice)} each</span>
+              </div>
+              <div className="pos-cart-line-controls">
+                <button type="button" onClick={() => changeCartQuantity(line.product.id, -1)} aria-label={`Remove one ${line.product.name}`}>−</button>
+                <strong>{line.quantity}</strong>
+                <button type="button" onClick={() => changeCartQuantity(line.product.id, 1)} disabled={line.quantity >= line.product.quantity} aria-label={`Add one ${line.product.name}`}>+</button>
+              </div>
+              <span className="pos-cart-line-total">{formatCurrency((line.product.sellingPrice ?? 0) * line.quantity)}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="pos-cart-checkout">
+          <div className="pos-cart-total"><span>Total</span><strong>{formatCurrency(cartTotal)}</strong></div>
+          <div className="pos-payment-buttons" aria-label="Payment method">
+            <button type="button" className={paymentMethod === "CASH" ? "active" : ""} onClick={() => setPaymentMethod("CASH")}>💵 Cash</button>
+            <button type="button" className={paymentMethod === "BANK_TRANSFER" ? "active" : ""} onClick={() => { setPaymentMethod("BANK_TRANSFER"); setAmountTendered(""); }}>💳 Card / Transfer</button>
           </div>
-          <strong className="bm-stat-value">{lowStockCount}</strong>
-          <span className="bm-stat-sub">Threshold-based alerts</span>
+          {paymentMethod === "CASH" && cart.length > 0 && (
+            <div className="pos-cash-area">
+              <label>Cash received</label>
+              <input value={amountTendered} onChange={(event) => setAmountTendered(event.target.value)} inputMode="decimal" type="number" min={0} step="0.01" placeholder="0.00" />
+              <div className="pos-quick-cash">
+                {[cartTotal, Math.ceil(cartTotal / 100) * 100, Math.ceil(cartTotal / 500) * 500]
+                  .filter((value, index, values) => value > 0 && values.indexOf(value) === index)
+                  .map((value) => <button key={value} type="button" onClick={() => setAmountTendered(String(value))}>{formatCurrency(value)}</button>)}
+              </div>
+              <div className="pos-change"><span>Change</span><strong>{formatCurrency(changeDue)}</strong></div>
+            </div>
+          )}
+          <button type="button" className="pos-complete-sale" disabled={cart.length === 0 || checkingOut || (paymentMethod === "CASH" && tendered < cartTotal)} onClick={() => void checkout()}>
+            {checkingOut ? "Completing…" : `Complete sale · ${formatCurrency(cartTotal)}`}
+          </button>
+          <div className="pos-cart-shortcuts">
+            <Link href="/dashboard/inventory/sold">Recent sales</Link>
+            {admin.role === "ADMIN" && <Link href="/dashboard/inventory/manage">Product setup</Link>}
+          </div>
         </div>
+      </aside>
       </div>
 
-      <div className="bm-table-card">
-        <div style={{ padding: "1rem", borderBottom: "1px solid var(--panel-border)", display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }}>
-          <input className="bm-input" style={{ maxWidth: 420 }} value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by product, category, brand, supplier or description" />
-          <button type="button" className="btn-outline" onClick={() => void loadData()}>Refresh</button>
-          <button type="button" className="btn-outline" onClick={exportInventoryPdf}>Export PDF</button>
-        </div>
-        <div className="data-table-wrap">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th style={{ width: 70 }} />
-                <th>Category / Part</th>
-                <th>Brand</th>
-                <th>Part No.</th>
-                <th>Supplier</th>
-                <th>In Stock</th>
-                <th>Sold</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading && (
-                <tr>
-                  <td colSpan={8} className="bm-table-empty">
-                    Loading drinks and products...
-                  </td>
-                </tr>
-              )}
-              {!loading && groupedProducts.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="bm-table-empty">
-                    No drinks or products found.
-                  </td>
-                </tr>
-              )}
-              {!loading &&
-                pagedProductGroups.map((group) => (
-                  <Fragment key={group.categoryId}>
-                    <tr className="bm-group-row">
-                      <td>
-                        <button
-                          type="button"
-                          className="bm-expand-btn"
-                          onClick={() =>
-                            setExpanded((current) => ({
-                              ...current,
-                              [group.categoryId]: !current[group.categoryId],
-                            }))
-                          }
-                        >
-                          <span
-                            className={`bm-chevron ${expanded[group.categoryId] ? "open" : ""}`}
-                          >
-                            ⌄
-                          </span>
-                        </button>
-                      </td>
-                      <td>
-                        <span className="bm-vehicle-detail">
-                          {group.categoryName}
-                        </span>
-                        <span className="bm-vehicle-meta">
-                          {group.count} parts in this category
-                        </span>
-                      </td>
-                      <td>{group.brandCount} brands</td>
-                      <td>—</td>
-                      <td>{group.supplierCount} linked</td>
-                      <td>{group.totalQty}</td>
-                      <td>{group.soldQty}</td>
-                      <td>
-                        <span
-                          className={`badge ${group.lowStockCount > 0 ? "badge-warning" : "badge-active"}`}
-                        >
-                          {group.lowStockCount > 0
-                            ? `${group.lowStockCount} alert${group.lowStockCount > 1 ? "s" : ""}`
-                            : "Healthy"}
-                        </span>
-                      </td>
-                    </tr>
-                    {expanded[group.categoryId] &&
-                      group.products.map((product) => {
-                        const primaryImg =
-                          (product.images ?? []).find(
-                            (image) => image.isPrimary,
-                          ) ?? (product.images ?? [])[0];
-                        return (
-                          <tr key={product.id} className="bm-vehicle-row">
-                            <td>
-                              {primaryImg ? (
-                                <img
-                                  src={`${API_URL}${primaryImg.url}`}
-                                  alt=""
-                                  className="bm-row-thumb"
-                                />
-                              ) : (
-                                <span className="bm-row-thumb-empty">🖼️</span>
-                              )}
-                            </td>
-                            <td>
-                              <span className="bm-vehicle-detail">
-                                {product.name}
-                              </span>
-                              <span className="bm-vehicle-meta">
-                                {product.displayId} · {product.category.name}
-                              </span>
-                            </td>
-                            <td>{product.brand.name}</td>
-                            <td>
-                              {product.partNumber ? (
-                                <code style={{ fontSize: 12 }}>
-                                  {product.partNumber}
-                                </code>
-                              ) : (
-                                <em className="bm-missing">—</em>
-                              )}
-                            </td>
-                            <td>
-                              {product.supplier ? (
-                                `${product.supplier.name} (${product.supplier.code})`
-                              ) : (
-                                <em className="bm-missing">No supplier</em>
-                              )}
-                            </td>
-                            <td>
-                              <span
-                                className={`badge ${(product.lowStockThreshold ?? 0) > 0 && product.quantity <= (product.lowStockThreshold ?? 0) ? "badge-warning" : "badge-active"}`}
-                              >
-                                {product.quantity}
-                              </span>
-                            </td>
-                            <td>{product.soldQuantity ?? 0}</td>
-                            <td>
-                              <div className="bm-row-actions">
-                                <button
-                                  type="button"
-                                  className="bm-action-btn bm-view-btn"
-                                  onClick={() => setViewProduct(product)}
-                                >
-                                  View
-                                </button>
-                                <button
-                                  type="button"
-                                  className="bm-action-btn bm-save-btn"
-                                  disabled={product.quantity <= 0}
-                                  onClick={() => setSaleProduct(product)}
-                                >
-                                  Sell
-                                </button>
-                                <button
-                                  type="button"
-                                  className="bm-action-btn bm-edit-btn"
-                                  onClick={() => openAlertEditor(product)}
-                                >
-                                  Alert
-                                </button>
-                                <button
-                                  type="button"
-                                  className="bm-action-btn bm-edit-btn"
-                                  onClick={() => {
-                                    setEditingProduct(product);
-                                    setShowProductModal(true);
-                                  }}
-                                >
-                                  ✎
-                                </button>
-                                <button
-                                  type="button"
-                                  className="bm-action-btn bm-del-btn"
-                                  onClick={() => void removeProduct(product.id)}
-                                >
-                                  🗑
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    {expanded[group.categoryId] &&
-                      alertProduct &&
-                      group.products.some(
-                        (product) => product.id === alertProduct.id,
-                      ) && (
-                        <tr>
-                          <td colSpan={8}>
-                            <div className="bm-inline-confirm bm-setting-panel">
-                              <div className="bm-setting-panel-header">
-                                <strong>
-                                  {alertProduct.name} low stock setting
-                                </strong>
-                                <label className="bm-setting-toggle">
-                                  <input
-                                    type="checkbox"
-                                    checked={alertEnabled}
-                                    onChange={(event) => {
-                                      setAlertEnabled(event.target.checked);
-                                      if (!event.target.checked)
-                                        setAlertThreshold("");
-                                    }}
-                                  />
-                                  Enable alert
-                                </label>
-                              </div>
-                              {alertEnabled && (
-                                <input
-                                  className="bm-input"
-                                  style={{ maxWidth: 300 }}
-                                  type="number"
-                                  min={1}
-                                  placeholder="Show alert when stock reaches this number"
-                                  value={alertThreshold}
-                                  onChange={(event) =>
-                                    setAlertThreshold(event.target.value)
-                                  }
-                                />
-                              )}
-                              <div className="bm-setting-panel-actions">
-                                <button
-                                  type="button"
-                                  className="btn-accent"
-                                  onClick={() => void saveAlertSettings()}
-                                  disabled={savingAlert}
-                                >
-                                  {savingAlert ? "Saving..." : "Save Alert"}
-                                </button>
-                                <button
-                                  type="button"
-                                  className="btn-outline"
-                                  onClick={() => setAlertProduct(null)}
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                  </Fragment>
-                ))}
-            </tbody>
-          </table>
-        </div>
-        <TablePagination page={page} pageSize={pageSize} total={groupedProducts.length} onPageChange={setPage} onPageSizeChange={setPageSize} />
-      </div>
-
-      {showProductModal && (
-        <ProductModal
-          token={token}
-          brands={brands}
-          categories={categories}
-          suppliers={suppliers}
-          product={editingProduct}
-          onClose={() => {
-            setShowProductModal(false);
-            setEditingProduct(null);
-          }}
-          onSaved={() => void loadData()}
-          onBrandCreated={(brand) =>
-            setBrands((current) =>
-              [...current, brand].sort((left, right) =>
-                left.name.localeCompare(right.name),
-              ),
-            )
-          }
-          onCategoryCreated={(category) =>
-            setCategories((current) =>
-              [...current, category].sort((left, right) =>
-                left.name.localeCompare(right.name),
-              ),
-            )
-          }
-          onSupplierCreated={(supplier) =>
-            setSuppliers((current) =>
-              [...current, supplier].sort((left, right) =>
-                left.name.localeCompare(right.name),
-              ),
-            )
-          }
-          onAuthExpired={logout}
-        />
-      )}
-
-      {saleProduct && (
-        <RecordSaleModal
-          product={saleProduct}
-          token={token}
-          onClose={() => setSaleProduct(null)}
-          onSaved={() => void loadData()}
-        />
-      )}
-      {viewProduct && (
-        <ViewProductModal
-          product={viewProduct}
-          token={token}
-          onClose={() => setViewProduct(null)}
-        />
-      )}
     </div>
   );
 }

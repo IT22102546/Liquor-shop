@@ -14,6 +14,13 @@ enum Role {
   CUSTOMER
 }
 
+enum PosAdminRole {
+  ADMIN
+  CASHIER
+  INVENTORY_MANAGER
+  ACCOUNTANT
+}
+
 enum PosPurchaseItemType {
   BIKE
   INVENTORY
@@ -128,12 +135,30 @@ model PosAdmin {
   name        String
   email       String    @unique
   passwordHash String
+  role        PosAdminRole @default(ADMIN)
   isActive    Boolean   @default(true)
   lastLoginAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  counterSales PosCounterSale[]
 
   @@map("pos_admins")
+}
+
+model PosCounterSale {
+  id               Int           @id @default(autoincrement())
+  invoiceGroupCode String        @unique
+  totalAmount      Float
+  amountReceived   Float
+  changeGiven      Float
+  paymentMethod    PaymentMethod @default(CASH)
+  cashierId        Int
+  cashier          PosAdmin      @relation(fields: [cashierId], references: [id])
+  createdAt        DateTime      @default(now())
+
+  @@index([cashierId])
+  @@index([createdAt])
+  @@map("pos_counter_sales")
 }
 
 // ── Bike Management ───────────────────────────────────────────────

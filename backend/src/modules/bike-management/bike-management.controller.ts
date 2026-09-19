@@ -121,7 +121,35 @@ export async function deleteProductCategory(req: Request, res: Response, next: N
 }
 
 export async function getProducts(req: Request, res: Response, next: NextFunction) {
-  try { return sendSuccess(res, await service.listProducts(validate(productQuerySchema, req.query))); } catch (err) { return next(err); }
+  try {
+    const result = await service.listProducts(validate(productQuerySchema, req.query));
+    const role = (req as unknown as { user?: { role?: string } }).user?.role;
+    if (role !== "CASHIER") return sendSuccess(res, result);
+
+    return sendSuccess(res, {
+      ...result,
+      products: result.products.map((product) => ({
+        id: product.id,
+        displayId: product.displayId,
+        brandId: product.brandId,
+        categoryId: product.categoryId,
+        name: product.name,
+        partNumber: product.partNumber,
+        compatibleWith: product.compatibleWith,
+        quantity: product.quantity,
+        soldQuantity: product.soldQuantity,
+        lowStockThreshold: product.lowStockThreshold,
+        sellingPrice: product.sellingPrice,
+        description: product.description,
+        lastSoldAt: product.lastSoldAt,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt,
+        brand: product.brand,
+        category: product.category,
+        images: product.images,
+      })),
+    });
+  } catch (err) { return next(err); }
 }
 export async function getInventoryHealth(_req: Request, res: Response, next: NextFunction) {
   try { return sendSuccess(res, await service.getInventoryHealth()); } catch (err) { return next(err); }

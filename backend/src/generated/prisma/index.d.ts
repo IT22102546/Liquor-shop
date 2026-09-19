@@ -29,6 +29,11 @@ export type Bike = $Result.DefaultSelection<Prisma.$BikePayload>
  */
 export type PosAdmin = $Result.DefaultSelection<Prisma.$PosAdminPayload>
 /**
+ * Model PosCounterSale
+ * 
+ */
+export type PosCounterSale = $Result.DefaultSelection<Prisma.$PosCounterSalePayload>
+/**
  * Model BikeBrand
  * 
  */
@@ -202,6 +207,25 @@ export namespace $Enums {
 export type Role = (typeof Role)[keyof typeof Role]
 
 
+export const PosAdminRole: {
+  ADMIN: 'ADMIN',
+  CASHIER: 'CASHIER',
+  INVENTORY_MANAGER: 'INVENTORY_MANAGER',
+  ACCOUNTANT: 'ACCOUNTANT'
+};
+
+export type PosAdminRole = (typeof PosAdminRole)[keyof typeof PosAdminRole]
+
+
+export const PaymentMethod: {
+  CASH: 'CASH',
+  CHEQUE: 'CHEQUE',
+  BANK_TRANSFER: 'BANK_TRANSFER'
+};
+
+export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]
+
+
 export const PosPurchaseItemType: {
   BIKE: 'BIKE',
   INVENTORY: 'INVENTORY',
@@ -285,15 +309,6 @@ export const AccountLevel: {
 export type AccountLevel = (typeof AccountLevel)[keyof typeof AccountLevel]
 
 
-export const PaymentMethod: {
-  CASH: 'CASH',
-  CHEQUE: 'CHEQUE',
-  BANK_TRANSFER: 'BANK_TRANSFER'
-};
-
-export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]
-
-
 export const ChequeStatus: {
   PENDING: 'PENDING',
   CLEARED: 'CLEARED',
@@ -344,6 +359,14 @@ export type Role = $Enums.Role
 
 export const Role: typeof $Enums.Role
 
+export type PosAdminRole = $Enums.PosAdminRole
+
+export const PosAdminRole: typeof $Enums.PosAdminRole
+
+export type PaymentMethod = $Enums.PaymentMethod
+
+export const PaymentMethod: typeof $Enums.PaymentMethod
+
 export type PosPurchaseItemType = $Enums.PosPurchaseItemType
 
 export const PosPurchaseItemType: typeof $Enums.PosPurchaseItemType
@@ -383,10 +406,6 @@ export const AccountType: typeof $Enums.AccountType
 export type AccountLevel = $Enums.AccountLevel
 
 export const AccountLevel: typeof $Enums.AccountLevel
-
-export type PaymentMethod = $Enums.PaymentMethod
-
-export const PaymentMethod: typeof $Enums.PaymentMethod
 
 export type ChequeStatus = $Enums.ChequeStatus
 
@@ -556,6 +575,16 @@ export class PrismaClient<
     * ```
     */
   get posAdmin(): Prisma.PosAdminDelegate<ExtArgs>;
+
+  /**
+   * `prisma.posCounterSale`: Exposes CRUD operations for the **PosCounterSale** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PosCounterSales
+    * const posCounterSales = await prisma.posCounterSale.findMany()
+    * ```
+    */
+  get posCounterSale(): Prisma.PosCounterSaleDelegate<ExtArgs>;
 
   /**
    * `prisma.bikeBrand`: Exposes CRUD operations for the **BikeBrand** model.
@@ -1320,6 +1349,7 @@ export namespace Prisma {
     User: 'User',
     Bike: 'Bike',
     PosAdmin: 'PosAdmin',
+    PosCounterSale: 'PosCounterSale',
     BikeBrand: 'BikeBrand',
     BikeModel: 'BikeModel',
     BikeColor: 'BikeColor',
@@ -1367,7 +1397,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "bike" | "posAdmin" | "bikeBrand" | "bikeModel" | "bikeColor" | "bikeSupplier" | "bikeVehicle" | "bikeVehicleImage" | "bikeVehicleExpense" | "inventoryBrand" | "inventoryCategory" | "inventoryProduct" | "inventoryProductExpense" | "inventoryProductImage" | "posCustomer" | "posLeasingCompany" | "posCustomerDreamBike" | "posCustomerPurchase" | "posInvoiceTerm" | "posInstallment" | "posInstallmentPayment" | "preOrder" | "preOrderImage" | "contactRequest" | "exportVehicle" | "exportVehicleImage" | "account" | "accountRelationship" | "accountReceipt" | "accountVoucher" | "accountTransaction" | "invoicePayment" | "accountDeposit" | "accountDepositItem"
+      modelProps: "user" | "bike" | "posAdmin" | "posCounterSale" | "bikeBrand" | "bikeModel" | "bikeColor" | "bikeSupplier" | "bikeVehicle" | "bikeVehicleImage" | "bikeVehicleExpense" | "inventoryBrand" | "inventoryCategory" | "inventoryProduct" | "inventoryProductExpense" | "inventoryProductImage" | "posCustomer" | "posLeasingCompany" | "posCustomerDreamBike" | "posCustomerPurchase" | "posInvoiceTerm" | "posInstallment" | "posInstallmentPayment" | "preOrder" | "preOrderImage" | "contactRequest" | "exportVehicle" | "exportVehicleImage" | "account" | "accountRelationship" | "accountReceipt" | "accountVoucher" | "accountTransaction" | "invoicePayment" | "accountDeposit" | "accountDepositItem"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1578,6 +1608,76 @@ export namespace Prisma {
           count: {
             args: Prisma.PosAdminCountArgs<ExtArgs>
             result: $Utils.Optional<PosAdminCountAggregateOutputType> | number
+          }
+        }
+      }
+      PosCounterSale: {
+        payload: Prisma.$PosCounterSalePayload<ExtArgs>
+        fields: Prisma.PosCounterSaleFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PosCounterSaleFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosCounterSalePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PosCounterSaleFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosCounterSalePayload>
+          }
+          findFirst: {
+            args: Prisma.PosCounterSaleFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosCounterSalePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PosCounterSaleFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosCounterSalePayload>
+          }
+          findMany: {
+            args: Prisma.PosCounterSaleFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosCounterSalePayload>[]
+          }
+          create: {
+            args: Prisma.PosCounterSaleCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosCounterSalePayload>
+          }
+          createMany: {
+            args: Prisma.PosCounterSaleCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PosCounterSaleCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosCounterSalePayload>[]
+          }
+          delete: {
+            args: Prisma.PosCounterSaleDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosCounterSalePayload>
+          }
+          update: {
+            args: Prisma.PosCounterSaleUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosCounterSalePayload>
+          }
+          deleteMany: {
+            args: Prisma.PosCounterSaleDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PosCounterSaleUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.PosCounterSaleUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosCounterSalePayload>
+          }
+          aggregate: {
+            args: Prisma.PosCounterSaleAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePosCounterSale>
+          }
+          groupBy: {
+            args: Prisma.PosCounterSaleGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PosCounterSaleGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PosCounterSaleCountArgs<ExtArgs>
+            result: $Utils.Optional<PosCounterSaleCountAggregateOutputType> | number
           }
         }
       }
@@ -3975,6 +4075,37 @@ export namespace Prisma {
   /**
    * Count Types
    */
+
+
+  /**
+   * Count Type PosAdminCountOutputType
+   */
+
+  export type PosAdminCountOutputType = {
+    counterSales: number
+  }
+
+  export type PosAdminCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    counterSales?: boolean | PosAdminCountOutputTypeCountCounterSalesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * PosAdminCountOutputType without action
+   */
+  export type PosAdminCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosAdminCountOutputType
+     */
+    select?: PosAdminCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * PosAdminCountOutputType without action
+   */
+  export type PosAdminCountOutputTypeCountCounterSalesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PosCounterSaleWhereInput
+  }
 
 
   /**
@@ -6620,6 +6751,7 @@ export namespace Prisma {
     name: string | null
     email: string | null
     passwordHash: string | null
+    role: $Enums.PosAdminRole | null
     isActive: boolean | null
     lastLoginAt: Date | null
     createdAt: Date | null
@@ -6631,6 +6763,7 @@ export namespace Prisma {
     name: string | null
     email: string | null
     passwordHash: string | null
+    role: $Enums.PosAdminRole | null
     isActive: boolean | null
     lastLoginAt: Date | null
     createdAt: Date | null
@@ -6642,6 +6775,7 @@ export namespace Prisma {
     name: number
     email: number
     passwordHash: number
+    role: number
     isActive: number
     lastLoginAt: number
     createdAt: number
@@ -6663,6 +6797,7 @@ export namespace Prisma {
     name?: true
     email?: true
     passwordHash?: true
+    role?: true
     isActive?: true
     lastLoginAt?: true
     createdAt?: true
@@ -6674,6 +6809,7 @@ export namespace Prisma {
     name?: true
     email?: true
     passwordHash?: true
+    role?: true
     isActive?: true
     lastLoginAt?: true
     createdAt?: true
@@ -6685,6 +6821,7 @@ export namespace Prisma {
     name?: true
     email?: true
     passwordHash?: true
+    role?: true
     isActive?: true
     lastLoginAt?: true
     createdAt?: true
@@ -6783,6 +6920,7 @@ export namespace Prisma {
     name: string
     email: string
     passwordHash: string
+    role: $Enums.PosAdminRole
     isActive: boolean
     lastLoginAt: Date | null
     createdAt: Date
@@ -6813,10 +6951,13 @@ export namespace Prisma {
     name?: boolean
     email?: boolean
     passwordHash?: boolean
+    role?: boolean
     isActive?: boolean
     lastLoginAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    counterSales?: boolean | PosAdmin$counterSalesArgs<ExtArgs>
+    _count?: boolean | PosAdminCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["posAdmin"]>
 
   export type PosAdminSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -6824,6 +6965,7 @@ export namespace Prisma {
     name?: boolean
     email?: boolean
     passwordHash?: boolean
+    role?: boolean
     isActive?: boolean
     lastLoginAt?: boolean
     createdAt?: boolean
@@ -6835,21 +6977,30 @@ export namespace Prisma {
     name?: boolean
     email?: boolean
     passwordHash?: boolean
+    role?: boolean
     isActive?: boolean
     lastLoginAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
+  export type PosAdminInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    counterSales?: boolean | PosAdmin$counterSalesArgs<ExtArgs>
+    _count?: boolean | PosAdminCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type PosAdminIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $PosAdminPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "PosAdmin"
-    objects: {}
+    objects: {
+      counterSales: Prisma.$PosCounterSalePayload<ExtArgs>[]
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: number
       name: string
       email: string
       passwordHash: string
+      role: $Enums.PosAdminRole
       isActive: boolean
       lastLoginAt: Date | null
       createdAt: Date
@@ -7218,6 +7369,7 @@ export namespace Prisma {
    */
   export interface Prisma__PosAdminClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    counterSales<T extends PosAdmin$counterSalesArgs<ExtArgs> = {}>(args?: Subset<T, PosAdmin$counterSalesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosCounterSalePayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7251,6 +7403,7 @@ export namespace Prisma {
     readonly name: FieldRef<"PosAdmin", 'String'>
     readonly email: FieldRef<"PosAdmin", 'String'>
     readonly passwordHash: FieldRef<"PosAdmin", 'String'>
+    readonly role: FieldRef<"PosAdmin", 'PosAdminRole'>
     readonly isActive: FieldRef<"PosAdmin", 'Boolean'>
     readonly lastLoginAt: FieldRef<"PosAdmin", 'DateTime'>
     readonly createdAt: FieldRef<"PosAdmin", 'DateTime'>
@@ -7268,6 +7421,10 @@ export namespace Prisma {
      */
     select?: PosAdminSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosAdminInclude<ExtArgs> | null
+    /**
      * Filter, which PosAdmin to fetch.
      */
     where: PosAdminWhereUniqueInput
@@ -7282,6 +7439,10 @@ export namespace Prisma {
      */
     select?: PosAdminSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosAdminInclude<ExtArgs> | null
+    /**
      * Filter, which PosAdmin to fetch.
      */
     where: PosAdminWhereUniqueInput
@@ -7295,6 +7456,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the PosAdmin
      */
     select?: PosAdminSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosAdminInclude<ExtArgs> | null
     /**
      * Filter, which PosAdmin to fetch.
      */
@@ -7340,6 +7505,10 @@ export namespace Prisma {
      */
     select?: PosAdminSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosAdminInclude<ExtArgs> | null
+    /**
      * Filter, which PosAdmin to fetch.
      */
     where?: PosAdminWhereInput
@@ -7384,6 +7553,10 @@ export namespace Prisma {
      */
     select?: PosAdminSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosAdminInclude<ExtArgs> | null
+    /**
      * Filter, which PosAdmins to fetch.
      */
     where?: PosAdminWhereInput
@@ -7422,6 +7595,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the PosAdmin
      */
     select?: PosAdminSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosAdminInclude<ExtArgs> | null
     /**
      * The data needed to create a PosAdmin.
      */
@@ -7463,6 +7640,10 @@ export namespace Prisma {
      */
     select?: PosAdminSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosAdminInclude<ExtArgs> | null
+    /**
      * The data needed to update a PosAdmin.
      */
     data: XOR<PosAdminUpdateInput, PosAdminUncheckedUpdateInput>
@@ -7495,6 +7676,10 @@ export namespace Prisma {
      */
     select?: PosAdminSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosAdminInclude<ExtArgs> | null
+    /**
      * The filter to search for the PosAdmin to update in case it exists.
      */
     where: PosAdminWhereUniqueInput
@@ -7517,6 +7702,10 @@ export namespace Prisma {
      */
     select?: PosAdminSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosAdminInclude<ExtArgs> | null
+    /**
      * Filter which PosAdmin to delete.
      */
     where: PosAdminWhereUniqueInput
@@ -7533,6 +7722,26 @@ export namespace Prisma {
   }
 
   /**
+   * PosAdmin.counterSales
+   */
+  export type PosAdmin$counterSalesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCounterSale
+     */
+    select?: PosCounterSaleSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCounterSaleInclude<ExtArgs> | null
+    where?: PosCounterSaleWhereInput
+    orderBy?: PosCounterSaleOrderByWithRelationInput | PosCounterSaleOrderByWithRelationInput[]
+    cursor?: PosCounterSaleWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PosCounterSaleScalarFieldEnum | PosCounterSaleScalarFieldEnum[]
+  }
+
+  /**
    * PosAdmin without action
    */
   export type PosAdminDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7540,6 +7749,1029 @@ export namespace Prisma {
      * Select specific fields to fetch from the PosAdmin
      */
     select?: PosAdminSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosAdminInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model PosCounterSale
+   */
+
+  export type AggregatePosCounterSale = {
+    _count: PosCounterSaleCountAggregateOutputType | null
+    _avg: PosCounterSaleAvgAggregateOutputType | null
+    _sum: PosCounterSaleSumAggregateOutputType | null
+    _min: PosCounterSaleMinAggregateOutputType | null
+    _max: PosCounterSaleMaxAggregateOutputType | null
+  }
+
+  export type PosCounterSaleAvgAggregateOutputType = {
+    id: number | null
+    totalAmount: number | null
+    amountReceived: number | null
+    changeGiven: number | null
+    cashierId: number | null
+  }
+
+  export type PosCounterSaleSumAggregateOutputType = {
+    id: number | null
+    totalAmount: number | null
+    amountReceived: number | null
+    changeGiven: number | null
+    cashierId: number | null
+  }
+
+  export type PosCounterSaleMinAggregateOutputType = {
+    id: number | null
+    invoiceGroupCode: string | null
+    totalAmount: number | null
+    amountReceived: number | null
+    changeGiven: number | null
+    paymentMethod: $Enums.PaymentMethod | null
+    cashierId: number | null
+    createdAt: Date | null
+  }
+
+  export type PosCounterSaleMaxAggregateOutputType = {
+    id: number | null
+    invoiceGroupCode: string | null
+    totalAmount: number | null
+    amountReceived: number | null
+    changeGiven: number | null
+    paymentMethod: $Enums.PaymentMethod | null
+    cashierId: number | null
+    createdAt: Date | null
+  }
+
+  export type PosCounterSaleCountAggregateOutputType = {
+    id: number
+    invoiceGroupCode: number
+    totalAmount: number
+    amountReceived: number
+    changeGiven: number
+    paymentMethod: number
+    cashierId: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type PosCounterSaleAvgAggregateInputType = {
+    id?: true
+    totalAmount?: true
+    amountReceived?: true
+    changeGiven?: true
+    cashierId?: true
+  }
+
+  export type PosCounterSaleSumAggregateInputType = {
+    id?: true
+    totalAmount?: true
+    amountReceived?: true
+    changeGiven?: true
+    cashierId?: true
+  }
+
+  export type PosCounterSaleMinAggregateInputType = {
+    id?: true
+    invoiceGroupCode?: true
+    totalAmount?: true
+    amountReceived?: true
+    changeGiven?: true
+    paymentMethod?: true
+    cashierId?: true
+    createdAt?: true
+  }
+
+  export type PosCounterSaleMaxAggregateInputType = {
+    id?: true
+    invoiceGroupCode?: true
+    totalAmount?: true
+    amountReceived?: true
+    changeGiven?: true
+    paymentMethod?: true
+    cashierId?: true
+    createdAt?: true
+  }
+
+  export type PosCounterSaleCountAggregateInputType = {
+    id?: true
+    invoiceGroupCode?: true
+    totalAmount?: true
+    amountReceived?: true
+    changeGiven?: true
+    paymentMethod?: true
+    cashierId?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type PosCounterSaleAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PosCounterSale to aggregate.
+     */
+    where?: PosCounterSaleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosCounterSales to fetch.
+     */
+    orderBy?: PosCounterSaleOrderByWithRelationInput | PosCounterSaleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PosCounterSaleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosCounterSales from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosCounterSales.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PosCounterSales
+    **/
+    _count?: true | PosCounterSaleCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PosCounterSaleAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PosCounterSaleSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PosCounterSaleMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PosCounterSaleMaxAggregateInputType
+  }
+
+  export type GetPosCounterSaleAggregateType<T extends PosCounterSaleAggregateArgs> = {
+        [P in keyof T & keyof AggregatePosCounterSale]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePosCounterSale[P]>
+      : GetScalarType<T[P], AggregatePosCounterSale[P]>
+  }
+
+
+
+
+  export type PosCounterSaleGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PosCounterSaleWhereInput
+    orderBy?: PosCounterSaleOrderByWithAggregationInput | PosCounterSaleOrderByWithAggregationInput[]
+    by: PosCounterSaleScalarFieldEnum[] | PosCounterSaleScalarFieldEnum
+    having?: PosCounterSaleScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PosCounterSaleCountAggregateInputType | true
+    _avg?: PosCounterSaleAvgAggregateInputType
+    _sum?: PosCounterSaleSumAggregateInputType
+    _min?: PosCounterSaleMinAggregateInputType
+    _max?: PosCounterSaleMaxAggregateInputType
+  }
+
+  export type PosCounterSaleGroupByOutputType = {
+    id: number
+    invoiceGroupCode: string
+    totalAmount: number
+    amountReceived: number
+    changeGiven: number
+    paymentMethod: $Enums.PaymentMethod
+    cashierId: number
+    createdAt: Date
+    _count: PosCounterSaleCountAggregateOutputType | null
+    _avg: PosCounterSaleAvgAggregateOutputType | null
+    _sum: PosCounterSaleSumAggregateOutputType | null
+    _min: PosCounterSaleMinAggregateOutputType | null
+    _max: PosCounterSaleMaxAggregateOutputType | null
+  }
+
+  type GetPosCounterSaleGroupByPayload<T extends PosCounterSaleGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PosCounterSaleGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PosCounterSaleGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PosCounterSaleGroupByOutputType[P]>
+            : GetScalarType<T[P], PosCounterSaleGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PosCounterSaleSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    invoiceGroupCode?: boolean
+    totalAmount?: boolean
+    amountReceived?: boolean
+    changeGiven?: boolean
+    paymentMethod?: boolean
+    cashierId?: boolean
+    createdAt?: boolean
+    cashier?: boolean | PosAdminDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["posCounterSale"]>
+
+  export type PosCounterSaleSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    invoiceGroupCode?: boolean
+    totalAmount?: boolean
+    amountReceived?: boolean
+    changeGiven?: boolean
+    paymentMethod?: boolean
+    cashierId?: boolean
+    createdAt?: boolean
+    cashier?: boolean | PosAdminDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["posCounterSale"]>
+
+  export type PosCounterSaleSelectScalar = {
+    id?: boolean
+    invoiceGroupCode?: boolean
+    totalAmount?: boolean
+    amountReceived?: boolean
+    changeGiven?: boolean
+    paymentMethod?: boolean
+    cashierId?: boolean
+    createdAt?: boolean
+  }
+
+  export type PosCounterSaleInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cashier?: boolean | PosAdminDefaultArgs<ExtArgs>
+  }
+  export type PosCounterSaleIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cashier?: boolean | PosAdminDefaultArgs<ExtArgs>
+  }
+
+  export type $PosCounterSalePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PosCounterSale"
+    objects: {
+      cashier: Prisma.$PosAdminPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      invoiceGroupCode: string
+      totalAmount: number
+      amountReceived: number
+      changeGiven: number
+      paymentMethod: $Enums.PaymentMethod
+      cashierId: number
+      createdAt: Date
+    }, ExtArgs["result"]["posCounterSale"]>
+    composites: {}
+  }
+
+  type PosCounterSaleGetPayload<S extends boolean | null | undefined | PosCounterSaleDefaultArgs> = $Result.GetResult<Prisma.$PosCounterSalePayload, S>
+
+  type PosCounterSaleCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<PosCounterSaleFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: PosCounterSaleCountAggregateInputType | true
+    }
+
+  export interface PosCounterSaleDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PosCounterSale'], meta: { name: 'PosCounterSale' } }
+    /**
+     * Find zero or one PosCounterSale that matches the filter.
+     * @param {PosCounterSaleFindUniqueArgs} args - Arguments to find a PosCounterSale
+     * @example
+     * // Get one PosCounterSale
+     * const posCounterSale = await prisma.posCounterSale.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PosCounterSaleFindUniqueArgs>(args: SelectSubset<T, PosCounterSaleFindUniqueArgs<ExtArgs>>): Prisma__PosCounterSaleClient<$Result.GetResult<Prisma.$PosCounterSalePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one PosCounterSale that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {PosCounterSaleFindUniqueOrThrowArgs} args - Arguments to find a PosCounterSale
+     * @example
+     * // Get one PosCounterSale
+     * const posCounterSale = await prisma.posCounterSale.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PosCounterSaleFindUniqueOrThrowArgs>(args: SelectSubset<T, PosCounterSaleFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PosCounterSaleClient<$Result.GetResult<Prisma.$PosCounterSalePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first PosCounterSale that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosCounterSaleFindFirstArgs} args - Arguments to find a PosCounterSale
+     * @example
+     * // Get one PosCounterSale
+     * const posCounterSale = await prisma.posCounterSale.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PosCounterSaleFindFirstArgs>(args?: SelectSubset<T, PosCounterSaleFindFirstArgs<ExtArgs>>): Prisma__PosCounterSaleClient<$Result.GetResult<Prisma.$PosCounterSalePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first PosCounterSale that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosCounterSaleFindFirstOrThrowArgs} args - Arguments to find a PosCounterSale
+     * @example
+     * // Get one PosCounterSale
+     * const posCounterSale = await prisma.posCounterSale.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PosCounterSaleFindFirstOrThrowArgs>(args?: SelectSubset<T, PosCounterSaleFindFirstOrThrowArgs<ExtArgs>>): Prisma__PosCounterSaleClient<$Result.GetResult<Prisma.$PosCounterSalePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more PosCounterSales that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosCounterSaleFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PosCounterSales
+     * const posCounterSales = await prisma.posCounterSale.findMany()
+     * 
+     * // Get first 10 PosCounterSales
+     * const posCounterSales = await prisma.posCounterSale.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const posCounterSaleWithIdOnly = await prisma.posCounterSale.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PosCounterSaleFindManyArgs>(args?: SelectSubset<T, PosCounterSaleFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosCounterSalePayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a PosCounterSale.
+     * @param {PosCounterSaleCreateArgs} args - Arguments to create a PosCounterSale.
+     * @example
+     * // Create one PosCounterSale
+     * const PosCounterSale = await prisma.posCounterSale.create({
+     *   data: {
+     *     // ... data to create a PosCounterSale
+     *   }
+     * })
+     * 
+     */
+    create<T extends PosCounterSaleCreateArgs>(args: SelectSubset<T, PosCounterSaleCreateArgs<ExtArgs>>): Prisma__PosCounterSaleClient<$Result.GetResult<Prisma.$PosCounterSalePayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many PosCounterSales.
+     * @param {PosCounterSaleCreateManyArgs} args - Arguments to create many PosCounterSales.
+     * @example
+     * // Create many PosCounterSales
+     * const posCounterSale = await prisma.posCounterSale.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PosCounterSaleCreateManyArgs>(args?: SelectSubset<T, PosCounterSaleCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PosCounterSales and returns the data saved in the database.
+     * @param {PosCounterSaleCreateManyAndReturnArgs} args - Arguments to create many PosCounterSales.
+     * @example
+     * // Create many PosCounterSales
+     * const posCounterSale = await prisma.posCounterSale.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PosCounterSales and only return the `id`
+     * const posCounterSaleWithIdOnly = await prisma.posCounterSale.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PosCounterSaleCreateManyAndReturnArgs>(args?: SelectSubset<T, PosCounterSaleCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosCounterSalePayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a PosCounterSale.
+     * @param {PosCounterSaleDeleteArgs} args - Arguments to delete one PosCounterSale.
+     * @example
+     * // Delete one PosCounterSale
+     * const PosCounterSale = await prisma.posCounterSale.delete({
+     *   where: {
+     *     // ... filter to delete one PosCounterSale
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PosCounterSaleDeleteArgs>(args: SelectSubset<T, PosCounterSaleDeleteArgs<ExtArgs>>): Prisma__PosCounterSaleClient<$Result.GetResult<Prisma.$PosCounterSalePayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one PosCounterSale.
+     * @param {PosCounterSaleUpdateArgs} args - Arguments to update one PosCounterSale.
+     * @example
+     * // Update one PosCounterSale
+     * const posCounterSale = await prisma.posCounterSale.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PosCounterSaleUpdateArgs>(args: SelectSubset<T, PosCounterSaleUpdateArgs<ExtArgs>>): Prisma__PosCounterSaleClient<$Result.GetResult<Prisma.$PosCounterSalePayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more PosCounterSales.
+     * @param {PosCounterSaleDeleteManyArgs} args - Arguments to filter PosCounterSales to delete.
+     * @example
+     * // Delete a few PosCounterSales
+     * const { count } = await prisma.posCounterSale.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PosCounterSaleDeleteManyArgs>(args?: SelectSubset<T, PosCounterSaleDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PosCounterSales.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosCounterSaleUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PosCounterSales
+     * const posCounterSale = await prisma.posCounterSale.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PosCounterSaleUpdateManyArgs>(args: SelectSubset<T, PosCounterSaleUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one PosCounterSale.
+     * @param {PosCounterSaleUpsertArgs} args - Arguments to update or create a PosCounterSale.
+     * @example
+     * // Update or create a PosCounterSale
+     * const posCounterSale = await prisma.posCounterSale.upsert({
+     *   create: {
+     *     // ... data to create a PosCounterSale
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PosCounterSale we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PosCounterSaleUpsertArgs>(args: SelectSubset<T, PosCounterSaleUpsertArgs<ExtArgs>>): Prisma__PosCounterSaleClient<$Result.GetResult<Prisma.$PosCounterSalePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of PosCounterSales.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosCounterSaleCountArgs} args - Arguments to filter PosCounterSales to count.
+     * @example
+     * // Count the number of PosCounterSales
+     * const count = await prisma.posCounterSale.count({
+     *   where: {
+     *     // ... the filter for the PosCounterSales we want to count
+     *   }
+     * })
+    **/
+    count<T extends PosCounterSaleCountArgs>(
+      args?: Subset<T, PosCounterSaleCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PosCounterSaleCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PosCounterSale.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosCounterSaleAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PosCounterSaleAggregateArgs>(args: Subset<T, PosCounterSaleAggregateArgs>): Prisma.PrismaPromise<GetPosCounterSaleAggregateType<T>>
+
+    /**
+     * Group by PosCounterSale.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosCounterSaleGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PosCounterSaleGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PosCounterSaleGroupByArgs['orderBy'] }
+        : { orderBy?: PosCounterSaleGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PosCounterSaleGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPosCounterSaleGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PosCounterSale model
+   */
+  readonly fields: PosCounterSaleFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PosCounterSale.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PosCounterSaleClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    cashier<T extends PosAdminDefaultArgs<ExtArgs> = {}>(args?: Subset<T, PosAdminDefaultArgs<ExtArgs>>): Prisma__PosAdminClient<$Result.GetResult<Prisma.$PosAdminPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PosCounterSale model
+   */ 
+  interface PosCounterSaleFieldRefs {
+    readonly id: FieldRef<"PosCounterSale", 'Int'>
+    readonly invoiceGroupCode: FieldRef<"PosCounterSale", 'String'>
+    readonly totalAmount: FieldRef<"PosCounterSale", 'Float'>
+    readonly amountReceived: FieldRef<"PosCounterSale", 'Float'>
+    readonly changeGiven: FieldRef<"PosCounterSale", 'Float'>
+    readonly paymentMethod: FieldRef<"PosCounterSale", 'PaymentMethod'>
+    readonly cashierId: FieldRef<"PosCounterSale", 'Int'>
+    readonly createdAt: FieldRef<"PosCounterSale", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PosCounterSale findUnique
+   */
+  export type PosCounterSaleFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCounterSale
+     */
+    select?: PosCounterSaleSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCounterSaleInclude<ExtArgs> | null
+    /**
+     * Filter, which PosCounterSale to fetch.
+     */
+    where: PosCounterSaleWhereUniqueInput
+  }
+
+  /**
+   * PosCounterSale findUniqueOrThrow
+   */
+  export type PosCounterSaleFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCounterSale
+     */
+    select?: PosCounterSaleSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCounterSaleInclude<ExtArgs> | null
+    /**
+     * Filter, which PosCounterSale to fetch.
+     */
+    where: PosCounterSaleWhereUniqueInput
+  }
+
+  /**
+   * PosCounterSale findFirst
+   */
+  export type PosCounterSaleFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCounterSale
+     */
+    select?: PosCounterSaleSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCounterSaleInclude<ExtArgs> | null
+    /**
+     * Filter, which PosCounterSale to fetch.
+     */
+    where?: PosCounterSaleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosCounterSales to fetch.
+     */
+    orderBy?: PosCounterSaleOrderByWithRelationInput | PosCounterSaleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PosCounterSales.
+     */
+    cursor?: PosCounterSaleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosCounterSales from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosCounterSales.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PosCounterSales.
+     */
+    distinct?: PosCounterSaleScalarFieldEnum | PosCounterSaleScalarFieldEnum[]
+  }
+
+  /**
+   * PosCounterSale findFirstOrThrow
+   */
+  export type PosCounterSaleFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCounterSale
+     */
+    select?: PosCounterSaleSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCounterSaleInclude<ExtArgs> | null
+    /**
+     * Filter, which PosCounterSale to fetch.
+     */
+    where?: PosCounterSaleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosCounterSales to fetch.
+     */
+    orderBy?: PosCounterSaleOrderByWithRelationInput | PosCounterSaleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PosCounterSales.
+     */
+    cursor?: PosCounterSaleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosCounterSales from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosCounterSales.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PosCounterSales.
+     */
+    distinct?: PosCounterSaleScalarFieldEnum | PosCounterSaleScalarFieldEnum[]
+  }
+
+  /**
+   * PosCounterSale findMany
+   */
+  export type PosCounterSaleFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCounterSale
+     */
+    select?: PosCounterSaleSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCounterSaleInclude<ExtArgs> | null
+    /**
+     * Filter, which PosCounterSales to fetch.
+     */
+    where?: PosCounterSaleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosCounterSales to fetch.
+     */
+    orderBy?: PosCounterSaleOrderByWithRelationInput | PosCounterSaleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PosCounterSales.
+     */
+    cursor?: PosCounterSaleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosCounterSales from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosCounterSales.
+     */
+    skip?: number
+    distinct?: PosCounterSaleScalarFieldEnum | PosCounterSaleScalarFieldEnum[]
+  }
+
+  /**
+   * PosCounterSale create
+   */
+  export type PosCounterSaleCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCounterSale
+     */
+    select?: PosCounterSaleSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCounterSaleInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PosCounterSale.
+     */
+    data: XOR<PosCounterSaleCreateInput, PosCounterSaleUncheckedCreateInput>
+  }
+
+  /**
+   * PosCounterSale createMany
+   */
+  export type PosCounterSaleCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PosCounterSales.
+     */
+    data: PosCounterSaleCreateManyInput | PosCounterSaleCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PosCounterSale createManyAndReturn
+   */
+  export type PosCounterSaleCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCounterSale
+     */
+    select?: PosCounterSaleSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many PosCounterSales.
+     */
+    data: PosCounterSaleCreateManyInput | PosCounterSaleCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCounterSaleIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PosCounterSale update
+   */
+  export type PosCounterSaleUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCounterSale
+     */
+    select?: PosCounterSaleSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCounterSaleInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PosCounterSale.
+     */
+    data: XOR<PosCounterSaleUpdateInput, PosCounterSaleUncheckedUpdateInput>
+    /**
+     * Choose, which PosCounterSale to update.
+     */
+    where: PosCounterSaleWhereUniqueInput
+  }
+
+  /**
+   * PosCounterSale updateMany
+   */
+  export type PosCounterSaleUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PosCounterSales.
+     */
+    data: XOR<PosCounterSaleUpdateManyMutationInput, PosCounterSaleUncheckedUpdateManyInput>
+    /**
+     * Filter which PosCounterSales to update
+     */
+    where?: PosCounterSaleWhereInput
+  }
+
+  /**
+   * PosCounterSale upsert
+   */
+  export type PosCounterSaleUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCounterSale
+     */
+    select?: PosCounterSaleSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCounterSaleInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PosCounterSale to update in case it exists.
+     */
+    where: PosCounterSaleWhereUniqueInput
+    /**
+     * In case the PosCounterSale found by the `where` argument doesn't exist, create a new PosCounterSale with this data.
+     */
+    create: XOR<PosCounterSaleCreateInput, PosCounterSaleUncheckedCreateInput>
+    /**
+     * In case the PosCounterSale was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PosCounterSaleUpdateInput, PosCounterSaleUncheckedUpdateInput>
+  }
+
+  /**
+   * PosCounterSale delete
+   */
+  export type PosCounterSaleDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCounterSale
+     */
+    select?: PosCounterSaleSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCounterSaleInclude<ExtArgs> | null
+    /**
+     * Filter which PosCounterSale to delete.
+     */
+    where: PosCounterSaleWhereUniqueInput
+  }
+
+  /**
+   * PosCounterSale deleteMany
+   */
+  export type PosCounterSaleDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PosCounterSales to delete
+     */
+    where?: PosCounterSaleWhereInput
+  }
+
+  /**
+   * PosCounterSale without action
+   */
+  export type PosCounterSaleDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCounterSale
+     */
+    select?: PosCounterSaleSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCounterSaleInclude<ExtArgs> | null
   }
 
 
@@ -41674,6 +42906,7 @@ export namespace Prisma {
     name: 'name',
     email: 'email',
     passwordHash: 'passwordHash',
+    role: 'role',
     isActive: 'isActive',
     lastLoginAt: 'lastLoginAt',
     createdAt: 'createdAt',
@@ -41681,6 +42914,20 @@ export namespace Prisma {
   };
 
   export type PosAdminScalarFieldEnum = (typeof PosAdminScalarFieldEnum)[keyof typeof PosAdminScalarFieldEnum]
+
+
+  export const PosCounterSaleScalarFieldEnum: {
+    id: 'id',
+    invoiceGroupCode: 'invoiceGroupCode',
+    totalAmount: 'totalAmount',
+    amountReceived: 'amountReceived',
+    changeGiven: 'changeGiven',
+    paymentMethod: 'paymentMethod',
+    cashierId: 'cashierId',
+    createdAt: 'createdAt'
+  };
+
+  export type PosCounterSaleScalarFieldEnum = (typeof PosCounterSaleScalarFieldEnum)[keyof typeof PosCounterSaleScalarFieldEnum]
 
 
   export const BikeBrandScalarFieldEnum: {
@@ -42307,6 +43554,34 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'PosAdminRole'
+   */
+  export type EnumPosAdminRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PosAdminRole'>
+    
+
+
+  /**
+   * Reference to a field of type 'PosAdminRole[]'
+   */
+  export type ListEnumPosAdminRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PosAdminRole[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'PaymentMethod'
+   */
+  export type EnumPaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentMethod'>
+    
+
+
+  /**
+   * Reference to a field of type 'PaymentMethod[]'
+   */
+  export type ListEnumPaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentMethod[]'>
+    
+
+
+  /**
    * Reference to a field of type 'PosPurchaseItemType'
    */
   export type EnumPosPurchaseItemTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PosPurchaseItemType'>
@@ -42450,20 +43725,6 @@ export namespace Prisma {
    * Reference to a field of type 'AccountLevel[]'
    */
   export type ListEnumAccountLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AccountLevel[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'PaymentMethod'
-   */
-  export type EnumPaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentMethod'>
-    
-
-
-  /**
-   * Reference to a field of type 'PaymentMethod[]'
-   */
-  export type ListEnumPaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentMethod[]'>
     
 
 
@@ -42677,10 +43938,12 @@ export namespace Prisma {
     name?: StringFilter<"PosAdmin"> | string
     email?: StringFilter<"PosAdmin"> | string
     passwordHash?: StringFilter<"PosAdmin"> | string
+    role?: EnumPosAdminRoleFilter<"PosAdmin"> | $Enums.PosAdminRole
     isActive?: BoolFilter<"PosAdmin"> | boolean
     lastLoginAt?: DateTimeNullableFilter<"PosAdmin"> | Date | string | null
     createdAt?: DateTimeFilter<"PosAdmin"> | Date | string
     updatedAt?: DateTimeFilter<"PosAdmin"> | Date | string
+    counterSales?: PosCounterSaleListRelationFilter
   }
 
   export type PosAdminOrderByWithRelationInput = {
@@ -42688,10 +43951,12 @@ export namespace Prisma {
     name?: SortOrder
     email?: SortOrder
     passwordHash?: SortOrder
+    role?: SortOrder
     isActive?: SortOrder
     lastLoginAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    counterSales?: PosCounterSaleOrderByRelationAggregateInput
   }
 
   export type PosAdminWhereUniqueInput = Prisma.AtLeast<{
@@ -42702,10 +43967,12 @@ export namespace Prisma {
     NOT?: PosAdminWhereInput | PosAdminWhereInput[]
     name?: StringFilter<"PosAdmin"> | string
     passwordHash?: StringFilter<"PosAdmin"> | string
+    role?: EnumPosAdminRoleFilter<"PosAdmin"> | $Enums.PosAdminRole
     isActive?: BoolFilter<"PosAdmin"> | boolean
     lastLoginAt?: DateTimeNullableFilter<"PosAdmin"> | Date | string | null
     createdAt?: DateTimeFilter<"PosAdmin"> | Date | string
     updatedAt?: DateTimeFilter<"PosAdmin"> | Date | string
+    counterSales?: PosCounterSaleListRelationFilter
   }, "id" | "email">
 
   export type PosAdminOrderByWithAggregationInput = {
@@ -42713,6 +43980,7 @@ export namespace Prisma {
     name?: SortOrder
     email?: SortOrder
     passwordHash?: SortOrder
+    role?: SortOrder
     isActive?: SortOrder
     lastLoginAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -42732,10 +44000,83 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"PosAdmin"> | string
     email?: StringWithAggregatesFilter<"PosAdmin"> | string
     passwordHash?: StringWithAggregatesFilter<"PosAdmin"> | string
+    role?: EnumPosAdminRoleWithAggregatesFilter<"PosAdmin"> | $Enums.PosAdminRole
     isActive?: BoolWithAggregatesFilter<"PosAdmin"> | boolean
     lastLoginAt?: DateTimeNullableWithAggregatesFilter<"PosAdmin"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"PosAdmin"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"PosAdmin"> | Date | string
+  }
+
+  export type PosCounterSaleWhereInput = {
+    AND?: PosCounterSaleWhereInput | PosCounterSaleWhereInput[]
+    OR?: PosCounterSaleWhereInput[]
+    NOT?: PosCounterSaleWhereInput | PosCounterSaleWhereInput[]
+    id?: IntFilter<"PosCounterSale"> | number
+    invoiceGroupCode?: StringFilter<"PosCounterSale"> | string
+    totalAmount?: FloatFilter<"PosCounterSale"> | number
+    amountReceived?: FloatFilter<"PosCounterSale"> | number
+    changeGiven?: FloatFilter<"PosCounterSale"> | number
+    paymentMethod?: EnumPaymentMethodFilter<"PosCounterSale"> | $Enums.PaymentMethod
+    cashierId?: IntFilter<"PosCounterSale"> | number
+    createdAt?: DateTimeFilter<"PosCounterSale"> | Date | string
+    cashier?: XOR<PosAdminRelationFilter, PosAdminWhereInput>
+  }
+
+  export type PosCounterSaleOrderByWithRelationInput = {
+    id?: SortOrder
+    invoiceGroupCode?: SortOrder
+    totalAmount?: SortOrder
+    amountReceived?: SortOrder
+    changeGiven?: SortOrder
+    paymentMethod?: SortOrder
+    cashierId?: SortOrder
+    createdAt?: SortOrder
+    cashier?: PosAdminOrderByWithRelationInput
+  }
+
+  export type PosCounterSaleWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    invoiceGroupCode?: string
+    AND?: PosCounterSaleWhereInput | PosCounterSaleWhereInput[]
+    OR?: PosCounterSaleWhereInput[]
+    NOT?: PosCounterSaleWhereInput | PosCounterSaleWhereInput[]
+    totalAmount?: FloatFilter<"PosCounterSale"> | number
+    amountReceived?: FloatFilter<"PosCounterSale"> | number
+    changeGiven?: FloatFilter<"PosCounterSale"> | number
+    paymentMethod?: EnumPaymentMethodFilter<"PosCounterSale"> | $Enums.PaymentMethod
+    cashierId?: IntFilter<"PosCounterSale"> | number
+    createdAt?: DateTimeFilter<"PosCounterSale"> | Date | string
+    cashier?: XOR<PosAdminRelationFilter, PosAdminWhereInput>
+  }, "id" | "invoiceGroupCode">
+
+  export type PosCounterSaleOrderByWithAggregationInput = {
+    id?: SortOrder
+    invoiceGroupCode?: SortOrder
+    totalAmount?: SortOrder
+    amountReceived?: SortOrder
+    changeGiven?: SortOrder
+    paymentMethod?: SortOrder
+    cashierId?: SortOrder
+    createdAt?: SortOrder
+    _count?: PosCounterSaleCountOrderByAggregateInput
+    _avg?: PosCounterSaleAvgOrderByAggregateInput
+    _max?: PosCounterSaleMaxOrderByAggregateInput
+    _min?: PosCounterSaleMinOrderByAggregateInput
+    _sum?: PosCounterSaleSumOrderByAggregateInput
+  }
+
+  export type PosCounterSaleScalarWhereWithAggregatesInput = {
+    AND?: PosCounterSaleScalarWhereWithAggregatesInput | PosCounterSaleScalarWhereWithAggregatesInput[]
+    OR?: PosCounterSaleScalarWhereWithAggregatesInput[]
+    NOT?: PosCounterSaleScalarWhereWithAggregatesInput | PosCounterSaleScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"PosCounterSale"> | number
+    invoiceGroupCode?: StringWithAggregatesFilter<"PosCounterSale"> | string
+    totalAmount?: FloatWithAggregatesFilter<"PosCounterSale"> | number
+    amountReceived?: FloatWithAggregatesFilter<"PosCounterSale"> | number
+    changeGiven?: FloatWithAggregatesFilter<"PosCounterSale"> | number
+    paymentMethod?: EnumPaymentMethodWithAggregatesFilter<"PosCounterSale"> | $Enums.PaymentMethod
+    cashierId?: IntWithAggregatesFilter<"PosCounterSale"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"PosCounterSale"> | Date | string
   }
 
   export type BikeBrandWhereInput = {
@@ -45601,10 +46942,12 @@ export namespace Prisma {
     name: string
     email: string
     passwordHash: string
+    role?: $Enums.PosAdminRole
     isActive?: boolean
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    counterSales?: PosCounterSaleCreateNestedManyWithoutCashierInput
   }
 
   export type PosAdminUncheckedCreateInput = {
@@ -45612,20 +46955,24 @@ export namespace Prisma {
     name: string
     email: string
     passwordHash: string
+    role?: $Enums.PosAdminRole
     isActive?: boolean
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    counterSales?: PosCounterSaleUncheckedCreateNestedManyWithoutCashierInput
   }
 
   export type PosAdminUpdateInput = {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumPosAdminRoleFieldUpdateOperationsInput | $Enums.PosAdminRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    counterSales?: PosCounterSaleUpdateManyWithoutCashierNestedInput
   }
 
   export type PosAdminUncheckedUpdateInput = {
@@ -45633,10 +46980,12 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumPosAdminRoleFieldUpdateOperationsInput | $Enums.PosAdminRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    counterSales?: PosCounterSaleUncheckedUpdateManyWithoutCashierNestedInput
   }
 
   export type PosAdminCreateManyInput = {
@@ -45644,6 +46993,7 @@ export namespace Prisma {
     name: string
     email: string
     passwordHash: string
+    role?: $Enums.PosAdminRole
     isActive?: boolean
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
@@ -45654,6 +47004,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumPosAdminRoleFieldUpdateOperationsInput | $Enums.PosAdminRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -45665,10 +47016,84 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumPosAdminRoleFieldUpdateOperationsInput | $Enums.PosAdminRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosCounterSaleCreateInput = {
+    invoiceGroupCode: string
+    totalAmount: number
+    amountReceived: number
+    changeGiven: number
+    paymentMethod?: $Enums.PaymentMethod
+    createdAt?: Date | string
+    cashier: PosAdminCreateNestedOneWithoutCounterSalesInput
+  }
+
+  export type PosCounterSaleUncheckedCreateInput = {
+    id?: number
+    invoiceGroupCode: string
+    totalAmount: number
+    amountReceived: number
+    changeGiven: number
+    paymentMethod?: $Enums.PaymentMethod
+    cashierId: number
+    createdAt?: Date | string
+  }
+
+  export type PosCounterSaleUpdateInput = {
+    invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    amountReceived?: FloatFieldUpdateOperationsInput | number
+    changeGiven?: FloatFieldUpdateOperationsInput | number
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cashier?: PosAdminUpdateOneRequiredWithoutCounterSalesNestedInput
+  }
+
+  export type PosCounterSaleUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    amountReceived?: FloatFieldUpdateOperationsInput | number
+    changeGiven?: FloatFieldUpdateOperationsInput | number
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    cashierId?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosCounterSaleCreateManyInput = {
+    id?: number
+    invoiceGroupCode: string
+    totalAmount: number
+    amountReceived: number
+    changeGiven: number
+    paymentMethod?: $Enums.PaymentMethod
+    cashierId: number
+    createdAt?: Date | string
+  }
+
+  export type PosCounterSaleUpdateManyMutationInput = {
+    invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    amountReceived?: FloatFieldUpdateOperationsInput | number
+    changeGiven?: FloatFieldUpdateOperationsInput | number
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosCounterSaleUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    amountReceived?: FloatFieldUpdateOperationsInput | number
+    changeGiven?: FloatFieldUpdateOperationsInput | number
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    cashierId?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type BikeBrandCreateInput = {
@@ -48823,6 +50248,13 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type EnumPosAdminRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.PosAdminRole | EnumPosAdminRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.PosAdminRole[] | ListEnumPosAdminRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PosAdminRole[] | ListEnumPosAdminRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumPosAdminRoleFilter<$PrismaModel> | $Enums.PosAdminRole
+  }
+
   export type DateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -48834,11 +50266,22 @@ export namespace Prisma {
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
+  export type PosCounterSaleListRelationFilter = {
+    every?: PosCounterSaleWhereInput
+    some?: PosCounterSaleWhereInput
+    none?: PosCounterSaleWhereInput
+  }
+
+  export type PosCounterSaleOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type PosAdminCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
     email?: SortOrder
     passwordHash?: SortOrder
+    role?: SortOrder
     isActive?: SortOrder
     lastLoginAt?: SortOrder
     createdAt?: SortOrder
@@ -48854,6 +50297,7 @@ export namespace Prisma {
     name?: SortOrder
     email?: SortOrder
     passwordHash?: SortOrder
+    role?: SortOrder
     isActive?: SortOrder
     lastLoginAt?: SortOrder
     createdAt?: SortOrder
@@ -48865,6 +50309,7 @@ export namespace Prisma {
     name?: SortOrder
     email?: SortOrder
     passwordHash?: SortOrder
+    role?: SortOrder
     isActive?: SortOrder
     lastLoginAt?: SortOrder
     createdAt?: SortOrder
@@ -48873,6 +50318,16 @@ export namespace Prisma {
 
   export type PosAdminSumOrderByAggregateInput = {
     id?: SortOrder
+  }
+
+  export type EnumPosAdminRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PosAdminRole | EnumPosAdminRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.PosAdminRole[] | ListEnumPosAdminRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PosAdminRole[] | ListEnumPosAdminRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumPosAdminRoleWithAggregatesFilter<$PrismaModel> | $Enums.PosAdminRole
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPosAdminRoleFilter<$PrismaModel>
+    _max?: NestedEnumPosAdminRoleFilter<$PrismaModel>
   }
 
   export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -48887,6 +50342,77 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type EnumPaymentMethodFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentMethod | EnumPaymentMethodFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentMethod[] | ListEnumPaymentMethodFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentMethod[] | ListEnumPaymentMethodFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentMethodFilter<$PrismaModel> | $Enums.PaymentMethod
+  }
+
+  export type PosAdminRelationFilter = {
+    is?: PosAdminWhereInput
+    isNot?: PosAdminWhereInput
+  }
+
+  export type PosCounterSaleCountOrderByAggregateInput = {
+    id?: SortOrder
+    invoiceGroupCode?: SortOrder
+    totalAmount?: SortOrder
+    amountReceived?: SortOrder
+    changeGiven?: SortOrder
+    paymentMethod?: SortOrder
+    cashierId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PosCounterSaleAvgOrderByAggregateInput = {
+    id?: SortOrder
+    totalAmount?: SortOrder
+    amountReceived?: SortOrder
+    changeGiven?: SortOrder
+    cashierId?: SortOrder
+  }
+
+  export type PosCounterSaleMaxOrderByAggregateInput = {
+    id?: SortOrder
+    invoiceGroupCode?: SortOrder
+    totalAmount?: SortOrder
+    amountReceived?: SortOrder
+    changeGiven?: SortOrder
+    paymentMethod?: SortOrder
+    cashierId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PosCounterSaleMinOrderByAggregateInput = {
+    id?: SortOrder
+    invoiceGroupCode?: SortOrder
+    totalAmount?: SortOrder
+    amountReceived?: SortOrder
+    changeGiven?: SortOrder
+    paymentMethod?: SortOrder
+    cashierId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PosCounterSaleSumOrderByAggregateInput = {
+    id?: SortOrder
+    totalAmount?: SortOrder
+    amountReceived?: SortOrder
+    changeGiven?: SortOrder
+    cashierId?: SortOrder
+  }
+
+  export type EnumPaymentMethodWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentMethod | EnumPaymentMethodFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentMethod[] | ListEnumPaymentMethodFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentMethod[] | ListEnumPaymentMethodFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentMethodWithAggregatesFilter<$PrismaModel> | $Enums.PaymentMethod
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPaymentMethodFilter<$PrismaModel>
+    _max?: NestedEnumPaymentMethodFilter<$PrismaModel>
   }
 
   export type BikeModelListRelationFilter = {
@@ -50728,13 +52254,6 @@ export namespace Prisma {
     subAccountId?: SortOrder
   }
 
-  export type EnumPaymentMethodFilter<$PrismaModel = never> = {
-    equals?: $Enums.PaymentMethod | EnumPaymentMethodFieldRefInput<$PrismaModel>
-    in?: $Enums.PaymentMethod[] | ListEnumPaymentMethodFieldRefInput<$PrismaModel>
-    notIn?: $Enums.PaymentMethod[] | ListEnumPaymentMethodFieldRefInput<$PrismaModel>
-    not?: NestedEnumPaymentMethodFilter<$PrismaModel> | $Enums.PaymentMethod
-  }
-
   export type EnumChequeStatusNullableFilter<$PrismaModel = never> = {
     equals?: $Enums.ChequeStatus | EnumChequeStatusFieldRefInput<$PrismaModel> | null
     in?: $Enums.ChequeStatus[] | ListEnumChequeStatusFieldRefInput<$PrismaModel> | null
@@ -50828,16 +52347,6 @@ export namespace Prisma {
     accountId?: SortOrder
     amount?: SortOrder
     createdById?: SortOrder
-  }
-
-  export type EnumPaymentMethodWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.PaymentMethod | EnumPaymentMethodFieldRefInput<$PrismaModel>
-    in?: $Enums.PaymentMethod[] | ListEnumPaymentMethodFieldRefInput<$PrismaModel>
-    notIn?: $Enums.PaymentMethod[] | ListEnumPaymentMethodFieldRefInput<$PrismaModel>
-    not?: NestedEnumPaymentMethodWithAggregatesFilter<$PrismaModel> | $Enums.PaymentMethod
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumPaymentMethodFilter<$PrismaModel>
-    _max?: NestedEnumPaymentMethodFilter<$PrismaModel>
   }
 
   export type EnumChequeStatusNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -51261,8 +52770,72 @@ export namespace Prisma {
     set?: boolean
   }
 
+  export type PosCounterSaleCreateNestedManyWithoutCashierInput = {
+    create?: XOR<PosCounterSaleCreateWithoutCashierInput, PosCounterSaleUncheckedCreateWithoutCashierInput> | PosCounterSaleCreateWithoutCashierInput[] | PosCounterSaleUncheckedCreateWithoutCashierInput[]
+    connectOrCreate?: PosCounterSaleCreateOrConnectWithoutCashierInput | PosCounterSaleCreateOrConnectWithoutCashierInput[]
+    createMany?: PosCounterSaleCreateManyCashierInputEnvelope
+    connect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+  }
+
+  export type PosCounterSaleUncheckedCreateNestedManyWithoutCashierInput = {
+    create?: XOR<PosCounterSaleCreateWithoutCashierInput, PosCounterSaleUncheckedCreateWithoutCashierInput> | PosCounterSaleCreateWithoutCashierInput[] | PosCounterSaleUncheckedCreateWithoutCashierInput[]
+    connectOrCreate?: PosCounterSaleCreateOrConnectWithoutCashierInput | PosCounterSaleCreateOrConnectWithoutCashierInput[]
+    createMany?: PosCounterSaleCreateManyCashierInputEnvelope
+    connect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+  }
+
+  export type EnumPosAdminRoleFieldUpdateOperationsInput = {
+    set?: $Enums.PosAdminRole
+  }
+
   export type NullableDateTimeFieldUpdateOperationsInput = {
     set?: Date | string | null
+  }
+
+  export type PosCounterSaleUpdateManyWithoutCashierNestedInput = {
+    create?: XOR<PosCounterSaleCreateWithoutCashierInput, PosCounterSaleUncheckedCreateWithoutCashierInput> | PosCounterSaleCreateWithoutCashierInput[] | PosCounterSaleUncheckedCreateWithoutCashierInput[]
+    connectOrCreate?: PosCounterSaleCreateOrConnectWithoutCashierInput | PosCounterSaleCreateOrConnectWithoutCashierInput[]
+    upsert?: PosCounterSaleUpsertWithWhereUniqueWithoutCashierInput | PosCounterSaleUpsertWithWhereUniqueWithoutCashierInput[]
+    createMany?: PosCounterSaleCreateManyCashierInputEnvelope
+    set?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    disconnect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    delete?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    connect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    update?: PosCounterSaleUpdateWithWhereUniqueWithoutCashierInput | PosCounterSaleUpdateWithWhereUniqueWithoutCashierInput[]
+    updateMany?: PosCounterSaleUpdateManyWithWhereWithoutCashierInput | PosCounterSaleUpdateManyWithWhereWithoutCashierInput[]
+    deleteMany?: PosCounterSaleScalarWhereInput | PosCounterSaleScalarWhereInput[]
+  }
+
+  export type PosCounterSaleUncheckedUpdateManyWithoutCashierNestedInput = {
+    create?: XOR<PosCounterSaleCreateWithoutCashierInput, PosCounterSaleUncheckedCreateWithoutCashierInput> | PosCounterSaleCreateWithoutCashierInput[] | PosCounterSaleUncheckedCreateWithoutCashierInput[]
+    connectOrCreate?: PosCounterSaleCreateOrConnectWithoutCashierInput | PosCounterSaleCreateOrConnectWithoutCashierInput[]
+    upsert?: PosCounterSaleUpsertWithWhereUniqueWithoutCashierInput | PosCounterSaleUpsertWithWhereUniqueWithoutCashierInput[]
+    createMany?: PosCounterSaleCreateManyCashierInputEnvelope
+    set?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    disconnect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    delete?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    connect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    update?: PosCounterSaleUpdateWithWhereUniqueWithoutCashierInput | PosCounterSaleUpdateWithWhereUniqueWithoutCashierInput[]
+    updateMany?: PosCounterSaleUpdateManyWithWhereWithoutCashierInput | PosCounterSaleUpdateManyWithWhereWithoutCashierInput[]
+    deleteMany?: PosCounterSaleScalarWhereInput | PosCounterSaleScalarWhereInput[]
+  }
+
+  export type PosAdminCreateNestedOneWithoutCounterSalesInput = {
+    create?: XOR<PosAdminCreateWithoutCounterSalesInput, PosAdminUncheckedCreateWithoutCounterSalesInput>
+    connectOrCreate?: PosAdminCreateOrConnectWithoutCounterSalesInput
+    connect?: PosAdminWhereUniqueInput
+  }
+
+  export type EnumPaymentMethodFieldUpdateOperationsInput = {
+    set?: $Enums.PaymentMethod
+  }
+
+  export type PosAdminUpdateOneRequiredWithoutCounterSalesNestedInput = {
+    create?: XOR<PosAdminCreateWithoutCounterSalesInput, PosAdminUncheckedCreateWithoutCounterSalesInput>
+    connectOrCreate?: PosAdminCreateOrConnectWithoutCounterSalesInput
+    upsert?: PosAdminUpsertWithoutCounterSalesInput
+    connect?: PosAdminWhereUniqueInput
+    update?: XOR<XOR<PosAdminUpdateToOneWithWhereWithoutCounterSalesInput, PosAdminUpdateWithoutCounterSalesInput>, PosAdminUncheckedUpdateWithoutCounterSalesInput>
   }
 
   export type BikeModelCreateNestedManyWithoutBrandInput = {
@@ -53055,10 +54628,6 @@ export namespace Prisma {
     connect?: InvoicePaymentWhereUniqueInput
   }
 
-  export type EnumPaymentMethodFieldUpdateOperationsInput = {
-    set?: $Enums.PaymentMethod
-  }
-
   export type NullableEnumChequeStatusFieldUpdateOperationsInput = {
     set?: $Enums.ChequeStatus | null
   }
@@ -53676,6 +55245,13 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type NestedEnumPosAdminRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.PosAdminRole | EnumPosAdminRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.PosAdminRole[] | ListEnumPosAdminRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PosAdminRole[] | ListEnumPosAdminRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumPosAdminRoleFilter<$PrismaModel> | $Enums.PosAdminRole
+  }
+
   export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -53685,6 +55261,16 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedEnumPosAdminRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PosAdminRole | EnumPosAdminRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.PosAdminRole[] | ListEnumPosAdminRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PosAdminRole[] | ListEnumPosAdminRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumPosAdminRoleWithAggregatesFilter<$PrismaModel> | $Enums.PosAdminRole
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPosAdminRoleFilter<$PrismaModel>
+    _max?: NestedEnumPosAdminRoleFilter<$PrismaModel>
   }
 
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -53699,6 +55285,23 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumPaymentMethodFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentMethod | EnumPaymentMethodFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentMethod[] | ListEnumPaymentMethodFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentMethod[] | ListEnumPaymentMethodFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentMethodFilter<$PrismaModel> | $Enums.PaymentMethod
+  }
+
+  export type NestedEnumPaymentMethodWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentMethod | EnumPaymentMethodFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentMethod[] | ListEnumPaymentMethodFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentMethod[] | ListEnumPaymentMethodFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentMethodWithAggregatesFilter<$PrismaModel> | $Enums.PaymentMethod
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPaymentMethodFilter<$PrismaModel>
+    _max?: NestedEnumPaymentMethodFilter<$PrismaModel>
   }
 
   export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -53909,28 +55512,11 @@ export namespace Prisma {
     _max?: NestedEnumAccountLevelFilter<$PrismaModel>
   }
 
-  export type NestedEnumPaymentMethodFilter<$PrismaModel = never> = {
-    equals?: $Enums.PaymentMethod | EnumPaymentMethodFieldRefInput<$PrismaModel>
-    in?: $Enums.PaymentMethod[] | ListEnumPaymentMethodFieldRefInput<$PrismaModel>
-    notIn?: $Enums.PaymentMethod[] | ListEnumPaymentMethodFieldRefInput<$PrismaModel>
-    not?: NestedEnumPaymentMethodFilter<$PrismaModel> | $Enums.PaymentMethod
-  }
-
   export type NestedEnumChequeStatusNullableFilter<$PrismaModel = never> = {
     equals?: $Enums.ChequeStatus | EnumChequeStatusFieldRefInput<$PrismaModel> | null
     in?: $Enums.ChequeStatus[] | ListEnumChequeStatusFieldRefInput<$PrismaModel> | null
     notIn?: $Enums.ChequeStatus[] | ListEnumChequeStatusFieldRefInput<$PrismaModel> | null
     not?: NestedEnumChequeStatusNullableFilter<$PrismaModel> | $Enums.ChequeStatus | null
-  }
-
-  export type NestedEnumPaymentMethodWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.PaymentMethod | EnumPaymentMethodFieldRefInput<$PrismaModel>
-    in?: $Enums.PaymentMethod[] | ListEnumPaymentMethodFieldRefInput<$PrismaModel>
-    notIn?: $Enums.PaymentMethod[] | ListEnumPaymentMethodFieldRefInput<$PrismaModel>
-    not?: NestedEnumPaymentMethodWithAggregatesFilter<$PrismaModel> | $Enums.PaymentMethod
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumPaymentMethodFilter<$PrismaModel>
-    _max?: NestedEnumPaymentMethodFilter<$PrismaModel>
   }
 
   export type NestedEnumChequeStatusNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -53992,6 +55578,127 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumTransactionDirectionFilter<$PrismaModel>
     _max?: NestedEnumTransactionDirectionFilter<$PrismaModel>
+  }
+
+  export type PosCounterSaleCreateWithoutCashierInput = {
+    invoiceGroupCode: string
+    totalAmount: number
+    amountReceived: number
+    changeGiven: number
+    paymentMethod?: $Enums.PaymentMethod
+    createdAt?: Date | string
+  }
+
+  export type PosCounterSaleUncheckedCreateWithoutCashierInput = {
+    id?: number
+    invoiceGroupCode: string
+    totalAmount: number
+    amountReceived: number
+    changeGiven: number
+    paymentMethod?: $Enums.PaymentMethod
+    createdAt?: Date | string
+  }
+
+  export type PosCounterSaleCreateOrConnectWithoutCashierInput = {
+    where: PosCounterSaleWhereUniqueInput
+    create: XOR<PosCounterSaleCreateWithoutCashierInput, PosCounterSaleUncheckedCreateWithoutCashierInput>
+  }
+
+  export type PosCounterSaleCreateManyCashierInputEnvelope = {
+    data: PosCounterSaleCreateManyCashierInput | PosCounterSaleCreateManyCashierInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type PosCounterSaleUpsertWithWhereUniqueWithoutCashierInput = {
+    where: PosCounterSaleWhereUniqueInput
+    update: XOR<PosCounterSaleUpdateWithoutCashierInput, PosCounterSaleUncheckedUpdateWithoutCashierInput>
+    create: XOR<PosCounterSaleCreateWithoutCashierInput, PosCounterSaleUncheckedCreateWithoutCashierInput>
+  }
+
+  export type PosCounterSaleUpdateWithWhereUniqueWithoutCashierInput = {
+    where: PosCounterSaleWhereUniqueInput
+    data: XOR<PosCounterSaleUpdateWithoutCashierInput, PosCounterSaleUncheckedUpdateWithoutCashierInput>
+  }
+
+  export type PosCounterSaleUpdateManyWithWhereWithoutCashierInput = {
+    where: PosCounterSaleScalarWhereInput
+    data: XOR<PosCounterSaleUpdateManyMutationInput, PosCounterSaleUncheckedUpdateManyWithoutCashierInput>
+  }
+
+  export type PosCounterSaleScalarWhereInput = {
+    AND?: PosCounterSaleScalarWhereInput | PosCounterSaleScalarWhereInput[]
+    OR?: PosCounterSaleScalarWhereInput[]
+    NOT?: PosCounterSaleScalarWhereInput | PosCounterSaleScalarWhereInput[]
+    id?: IntFilter<"PosCounterSale"> | number
+    invoiceGroupCode?: StringFilter<"PosCounterSale"> | string
+    totalAmount?: FloatFilter<"PosCounterSale"> | number
+    amountReceived?: FloatFilter<"PosCounterSale"> | number
+    changeGiven?: FloatFilter<"PosCounterSale"> | number
+    paymentMethod?: EnumPaymentMethodFilter<"PosCounterSale"> | $Enums.PaymentMethod
+    cashierId?: IntFilter<"PosCounterSale"> | number
+    createdAt?: DateTimeFilter<"PosCounterSale"> | Date | string
+  }
+
+  export type PosAdminCreateWithoutCounterSalesInput = {
+    name: string
+    email: string
+    passwordHash: string
+    role?: $Enums.PosAdminRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PosAdminUncheckedCreateWithoutCounterSalesInput = {
+    id?: number
+    name: string
+    email: string
+    passwordHash: string
+    role?: $Enums.PosAdminRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PosAdminCreateOrConnectWithoutCounterSalesInput = {
+    where: PosAdminWhereUniqueInput
+    create: XOR<PosAdminCreateWithoutCounterSalesInput, PosAdminUncheckedCreateWithoutCounterSalesInput>
+  }
+
+  export type PosAdminUpsertWithoutCounterSalesInput = {
+    update: XOR<PosAdminUpdateWithoutCounterSalesInput, PosAdminUncheckedUpdateWithoutCounterSalesInput>
+    create: XOR<PosAdminCreateWithoutCounterSalesInput, PosAdminUncheckedCreateWithoutCounterSalesInput>
+    where?: PosAdminWhereInput
+  }
+
+  export type PosAdminUpdateToOneWithWhereWithoutCounterSalesInput = {
+    where?: PosAdminWhereInput
+    data: XOR<PosAdminUpdateWithoutCounterSalesInput, PosAdminUncheckedUpdateWithoutCounterSalesInput>
+  }
+
+  export type PosAdminUpdateWithoutCounterSalesInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumPosAdminRoleFieldUpdateOperationsInput | $Enums.PosAdminRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosAdminUncheckedUpdateWithoutCounterSalesInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumPosAdminRoleFieldUpdateOperationsInput | $Enums.PosAdminRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type BikeModelCreateWithoutBrandInput = {
@@ -60043,6 +61750,45 @@ export namespace Prisma {
     invoicePayment?: InvoicePaymentUncheckedUpdateOneWithoutReceiptNestedInput
   }
 
+  export type PosCounterSaleCreateManyCashierInput = {
+    id?: number
+    invoiceGroupCode: string
+    totalAmount: number
+    amountReceived: number
+    changeGiven: number
+    paymentMethod?: $Enums.PaymentMethod
+    createdAt?: Date | string
+  }
+
+  export type PosCounterSaleUpdateWithoutCashierInput = {
+    invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    amountReceived?: FloatFieldUpdateOperationsInput | number
+    changeGiven?: FloatFieldUpdateOperationsInput | number
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosCounterSaleUncheckedUpdateWithoutCashierInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    amountReceived?: FloatFieldUpdateOperationsInput | number
+    changeGiven?: FloatFieldUpdateOperationsInput | number
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosCounterSaleUncheckedUpdateManyWithoutCashierInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    amountReceived?: FloatFieldUpdateOperationsInput | number
+    changeGiven?: FloatFieldUpdateOperationsInput | number
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type BikeModelCreateManyBrandInput = {
     id?: number
     name: string
@@ -62395,6 +64141,10 @@ export namespace Prisma {
    * Aliases for legacy arg types
    */
     /**
+     * @deprecated Use PosAdminCountOutputTypeDefaultArgs instead
+     */
+    export type PosAdminCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PosAdminCountOutputTypeDefaultArgs<ExtArgs>
+    /**
      * @deprecated Use BikeBrandCountOutputTypeDefaultArgs instead
      */
     export type BikeBrandCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = BikeBrandCountOutputTypeDefaultArgs<ExtArgs>
@@ -62474,6 +64224,10 @@ export namespace Prisma {
      * @deprecated Use PosAdminDefaultArgs instead
      */
     export type PosAdminArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PosAdminDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use PosCounterSaleDefaultArgs instead
+     */
+    export type PosCounterSaleArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PosCounterSaleDefaultArgs<ExtArgs>
     /**
      * @deprecated Use BikeBrandDefaultArgs instead
      */

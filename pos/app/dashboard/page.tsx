@@ -15,7 +15,6 @@ import {
   IconInvoice,
   IconInventory,
   IconTrend,
-  IconBike,
   IconActivity,
 } from "../lib/icons";
 
@@ -716,13 +715,13 @@ export default function DashboardPage() {
             onClick={exportFinanceReportPdf}
             disabled={financeDateRangeInvalid}
           >
-            <IconInvoice /> Print Finance PDF
+            <IconInvoice /> Export Sales Report
           </button>
           <button type="button" className="btn-outline" onClick={() => router.push("/dashboard/invoices")}>
-            <IconInvoice /> New Invoice
+            <IconInvoice /> New Sale
           </button>
           <button type="button" className="btn-accent" onClick={() => router.push("/dashboard/inventory")}>
-            <IconInventory /> Check Drink Stock
+            <IconInventory /> Check Stock
           </button>
         </div>
       </div>
@@ -855,7 +854,7 @@ export default function DashboardPage() {
             color: "#C9A84C",
           },
           {
-            label: "Whole Revenue",
+            label: "All-time Revenue",
             value: loading ? "Loading..." : `LKR ${formatCurrencyCompact(totals.totalRevenue)}`,
             trend: `${purchases.length} total invoices`,
             up: true,
@@ -863,9 +862,9 @@ export default function DashboardPage() {
             color: "#10B981",
           },
           {
-            label: "Active Users",
+            label: "Customers Served",
             value: loading ? "Loading..." : String(totals.activeUsers),
-            trend: `${totals.openInvoices} open invoices`,
+            trend: `${totals.openInvoices} open tabs`,
             up: totals.openInvoices === 0,
             icon: <IconUsers />,
             color: "#3B82F6",
@@ -873,7 +872,7 @@ export default function DashboardPage() {
           {
             label: "Low Stock Alerts",
             value: loading ? "Loading..." : String(totals.lowStockAlerts),
-            trend: "inventory threshold", 
+            trend: "items below par",
             up: totals.lowStockAlerts === 0,
             icon: <IconInventory />,
             color: "#EF4444",

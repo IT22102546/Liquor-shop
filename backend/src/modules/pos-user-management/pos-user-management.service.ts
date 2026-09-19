@@ -7,6 +7,7 @@ import type {
   CreateLeasingCompanyDto,
   CreateInvoiceTermDto,
   CreatePurchaseDto,
+  CheckoutSaleDto,
   CreatePosUserDto,
   PurchaseQueryDto,
   PosUserQueryDto,
@@ -759,6 +760,157 @@ export async function deletePosUser(id: number) {
   });
   if (!existing) throw AppError.notFound("User not found");
   await prisma.posCustomer.delete({ where: { id } });
+}
+
+export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
+  const mergedItems = Array.from(
+    dto.items.reduce((items, item) => {
+      const existing = items.get(item.productId);
+      if (existing) {
+        existing.quantity += item.quantity;
+        existing.unitPrice = item.unitPrice;
+      } else {
+        items.set(item.productId, { ...item });
+      }
+      return items;
+    }, new Map<number, CheckoutSaleDto["items"][number]>()).values(),
+  );
+
+  const products = await prisma.inventoryProduct.findMany({
+    where: { id: { in: mergedItems.map((item) => item.productId) } },
+    select: { id: true, name: true, displayId: true, quantity: true },
+  });
+  if (products.length !== mergedItems.length) {
+    throw AppError.validation({ items: ["One or more products no longer exist"] });
+  }
+  const productById = new Map(products.map((product) => [product.id, product]));
+  for (const item of mergedItems) {
+    const product = productById.get(item.productId)!;
+    if (item.quantity > product.quantity) {
+      throw AppError.validation({
+        items: [`Only ${product.quantity} unit(s) of ${product.name} are available`],
+      });
+    }
+  }
+
+  const invoiceGroupCode = `POS-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+  const total = roundCurrency(
+    mergedItems.reduce(
+      (sum, item) => sum + item.unitPrice * item.quantity,
+      0,
+    ),
+  );
+  const amountReceived = dto.paymentMethod === "CASH"
+    ? roundCurrency(dto.amountReceived ?? Number.NaN)
+    : total;
+  if (!Number.isFinite(amountReceived) || amountReceived < total) {
+    throw AppError.validation({
+      amountReceived: ["Cash received must be equal to or greater than the sale total"],
+    });
+  }
+  const changeGiven = dto.paymentMethod === "CASH"
+    ? roundCurrency(amountReceived - total)
+    : 0;
+
+  const result = await prisma.$transaction(async (tx) => {
+    const customer = await tx.posCustomer.upsert({
+      where: { nic: "WALK-IN" },
+      update: {},
+      create: {
+        firstName: "Walk-in",
+        lastName: "Customer",
+        nic: "WALK-IN",
+        mobileNumber: "WALK-IN",
+        province: "North Western",
+        district: "Kurunegala",
+        address: "Bar Shop counter sale",
+      },
+    });
+
+    const purchases = [];
+    for (const item of mergedItems) {
+      const product = productById.get(item.productId)!;
+      const updated = await tx.inventoryProduct.updateMany({
+        where: { id: item.productId, quantity: { gte: item.quantity } },
+        data: {
+          quantity: { decrement: item.quantity },
+          soldQuantity: { increment: item.quantity },
+          lastSoldAt: new Date(),
+        },
+      });
+      if (updated.count !== 1) {
+        throw new AppError(`${product.name} does not have enough stock`, 409);
+      }
+
+      const lineTotal = roundCurrency(item.unitPrice * item.quantity);
+      const purchase = await tx.posCustomerPurchase.create({
+        data: {
+          customerId: customer.id,
+          itemType: "INVENTORY",
+          purchaseMode: mergedItems.length > 1 ? "BULK" : "SINGLE",
+          invoiceGroupCode,
+          inventoryProductId: item.productId,
+          quantity: item.quantity,
+          currentSellingPrice: item.unitPrice,
+          finalSellingPrice: lineTotal,
+          paymentType: "DIRECT",
+          downPaymentAmount: lineTotal,
+          remainingAmount: 0,
+          settlementStatus: "SETTLED",
+          purchaseChannel: "PERSONAL",
+        },
+      });
+      if (lineTotal > 0) {
+        await tx.invoicePayment.create({
+          data: {
+            purchaseId: purchase.id,
+            amount: lineTotal,
+            paymentMethod: dto.paymentMethod,
+            description: `Counter sale — ${invoiceGroupCode}`,
+          },
+        });
+      }
+      purchases.push({
+        id: purchase.id,
+        productId: item.productId,
+        displayId: product.displayId,
+        name: product.name,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        lineTotal,
+      });
+    }
+
+    const counterSale = await tx.posCounterSale.create({
+      data: {
+        invoiceGroupCode,
+        totalAmount: total,
+        amountReceived,
+        changeGiven,
+        paymentMethod: dto.paymentMethod,
+        cashierId,
+      },
+      select: {
+        totalAmount: true,
+        amountReceived: true,
+        changeGiven: true,
+        paymentMethod: true,
+        createdAt: true,
+      },
+    });
+
+    return { customerId: customer.id, purchases, counterSale };
+  });
+
+  return {
+    invoiceGroupCode,
+    paymentMethod: dto.paymentMethod,
+    total,
+    amountReceived,
+    changeGiven,
+    itemCount: mergedItems.reduce((sum, item) => sum + item.quantity, 0),
+    ...result,
+  };
 }
 
 async function createInvoicePaymentRecord(

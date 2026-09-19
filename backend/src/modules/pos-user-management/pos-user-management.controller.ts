@@ -7,6 +7,7 @@ import {
   createPurchaseSchema,
   createInvoiceTermSchema,
   createPosUserSchema,
+  checkoutSaleSchema,
   purchaseQuerySchema,
   posUserQuerySchema,
   settlePurchaseSchema,
@@ -133,6 +134,20 @@ export async function createPurchase(
     const id = parsePositiveIntParam("id", req.params.id);
     const data = await service.createPurchase(id, dto);
     return sendCreated(res, data);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function checkoutSale(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const dto = validate(checkoutSaleSchema, req.body);
+    const cashierId = (req as unknown as { user: { id: number } }).user.id;
+    return sendCreated(res, await service.checkoutSale(dto, cashierId));
   } catch (error) {
     return next(error);
   }

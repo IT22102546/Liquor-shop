@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { authenticatePosAdmin } from "../../common/middleware/pos-auth.middleware";
+import { authenticatePosAdmin, authorizePosRoles } from "../../common/middleware/pos-auth.middleware";
 import * as controller from "./accounts.controller";
 
 const router = Router();
 router.use(authenticatePosAdmin);
+router.use(authorizePosRoles("ADMIN", "ACCOUNTANT"));
 
 // Chart of Accounts
 router.get("/chart", controller.getAccounts);

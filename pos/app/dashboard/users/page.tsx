@@ -289,7 +289,7 @@ export default function UsersPage() {
   const [bikeLoading, setBikeLoading] = useState(false);
   const [purchaseUser, setPurchaseUser] = useState<PosUser | null>(null);
   const [purchaseForm, setPurchaseForm] = useState<PurchaseFormState>({
-    purchaseType: "BIKE",
+    purchaseType: "INVENTORY",
     purchaseMode: "SINGLE",
     bikeVehicleId: "",
     inventoryProductId: "",
@@ -1243,7 +1243,7 @@ export default function UsersPage() {
   const openPurchaseModal = (user: PosUser) => {
     setPurchaseUser(user);
     setPurchaseForm({
-      purchaseType: "BIKE",
+      purchaseType: "INVENTORY",
       purchaseMode: "SINGLE",
       bikeVehicleId: "",
       inventoryProductId: "",
@@ -1269,7 +1269,7 @@ export default function UsersPage() {
   const closePurchaseModal = () => {
     setPurchaseUser(null);
     setPurchaseForm({
-      purchaseType: "BIKE",
+      purchaseType: "INVENTORY",
       purchaseMode: "SINGLE",
       bikeVehicleId: "",
       inventoryProductId: "",
@@ -1546,7 +1546,7 @@ export default function UsersPage() {
             method: "POST",
             headers: { ...authHeader, "Content-Type": "application/json" },
             body: JSON.stringify({
-              purchaseType: "BIKE",
+              purchaseType: "INVENTORY",
               purchaseMode: "BULK",
               invoiceGroupCode,
               bikeVehicleId: line.bikeId,
@@ -1620,17 +1620,17 @@ export default function UsersPage() {
         <div className="page-title-row">
           <div className="page-title-icon"><IconUsers /></div>
           <div>
-            <h2 className="page-title">User Management</h2>
-            <p className="page-subtitle">Add and manage customers with profile details, contact information, and product preferences.</p>
+            <h2 className="page-title">Customer Directory</h2>
+            <p className="page-subtitle">Register customers for quick lookup, receipts, and sales history.</p>
           </div>
         </div>
       </div>
 
       <div className="bm-manage-tabs">
-        <button className={`bm-tab-btn ${activeTab === "users" ? "active" : ""}`} onClick={() => router.push("/dashboard/users")}>Users</button>
+        <button className={`bm-tab-btn ${activeTab === "users" ? "active" : ""}`} onClick={() => router.push("/dashboard/users")}>Customers</button>
         <button className={`bm-tab-btn ${activeTab === "history" ? "active" : ""}`} onClick={() => router.push("/dashboard/users/history")}>
           <IconClock />
-          User History
+          Sales History
         </button>
       </div>
 
@@ -1644,19 +1644,19 @@ export default function UsersPage() {
           <span className="bm-stat-sub">Registered user records</span>
         </div>
         <div className="bm-stat-card">
-          <div className="bm-stat-head"><span className="bm-stat-icon"><IconBike /></span><span className="bm-stat-label">Customers With Product Preferences</span></div>
-          <strong className="bm-stat-value">{usersWithDreamBikes}</strong>
-          <span className="bm-stat-sub">Users who selected at least one bike</span>
+          <div className="bm-stat-head"><span className="bm-stat-icon"><IconUsers /></span><span className="bm-stat-label">Customer Records</span></div>
+          <strong className="bm-stat-value">{totalUsers}</strong>
+          <span className="bm-stat-sub">Available for lookup at checkout</span>
         </div>
         <div className="bm-stat-card bm-stat-card-soft">
-          <div className="bm-stat-head"><span className="bm-stat-icon"><IconInvoice /></span><span className="bm-stat-label">Product Preference Selections</span></div>
-          <strong className="bm-stat-value">{totalDreamSelections}</strong>
-          <span className="bm-stat-sub">Total saved product preference links</span>
+          <div className="bm-stat-head"><span className="bm-stat-icon"><IconInvoice /></span><span className="bm-stat-label">Contact Coverage</span></div>
+          <strong className="bm-stat-value">{users.filter((user) => Boolean(user.mobileNumber)).length}</strong>
+          <span className="bm-stat-sub">Customers with a phone number</span>
         </div>
         <div className="bm-stat-card">
-          <div className="bm-stat-head"><span className="bm-stat-icon"><IconActivity /></span><span className="bm-stat-label">Available Product Options</span></div>
-          <strong className="bm-stat-value">{availableDreamBikes}</strong>
-          <span className="bm-stat-sub">Currently available in bike inventory</span>
+          <div className="bm-stat-head"><span className="bm-stat-icon"><IconActivity /></span><span className="bm-stat-label">Sales Ready</span></div>
+          <strong className="bm-stat-value">{users.length}</strong>
+          <span className="bm-stat-sub">Customer profiles ready for checkout</span>
         </div>
       </div>
 
@@ -1755,10 +1755,10 @@ export default function UsersPage() {
         <>
           <div className="bm-table-card">
             <div style={{ padding: "1rem", borderBottom: "1px solid var(--panel-border)", display: "flex", justifyContent: "space-between", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }}>
-              <h3 className="users-section-title" style={{ margin: 0 }}>Users</h3>
+              <h3 className="users-section-title" style={{ margin: 0 }}>Customers</h3>
               <div style={{ display: "flex", gap: "0.55rem", flexWrap: "wrap" }}>
                 <input className="bm-input" style={{ minWidth: 280 }} type="search" value={userSearch} onChange={(event) => setUserSearch(event.target.value)} placeholder="Search name, NIC, mobile or location" />
-                <button type="button" className="btn-accent" onClick={openAddUserModal}>Add User</button>
+                <button type="button" className="btn-accent" onClick={openAddUserModal}>Add Customer</button>
                 <button type="button" className="btn-outline" onClick={() => void loadInitialData()}>Refresh</button>
               </div>
             </div>
@@ -1771,7 +1771,7 @@ export default function UsersPage() {
                     <th>NIC</th>
                     <th>Mobile</th>
                     <th>Province / District</th>
-                    <th>Product Preferences</th>
+                    <th>Customer Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -1787,7 +1787,7 @@ export default function UsersPage() {
                       <td>{user.nic}</td>
                       <td>{user.mobileNumber}</td>
                       <td>{user.province} / {user.district}</td>
-                      <td>{user.dreamBikes.length}</td>
+                        <td><span className="badge badge-active">Registered</span></td>
                       <td>
                         <div className="users-row-actions">
                           <button type="button" className="btn-outline" onClick={() => setViewUser(user)}>View</button>
@@ -1811,7 +1811,7 @@ export default function UsersPage() {
         <div className="bm-modal-backdrop" onClick={resetForm}>
           <form onSubmit={handleSaveUser} className="bm-modal bm-modal-lg" onClick={(e) => e.stopPropagation()}>
             <button type="button" className="bm-modal-close" onClick={resetForm}>x</button>
-            <h3 className="bm-modal-title">{editingUserId ? "Edit User" : "Add New User"}</h3>
+            <h3 className="bm-modal-title">{editingUserId ? "Edit Customer" : "Register Customer"}</h3>
             {formGeneralError && <div className="bm-alert bm-alert-error">{formGeneralError}</div>}
             <div className="users-form-grid">
               <div className="bm-field-group">
@@ -1862,31 +1862,8 @@ export default function UsersPage() {
               </div>
             </div>
 
-            <div className="users-dream-bikes-wrap">
-              <label className="users-label">Product Preferences</label>
-              <input className="bm-input" placeholder="Search bikes by display ID, brand, model or color" value={dreamBikeSearch} onChange={(e) => setDreamBikeSearch(e.target.value)} />
-              <div className="users-bike-list">
-                {filteredBikeOptions.map((bike) => {
-                  const checked = form.dreamBikeIds.includes(bike.id);
-                  return (
-                    <label key={bike.id} className={`users-bike-option ${checked ? "checked" : ""}`}>
-                      <input type="checkbox" checked={checked} onChange={() => toggleDreamBike(bike.id)} />
-                      <span>
-                        {bike.displayId} | {bike.brandName} {bike.modelName} ({bike.colour})
-                        <em className={`users-availability ${bike.availability === "available" ? "ok" : "warn"}`}>
-                          {bike.availability === "available" ? "Available" : "Not Available"}
-                        </em>
-                      </span>
-                    </label>
-                  );
-                })}
-                {filteredBikeOptions.length === 0 && <p className="users-muted">No bikes found for the current search.</p>}
-              </div>
-              {formFieldErrors.dreamBikeIds && <span className="users-field-error">{formFieldErrors.dreamBikeIds}</span>}
-            </div>
-
             <div className="bm-modal-actions" style={{ marginTop: "1rem" }}>
-              <button type="submit" className="btn-accent" disabled={saving}>{saving ? "Saving..." : editingUserId ? "Update User" : "Add User"}</button>
+              <button type="submit" className="btn-accent" disabled={saving}>{saving ? "Saving..." : editingUserId ? "Update Customer" : "Register Customer"}</button>
               <button type="button" className="btn-outline" onClick={resetForm}>Cancel</button>
             </div>
           </form>
@@ -1906,18 +1883,7 @@ export default function UsersPage() {
               <div className="users-span-2"><strong>Address:</strong> {viewUser.address}</div>
             </div>
 
-            <h4 className="users-section-title" style={{ marginTop: "1rem" }}>Product Preferences</h4>
-            <div className="users-bike-chips">
-              {viewUser.dreamBikes.map((bike) => (
-                <button type="button" key={bike.relationId} className="users-bike-chip" onClick={() => void openBikeModal(bike.bikeId)}>
-                  {bike.displayId} | {bike.brandName} {bike.modelName}
-                  <span className={`users-availability ${bike.availability === "available" ? "ok" : "warn"}`}>
-                    {bike.availability === "available" ? "Available" : "Not Available"}
-                  </span>
-                </button>
-              ))}
-              {viewUser.dreamBikes.length === 0 && <p className="users-muted">No product preferences added.</p>}
-            </div>
+            <p className="users-muted" style={{ marginTop: "1rem" }}>Customer profile available for lookup and sales history.</p>
           </div>
         </div>
       )}
@@ -1954,7 +1920,7 @@ export default function UsersPage() {
         <div className="bm-modal-backdrop" onClick={closePurchaseModal}>
           <form className="bm-modal bm-modal-lg" onClick={(e) => e.stopPropagation()} onSubmit={handlePurchaseSubmit}>
             <button type="button" className="bm-modal-close" onClick={closePurchaseModal}>x</button>
-            <h3 className="bm-modal-title">Create Purchase</h3>
+            <h3 className="bm-modal-title">Record Sale</h3>
             {purchaseError && <div className="bm-alert bm-alert-error">{purchaseError}</div>}
 
             <div className="users-view-grid" style={{ marginBottom: "1rem" }}>
@@ -1966,7 +1932,7 @@ export default function UsersPage() {
 
             <div className="users-form-grid">
               <div className="bm-field-group users-span-2">
-                <label>Purchase Type</label>
+                <label>Sale Type</label>
                 <select
                   className="bm-input"
                   value={purchaseForm.purchaseType}
@@ -1997,8 +1963,7 @@ export default function UsersPage() {
                     setPurchaseError(null);
                   }}
                 >
-                  <option value="BIKE">Bike</option>
-                  <option value="INVENTORY">Inventory Product</option>
+                  <option value="INVENTORY">Drink or Bar Product</option>
                 </select>
               </div>
 

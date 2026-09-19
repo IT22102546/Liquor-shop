@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authenticatePosAdmin } from "../../common/middleware/pos-auth.middleware";
+import { authenticatePosAdmin, authorizePosRoles } from "../../common/middleware/pos-auth.middleware";
 import * as ctrl from "./contact-requests.controller";
 
 // ── Public router (no auth) ────────────────────────────────────────────────
@@ -9,6 +9,7 @@ publicContactRequestsRouter.post("/", ctrl.submitContactRequest);
 // ── POS Management router (auth required) ─────────────────────────────────
 const posRouter = Router();
 posRouter.use(authenticatePosAdmin);
+posRouter.use(authorizePosRoles("ADMIN", "INVENTORY_MANAGER"));
 
 posRouter.get("/stats", ctrl.getContactRequestStats);
 posRouter.get("/", ctrl.listContactRequests);
