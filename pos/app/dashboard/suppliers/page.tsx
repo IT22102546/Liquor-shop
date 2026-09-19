@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAdmin } from "../../components/AdminContext";
 import { API_URL } from "../../lib/constants";
 import { exportTableToPdf } from "../../lib/pdf-export";
-import { IconBike, IconSupplier } from "../../lib/icons";
+import { IconInventory, IconSupplier } from "../../lib/icons";
 import TablePagination, { paginateRows } from "../../components/TablePagination";
 
 type Supplier = {
@@ -18,15 +18,6 @@ type Supplier = {
   email?: string;
   vatRegistrationNo?: string;
   _count?: { vehicles: number; products: number };
-};
-
-type VehicleImage = {
-  id: number;
-  vehicleId: number;
-  url: string;
-  isPrimary: boolean;
-  sortOrder: number;
-  createdAt: string;
 };
 
 type ProductImage = {
@@ -55,40 +46,6 @@ type InventoryProduct = {
   createdAt: string;
 };
 
-type VehicleExpense = {
-  id: number;
-  description: string;
-  amount: number;
-  createdAt: string;
-};
-
-type Vehicle = {
-  id: number;
-  displayId: string;
-  brand: { id?: number; name: string };
-  model: { id?: number; name: string };
-  supplier?: { id: number; name: string; code: string } | null;
-  colour: string;
-  year?: number;
-  createdAt: string;
-  fileNo?: string;
-  registerNo?: string;
-  chassisNo?: string;
-  engineNo?: string;
-  engineCapacityCc?: number;
-  condition?: "brandnew" | "used";
-  mileage?: number;
-  description?: string;
-  registrationType?: "registered" | "unregistered";
-  purchasePrice?: number;
-  taxAmount?: number;
-  sellingPrice?: number;
-  status: "available" | "sold";
-  soldAt?: string;
-  expenses?: VehicleExpense[];
-  images?: VehicleImage[];
-};
-
 type SupplierFormState = {
   name: string;
   contactPerson: string;
@@ -100,167 +57,6 @@ type SupplierFormState = {
 };
 
 type ConfirmState = { id: number; name: string } | null;
-
-function ViewBikeModal({ vehicle: initialVehicle, token, relatedVehicles = [], onClose }: { vehicle: Vehicle; token: string; relatedVehicles?: Vehicle[]; onClose: () => void }) {
-  const [vehicle, setVehicle] = useState<Vehicle>(initialVehicle);
-  const [loading, setLoading] = useState(true);
-  const [images, setImages] = useState<VehicleImage[]>(initialVehicle.images ?? []);
-  const base = `${API_URL}/api/pos/bike-management`;
-  const auth = { Authorization: `Bearer ${token}` };
-
-  useEffect(() => {
-    void (async () => {
-      try {
-        const [response, imageResponse] = await Promise.all([
-          fetch(`${base}/vehicles/${initialVehicle.id}`, { headers: auth }),
-          fetch(`${base}/vehicles/${initialVehicle.id}/images`, { headers: auth }),
-        ]);
-        if (response.ok) {
-          const payload = await response.json() as { data: Vehicle };
-          setVehicle(payload.data);
-          if (payload.data.images?.length) setImages(payload.data.images);
-        }
-        if (imageResponse.ok) {
-          const payload = await imageResponse.json() as { data: VehicleImage[] };
-          setImages(payload.data ?? []);
-        }
-      } finally {
-        setLoading(false);
-      }
-    })();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const formatCurrency = (value: number) => `Rs. ${value.toLocaleString(undefined, { minimumFractionDigits: value % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 })}`;
-  const expenses = vehicle.expenses ?? [];
-  const rawTotalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-  const createdAtMs = new Date(vehicle.createdAt).getTime();
-  const likelyBulkCount = Math.max(1, relatedVehicles.filter((candidate) => {
-    const candidateCreatedAtMs = new Date(candidate.createdAt).getTime();
-    return Number.isFinite(createdAtMs)
-      && Number.isFinite(candidateCreatedAtMs)
-      && Math.abs(candidateCreatedAtMs - createdAtMs) <= 60_000
-      && candidate.brand?.id === vehicle.brand?.id
-      && candidate.model?.id === vehicle.model?.id
-      && candidate.colour === vehicle.colour
-      && (candidate.supplier?.id ?? null) === (vehicle.supplier?.id ?? null)
-      && (candidate.year ?? null) === (vehicle.year ?? null)
-      && (candidate.registrationType ?? null) === (vehicle.registrationType ?? null)
-      && (candidate.sellingPrice ?? null) === (vehicle.sellingPrice ?? null);
-  }).length);
-  const comparisonBase = vehicle.sellingPrice ?? Number.MAX_SAFE_INTEGER;
-  const shouldDivideBulkValues = likelyBulkCount > 1 && (
-    (vehicle.purchasePrice ?? 0) > comparisonBase
-    || (vehicle.taxAmount ?? 0) > comparisonBase
-    || rawTotalExpenses > comparisonBase
-  );
-  const divideBulkAmount = (amount?: number) => {
-    if (amount == null) return amount;
-    return Number((amount / likelyBulkCount).toFixed(2));
-  };
-  const displayPurchasePrice = shouldDivideBulkValues ? divideBulkAmount(vehicle.purchasePrice) : vehicle.purchasePrice;
-  const displayTaxAmount = shouldDivideBulkValues ? divideBulkAmount(vehicle.taxAmount) : vehicle.taxAmount;
-  const displayExpenses = shouldDivideBulkValues
-    ? expenses.map((expense) => ({ ...expense, amount: divideBulkAmount(expense.amount) ?? 0 }))
-    : expenses;
-  const displayTotalExpenses = displayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
-
-  return (
-    <div className="bm-modal-backdrop" onClick={onClose}>
-      <div className="bm-modal bm-view-modal" onClick={(event) => event.stopPropagation()}>
-        <button className="bm-modal-close" onClick={onClose}>✕</button>
-        <h3 className="bm-modal-title">
-          Product Details — {vehicle.displayId}
-          <span className={`badge ${vehicle.status === "available" ? "badge-active" : "badge-pending"}`} style={{ marginLeft: 10, fontSize: 11, verticalAlign: "middle" }}>
-            {vehicle.status === "available" ? "Available" : "Sold"}
-          </span>
-        </h3>
-        {loading && <div style={{ textAlign: "center", padding: 12, color: "var(--text-soft)" }}>Loading product details…</div>}
-
-        <div className="bm-view-layout">
-          <div className="bm-view-left">
-            <div className="bm-view-section">
-              <h4 className="bm-view-section-title">Product Images</h4>
-              {images.length > 0 ? (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 10 }}>
-                  {images.slice(0, 4).map((image) => (
-                    <div key={image.id} style={{ borderRadius: 10, overflow: "hidden", border: "1px solid var(--panel-border)", background: "var(--bg)" }}>
-                      <img src={`${API_URL}${image.url}`} alt="Bike" className="bm-row-thumb" style={{ width: "100%", height: 110, objectFit: "cover", display: "block", borderRadius: 0 }} />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="bm-gallery-empty"><span className="bm-gallery-empty-icon">🖼️</span><span>No images available</span></div>
-              )}
-            </div>
-
-            <div className="bm-view-section">
-              <h4 className="bm-view-section-title">Overview</h4>
-              <div className="bm-view-quick-info">
-                <div className="bm-view-quick-item"><span className="bm-view-quick-label">Brand</span><span className="bm-view-quick-value">{vehicle.brand.name}</span></div>
-                <div className="bm-view-quick-item"><span className="bm-view-quick-label">Model</span><span className="bm-view-quick-value">{vehicle.model.name}</span></div>
-                <div className="bm-view-quick-item"><span className="bm-view-quick-label">Colour</span><span className="bm-view-quick-value">{vehicle.colour}</span></div>
-                <div className="bm-view-quick-item"><span className="bm-view-quick-label">Condition</span><span className="bm-view-quick-value">{vehicle.condition === "used" ? "Used" : vehicle.condition === "brandnew" ? "Brand New" : "—"}</span></div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bm-view-right">
-            <div className="bm-view-section">
-              <h4 className="bm-view-section-title">Product Information</h4>
-              <div className="bm-view-detail-grid">
-                <div className="bm-view-detail"><span className="bm-view-detail-label">Supplier</span><span className="bm-view-detail-value">{vehicle.supplier ? `${vehicle.supplier.name} (${vehicle.supplier.code})` : "—"}</span></div>
-                <div className="bm-view-detail"><span className="bm-view-detail-label">Year</span><span className="bm-view-detail-value">{vehicle.year ?? "—"}</span></div>
-                <div className="bm-view-detail"><span className="bm-view-detail-label">Engine Capacity</span><span className="bm-view-detail-value">{vehicle.engineCapacityCc ? `${vehicle.engineCapacityCc} cc` : "—"}</span></div>
-                <div className="bm-view-detail"><span className="bm-view-detail-label">Mileage</span><span className="bm-view-detail-value">{vehicle.mileage != null ? `${vehicle.mileage.toLocaleString()} km` : "—"}</span></div>
-                <div className="bm-view-detail"><span className="bm-view-detail-label">Registration</span><span className="bm-view-detail-value">{vehicle.registrationType === "registered" ? "Registered" : vehicle.registrationType === "unregistered" ? "Unregistered" : "—"}</span></div>
-                <div className="bm-view-detail"><span className="bm-view-detail-label">File No</span><span className="bm-view-detail-value">{vehicle.fileNo ?? "—"}</span></div>
-                <div className="bm-view-detail"><span className="bm-view-detail-label">Register No</span><span className="bm-view-detail-value">{vehicle.registerNo ?? "—"}</span></div>
-                <div className="bm-view-detail"><span className="bm-view-detail-label">Chassis No</span><span className="bm-view-detail-value">{vehicle.chassisNo ?? "—"}</span></div>
-                <div className="bm-view-detail"><span className="bm-view-detail-label">Engine No</span><span className="bm-view-detail-value">{vehicle.engineNo ?? "—"}</span></div>
-                <div className="bm-view-detail"><span className="bm-view-detail-label">Sold At</span><span className="bm-view-detail-value">{vehicle.soldAt ? new Date(vehicle.soldAt).toLocaleString() : "—"}</span></div>
-              </div>
-              {vehicle.description && (
-                <div className="bm-view-desc">
-                  <span className="bm-view-detail-label">Description</span>
-                  <p className="bm-view-desc-text">{vehicle.description}</p>
-                </div>
-              )}
-            </div>
-
-            <div className="bm-view-section">
-              <h4 className="bm-view-section-title">Pricing</h4>
-              <div className="bm-view-detail-grid">
-                <div className="bm-view-detail"><span className="bm-view-detail-label">Purchase Price</span><span className="bm-view-detail-value bm-view-price">{displayPurchasePrice != null ? formatCurrency(displayPurchasePrice) : "—"}</span></div>
-                <div className="bm-view-detail"><span className="bm-view-detail-label">Tax Amount</span><span className="bm-view-detail-value bm-view-price">{displayTaxAmount != null ? formatCurrency(displayTaxAmount) : "—"}</span></div>
-                <div className="bm-view-detail"><span className="bm-view-detail-label">Selling Price</span><span className="bm-view-detail-value bm-view-price bm-view-price-highlight">{vehicle.sellingPrice != null ? formatCurrency(vehicle.sellingPrice) : "—"}</span></div>
-              </div>
-              {shouldDivideBulkValues && (
-                <div style={{ marginTop: 8, fontSize: 12, color: "var(--text-soft)" }}>
-                  Showing per-bike values divided across {likelyBulkCount} bikes from the same bulk entry.
-                </div>
-              )}
-            </div>
-
-            {displayExpenses.length > 0 && (
-              <div className="bm-view-section">
-                <h4 className="bm-view-section-title">Additional Expenses</h4>
-                <div className="bm-view-detail-grid">
-                  <div className="bm-view-detail"><span className="bm-view-detail-label">Expense Items</span><span className="bm-view-detail-value">{displayExpenses.length}</span></div>
-                  <div className="bm-view-detail"><span className="bm-view-detail-label">Total Expense</span><span className="bm-view-detail-value bm-view-price">{formatCurrency(displayTotalExpenses)}</span></div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="bm-modal-actions">
-          <button type="button" className="btn-outline" onClick={onClose}>Close</button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function ViewInventoryProductModal({ product, token, onClose }: { product: InventoryProduct; token: string; onClose: () => void }) {
   const [detail, setDetail] = useState<InventoryProduct>(product);
@@ -349,33 +145,22 @@ function ViewInventoryProductModal({ product, token, onClose }: { product: Inven
 }
 
 function ViewSupplierModal({ supplier, token, onClose }: { supplier: Supplier; token: string; onClose: () => void }) {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [products, setProducts] = useState<InventoryProduct[]>([]);
-  const [loadingVehicles, setLoadingVehicles] = useState(true);
   const [loadingProducts, setLoadingProducts] = useState(true);
-  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<InventoryProduct | null>(null);
   const base = `${API_URL}/api/pos/bike-management`;
   const auth = { Authorization: `Bearer ${token}` };
-  const linkedBikes = vehicles.length || supplier._count?.vehicles || 0;
   const linkedProducts = products.length || supplier._count?.products || 0;
   const hasContactDetails = !!(supplier.contactPerson || supplier.telephone || supplier.email || supplier.fax);
 
   useEffect(() => {
     void (async () => {
       try {
-        const [vehicleResponse, productResponse] = await Promise.all([
-          fetch(`${base}/vehicles?limit=5000`, { headers: auth }),
-          fetch(`${base}/products?limit=5000`, { headers: auth }),
-        ]);
-        const vehiclePayload = await vehicleResponse.json().catch(() => null) as { data?: { vehicles?: Vehicle[] } } | null;
+        const productResponse = await fetch(`${base}/products?limit=5000`, { headers: auth });
         const productPayload = await productResponse.json().catch(() => null) as { data?: { products?: InventoryProduct[] } } | null;
-        const allVehicles = vehiclePayload?.data?.vehicles ?? [];
         const allProducts = productPayload?.data?.products ?? [];
-        setVehicles(allVehicles.filter((vehicle) => vehicle.supplier?.id === supplier.id));
         setProducts(allProducts.filter((product) => product.supplier?.id === supplier.id));
       } finally {
-        setLoadingVehicles(false);
         setLoadingProducts(false);
       }
     })();
@@ -400,10 +185,6 @@ function ViewSupplierModal({ supplier, token, onClose }: { supplier: Supplier; t
                 <div className="bm-view-quick-item">
                   <span className="bm-view-quick-label">Supplier Code</span>
                   <span className="bm-view-quick-value">{supplier.code}</span>
-                </div>
-                <div className="bm-view-quick-item">
-                  <span className="bm-view-quick-label">Linked Bikes</span>
-                  <span className="bm-view-quick-value">{linkedBikes}</span>
                 </div>
                 <div className="bm-view-quick-item">
                   <span className="bm-view-quick-label">Linked Products</span>
@@ -437,56 +218,6 @@ function ViewSupplierModal({ supplier, token, onClose }: { supplier: Supplier; t
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="bm-view-section">
-          <h4 className="bm-view-section-title">Bikes Under This Supplier</h4>
-          {loadingVehicles ? (
-            <p className="bm-empty" style={{ padding: "1rem 0" }}>Loading linked bikes…</p>
-          ) : vehicles.length === 0 ? (
-            <p className="bm-empty" style={{ padding: "1rem 0" }}>No bikes are linked to this supplier yet.</p>
-          ) : (
-            <div className="data-table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Image</th>
-                    <th>Bike ID</th>
-                    <th>Product</th>
-                    <th>Status</th>
-                    <th>Register No</th>
-                    <th>Selling Price</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {vehicles.map((vehicle) => {
-                    const primaryImg = (vehicle.images ?? []).find((img) => img.isPrimary) ?? (vehicle.images ?? [])[0];
-                    return (
-                      <tr key={vehicle.id}>
-                        <td>{primaryImg ? <img src={`${API_URL}${primaryImg.url}`} alt="" className="bm-row-thumb" /> : <span className="bm-row-thumb-empty">🖼️</span>}</td>
-                        <td><span className="bm-display-id">{vehicle.displayId}</span></td>
-                        <td>
-                          <span className="bm-vehicle-detail">{vehicle.brand.name} · {vehicle.model.name}</span>
-                          <span className="bm-vehicle-meta">{vehicle.colour}{vehicle.year ? ` · ${vehicle.year}` : ""}{vehicle.engineCapacityCc ? ` · ${vehicle.engineCapacityCc} cc` : ""}</span>
-                        </td>
-                        <td>
-                          <span className={`badge ${vehicle.status === "available" ? "badge-active" : "badge-pending"}`}>
-                            {vehicle.status === "available" ? "Available" : "Sold"}
-                          </span>
-                        </td>
-                        <td>{vehicle.registerNo || "—"}</td>
-                        <td>{vehicle.sellingPrice != null ? `Rs. ${vehicle.sellingPrice.toLocaleString()}` : "—"}</td>
-                        <td>
-                          <button type="button" className="bm-action-btn bm-view-btn" onClick={() => setSelectedVehicle(vehicle)} title="View product details">View</button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
         </div>
 
         <div className="bm-view-section">
@@ -537,7 +268,6 @@ function ViewSupplierModal({ supplier, token, onClose }: { supplier: Supplier; t
           <button type="button" className="btn-outline" onClick={onClose}>Close</button>
         </div>
 
-        {selectedVehicle && <ViewBikeModal vehicle={selectedVehicle} relatedVehicles={vehicles} token={token} onClose={() => setSelectedVehicle(null)} />}
         {selectedProduct && <ViewInventoryProductModal product={selectedProduct} token={token} onClose={() => setSelectedProduct(null)} />}
       </div>
     </div>
@@ -676,7 +406,7 @@ export default function SupplierManagementPage() {
     }
   };
 
-  const linkedBikeCount = suppliers.reduce((sum, supplier) => sum + (supplier._count?.vehicles ?? 0), 0);
+  const linkedProductCount = suppliers.reduce((sum, supplier) => sum + (supplier._count?.products ?? 0), 0);
   const activeContacts = suppliers.filter((supplier) => supplier.contactPerson || supplier.telephone || supplier.email).length;
   const filteredSuppliers = useMemo(() => {
     const needle = search.trim().toLowerCase();
@@ -702,7 +432,6 @@ export default function SupplierManagementPage() {
         { header: "Fax", value: (supplier) => supplier.fax ?? "-" },
         { header: "VAT Reg. No", value: (supplier) => supplier.vatRegistrationNo ?? "-" },
         { header: "Address", value: (supplier) => supplier.address ?? "-" },
-        { header: "Linked Bikes", value: (supplier) => supplier._count?.vehicles ?? 0 },
         { header: "Linked Products", value: (supplier) => supplier._count?.products ?? 0 },
       ],
     });
@@ -714,7 +443,7 @@ export default function SupplierManagementPage() {
         <div className="page-title-icon"><IconSupplier /></div>
         <div>
           <h2 className="page-title">Supplier Management</h2>
-          <p className="page-subtitle">Register and manage suppliers separately from bike inventory data.</p>
+          <p className="page-subtitle">Register beverage suppliers and review every product they provide.</p>
         </div>
         <button type="button" className="btn-outline" onClick={exportSuppliersPdf}>Export PDF</button>
       </div>
@@ -732,11 +461,11 @@ export default function SupplierManagementPage() {
         </div>
         <div className="bm-stat-card">
           <div className="bm-stat-head">
-            <span className="bm-stat-icon"><IconBike /></span>
-            <span className="bm-stat-label">Linked Bikes</span>
+            <span className="bm-stat-icon"><IconInventory /></span>
+            <span className="bm-stat-label">Linked Products</span>
           </div>
-          <strong className="bm-stat-value">{linkedBikeCount}</strong>
-          <span className="bm-stat-sub">Inventory units with a supplier</span>
+          <strong className="bm-stat-value">{linkedProductCount}</strong>
+          <span className="bm-stat-sub">Catalog items with a supplier</span>
         </div>
         <div className="bm-stat-card bm-stat-card-soft">
           <div className="bm-stat-head">
@@ -810,7 +539,7 @@ export default function SupplierManagementPage() {
               <div key={supplier.id} className="bm-list-item">
                 <div className="bm-item-name-btn">
                   <span className="bm-item-name">{supplier.name}</span>
-                  <span className="bm-item-meta">{supplier.code} · {supplier._count?.vehicles ?? 0} bikes</span>
+                  <span className="bm-item-meta">{supplier.code} · {supplier._count?.products ?? 0} products</span>
                   <span className="bm-item-meta">{supplier.contactPerson || supplier.telephone || supplier.email || "No contact details"}</span>
                 </div>
                 <div className="bm-actions">
@@ -831,7 +560,7 @@ export default function SupplierManagementPage() {
         <div className="bm-modal-backdrop" onClick={() => setConfirm(null)}>
           <div className="bm-modal" onClick={(event) => event.stopPropagation()}>
             <h3 className="bm-modal-title">Confirm Delete</h3>
-            <p className="bm-modal-body">Delete supplier <strong>{confirm.name}</strong>? Linked bikes will keep their records and lose only the supplier reference.</p>
+            <p className="bm-modal-body">Delete supplier <strong>{confirm.name}</strong>? Linked products will keep their records and lose only the supplier reference.</p>
             <div className="bm-modal-actions">
               <button type="button" className="btn-outline" onClick={() => setConfirm(null)}>Cancel</button>
               <button type="button" className="bm-btn-danger" onClick={() => handleDeleteSupplier(confirm.id)}>Delete</button>

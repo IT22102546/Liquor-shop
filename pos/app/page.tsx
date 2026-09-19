@@ -9,7 +9,7 @@ export default function RootPage() {
 
   useEffect(() => {
     const token = localStorage.getItem(STORAGE_TOKEN);
-    router.replace(token ? "/dashboard" : "/signin");
+    router.replace(token ? "/dashboard/inventory" : "/signin");
   }, [router]);
 
   return <main className="pos-shell" />;

@@ -13,6 +13,7 @@ router.patch("/leasing-companies/:companyId", controller.updateLeasingCompany);
 router.delete("/leasing-companies/:companyId", controller.deleteLeasingCompany);
 router.get("/leasing-companies/:companyId/applications", controller.getLeasingCompanyApplications);
 router.get("/purchases", controller.getPurchases);
+router.post("/checkout", controller.checkoutSale);
 router.patch("/purchases/:purchaseId", controller.updatePurchase);
 router.get("/invoice-accounts", controller.getInvoiceAccounts);
 router.post("/invoice-accounts", controller.createInvoiceAccount);

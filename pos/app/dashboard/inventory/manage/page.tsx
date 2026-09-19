@@ -193,7 +193,7 @@ export default function InventoryManagePage() {
       {error && <div className="bm-alert bm-alert-error">{error}</div>}
 
       <div className="bm-stats-grid">
-        <div className="bm-stat-card bm-stat-card-soft"><div className="bm-stat-head"><span className="bm-stat-icon"><IconInventory /></span><span className="bm-stat-label">Brands</span></div><strong className="bm-stat-value">{brands.length}</strong><span className="bm-stat-sub">Spare part brands configured</span></div>
+        <div className="bm-stat-card bm-stat-card-soft"><div className="bm-stat-head"><span className="bm-stat-icon"><IconInventory /></span><span className="bm-stat-label">Brands</span></div><strong className="bm-stat-value">{brands.length}</strong><span className="bm-stat-sub">Beverage and product brands configured</span></div>
         <div className="bm-stat-card"><div className="bm-stat-head"><span className="bm-stat-icon"><IconActivity /></span><span className="bm-stat-label">Categories</span></div><strong className="bm-stat-value">{categories.length}</strong><span className="bm-stat-sub">Drink and product categories available</span></div>
         <div className="bm-stat-card bm-stat-card-soft"><div className="bm-stat-head"><span className="bm-stat-icon"><IconInvoice /></span><span className="bm-stat-label">Mapped Products</span></div><strong className="bm-stat-value">{products.length}</strong><span className="bm-stat-sub">In stock: {totalQty}</span></div>
         <div className="bm-stat-card"><div className="bm-stat-head"><span className="bm-stat-icon"><IconActivity /></span><span className="bm-stat-label">Sold Units</span></div><strong className="bm-stat-value">{totalSoldQty}</strong><span className="bm-stat-sub">Recorded from inventory sales</span></div>

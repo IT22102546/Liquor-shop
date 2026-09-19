@@ -190,6 +190,20 @@ export const createPurchaseSchema = z
     }
   });
 
+export const checkoutSaleSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        productId: z.number().int().positive(),
+        quantity: z.number().int().min(1).max(999),
+        unitPrice: z.number().min(0),
+      }),
+    )
+    .min(1, "Add at least one product")
+    .max(100),
+  paymentMethod: z.enum(["CASH", "CHEQUE", "BANK_TRANSFER"]).default("CASH"),
+});
+
 export const createLeasingCompanySchema = z.object({
   name: z
     .string()
@@ -319,6 +333,7 @@ export type CreatePosUserDto = z.infer<typeof createPosUserSchema>;
 export type UpdatePosUserDto = z.infer<typeof updatePosUserSchema>;
 export type PosUserQueryDto = z.infer<typeof posUserQuerySchema>;
 export type CreatePurchaseDto = z.infer<typeof createPurchaseSchema>;
+export type CheckoutSaleDto = z.infer<typeof checkoutSaleSchema>;
 export type PurchaseQueryDto = z.infer<typeof purchaseQuerySchema>;
 export type SettlePurchaseDto = z.infer<typeof settlePurchaseSchema>;
 export type UpdatePurchaseDto = z.infer<typeof updatePurchaseSchema>;

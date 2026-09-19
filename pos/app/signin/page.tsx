@@ -30,7 +30,7 @@ export default function SignInPage() {
   // If already logged in, redirect immediately
   useEffect(() => {
     if (localStorage.getItem(STORAGE_TOKEN)) {
-      router.replace("/dashboard");
+      router.replace("/dashboard/inventory");
     }
   }, [router]);
 
@@ -51,7 +51,7 @@ export default function SignInPage() {
       if (!res.ok || !payload.data) throw new Error(payload.message ?? "Invalid credentials");
       localStorage.setItem(STORAGE_TOKEN, payload.data.accessToken);
       localStorage.setItem(STORAGE_ADMIN, JSON.stringify(payload.data.admin));
-      router.push("/dashboard");
+      router.push("/dashboard/inventory");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to sign in");
     } finally {

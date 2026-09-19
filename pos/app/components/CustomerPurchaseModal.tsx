@@ -659,7 +659,7 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
     <div className="bm-modal-backdrop" onClick={onClose}>
       <form className="bm-modal bm-modal-lg" onClick={(event) => event.stopPropagation()} onSubmit={submit}>
         <button type="button" className="bm-modal-close" onClick={onClose}>x</button>
-        <h3 className="bm-modal-title">{itemType === "CUSTOM" ? "Generate Custom Invoice" : "Sell To Customer"}</h3>
+        <h3 className="bm-modal-title">{itemType === "CUSTOM" ? "Generate Bar Invoice" : "Record Drink Sale"}</h3>
 
         {error && <div className="bm-alert bm-alert-error">{error}</div>}
         {loading && <p className="users-muted">Loading users...</p>}
@@ -691,7 +691,7 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
               )}
 
               <div className="bm-field-group users-span-2">
-                <label>Select Existing Customer</label>
+                <label>Customer Lookup</label>
                 <div style={{ display: "flex", gap: "0.5rem" }}>
                   <select
                     className="bm-input"
@@ -703,7 +703,7 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
                     }}
                     disabled={showAddUser}
                   >
-                    <option value="">Select customer</option>
+                    <option value="">Search registered customer</option>
                     {users.map((user) => (
                       <option key={user.id} value={user.id}>
                         {user.firstName} {user.lastName} | {user.nic} | {user.mobileNumber}

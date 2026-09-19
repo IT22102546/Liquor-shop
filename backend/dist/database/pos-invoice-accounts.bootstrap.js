@@ -1,0 +1,32 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ensurePosInvoiceAccountsTable = ensurePosInvoiceAccountsTable;
+const prisma_client_1 = require("./prisma.client");
+const createPosInvoiceAccountsTableSql = `
+  CREATE TABLE IF NOT EXISTS "pos_invoice_accounts" (
+    "id" SERIAL NOT NULL,
+    "accountHolder" TEXT NOT NULL,
+    "accountNumber" TEXT NOT NULL,
+    "bankName" TEXT NOT NULL,
+    "branchName" TEXT,
+    "sortOrder" INTEGER NOT NULL DEFAULT 1,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "pos_invoice_accounts_pkey" PRIMARY KEY ("id")
+  )
+`;
+const createPosInvoiceAccountsUniqueIndexSql = `
+  CREATE UNIQUE INDEX IF NOT EXISTS "pos_invoice_accounts_bankName_accountNumber_key"
+    ON "pos_invoice_accounts"("bankName", "accountNumber")
+`;
+const createPosInvoiceAccountsSortIndexSql = `
+  CREATE INDEX IF NOT EXISTS "pos_invoice_accounts_sortOrder_idx"
+    ON "pos_invoice_accounts"("sortOrder")
+`;
+async function ensurePosInvoiceAccountsTable() {
+    await prisma_client_1.prisma.$executeRawUnsafe(createPosInvoiceAccountsTableSql);
+    await prisma_client_1.prisma.$executeRawUnsafe(createPosInvoiceAccountsUniqueIndexSql);
+    await prisma_client_1.prisma.$executeRawUnsafe(createPosInvoiceAccountsSortIndexSql);
+}

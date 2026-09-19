@@ -1,4 +1,4 @@
-import { PrismaClient, Role } from "@prisma/client";
+import { PrismaClient, Role } from "../src/generated/prisma";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -6,8 +6,8 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Seeding Bar Shop data...");
 
-  const passwordHash = await bcrypt.hash("BarShop@123", 12);
-  const posAdminPasswordHash = await bcrypt.hash("BarShop@123", 12);
+  const passwordHash = await bcrypt.hash("liquorshop@2026", 12);
+  const posAdminPasswordHash = await bcrypt.hash("liquorshop@2026", 12);
 
   const admin = await prisma.user.upsert({
     where: { email: "admin@barshop.local" },
