@@ -34,7 +34,7 @@ export default function InventoryManagePage() {
   const [categoryPage, setCategoryPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 
-  const base = `${API_URL}/api/pos/bike-management`;
+  const base = `${API_URL}/api/pos/`;
   const auth = { Authorization: `Bearer ${token}` };
 
   const loadData = useCallback(async () => {

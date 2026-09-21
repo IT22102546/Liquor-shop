@@ -313,7 +313,7 @@ function SupplierQuickAddModal({
   const [form, setForm] = useState<SupplierFormState>(EMPTY_SUPPLIER_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const base = `${API_URL}/api/pos/bike-management`;
+  const base = `${API_URL}/api/pos/`;
   const auth = { Authorization: `Bearer ${token}` };
 
   const setField =
@@ -1651,9 +1651,10 @@ export default function InventoryPage() {
             unitPrice: line.product.sellingPrice ?? 0,
           })),
           paymentMethod,
+          amountReceived: paymentMethod === "CASH" ? tendered : cartTotal,
         }),
       });
-      const payload = await response.json().catch(() => null) as { data?: { invoiceGroupCode: string }; message?: string } | null;
+      const payload = await response.json().catch(() => null) as { data?: { invoiceGroupCode: string; amountReceived: number; changeGiven: number; counterSale?: { createdAt: string } }; message?: string } | null;
       if (!response.ok || !payload?.data) throw new Error(payload?.message ?? "Checkout failed");
       const receipt: CompletedReceipt = {
         invoiceNumber: payload.data.invoiceGroupCode,
@@ -1665,9 +1666,9 @@ export default function InventoryPage() {
         })),
         paymentMethod,
         total: cartTotal,
-        amountReceived: paymentMethod === "CASH" ? tendered : cartTotal,
-        change: paymentMethod === "CASH" ? changeDue : 0,
-        completedAt: new Date().toISOString(),
+        amountReceived: payload.data.amountReceived,
+        change: payload.data.changeGiven,
+        completedAt: payload.data.counterSale?.createdAt ?? new Date().toISOString(),
       };
       setCheckoutMessage(`Sale complete · ${payload.data.invoiceGroupCode}`);
       setCompletedReceipt(receipt);

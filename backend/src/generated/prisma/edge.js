@@ -539,7 +539,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "D:\\KodeArcs\\Liquor-shop\\backend\\src\\generated\\prisma",
+      "value": "/Users/sanjananimesh/Documents/Projects/bar shop/backend/src/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -548,16 +548,17 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "windows",
+        "value": "darwin-arm64",
         "native": true
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "D:\\KodeArcs\\Liquor-shop\\backend\\prisma\\schema.prisma",
+    "sourceFilePath": "/Users/sanjananimesh/Documents/Projects/bar shop/backend/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": null
+    "rootEnvPath": null,
+    "schemaEnvPath": "../../../.env"
   },
   "relativePath": "../../../prisma",
   "clientVersion": "5.22.0",

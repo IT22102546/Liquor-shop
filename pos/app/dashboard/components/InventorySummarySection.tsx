@@ -21,7 +21,7 @@ export function InventorySummarySection() {
     queryKey: ["pos", "inventory-section", "products", token],
     enabled: Boolean(token),
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/api/pos/bike-management/products?page=1&limit=500`, {
+      const response = await fetch(`${API_URL}/api/pos/products?page=1&limit=500`, {
         headers: auth,
         cache: "no-store",
       });
