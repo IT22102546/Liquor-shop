@@ -11,6 +11,7 @@ import {
 import { useAdmin } from "../../components/AdminContext";
 import { API_URL } from "../../lib/constants";
 import { IconInventory } from "../../lib/icons";
+import { canAccessPath } from "../../lib/roles";
 
 type ProductBrand = { id: number; name: string; _count?: { products: number } };
 type ProductCategory = {
@@ -1502,8 +1503,12 @@ function ViewProductModal({
 
 export default function InventoryPage() {
   const { admin, token, logout } = useAdmin();
+  const canManageProducts = canAccessPath(admin.role, "/dashboard/inventory/manage");
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [brands, setBrands] = useState<ProductBrand[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [productModalOpen, setProductModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -1523,21 +1528,27 @@ export default function InventoryPage() {
     setLoading(true);
     setError(null);
     try {
-      const [categoryResponse, productResponse] = await Promise.all([
+      const [categoryResponse, productResponse, brandResponse, supplierResponse] = await Promise.all([
         fetch(`${base}/product-categories`, { headers: auth }),
         fetch(`${base}/products?limit=5000`, { headers: auth }),
+        canManageProducts ? fetch(`${base}/product-brands`, { headers: auth }) : Promise.resolve(null),
+        canManageProducts ? fetch(`${base}/suppliers`, { headers: auth }) : Promise.resolve(null),
       ]);
 
-      const [categoryPayload, productPayload] = (await Promise.all([
+      const [categoryPayload, productPayload, brandPayload, supplierPayload] = (await Promise.all([
           categoryResponse.json(),
           productResponse.json(),
+          brandResponse ? brandResponse.json() : Promise.resolve(null),
+          supplierResponse ? supplierResponse.json() : Promise.resolve(null),
         ])) as [
           { data?: ProductCategory[]; message?: string },
           { data?: { products?: Product[] }; message?: string },
+          { data?: ProductBrand[]; message?: string } | null,
+          { data?: Supplier[]; message?: string } | null,
         ];
 
       if (
-        [categoryResponse.status, productResponse.status].some(
+        [categoryResponse.status, productResponse.status, brandResponse?.status, supplierResponse?.status].some(
           (status) => status === 401 || status === 403,
         )
       ) {
@@ -1549,9 +1560,15 @@ export default function InventoryPage() {
         throw new Error(categoryPayload.message ?? "Failed to load categories");
       if (!productResponse.ok)
         throw new Error(productPayload.message ?? "Failed to load products");
+      if (brandResponse && !brandResponse.ok)
+        throw new Error(brandPayload?.message ?? "Failed to load brands");
+      if (supplierResponse && !supplierResponse.ok)
+        throw new Error(supplierPayload?.message ?? "Failed to load suppliers");
 
       setCategories(categoryPayload.data ?? []);
       setProducts(productPayload.data?.products ?? []);
+      if (brandResponse) setBrands(brandPayload?.data ?? []);
+      if (supplierResponse) setSuppliers(supplierPayload?.data ?? []);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to load inventory data",
@@ -1560,7 +1577,7 @@ export default function InventoryPage() {
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, [token, canManageProducts]);
 
   useEffect(() => {
     void loadData();
@@ -1651,6 +1668,7 @@ export default function InventoryPage() {
             unitPrice: line.product.sellingPrice ?? 0,
           })),
           paymentMethod,
+          amountReceived: paymentMethod === "CASH" ? tendered : undefined,
         }),
       });
       const payload = await response.json().catch(() => null) as { data?: { invoiceGroupCode: string }; message?: string } | null;
@@ -1732,6 +1750,11 @@ export default function InventoryPage() {
             />
             <button type="button" className="pos-icon-action" onClick={() => void loadData()} aria-label="Refresh products">↻</button>
           </div>
+          {canManageProducts && (
+            <button type="button" className="btn-accent bm-add-btn" onClick={() => setProductModalOpen(true)}>
+              + Add Liquor Product
+            </button>
+          )}
         </div>
 
         <div className="pos-category-tabs" aria-label="Filter products by category">
@@ -1830,6 +1853,23 @@ export default function InventoryPage() {
       </aside>
       </div>
 
+      {productModalOpen && (
+        <ProductModal
+          token={token}
+          brands={brands}
+          categories={categories}
+          suppliers={suppliers}
+          onClose={() => setProductModalOpen(false)}
+          onSaved={() => {
+            setProductModalOpen(false);
+            void loadData();
+          }}
+          onBrandCreated={(brand) => setBrands((current) => [...current, brand])}
+          onCategoryCreated={(category) => setCategories((current) => [...current, category])}
+          onSupplierCreated={(supplier) => setSuppliers((current) => [...current, supplier])}
+          onAuthExpired={logout}
+        />
+      )}
     </div>
   );
 }
