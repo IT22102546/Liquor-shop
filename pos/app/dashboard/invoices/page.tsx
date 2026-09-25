@@ -33,22 +33,16 @@ type Installment = {
 type Purchase = {
   id: number;
   purchasedAt: string;
-  itemType: "BIKE" | "INVENTORY" | "PRE_ORDER" | "CUSTOM";
+  itemType: "INVENTORY" | "CUSTOM";
   purchaseMode?: "SINGLE" | "BULK";
   invoiceGroupCode?: string | null;
   quantity: number;
   currentSellingPrice?: number | null;
   finalSellingPrice: number;
   paymentType?: "DIRECT" | "DOWNPAYMENT";
-  purchaseChannel?: "PERSONAL" | "LEASING";
-  leasingCompany?: { id: number; name: string } | null;
-  leasingDownPaymentAmount?: number;
-  leasingFinancedAmount?: number;
   downPaymentAmount?: number;
   remainingAmount?: number;
   settlementStatus?: "SETTLED" | "TO_SETTLE";
-  hasRegistrationFee?: boolean;
-  registrationFeeAmount?: number;
   extraCosts?: Array<{ label: string; amount: number }>;
   interestRate?: number | null;
   installmentMonths?: number | null;
@@ -64,23 +58,6 @@ type Purchase = {
     province: string;
     district: string;
   };
-  bike?: {
-    id: number;
-    displayId: string;
-    brand: string;
-    model: string;
-    colour: string;
-    year?: number | null;
-    engineCapacityCc?: number | null;
-    mileage?: number | null;
-    condition: string;
-    registrationType: string;
-    fileNo?: string | null;
-    registerNo?: string | null;
-    chassisNo?: string | null;
-    engineNo?: string | null;
-    description?: string | null;
-  } | null;
   inventory?: {
     id: number;
     displayId: string;
@@ -89,13 +66,6 @@ type Purchase = {
     category: string;
     supplier?: string | null;
     description?: string | null;
-  } | null;
-  preOrder?: {
-    id: number;
-    displayId: string;
-    brand: string;
-    model: string;
-    colour?: string | null;
   } | null;
   customCategory?: string | null;
   customDescription?: string | null;
@@ -111,7 +81,6 @@ type InvoiceRow = {
   finalSellingPrice: number;
   currentSellingPrice: number;
   downPaymentAmount: number;
-  registrationFeeTotal: number;
   extraCosts: Array<{ label: string; amount: number }>;
   remainingAmount: number;
   settlementStatus: "SETTLED" | "TO_SETTLE";
@@ -241,7 +210,6 @@ export default function InvoicesPage() {
   const [editingEntry, setEditingEntry] = useState<Purchase | null>(null);
   const [editFsp, setEditFsp] = useState("");
   const [editDown, setEditDown] = useState("");
-  const [editRegFee, setEditRegFee] = useState("");
   const [editMobileNumber, setEditMobileNumber] = useState("");
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
@@ -260,14 +228,12 @@ export default function InvoicesPage() {
     const entry = invoice.entries[0];
     setEditFsp(String(entry.finalSellingPrice));
     setEditDown(String(entry.downPaymentAmount ?? ""));
-    setEditRegFee(String(entry.registrationFeeAmount ?? ""));
     setEditMobileNumber(entry.customer.mobileNumber);
     setEditError(null);
-    setEditFinancialsEnabled(invoice.purchaseModeText === "Single" && entry.purchaseChannel !== "LEASING");
+    setEditFinancialsEnabled(invoice.purchaseModeText === "Single");
     const outstanding = entry.finalSellingPrice - (entry.downPaymentAmount ?? 0);
     setEditHasReceipts(
       invoice.purchaseModeText === "Single" &&
-      entry.purchaseChannel !== "LEASING" &&
       (entry.remainingAmount ?? 0) < outstanding
     );
     setEditingEntry(entry);
@@ -293,11 +259,6 @@ export default function InvoicesPage() {
         const down = parseFloat(editDown);
         if (!isFinite(down) || down < 0) { setEditError("Down payment must be a valid number"); return; }
         body.downPaymentAmount = down;
-      }
-      if (editingEntry.hasRegistrationFee) {
-        const reg = parseFloat(editRegFee);
-        if (!isFinite(reg) || reg <= 0) { setEditError("Registration fee must be greater than 0"); return; }
-        body.registrationFeeAmount = reg;
       }
     }
     setEditSaving(true);
@@ -337,22 +298,10 @@ export default function InvoicesPage() {
   }, [search, rowsPerPage]);
 
   const getPurchaseItemMeta = useCallback((entry: Purchase) => {
-    if (entry.itemType === "BIKE" && entry.bike) {
-      return {
-        title: `${entry.bike.brand} ${entry.bike.model}`,
-        subtitle: `${entry.bike.displayId} • ${entry.bike.colour}`,
-      };
-    }
     if (entry.itemType === "INVENTORY" && entry.inventory) {
       return {
         title: entry.inventory.name,
         subtitle: `${entry.inventory.displayId} • ${entry.inventory.brand}`,
-      };
-    }
-    if (entry.itemType === "PRE_ORDER" && entry.preOrder) {
-      return {
-        title: `${entry.preOrder.brand} ${entry.preOrder.model}`,
-        subtitle: `Pre-Order • ${entry.preOrder.displayId}`,
       };
     }
     if (entry.itemType === "CUSTOM") {
@@ -365,7 +314,6 @@ export default function InvoicesPage() {
   }, []);
 
   const isDownPaymentEntry = useCallback((entry: Purchase) => {
-    if (entry.purchaseChannel === "LEASING") return false;
     if (entry.paymentType === "DOWNPAYMENT") return true;
     const downPayment = entry.downPaymentAmount ?? 0;
     const remaining = entry.remainingAmount ?? 0;
@@ -375,34 +323,17 @@ export default function InvoicesPage() {
   }, []);
 
   const getPaymentLabel = useCallback((entry: Purchase) => {
-    if (entry.purchaseChannel === "LEASING") {
-      return entry.leasingCompany?.name ? `Leasing (${entry.leasingCompany.name})` : "Leasing";
-    }
     return isDownPaymentEntry(entry) ? "Downpayment" : "Direct";
   }, [isDownPaymentEntry]);
 
   const invoiceRows = useMemo(() => {
     const grouped = new Map<string, Purchase[]>();
 
-    const heuristicCounts = new Map<string, number>();
-    invoices.forEach((entry: Purchase) => {
-      if (entry.invoiceGroupCode?.trim()) return;
-      if (entry.itemType !== "BIKE") return;
-      const secondBucket = Math.floor(new Date(entry.purchasedAt).getTime() / 1000);
-      const key = `${entry.customer.id}:${secondBucket}`;
-      heuristicCounts.set(key, (heuristicCounts.get(key) ?? 0) + 1);
-    });
-
     invoices.forEach((entry: Purchase) => {
       const groupCode = entry.invoiceGroupCode?.trim();
-      const secondBucket = Math.floor(new Date(entry.purchasedAt).getTime() / 1000);
-      const heuristicKey = `${entry.customer.id}:${secondBucket}`;
-      const isHeuristicBulk = !groupCode && entry.itemType === "BIKE" && (heuristicCounts.get(heuristicKey) ?? 0) > 1;
       const key = groupCode
         ? `group:${entry.customer.id}:${groupCode}`
-        : isHeuristicBulk
-          ? `heuristic:${heuristicKey}`
-          : `single:${entry.id}`;
+        : `single:${entry.id}`;
       const existing = grouped.get(key);
       if (existing) existing.push(entry);
       else grouped.set(key, [entry]);
@@ -423,10 +354,6 @@ export default function InvoicesPage() {
         if (!isDownPaymentEntry(entry)) return sum;
         return sum + Math.max(0, entry.finalSellingPrice - (entry.remainingAmount ?? 0));
       }, 0);
-      const registrationFeeTotal = sorted.reduce((sum, entry) => {
-        if (!entry.hasRegistrationFee) return sum;
-        return sum + (entry.registrationFeeAmount ?? 0);
-      }, 0);
       const extraCosts = sorted.flatMap((entry) => Array.isArray(entry.extraCosts) ? entry.extraCosts : []);
       const remainingAmount = Math.max(0, Math.round(sorted.reduce((sum, entry) => sum + (entry.remainingAmount ?? 0), 0) * 100) / 100);
       const settlementStatus: "SETTLED" | "TO_SETTLE" = remainingAmount > 0 || sorted.some((entry) => entry.settlementStatus === "TO_SETTLE")
@@ -434,7 +361,7 @@ export default function InvoicesPage() {
         : "SETTLED";
       const paymentTypeText = getPaymentLabel(representative);
 
-      const itemTitle = isBulk ? `Bulk Purchase (${sorted.length} bike entries)` : getPurchaseItemMeta(representative).title;
+      const itemTitle = isBulk ? `Bulk Purchase (${sorted.length} items)` : getPurchaseItemMeta(representative).title;
       const itemSubtitle = isBulk
         ? sorted.slice(0, 2).map((entry) => getPurchaseItemMeta(entry).title).join(" + ")
         : getPurchaseItemMeta(representative).subtitle;
@@ -455,7 +382,6 @@ export default function InvoicesPage() {
         finalSellingPrice,
         currentSellingPrice,
         downPaymentAmount,
-        registrationFeeTotal,
         extraCosts,
         remainingAmount,
         settlementStatus,
@@ -492,9 +418,6 @@ export default function InvoicesPage() {
           String(entry.id),
           entry.customer.nic,
           entry.customer.mobileNumber,
-          entry.bike?.displayId,
-          entry.bike?.brand,
-          entry.bike?.model,
           entry.inventory?.displayId,
           entry.inventory?.name,
           entry.inventory?.brand,
@@ -532,7 +455,7 @@ export default function InvoicesPage() {
   const getInvoiceGrandTotal = (invoice: InvoiceRow) => {
     const effectiveTotal = invoice.entries.reduce((sum, e) => sum + (e.totalWithInterest ?? e.finalSellingPrice), 0);
     const extraCostsTotal = invoice.extraCosts.reduce((sum, cost) => sum + cost.amount, 0);
-    return effectiveTotal + invoice.registrationFeeTotal + extraCostsTotal;
+    return effectiveTotal + extraCostsTotal;
   };
 
   return (
@@ -588,7 +511,7 @@ export default function InvoicesPage() {
           <input
             className="bm-input"
             style={{ maxWidth: 420 }}
-            placeholder="Search by customer, NIC, item ID, bike brand/model, or product name"
+            placeholder="Search by customer, NIC, item ID, or product name"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -736,17 +659,11 @@ export default function InvoicesPage() {
                   <tbody>
                     {selectedInvoice.entries.map((entry) => {
                       const itemMeta = getPurchaseItemMeta(entry);
-                      const hasBike = entry.itemType === "BIKE" && !!entry.bike;
                       return (
                         <tr key={`entry-${entry.id}`}>
                           <td className="invoice-desc-cell">
                             <strong>{itemMeta.title}</strong>
                             <div className="invoice-item-meta">{itemMeta.subtitle}</div>
-                            {hasBike && (
-                              <div className="invoice-vehicle-meta">
-                                Chassis No: {entry.bike?.chassisNo ?? "-"} | Engine No: {entry.bike?.engineNo ?? "-"} | Registration: {entry.bike?.registrationType ?? "-"}
-                              </div>
-                            )}
                           </td>
                           <td className="invoice-col-qty">{entry.quantity}</td>
                           <td className="invoice-col-amount">Rs. {(entry.quantity > 0 ? entry.finalSellingPrice / entry.quantity : entry.finalSellingPrice).toLocaleString()}</td>
@@ -754,19 +671,6 @@ export default function InvoicesPage() {
                         </tr>
                       );
                     })}
-                    {selectedInvoice.entries
-                      .filter((entry) => entry.hasRegistrationFee && (entry.registrationFeeAmount ?? 0) > 0)
-                      .map((entry) => (
-                        <tr key={`reg-${entry.id}`} className="invoice-registration-row">
-                          <td className="invoice-desc-cell">
-                            Registration Fee
-                            {entry.bike ? ` - ${entry.bike.brand} ${entry.bike.model}` : ""}
-                          </td>
-                          <td className="invoice-col-qty">{entry.quantity}</td>
-                          <td className="invoice-col-amount">Rs. {(entry.registrationFeeAmount ?? 0).toLocaleString()}</td>
-                          <td className="invoice-col-amount">Rs. {((entry.registrationFeeAmount ?? 0) * entry.quantity).toLocaleString()}</td>
-                        </tr>
-                      ))}
                     {selectedInvoice.extraCosts.map((cost, index) => (
                       <tr key={`extra-${index}-${cost.label}`} className="invoice-registration-row">
                         <td className="invoice-desc-cell">{cost.label}</td>
@@ -775,27 +679,6 @@ export default function InvoicesPage() {
                         <td className="invoice-col-amount">Rs. {cost.amount.toLocaleString()}</td>
                       </tr>
                     ))}
-                    {selectedInvoice.entries.some((entry) => entry.purchaseChannel === "LEASING") && (
-                      <>
-                        <tr className="invoice-summary-row">
-                          <td className="invoice-desc-cell">
-                            Leasing Partner
-                            {selectedInvoice.entries.find((entry) => entry.purchaseChannel === "LEASING")?.leasingCompany?.name
-                              ? ` - ${selectedInvoice.entries.find((entry) => entry.purchaseChannel === "LEASING")?.leasingCompany?.name}`
-                              : ""}
-                          </td>
-                          <td className="invoice-col-qty" />
-                          <td className="invoice-col-amount" />
-                          <td className="invoice-col-amount" />
-                        </tr>
-                        <tr className="invoice-summary-row">
-                          <td className="invoice-desc-cell">Leasing Amount</td>
-                          <td className="invoice-col-qty" />
-                          <td className="invoice-col-amount">Rs. {selectedInvoice.entries.reduce((sum, entry) => sum + (entry.leasingFinancedAmount ?? 0), 0).toLocaleString()}</td>
-                          <td className="invoice-col-amount" />
-                        </tr>
-                      </>
-                    )}
                     {(() => {
                       const interestEntry = selectedInvoice.entries.find((e) => (e.interestRate ?? 0) > 0 && (e.installmentMonths ?? 0) > 0);
                       if (!interestEntry) return null;
@@ -993,19 +876,6 @@ export default function InvoicesPage() {
                       step="0.01"
                       value={editDown}
                       onChange={(e) => setEditDown(e.target.value)}
-                    />
-                  </div>
-                )}
-                {editFinancialsEnabled && editingEntry.hasRegistrationFee && (
-                  <div className="bm-field-group">
-                    <label className="users-label">Registration Fee (Rs.)</label>
-                    <input
-                      className="bm-input"
-                      type="number"
-                      min={0}
-                      step="0.01"
-                      value={editRegFee}
-                      onChange={(e) => setEditRegFee(e.target.value)}
                     />
                   </div>
                 )}

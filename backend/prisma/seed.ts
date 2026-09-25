@@ -41,18 +41,8 @@ async function main() {
     },
   });
 
-  const starterProducts = [
-    { name: "Lager 500ml", brand: "Island Brew", model: "LAGER-500", year: 2026, price: 450.0, inStock: true },
-    { name: "Classic Red 750ml", brand: "Vine House", model: "RED-750", year: 2026, price: 2800.0, inStock: true },
-    { name: "London Dry Gin 750ml", brand: "Juniper Co.", model: "GIN-750", year: 2026, price: 6200.0, inStock: true },
-  ];
-
-  await prisma.bike.deleteMany();
-  await prisma.bike.createMany({ data: starterProducts });
-
-  const productCount = await prisma.bike.count();
   console.log(
-    `Seed complete. Admin: ${admin.email}, POS Admin: ${posAdmin.email}, Starter products: ${productCount}`
+    `Seed complete. Admin: ${admin.email}, POS Admin: ${posAdmin.email}`
   );
 }
 

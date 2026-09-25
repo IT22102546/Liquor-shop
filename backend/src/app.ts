@@ -9,11 +9,8 @@ import {
 import authRoutes from "./modules/auth/auth.routes";
 import bikesRoutes from "./modules/bikes/bikes.routes";
 import posAuthRoutes from "./modules/pos-auth/pos-auth.routes";
-import bikeManagementRoutes from "./modules/bike-management/bike-management.routes";
+import inventoryManagementRoutes from "./modules/inventory-management/inventory-management.routes";
 import posUserManagementRoutes from "./modules/pos-user-management/pos-user-management.routes";
-import preOrdersPosRouter, {
-  publicPreOrdersRouter,
-} from "./modules/pre-orders/pre-orders.routes";
 import contactRequestsPosRouter, {
   publicContactRequestsRouter,
 } from "./modules/contact-requests/contact-requests.routes";
@@ -47,11 +44,9 @@ app.get("/health", (_req, res) => {
 /* ──────────────────── API Routes ────────────────────────── */
 app.use("/api/auth", authRoutes);
 app.use("/api/bikes", bikesRoutes);
-app.use("/api/pre-orders", publicPreOrdersRouter);
 app.use("/api/pos/auth", posAuthRoutes);
-app.use("/api/pos/bike-management", bikeManagementRoutes);
+app.use("/api/pos/inventory-management", inventoryManagementRoutes);
 app.use("/api/pos/user-management", posUserManagementRoutes);
-app.use("/api/pos/pre-orders", preOrdersPosRouter);
 app.use("/api/contact-requests", publicContactRequestsRouter);
 app.use("/api/pos/contact-requests", contactRequestsPosRouter);
 app.use("/api/pos/accounts", accountsRouter);

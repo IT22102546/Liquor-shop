@@ -313,7 +313,7 @@ function SupplierQuickAddModal({
   const [form, setForm] = useState<SupplierFormState>(EMPTY_SUPPLIER_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const base = `${API_URL}/api/pos/bike-management`;
+  const base = `${API_URL}/api/pos/inventory-management`;
   const auth = { Authorization: `Bearer ${token}` };
 
   const setField =
@@ -541,7 +541,7 @@ function ProductModal({
   const [addingCategory, setAddingCategory] = useState(false);
   const [newBrand, setNewBrand] = useState("");
   const [newCategory, setNewCategory] = useState("");
-  const base = `${API_URL}/api/pos/bike-management`;
+  const base = `${API_URL}/api/pos/inventory-management`;
   const auth = { Authorization: `Bearer ${token}` };
 
   const setField = (key: keyof typeof form) => (value: string) =>
@@ -1189,7 +1189,7 @@ function ViewProductModal({
     ...expense,
     description: expense.description?.trim() || "Additional expense",
   }));
-  const base = `${API_URL}/api/pos/bike-management`;
+  const base = `${API_URL}/api/pos/inventory-management`;
   const auth = { Authorization: `Bearer ${token}` };
 
   useEffect(() => {
@@ -1516,7 +1516,7 @@ export default function InventoryPage() {
   const [completedReceipt, setCompletedReceipt] = useState<CompletedReceipt | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const base = `${API_URL}/api/pos/bike-management`;
+  const base = `${API_URL}/api/pos/inventory-management`;
   const auth = { Authorization: `Bearer ${token}` };
 
   const loadData = useCallback(async () => {

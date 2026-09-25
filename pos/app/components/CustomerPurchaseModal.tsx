@@ -51,41 +51,13 @@ type ExtraCost = {
 
 type CustomerPurchaseModalProps = {
   token: string;
-  itemType: "BIKE" | "INVENTORY" | "PRE_ORDER" | "CUSTOM";
+  itemType: "INVENTORY" | "CUSTOM";
   itemId: number;
   itemLabel: string;
   currentSellingPrice?: number | null;
   maxQuantity?: number;
   onClose: () => void;
   onSaved: () => void;
-};
-
-type BikeOption = {
-  id: number;
-  displayId: string;
-  colour: string;
-  status: "available" | "sold";
-  sellingPrice?: number | null;
-  brand: { name: string };
-  model: { name: string };
-};
-
-type BulkLine = {
-  key: string;
-  brandName: string;
-  modelName: string;
-  unitPrice: number;
-  quantity: number;
-  subtotal: number;
-  hasRegistrationFee: boolean;
-  registrationFeeAmount: number;
-  registrationFeeSubtotal: number;
-  bikeIds: number[];
-};
-
-type LeasingCompanyOption = {
-  id: number;
-  name: string;
 };
 
 const EMPTY_USER_FORM: UserFormState = {
@@ -126,8 +98,6 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
 
   const [users, setUsers] = useState<PosUser[]>([]);
   const [provinces, setProvinces] = useState<ProvinceMeta[]>([]);
-  const [bikeOptions, setBikeOptions] = useState<BikeOption[]>([]);
-  const [leasingCompanies, setLeasingCompanies] = useState<LeasingCompanyOption[]>([]);
 
   const [paymentMethod, setPaymentMethod] = useState<"CASH" | "CHEQUE" | "BANK_TRANSFER">("CASH");
   const [paymentChequeNo, setPaymentChequeNo] = useState("");
@@ -138,26 +108,12 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
   const [showAddUser, setShowAddUser] = useState(false);
   const [userForm, setUserForm] = useState<UserFormState>(EMPTY_USER_FORM);
 
-  const [purchaseMode, setPurchaseMode] = useState<"SINGLE" | "BULK">("SINGLE");
-  const [selectedBikeId, setSelectedBikeId] = useState<number | "">(itemType === "BIKE" ? itemId : "");
-  const [bulkBrandModelKey, setBulkBrandModelKey] = useState("");
-  const [bulkCount, setBulkCount] = useState("1");
-  const [bulkUnitPrice, setBulkUnitPrice] = useState(currentSellingPrice != null ? String(currentSellingPrice) : "");
-  const [bulkHasRegistrationFee, setBulkHasRegistrationFee] = useState(false);
-  const [bulkRegistrationFeeAmount, setBulkRegistrationFeeAmount] = useState("");
-  const [bulkLines, setBulkLines] = useState<BulkLine[]>([]);
-
   const [quantity, setQuantity] = useState("1");
   const [finalSellingPrice, setFinalSellingPrice] = useState(
     currentSellingPrice != null ? String(currentSellingPrice) : ""
   );
   const [paymentType, setPaymentType] = useState<"DIRECT" | "DOWNPAYMENT">("DIRECT");
   const [downPaymentAmount, setDownPaymentAmount] = useState("");
-  const [purchaseChannel, setPurchaseChannel] = useState<"PERSONAL" | "LEASING">("PERSONAL");
-  const [leasingCompanyId, setLeasingCompanyId] = useState<number | "">("");
-  const [leasingDownPaymentAmount, setLeasingDownPaymentAmount] = useState("");
-  const [hasRegistrationFee, setHasRegistrationFee] = useState(false);
-  const [registrationFeeAmount, setRegistrationFeeAmount] = useState("");
   const [extraCostType, setExtraCostType] = useState<(typeof EXTRA_COST_OPTIONS)[number]>("VIP Number Plate");
   const [customExtraCostLabel, setCustomExtraCostLabel] = useState("");
   const [extraCostAmount, setExtraCostAmount] = useState("");
@@ -177,66 +133,14 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
     [provinces, userForm.province]
   );
 
-  const availableBikeOptions = useMemo(
-    () => bikeOptions.filter((bike) => bike.status === "available"),
-    [bikeOptions]
-  );
-
-  const bikeGroupOptions = useMemo(() => {
-    const map = new Map<string, { brandName: string; modelName: string; availableCount: number; defaultPrice?: number | null }>();
-    availableBikeOptions.forEach((bike) => {
-      const key = `${bike.brand.name}__${bike.model.name}`;
-      const current = map.get(key);
-      if (current) {
-        current.availableCount += 1;
-      } else {
-        map.set(key, {
-          brandName: bike.brand.name,
-          modelName: bike.model.name,
-          availableCount: 1,
-          defaultPrice: bike.sellingPrice,
-        });
-      }
-    });
-    return Array.from(map.entries()).map(([key, value]) => ({ key, ...value }));
-  }, [availableBikeOptions]);
-
-  const selectedSingleBike = useMemo(
-    () => availableBikeOptions.find((bike) => bike.id === selectedBikeId),
-    [availableBikeOptions, selectedBikeId]
-  );
-
-  const bulkTotal = useMemo(
-    () => bulkLines.reduce((sum, line) => sum + line.subtotal, 0),
-    [bulkLines]
-  );
-
-  const bulkRegistrationFeeTotal = useMemo(
-    () => bulkLines.reduce((sum, line) => sum + line.registrationFeeSubtotal, 0),
-    [bulkLines]
-  );
-
   const computedInvoiceTotal = useMemo(() => {
-    if (itemType === "BIKE") {
-      if (purchaseMode === "BULK") return bulkTotal;
-      const parsed = Number(finalSellingPrice);
-      return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
-    }
     const parsed = Number(finalSellingPrice);
     return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
-  }, [bulkTotal, finalSellingPrice, itemType, purchaseMode]);
-
-  const computedRegistrationTotal = useMemo(() => {
-    if (itemType !== "BIKE") return 0;
-    if (purchaseMode === "BULK") return bulkRegistrationFeeTotal;
-    if (!hasRegistrationFee) return 0;
-    const parsed = Number(registrationFeeAmount || "0");
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
-  }, [bulkRegistrationFeeTotal, hasRegistrationFee, itemType, purchaseMode, registrationFeeAmount]);
+  }, [finalSellingPrice]);
 
   const computedInvoiceGrandTotal = useMemo(
-    () => computedInvoiceTotal + computedRegistrationTotal + extraCosts.reduce((sum, cost) => sum + cost.amount, 0),
-    [computedInvoiceTotal, computedRegistrationTotal, extraCosts]
+    () => computedInvoiceTotal + extraCosts.reduce((sum, cost) => sum + cost.amount, 0),
+    [computedInvoiceTotal, extraCosts]
   );
 
   const computedExtraCostsTotal = useMemo(
@@ -245,7 +149,6 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
   );
 
   const parsedDownPayment = Number(downPaymentAmount || "0");
-  const parsedLeasingDownPayment = Number(leasingDownPaymentAmount || "0");
   const parsedInterestRate = Number(interestRate || "0");
   const parsedInstallmentMonths = Number(installmentMonths || "0");
 
@@ -262,11 +165,9 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
 
   const effectiveTotal = computedTotalWithInterest ?? computedInvoiceTotal;
 
-  const computedDownPayment = purchaseChannel === "LEASING"
-    ? (Number.isFinite(parsedLeasingDownPayment) && parsedLeasingDownPayment >= 0 ? parsedLeasingDownPayment : 0)
-    : (paymentType === "DIRECT"
-      ? computedInvoiceTotal
-      : (Number.isFinite(parsedDownPayment) && parsedDownPayment >= 0 ? parsedDownPayment : 0));
+  const computedDownPayment = paymentType === "DIRECT"
+    ? computedInvoiceTotal
+    : (Number.isFinite(parsedDownPayment) && parsedDownPayment >= 0 ? parsedDownPayment : 0);
   const computedRemaining = Math.max(0, Math.round((effectiveTotal - computedDownPayment) * 100) / 100);
 
   useEffect(() => {
@@ -274,126 +175,32 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
       setLoading(true);
       setError(null);
       try {
-        const requests: Array<Promise<Response>> = [
+        const [usersRes, provincesRes] = await Promise.all([
           fetch(`${base}?page=1&limit=500`, { headers: auth, cache: "no-store" }),
           fetch(`${base}/meta/provinces`, { headers: auth, cache: "no-store" }),
-          fetch(`${base}/leasing-companies`, { headers: auth, cache: "no-store" }),
-        ];
-        if (itemType === "BIKE") {
-          requests.push(fetch(`${API_URL}/api/pos/bike-management/vehicles?page=1&limit=5000&status=available`, { headers: auth, cache: "no-store" }));
-        }
-
-        const responses = await Promise.all(requests);
-        const usersRes = responses[0];
-        const provincesRes = responses[1];
-        const leasingCompaniesRes = responses[2];
-        const bikesRes = itemType === "BIKE" ? responses[3] : null;
+        ]);
 
         const usersJson = (await usersRes.json()) as { data?: { users?: PosUser[] }; message?: string };
         const provincesJson = (await provincesRes.json()) as { data?: { provinces?: ProvinceMeta[] }; message?: string };
-        const leasingCompaniesJson = (await leasingCompaniesRes.json()) as { data?: { companies?: LeasingCompanyOption[] }; message?: string };
-        const bikesJson = bikesRes
-          ? (await bikesRes.json()) as { data?: { vehicles?: BikeOption[] }; message?: string }
-          : null;
 
         if (!usersRes.ok) throw new Error(usersJson.message ?? "Failed to load users");
         if (!provincesRes.ok) throw new Error(provincesJson.message ?? "Failed to load provinces");
-        if (!leasingCompaniesRes.ok) throw new Error(leasingCompaniesJson.message ?? "Failed to load leasing companies");
-        if (bikesRes && !bikesRes.ok) throw new Error(bikesJson?.message ?? "Failed to load bikes");
 
         setUsers(usersJson.data?.users ?? []);
         setProvinces(provincesJson.data?.provinces ?? []);
-        setLeasingCompanies(leasingCompaniesJson.data?.companies ?? []);
-        if (bikesJson) {
-          const loadedBikes = bikesJson.data?.vehicles ?? [];
-          setBikeOptions(loadedBikes);
-          const selected = loadedBikes.find((bike) => bike.id === itemId) ?? loadedBikes[0];
-          if (selected) {
-            setSelectedBikeId(selected.id);
-            if (selected.sellingPrice != null) {
-              setFinalSellingPrice(String(selected.sellingPrice));
-            }
-          }
-        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load customer data");
       } finally {
         setLoading(false);
       }
     })();
-  }, [auth, base, itemId, itemType]);
+  }, [auth, base]);
 
   useEffect(() => {
-    if (itemType !== "BIKE") return;
-    if (!selectedSingleBike) return;
-    if (selectedSingleBike.sellingPrice != null) {
-      setFinalSellingPrice(String(selectedSingleBike.sellingPrice));
-    }
-  }, [itemType, selectedSingleBike]);
-
-  useEffect(() => {
-    if (purchaseChannel !== "LEASING" && paymentType === "DIRECT") {
+    if (paymentType === "DIRECT") {
       setDownPaymentAmount(String(computedInvoiceTotal));
     }
-  }, [computedInvoiceTotal, paymentType, purchaseChannel]);
-
-  const addBulkLine = () => {
-    if (!bulkBrandModelKey) {
-      setError("Please select a brand and model");
-      return;
-    }
-    const qty = Number(bulkCount);
-    const unitPrice = Number(bulkUnitPrice);
-    const parsedRegistrationFee = Number(bulkRegistrationFeeAmount || "0");
-    if (!Number.isInteger(qty) || qty <= 0) {
-      setError("Please enter a valid bike count");
-      return;
-    }
-    if (!Number.isFinite(unitPrice) || unitPrice < 0) {
-      setError("Please enter a valid allocated price");
-      return;
-    }
-    if (bulkHasRegistrationFee && (!Number.isFinite(parsedRegistrationFee) || parsedRegistrationFee <= 0)) {
-      setError("Please enter a valid registration fee amount");
-      return;
-    }
-
-    const [brandName, modelName] = bulkBrandModelKey.split("__");
-    const usedBikeIds = new Set(bulkLines.flatMap((line) => line.bikeIds));
-    const matching = availableBikeOptions.filter((bike) => bike.brand.name === brandName && bike.model.name === modelName && !usedBikeIds.has(bike.id));
-
-    if (matching.length < qty) {
-      setError(`Only ${matching.length} bike(s) available for ${brandName} ${modelName}`);
-      return;
-    }
-
-    const selectedBikes = matching.slice(0, qty);
-    const subtotal = Math.round(unitPrice * qty * 100) / 100;
-    const registrationFeeAmount = bulkHasRegistrationFee ? Math.round(parsedRegistrationFee * 100) / 100 : 0;
-    const registrationFeeSubtotal = Math.round(registrationFeeAmount * qty * 100) / 100;
-    const key = `${brandName}__${modelName}__${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-
-    setBulkLines((prev) => [
-      ...prev,
-      {
-        key,
-        brandName,
-        modelName,
-        unitPrice,
-        quantity: qty,
-        subtotal,
-        hasRegistrationFee: bulkHasRegistrationFee,
-        registrationFeeAmount,
-        registrationFeeSubtotal,
-        bikeIds: selectedBikes.map((bike) => bike.id),
-      },
-    ]);
-    setError(null);
-  };
-
-  const removeBulkLine = (key: string) => {
-    setBulkLines((prev) => prev.filter((line) => line.key !== key));
-  };
+  }, [computedInvoiceTotal, paymentType]);
 
   const addExtraCost = () => {
     const label = extraCostType === "Other" ? customExtraCostLabel.trim() : extraCostType;
@@ -415,41 +222,6 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
     setError(null);
   };
 
-  const allocateDownPayments = (lineItems: Array<{ bikeId: number; unitPrice: number }>, totalDownPayment: number) => {
-    if (lineItems.length === 0) return [] as Array<{ bikeId: number; unitPrice: number; downPayment: number }>;
-    const totalPrice = lineItems.reduce((sum, item) => sum + item.unitPrice, 0);
-    const targetCents = Math.round(totalDownPayment * 100);
-
-    if (totalPrice <= 0) {
-      const base = Math.floor(targetCents / lineItems.length);
-      const remainder = targetCents % lineItems.length;
-      return lineItems.map((item, index) => ({
-        ...item,
-        downPayment: (base + (index < remainder ? 1 : 0)) / 100,
-      }));
-    }
-
-    const provisional = lineItems.map((item, index) => {
-      const raw = (targetCents * item.unitPrice) / totalPrice;
-      const floor = Math.floor(raw);
-      return { index, floor, fraction: raw - floor };
-    });
-    let allocated = provisional.reduce((sum, item) => sum + item.floor, 0);
-    let remaining = targetCents - allocated;
-
-    provisional.sort((a, b) => b.fraction - a.fraction);
-    for (let i = 0; i < provisional.length && remaining > 0; i += 1) {
-      provisional[i].floor += 1;
-      remaining -= 1;
-    }
-
-    const centsByIndex = new Map<number, number>(provisional.map((item) => [item.index, item.floor]));
-    return lineItems.map((item, index) => ({
-      ...item,
-      downPayment: (centsByIndex.get(index) ?? 0) / 100,
-    }));
-  };
-
   const createCustomer = async () => {
     const response = await fetch(base, {
       method: "POST",
@@ -463,7 +235,6 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
         province: userForm.province,
         district: userForm.district,
         address: userForm.address,
-        dreamBikeIds: [],
       }),
     });
 
@@ -498,110 +269,20 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
         }
       }
 
-      if ((itemType === "BIKE" || itemType === "PRE_ORDER") && purchaseChannel === "LEASING") {
-        const parsedLeasingDownPayment = Number(leasingDownPaymentAmount || "0");
-        if (leasingCompanyId === "") {
-          throw new Error("Please select a leasing company");
-        }
-        if (
-          !Number.isFinite(parsedLeasingDownPayment) ||
-          parsedLeasingDownPayment < 0 ||
-          (itemType === "BIKE" && parsedLeasingDownPayment <= 0)
-        ) {
-          throw new Error(
-            itemType === "BIKE"
-              ? "Please enter a leasing advance payment greater than 0"
-              : "Please enter a valid leasing downpayment amount",
-          );
-        }
-        if (parsedLeasingDownPayment >= computedInvoiceTotal) {
-          throw new Error("Leasing advance payment must be less than the total invoice amount");
-        }
-      }
-
       if (itemType === "CUSTOM" && !customDescription.trim()) {
         throw new Error("Please enter a description for the custom invoice");
       }
 
-      if (purchaseChannel !== "LEASING" && paymentType === "DOWNPAYMENT") {
+      if (paymentType === "DOWNPAYMENT") {
         if (!Number.isFinite(parsedDownPayment) || parsedDownPayment <= 0) {
           throw new Error("Please enter a valid downpayment amount");
         }
-        if (
-          parsedDownPayment > computedInvoiceTotal ||
-          (itemType === "BIKE" && parsedDownPayment >= computedInvoiceTotal)
-        ) {
-          throw new Error(
-            itemType === "BIKE"
-              ? "Advance payment must be less than the total invoice amount"
-              : "Downpayment amount cannot exceed total invoice amount",
-          );
+        if (parsedDownPayment > computedInvoiceTotal) {
+          throw new Error("Downpayment amount cannot exceed total invoice amount");
         }
       }
 
-      if (itemType === "BIKE" && purchaseMode === "SINGLE") {
-        if (!selectedBikeId) {
-          throw new Error("Please select a bike");
-        }
-        if (!Number.isFinite(parsedFinalPrice) || parsedFinalPrice < 0) {
-          throw new Error("Please enter a valid final selling price");
-        }
-        const parsedRegistrationFee = Number(registrationFeeAmount || "0");
-        if (hasRegistrationFee && (!Number.isFinite(parsedRegistrationFee) || parsedRegistrationFee <= 0)) {
-          throw new Error("Please enter a valid registration fee amount");
-        }
-      }
-
-      if (itemType === "BIKE" && purchaseMode === "BULK") {
-        if (bulkLines.length === 0) {
-          throw new Error("Please add at least one bulk bike line");
-        }
-
-        const invoiceGroupCode = `BULK-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
-        const lineItems = bulkLines.flatMap((line) => line.bikeIds.map((bikeId) => ({ bikeId, unitPrice: line.unitPrice })));
-        const effectiveLeasingDownPayment = Number(leasingDownPaymentAmount || "0");
-        const effectiveDownPayment = purchaseChannel === "LEASING"
-          ? effectiveLeasingDownPayment
-          : (paymentType === "DIRECT" ? bulkTotal : parsedDownPayment);
-        const allocation = allocateDownPayments(lineItems, effectiveDownPayment);
-
-        for (const [allocationIndex, allocated] of allocation.entries()) {
-          const response = await fetch(`${base}/${resolvedUserId}/purchases`, {
-            method: "POST",
-            headers: { ...auth, "Content-Type": "application/json" },
-            body: JSON.stringify({
-              purchaseType: "BIKE",
-              purchaseMode: "BULK",
-              invoiceGroupCode,
-              bikeVehicleId: allocated.bikeId,
-              finalSellingPrice: allocated.unitPrice,
-              purchaseChannel,
-              leasingCompanyId: purchaseChannel === "LEASING" ? leasingCompanyId : undefined,
-              leasingDownPaymentAmount: purchaseChannel === "LEASING" ? allocated.downPayment : undefined,
-              paymentType: purchaseChannel === "LEASING" ? "DIRECT" : paymentType,
-              downPaymentAmount: purchaseChannel === "LEASING"
-                ? undefined
-                : (paymentType === "DOWNPAYMENT" ? allocated.downPayment : undefined),
-              hasRegistrationFee: bulkLines.find((line) => line.bikeIds.includes(allocated.bikeId))?.hasRegistrationFee ?? false,
-              registrationFeeAmount: bulkLines.find((line) => line.bikeIds.includes(allocated.bikeId))?.registrationFeeAmount ?? 0,
-              extraCosts: allocationIndex === 0
-                ? extraCosts.map(({ label, amount }) => ({ label, amount }))
-                : [],
-            }),
-          });
-
-          const payload = (await response.json()) as { message?: string };
-          if (!response.ok) {
-            throw new Error(payload.message ?? "Failed to create bulk purchase");
-          }
-        }
-
-        onSaved();
-        onClose();
-        return;
-      }
-
-      if (itemType !== "BIKE" && (!Number.isFinite(parsedFinalPrice) || parsedFinalPrice < 0)) {
+      if (!Number.isFinite(parsedFinalPrice) || parsedFinalPrice < 0) {
         throw new Error("Please enter a valid final selling price");
       }
 
@@ -611,26 +292,15 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
         body: JSON.stringify({
           purchaseType: itemType,
           purchaseMode: "SINGLE",
-          bikeVehicleId: itemType === "BIKE" ? selectedBikeId : undefined,
           inventoryProductId: itemType === "INVENTORY" ? itemId : undefined,
-          preOrderId: itemType === "PRE_ORDER" ? itemId : undefined,
           customCategory: itemType === "CUSTOM"
             ? (customCategory === "Other" ? customCategoryOther.trim() || "Miscellaneous" : customCategory)
             : undefined,
           customDescription: itemType === "CUSTOM" ? customDescription.trim() : undefined,
           quantity: itemType === "INVENTORY" ? parsedQty : undefined,
           finalSellingPrice: parsedFinalPrice,
-          purchaseChannel: (itemType === "BIKE" || itemType === "PRE_ORDER") ? purchaseChannel : "PERSONAL",
-          leasingCompanyId: (itemType === "BIKE" || itemType === "PRE_ORDER") && purchaseChannel === "LEASING" ? leasingCompanyId : undefined,
-          leasingDownPaymentAmount: (itemType === "BIKE" || itemType === "PRE_ORDER") && purchaseChannel === "LEASING"
-            ? Number(leasingDownPaymentAmount || "0")
-            : undefined,
-          paymentType: (itemType === "BIKE" || itemType === "PRE_ORDER") && purchaseChannel === "LEASING" ? "DIRECT" : paymentType,
-          downPaymentAmount: (itemType === "BIKE" || itemType === "PRE_ORDER") && purchaseChannel === "LEASING"
-            ? undefined
-            : (paymentType === "DOWNPAYMENT" ? parsedDownPayment : undefined),
-          hasRegistrationFee: itemType === "BIKE" ? hasRegistrationFee : false,
-          registrationFeeAmount: itemType === "BIKE" && hasRegistrationFee ? Number(registrationFeeAmount || "0") : undefined,
+          paymentType,
+          downPaymentAmount: paymentType === "DOWNPAYMENT" ? parsedDownPayment : undefined,
           extraCosts: extraCosts.map(({ label, amount }) => ({ label, amount })),
           interestRate: paymentType === "DOWNPAYMENT" && parsedInterestRate > 0 ? parsedInterestRate : undefined,
           installmentMonths: paymentType === "DOWNPAYMENT" && parsedInstallmentMonths >= 1 ? parsedInstallmentMonths : undefined,
@@ -659,7 +329,7 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
     <div className="bm-modal-backdrop" onClick={onClose}>
       <form className="bm-modal bm-modal-lg" onClick={(event) => event.stopPropagation()} onSubmit={submit}>
         <button type="button" className="bm-modal-close" onClick={onClose}>x</button>
-        <h3 className="bm-modal-title">{itemType === "CUSTOM" ? "Generate Bar Invoice" : "Record Drink Sale"}</h3>
+        <h3 className="bm-modal-title">{itemType === "CUSTOM" ? "Generate Bar Invoice" : "Record Product Sale"}</h3>
 
         {error && <div className="bm-alert bm-alert-error">{error}</div>}
         {loading && <p className="users-muted">Loading users...</p>}
@@ -671,24 +341,6 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
                 <label>Item</label>
                 <input className="bm-input" value={itemLabel} readOnly />
               </div>
-
-              {itemType === "BIKE" && (
-                <div className="bm-field-group users-span-2">
-                  <label>Purchase Option</label>
-                  <select
-                    className="bm-input"
-                    value={purchaseMode}
-                    onChange={(event) => {
-                      const mode = event.target.value as "SINGLE" | "BULK";
-                      setPurchaseMode(mode);
-                      setError(null);
-                    }}
-                  >
-                    <option value="SINGLE">Single Purchase</option>
-                    <option value="BULK">Bulk Purchase</option>
-                  </select>
-                </div>
-              )}
 
               <div className="bm-field-group users-span-2">
                 <label>Customer Lookup</label>
@@ -817,101 +469,6 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
                 </>
               )}
 
-              {itemType === "BIKE" && purchaseMode === "SINGLE" && (
-                <div className="bm-field-group users-span-2">
-                  <label>Select Bike</label>
-                  <select
-                    className="bm-input"
-                    value={selectedBikeId}
-                    onChange={(event) => {
-                      const value = event.target.value;
-                      setSelectedBikeId(value ? Number(value) : "");
-                    }}
-                    required
-                  >
-                    <option value="">Select available bike</option>
-                    {availableBikeOptions.map((bike) => (
-                      <option key={bike.id} value={bike.id}>
-                        {bike.displayId} | {bike.brand.name} {bike.model.name} ({bike.colour})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {itemType === "BIKE" && purchaseMode === "BULK" && (
-                <>
-                  <div className="bm-field-group">
-                    <label>Brand + Model</label>
-                    <select className="bm-input" value={bulkBrandModelKey} onChange={(event) => setBulkBrandModelKey(event.target.value)}>
-                      <option value="">Select brand and model</option>
-                      {bikeGroupOptions.map((group) => (
-                        <option key={group.key} value={group.key}>
-                          {group.brandName} {group.modelName} (Available: {group.availableCount})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="bm-field-group">
-                    <label>Bike Count</label>
-                    <input className="bm-input" type="number" min={1} value={bulkCount} onChange={(event) => setBulkCount(event.target.value)} />
-                  </div>
-                  <div className="bm-field-group">
-                    <label>Allocated Price (Per Bike)</label>
-                    <input className="bm-input" type="number" min={0} step="0.01" value={bulkUnitPrice} onChange={(event) => setBulkUnitPrice(event.target.value)} />
-                  </div>
-                  <div className="bm-field-group">
-                    <label>Registration Needed</label>
-                    <select className="bm-input" value={bulkHasRegistrationFee ? "yes" : "no"} onChange={(event) => setBulkHasRegistrationFee(event.target.value === "yes")}>
-                      <option value="no">No</option>
-                      <option value="yes">Yes</option>
-                    </select>
-                  </div>
-                  <div className="bm-field-group">
-                    <label>Registration Fee (Per Bike)</label>
-                    <input className="bm-input" type="number" min={0} step="0.01" value={bulkRegistrationFeeAmount} onChange={(event) => setBulkRegistrationFeeAmount(event.target.value)} disabled={!bulkHasRegistrationFee} />
-                  </div>
-                  <div className="bm-field-group" style={{ display: "flex", alignItems: "end" }}>
-                    <button type="button" className="btn-accent" onClick={addBulkLine}>Apply</button>
-                  </div>
-
-                  <div className="bm-field-group users-span-2">
-                    <label>Added Bike List</label>
-                    {bulkLines.length === 0 && <div className="users-muted">No bulk lines added yet.</div>}
-                    {bulkLines.length > 0 && (
-                      <div className="data-table-wrap" style={{ marginTop: 8 }}>
-                        <table className="data-table">
-                          <thead>
-                            <tr>
-                              <th>Brand</th>
-                              <th>Model</th>
-                              <th>Count</th>
-                              <th>Allocated Price</th>
-                              <th>Reg Fee</th>
-                              <th>Subtotal</th>
-                              <th>Action</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {bulkLines.map((line) => (
-                              <tr key={line.key}>
-                                <td>{line.brandName}</td>
-                                <td>{line.modelName}</td>
-                                <td>{line.quantity}</td>
-                                <td>Rs. {line.unitPrice.toLocaleString()}</td>
-                                <td>{line.hasRegistrationFee ? `Rs. ${line.registrationFeeSubtotal.toLocaleString()}` : "-"}</td>
-                                <td>Rs. {line.subtotal.toLocaleString()}</td>
-                                <td><button type="button" className="btn-outline" onClick={() => removeBulkLine(line.key)}>Remove</button></td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-
               {itemType === "INVENTORY" && (
                 <div className="bm-field-group">
                   <label>Quantity</label>
@@ -947,55 +504,23 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
                 <label>Current Selling Price</label>
                 <input
                   className="bm-input"
-                  value={itemType === "BIKE" && purchaseMode === "BULK"
-                    ? `Rs. ${bulkTotal.toLocaleString()}`
-                    : currentSellingPrice != null ? `Rs. ${currentSellingPrice.toLocaleString()}` : "Not set"}
+                  value={currentSellingPrice != null ? `Rs. ${currentSellingPrice.toLocaleString()}` : "Not set"}
                   readOnly
                 />
               </div>
 
-              {(itemType !== "BIKE" || purchaseMode === "SINGLE") && (
-                <div className="bm-field-group">
-                  <label>Final Selling Price</label>
-                  <input
-                    className="bm-input"
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    value={finalSellingPrice}
-                    onChange={(event) => setFinalSellingPrice(event.target.value)}
-                    required
-                  />
-                </div>
-              )}
-
-              {itemType === "BIKE" && purchaseMode === "SINGLE" && (
-                <>
-                  <div className="bm-field-group">
-                    <label>Registration Needed</label>
-                    <select
-                      className="bm-input"
-                      value={hasRegistrationFee ? "yes" : "no"}
-                      onChange={(event) => setHasRegistrationFee(event.target.value === "yes")}
-                    >
-                      <option value="no">No</option>
-                      <option value="yes">Yes</option>
-                    </select>
-                  </div>
-                  <div className="bm-field-group">
-                    <label>Registration Fee</label>
-                    <input
-                      className="bm-input"
-                      type="number"
-                      min={0}
-                      step="0.01"
-                      value={registrationFeeAmount}
-                      onChange={(event) => setRegistrationFeeAmount(event.target.value)}
-                      disabled={!hasRegistrationFee}
-                    />
-                  </div>
-                </>
-              )}
+              <div className="bm-field-group">
+                <label>Final Selling Price</label>
+                <input
+                  className="bm-input"
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={finalSellingPrice}
+                  onChange={(event) => setFinalSellingPrice(event.target.value)}
+                  required
+                />
+              </div>
 
               <div className="bm-field-group users-span-2">
                 <label>Extra Costs</label>
@@ -1056,127 +581,6 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
                   </div>
                 )}
               </div>
-
-              {(itemType === "BIKE" || itemType === "PRE_ORDER") && (
-                <>
-                  <div className="bm-field-group">
-                    <label>Selling Option</label>
-                    <select className="bm-input" value={purchaseChannel} onChange={(event) => setPurchaseChannel(event.target.value as "PERSONAL" | "LEASING") }>
-                      <option value="PERSONAL">Full / Advance Payment</option>
-                      <option value="LEASING">Leasing Downpayment</option>
-                    </select>
-                  </div>
-
-                  {purchaseChannel === "PERSONAL" && (
-                    <>
-                      <div className="bm-field-group">
-                        <label>Payment Type</label>
-                        <select className="bm-input" value={paymentType} onChange={(event) => {
-                          setPaymentType(event.target.value as "DIRECT" | "DOWNPAYMENT");
-                          if (event.target.value === "DIRECT") {
-                            setInterestRate("");
-                            setInstallmentMonths("");
-                          }
-                        }}>
-                          <option value="DIRECT">Full Payment</option>
-                          <option value="DOWNPAYMENT">Advance Payment</option>
-                        </select>
-                      </div>
-
-                      <div className="bm-field-group">
-                        <label>{itemType === "BIKE" ? "Advance Payment" : "Downpayment Amount"}</label>
-                        <input
-                          className="bm-input"
-                          type="number"
-                          min={itemType === "BIKE" ? 0.01 : 0}
-                          step="0.01"
-                          value={downPaymentAmount}
-                          onChange={(event) => setDownPaymentAmount(event.target.value)}
-                          disabled={paymentType === "DIRECT"}
-                          required={paymentType === "DOWNPAYMENT"}
-                        />
-                      </div>
-
-                      {paymentType === "DOWNPAYMENT" && itemType !== "BIKE" && (
-                        <>
-                          <div className="bm-field-group">
-                            <label>Finance Charge (%)</label>
-                            <input
-                              className="bm-input"
-                              type="number"
-                              min={0}
-                              max={100}
-                              step="0.01"
-                              placeholder="e.g. 5"
-                              value={interestRate}
-                              onChange={(event) => setInterestRate(event.target.value)}
-                            />
-                          </div>
-                          <div className="bm-field-group">
-                            <label>Number of Installments (Months)</label>
-                            <input
-                              className="bm-input"
-                              type="number"
-                              min={1}
-                              step="1"
-                              placeholder="e.g. 12"
-                              value={installmentMonths}
-                              onChange={(event) => setInstallmentMonths(event.target.value)}
-                            />
-                          </div>
-                          {computedTotalWithInterest != null && (
-                            <>
-                              <div className="bm-field-group">
-                                <label>Total with Finance Charge</label>
-                                <input className="bm-input" value={`Rs. ${computedTotalWithInterest.toLocaleString()}`} readOnly />
-                              </div>
-                              <div className="bm-field-group">
-                                <label>Monthly Installment</label>
-                                <input className="bm-input" value={computedMonthlyInstallment != null ? `Rs. ${computedMonthlyInstallment.toLocaleString()}` : "-"} readOnly />
-                              </div>
-                            </>
-                          )}
-                        </>
-                      )}
-                    </>
-                  )}
-
-                  {purchaseChannel === "LEASING" && (
-                    <>
-                      <div className="bm-field-group">
-                        <label>Select Leasing Partner</label>
-                        <select
-                          className="bm-input"
-                          value={leasingCompanyId}
-                          onChange={(event) => {
-                            const value = event.target.value;
-                            setLeasingCompanyId(value ? Number(value) : "");
-                          }}
-                          required
-                        >
-                          <option value="">Select leasing company</option>
-                          {leasingCompanies.map((company) => (
-                            <option key={company.id} value={company.id}>{company.name}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div className="bm-field-group">
-                        <label>Leasing Advance Payment</label>
-                        <input
-                          className="bm-input"
-                          type="number"
-                          min={itemType === "BIKE" ? 0.01 : 0}
-                          step="0.01"
-                          value={leasingDownPaymentAmount}
-                          onChange={(event) => setLeasingDownPaymentAmount(event.target.value)}
-                        />
-                        <span className="users-muted">Complete the remaining balance from Users → View Orders → Settle.</span>
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
 
               {(itemType === "INVENTORY" || itemType === "CUSTOM") && (
                 <>
@@ -1257,13 +661,6 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
                 <input className="bm-input" value={`Rs. ${computedInvoiceTotal.toLocaleString()}`} readOnly />
               </div>
 
-              {itemType === "BIKE" && (
-                <div className="bm-field-group">
-                  <label>Registration Total</label>
-                  <input className="bm-input" value={`Rs. ${computedRegistrationTotal.toLocaleString()}`} readOnly />
-                </div>
-              )}
-
               {extraCosts.length > 0 && (
                 <div className="bm-field-group">
                   <label>Extra Costs Total</label>
@@ -1273,7 +670,7 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
 
               <div className="bm-field-group">
                 <label>Grand Total{computedTotalWithInterest != null ? " (incl. finance charge)" : ""}</label>
-                <input className="bm-input" value={`Rs. ${(computedTotalWithInterest != null ? computedTotalWithInterest + computedRegistrationTotal + computedExtraCostsTotal : computedInvoiceGrandTotal).toLocaleString()}`} readOnly />
+                <input className="bm-input" value={`Rs. ${(computedTotalWithInterest != null ? computedTotalWithInterest + computedExtraCostsTotal : computedInvoiceGrandTotal).toLocaleString()}`} readOnly />
               </div>
 
               <div className="bm-field-group">
@@ -1282,40 +679,38 @@ export default function CustomerPurchaseModal(props: CustomerPurchaseModalProps)
               </div>
             </div>
 
-            {purchaseMode === "SINGLE" && (
-              <div style={{ marginTop: "1.25rem", padding: "1rem", border: "1px solid var(--panel-border)", borderRadius: "var(--radius-sm)", background: "var(--panel-bg)" }}>
-                <div style={{ fontWeight: 600, fontSize: "0.88rem", marginBottom: "0.75rem", color: "var(--accent)" }}>How is this being paid?</div>
-                <div className="users-form-grid">
-                  <div className="bm-field-group users-span-2">
-                    <label>Payment Method</label>
-                    <div style={{ display: "flex", gap: 20 }}>
-                      {(["CASH", "CHEQUE", "BANK_TRANSFER"] as const).map((m) => (
-                        <label key={m} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: "0.875rem", fontWeight: 500 }}>
-                          <input type="radio" checked={paymentMethod === m} onChange={() => setPaymentMethod(m)} style={{ accentColor: "var(--accent)" }} />
-                          {m === "BANK_TRANSFER" ? "Bank Transfer" : m}
-                        </label>
-                      ))}
-                    </div>
+            <div style={{ marginTop: "1.25rem", padding: "1rem", border: "1px solid var(--panel-border)", borderRadius: "var(--radius-sm)", background: "var(--panel-bg)" }}>
+              <div style={{ fontWeight: 600, fontSize: "0.88rem", marginBottom: "0.75rem", color: "var(--accent)" }}>How is this being paid?</div>
+              <div className="users-form-grid">
+                <div className="bm-field-group users-span-2">
+                  <label>Payment Method</label>
+                  <div style={{ display: "flex", gap: 20 }}>
+                    {(["CASH", "CHEQUE", "BANK_TRANSFER"] as const).map((m) => (
+                      <label key={m} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: "0.875rem", fontWeight: 500 }}>
+                        <input type="radio" checked={paymentMethod === m} onChange={() => setPaymentMethod(m)} style={{ accentColor: "var(--accent)" }} />
+                        {m === "BANK_TRANSFER" ? "Bank Transfer" : m}
+                      </label>
+                    ))}
                   </div>
-                  {paymentMethod === "CHEQUE" && (
-                    <>
-                      <div className="bm-field-group">
-                        <label>Cheque No *</label>
-                        <input className="bm-input" value={paymentChequeNo} onChange={(e) => setPaymentChequeNo(e.target.value)} placeholder="e.g. 001234" />
-                      </div>
-                      <div className="bm-field-group">
-                        <label>Bank</label>
-                        <input className="bm-input" value={paymentChequeBank} onChange={(e) => setPaymentChequeBank(e.target.value)} placeholder="e.g. HNB" />
-                      </div>
-                      <div className="bm-field-group">
-                        <label>Cheque Date</label>
-                        <input type="date" className="bm-input" value={paymentChequeDate} onChange={(e) => setPaymentChequeDate(e.target.value)} />
-                      </div>
-                    </>
-                  )}
                 </div>
+                {paymentMethod === "CHEQUE" && (
+                  <>
+                    <div className="bm-field-group">
+                      <label>Cheque No *</label>
+                      <input className="bm-input" value={paymentChequeNo} onChange={(e) => setPaymentChequeNo(e.target.value)} placeholder="e.g. 001234" />
+                    </div>
+                    <div className="bm-field-group">
+                      <label>Bank</label>
+                      <input className="bm-input" value={paymentChequeBank} onChange={(e) => setPaymentChequeBank(e.target.value)} placeholder="e.g. HNB" />
+                    </div>
+                    <div className="bm-field-group">
+                      <label>Cheque Date</label>
+                      <input type="date" className="bm-input" value={paymentChequeDate} onChange={(e) => setPaymentChequeDate(e.target.value)} />
+                    </div>
+                  </>
+                )}
               </div>
-            )}
+            </div>
 
             <div className="bm-modal-actions" style={{ marginTop: "1rem" }}>
               <button type="submit" className="btn-accent" disabled={saving}>{saving ? "Saving..." : "Confirm Sale"}</button>

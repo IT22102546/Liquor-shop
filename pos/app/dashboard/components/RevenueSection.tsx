@@ -10,10 +10,9 @@ import { IconTrend } from "../../lib/icons";
 type Purchase = {
   id: number;
   purchasedAt: string;
-  itemType: "BIKE" | "INVENTORY";
+  itemType: "INVENTORY" | "CUSTOM";
   quantity: number;
   finalSellingPrice: number;
-  purchaseChannel?: "PERSONAL" | "LEASING";
   remainingAmount?: number;
 };
 

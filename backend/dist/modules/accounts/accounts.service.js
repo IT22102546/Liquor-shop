@@ -28,20 +28,16 @@ exports.getAccountBalance = getAccountBalance;
 const prisma_1 = require("../../generated/prisma");
 const prisma_client_1 = require("../../database/prisma.client");
 const errors_1 = require("../../common/utils/errors");
-const prisma_model_1 = require("../../common/utils/prisma-model");
 const prisma_2 = require("../../generated/prisma");
 const ACCOUNT_TRANSFER_TYPE = "ACCOUNT_TRANSFER";
 const TRANSFER_TRANSACTION_TYPE = "TRANSFER";
 const VOUCHER_TYPE_LABELS = {
-    VEHICLE_CLEARANCE: "Vehicle Clearance Payment",
     BILL: "Bill",
     OTHER_PAYMENT: "Other Payment",
     PERMIT: "Permit Payment",
-    LEASING_PAYMENT: "Leasing Payment",
     LOAN_PAYMENT: "Loan Payment",
     SALARY: "Salary",
     CUSTOMER_REFUND: "Customer Refund",
-    VEHICLE_PURCHASE: "Vehicle Purchase",
     ADVANCE_REFUND: "Advance Invoice Refund",
     [ACCOUNT_TRANSFER_TYPE]: "Account Transfer",
 };
@@ -53,11 +49,7 @@ function voucherTypeLabel(type) {
     return VOUCHER_TYPE_LABELS[type] ?? type;
 }
 function calculateTotalReceivable(p) {
-    const regFee = p.hasRegistrationFee ? p.registrationFeeAmount : 0;
-    if (p.purchaseChannel === "LEASING") {
-        return p.leasingDownPaymentAmount + regFee;
-    }
-    return (p.totalWithInterest ?? p.finalSellingPrice) + regFee;
+    return p.totalWithInterest ?? p.finalSellingPrice;
 }
 async function resolveVoucherToAccount(client, toAccountId) {
     if (!toAccountId)
@@ -345,13 +337,6 @@ async function listPurchasesForReceipt(dto) {
                 address: true,
             },
         },
-        bikeVehicle: {
-            select: {
-                displayId: true,
-                brand: { select: { name: true } },
-                model: { select: { name: true } },
-            },
-        },
         inventoryProduct: {
             select: { displayId: true, name: true },
         },
@@ -360,11 +345,6 @@ async function listPurchasesForReceipt(dto) {
             select: { amount: true },
         },
     };
-    if ((0, prisma_model_1.prismaModelHasObjectField)(prisma_client_1.prisma, "PosCustomerPurchase", "preOrder")) {
-        purchaseInclude.preOrder = {
-            select: { id: true, displayId: true, brand: true, model: true, colour: true },
-        };
-    }
     const purchases = await prisma_client_1.prisma.posCustomerPurchase.findMany({
         where: {
             ...searchClause,
@@ -379,15 +359,11 @@ async function listPurchasesForReceipt(dto) {
         const totalReceivable = calculateTotalReceivable(p);
         const totalReceipted = p.receipts.reduce((sum, r) => sum + r.amount, 0);
         const outstanding = Math.max(0, totalReceivable - totalReceipted);
-        const itemLabel = p.bikeVehicle
-            ? `${p.bikeVehicle.brand.name} ${p.bikeVehicle.model.name} (${p.bikeVehicle.displayId})`
-            : p.inventoryProduct
-                ? `${p.inventoryProduct.name} (${p.inventoryProduct.displayId})`
-                : p.preOrder
-                    ? `${p.preOrder.brand} ${p.preOrder.model} (${p.preOrder.displayId})`
-                    : p.customCategory
-                        ? `${p.customCategory}${p.customDescription ? ` — ${p.customDescription}` : ""}`
-                        : "—";
+        const itemLabel = p.inventoryProduct
+            ? `${p.inventoryProduct.name} (${p.inventoryProduct.displayId})`
+            : p.customCategory
+                ? `${p.customCategory}${p.customDescription ? ` — ${p.customDescription}` : ""}`
+                : "—";
         return {
             id: p.id,
             invoiceRef: p.invoiceGroupCode ?? `INV-${String(p.id).padStart(5, "0")}`,
@@ -399,9 +375,6 @@ async function listPurchasesForReceipt(dto) {
             purchaseChannel: p.purchaseChannel,
             paymentType: p.paymentType,
             finalSellingPrice: p.finalSellingPrice,
-            hasRegistrationFee: p.hasRegistrationFee,
-            registrationFeeAmount: p.registrationFeeAmount,
-            leasingDownPaymentAmount: p.leasingDownPaymentAmount,
             totalReceivable,
             totalReceipted,
             outstanding,
@@ -666,10 +639,7 @@ async function getReceiptById(id) {
                     id: true,
                     invoiceGroupCode: true,
                     finalSellingPrice: true,
-                    hasRegistrationFee: true,
-                    registrationFeeAmount: true,
                     purchaseChannel: true,
-                    leasingDownPaymentAmount: true,
                     customer: {
                         select: {
                             firstName: true,
@@ -679,9 +649,6 @@ async function getReceiptById(id) {
                             address: true,
                             district: true,
                         },
-                    },
-                    bikeVehicle: {
-                        select: { displayId: true, brand: { select: { name: true } }, model: { select: { name: true } } },
                     },
                     inventoryProduct: { select: { displayId: true, name: true } },
                 },
@@ -1111,16 +1078,8 @@ async function listInvoicePayments(dto) {
         customCategory: true,
         customDescription: true,
         customer: { select: { firstName: true, lastName: true, nic: true, mobileNumber: true } },
-        bikeVehicle: {
-            select: { displayId: true, brand: { select: { name: true } }, model: { select: { name: true } } },
-        },
         inventoryProduct: { select: { displayId: true, name: true } },
     };
-    if ((0, prisma_model_1.prismaModelHasObjectField)(prisma_client_1.prisma, "PosCustomerPurchase", "preOrder")) {
-        purchaseSelect.preOrder = {
-            select: { displayId: true, brand: true, model: true, colour: true },
-        };
-    }
     const [total, payments] = await Promise.all([
         prisma_client_1.prisma.invoicePayment.count({ where }),
         prisma_client_1.prisma.invoicePayment.findMany({
@@ -1137,15 +1096,11 @@ async function listInvoicePayments(dto) {
     ]);
     const data = payments.map((p) => {
         const pur = p.purchase;
-        const itemLabel = pur.bikeVehicle
-            ? `${pur.bikeVehicle.brand.name} ${pur.bikeVehicle.model.name} (${pur.bikeVehicle.displayId})`
-            : pur.inventoryProduct
-                ? `${pur.inventoryProduct.name} (${pur.inventoryProduct.displayId})`
-                : pur.preOrder
-                    ? `${pur.preOrder.brand} ${pur.preOrder.model} (${pur.preOrder.displayId})`
-                    : pur.customCategory
-                        ? `${pur.customCategory}${pur.customDescription ? ` — ${pur.customDescription}` : ""}`
-                        : "—";
+        const itemLabel = pur.inventoryProduct
+            ? `${pur.inventoryProduct.name} (${pur.inventoryProduct.displayId})`
+            : pur.customCategory
+                ? `${pur.customCategory}${pur.customDescription ? ` — ${pur.customDescription}` : ""}`
+                : "—";
         return {
             ...p,
             invoiceRef: pur.invoiceGroupCode ?? `INV-${String(p.purchaseId).padStart(5, "0")}`,
@@ -1194,9 +1149,6 @@ async function generateReceiptFromPayment(paymentId, dto, adminId) {
                             id: true,
                             invoiceGroupCode: true,
                             customer: { select: { firstName: true, lastName: true, nic: true, mobileNumber: true, address: true } },
-                            bikeVehicle: {
-                                select: { displayId: true, brand: { select: { name: true } }, model: { select: { name: true } } },
-                            },
                             inventoryProduct: { select: { displayId: true, name: true } },
                         },
                     },

@@ -33,15 +33,12 @@ type ApiErrorPayload = {
 };
 
 const VOUCHER_TYPES = [
-  { value: "VEHICLE_CLEARANCE", label: "Vehicle Clearance Payment" },
   { value: "BILL", label: "Bill" },
   { value: "OTHER_PAYMENT", label: "Other Payment" },
   { value: "PERMIT", label: "Permit Payment" },
-  { value: "LEASING_PAYMENT", label: "Leasing Payment" },
   { value: "LOAN_PAYMENT", label: "Loan Payment" },
   { value: "SALARY", label: "Salary" },
   { value: "CUSTOMER_REFUND", label: "Customer Refund" },
-  { value: "VEHICLE_PURCHASE", label: "Vehicle Purchase" },
   { value: "ADVANCE_REFUND", label: "Advance Invoice Refund" },
   { value: "ACCOUNT_TRANSFER", label: "Account Transfer" },
 ];

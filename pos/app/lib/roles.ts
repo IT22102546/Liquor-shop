@@ -20,13 +20,11 @@ const ROLE_PATHS: Record<PosAdminRole, string[]> = {
   INVENTORY_MANAGER: [
     "/dashboard/inventory/manage",
     "/dashboard/suppliers",
-    "/dashboard/purchase-orders",
     "/dashboard/purchasing-requests",
   ],
   ACCOUNTANT: [
     "/dashboard/accounts",
     "/dashboard/invoices",
-    "/dashboard/wholesale-accounts",
   ],
 };
 

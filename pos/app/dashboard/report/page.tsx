@@ -73,18 +73,13 @@ export default function ReportPage() {
                 <td className={styles.amount}>Rs. 200,000</td>
                 <td />
               </tr>
-              <tr>
-                <td className={styles.desc}>Leasing Outstanding</td>
-                <td className={styles.amount}>Rs. 200,000</td>
-                <td />
-              </tr>
             </tbody>
           </table>
 
           <div className={styles.rowTotal}>
             <div />
             <div className={styles.totalLabel}>Total Outstanding</div>
-            <div className={styles.totalAmount}>Rs. 400,000</div>
+            <div className={styles.totalAmount}>Rs. 200,000</div>
           </div>
         </section>
       </main>

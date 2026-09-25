@@ -35,16 +35,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const bikesController = __importStar(require("./bikes.controller"));
-const auth_middleware_1 = require("../../common/middleware/auth.middleware");
-const auth_middleware_2 = require("../../common/middleware/auth.middleware");
 const router = (0, express_1.Router)();
-router.get("/vehicles", bikesController.listPublicVehicles);
-router.get("/vehicles/:id", bikesController.getPublicVehicleById);
 router.get("/products", bikesController.listPublicProducts);
 router.get("/products/:id", bikesController.getPublicProductById);
-router.get("/", bikesController.listBikes);
-router.get("/:id", bikesController.getBike);
-router.post("/", auth_middleware_1.authenticate, (0, auth_middleware_2.authorize)("ADMIN", "STAFF"), bikesController.createBike);
-router.patch("/:id", auth_middleware_1.authenticate, (0, auth_middleware_2.authorize)("ADMIN", "STAFF"), bikesController.updateBike);
-router.delete("/:id", auth_middleware_1.authenticate, (0, auth_middleware_2.authorize)("ADMIN"), bikesController.deleteBike);
 exports.default = router;

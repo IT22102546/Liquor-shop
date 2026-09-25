@@ -1,7 +1,6 @@
 import { Prisma } from "../../generated/prisma";
 import { prisma } from "../../database/prisma.client";
 import { AppError } from "../../common/utils/errors";
-import { prismaModelHasObjectField } from "../../common/utils/prisma-model";
 import {
   AccountLevel,
   ChequeStatus,
@@ -31,15 +30,12 @@ import type {
 const ACCOUNT_TRANSFER_TYPE = "ACCOUNT_TRANSFER";
 const TRANSFER_TRANSACTION_TYPE = "TRANSFER";
 const VOUCHER_TYPE_LABELS: Record<string, string> = {
-  VEHICLE_CLEARANCE: "Vehicle Clearance Payment",
   BILL: "Bill",
   OTHER_PAYMENT: "Other Payment",
   PERMIT: "Permit Payment",
-  LEASING_PAYMENT: "Leasing Payment",
   LOAN_PAYMENT: "Loan Payment",
   SALARY: "Salary",
   CUSTOMER_REFUND: "Customer Refund",
-  VEHICLE_PURCHASE: "Vehicle Purchase",
   ADVANCE_REFUND: "Advance Invoice Refund",
   [ACCOUNT_TRANSFER_TYPE]: "Account Transfer",
 };
@@ -56,16 +52,8 @@ function voucherTypeLabel(type: string): string {
 function calculateTotalReceivable(p: {
   finalSellingPrice: number;
   totalWithInterest: number | null;
-  hasRegistrationFee: boolean;
-  registrationFeeAmount: number;
-  purchaseChannel: string;
-  leasingDownPaymentAmount: number;
 }): number {
-  const regFee = p.hasRegistrationFee ? p.registrationFeeAmount : 0;
-  if (p.purchaseChannel === "LEASING") {
-    return p.leasingDownPaymentAmount + regFee;
-  }
-  return (p.totalWithInterest ?? p.finalSellingPrice) + regFee;
+  return p.totalWithInterest ?? p.finalSellingPrice;
 }
 
 type VoucherRow = Prisma.AccountVoucherGetPayload<{
@@ -460,13 +448,6 @@ export async function listPurchasesForReceipt(dto: InvoiceQueueQueryDto) {
         address: true,
       },
     },
-    bikeVehicle: {
-      select: {
-        displayId: true,
-        brand: { select: { name: true } },
-        model: { select: { name: true } },
-      },
-    },
     inventoryProduct: {
       select: { displayId: true, name: true },
     },
@@ -475,18 +456,6 @@ export async function listPurchasesForReceipt(dto: InvoiceQueueQueryDto) {
       select: { amount: true },
     },
   };
-
-  if (
-    prismaModelHasObjectField(
-      prisma as any,
-      "PosCustomerPurchase",
-      "preOrder",
-    )
-  ) {
-    purchaseInclude.preOrder = {
-      select: { id: true, displayId: true, brand: true, model: true, colour: true },
-    };
-  }
 
   const purchases: any[] = await (prisma.posCustomerPurchase as any).findMany({
     where: {
@@ -505,12 +474,8 @@ export async function listPurchasesForReceipt(dto: InvoiceQueueQueryDto) {
     const outstanding = Math.max(0, totalReceivable - totalReceipted);
 
     const itemLabel =
-      p.bikeVehicle
-        ? `${p.bikeVehicle.brand.name} ${p.bikeVehicle.model.name} (${p.bikeVehicle.displayId})`
-        : p.inventoryProduct
+      p.inventoryProduct
         ? `${p.inventoryProduct.name} (${p.inventoryProduct.displayId})`
-        : p.preOrder
-        ? `${p.preOrder.brand} ${p.preOrder.model} (${p.preOrder.displayId})`
         : p.customCategory
         ? `${p.customCategory}${p.customDescription ? ` — ${p.customDescription}` : ""}`
         : "—";
@@ -526,9 +491,6 @@ export async function listPurchasesForReceipt(dto: InvoiceQueueQueryDto) {
       purchaseChannel: p.purchaseChannel,
       paymentType: p.paymentType,
       finalSellingPrice: p.finalSellingPrice,
-      hasRegistrationFee: p.hasRegistrationFee,
-      registrationFeeAmount: p.registrationFeeAmount,
-      leasingDownPaymentAmount: p.leasingDownPaymentAmount,
       totalReceivable,
       totalReceipted,
       outstanding,
@@ -819,10 +781,7 @@ export async function getReceiptById(id: number) {
           id: true,
           invoiceGroupCode: true,
           finalSellingPrice: true,
-          hasRegistrationFee: true,
-          registrationFeeAmount: true,
           purchaseChannel: true,
-          leasingDownPaymentAmount: true,
           customer: {
             select: {
               firstName: true,
@@ -832,9 +791,6 @@ export async function getReceiptById(id: number) {
               address: true,
               district: true,
             },
-          },
-          bikeVehicle: {
-            select: { displayId: true, brand: { select: { name: true } }, model: { select: { name: true } } },
           },
           inventoryProduct: { select: { displayId: true, name: true } },
         },
@@ -1324,23 +1280,8 @@ export async function listInvoicePayments(dto: InvoicePaymentQueryDto) {
     customCategory: true,
     customDescription: true,
     customer: { select: { firstName: true, lastName: true, nic: true, mobileNumber: true } },
-    bikeVehicle: {
-      select: { displayId: true, brand: { select: { name: true } }, model: { select: { name: true } } },
-    },
     inventoryProduct: { select: { displayId: true, name: true } },
   };
-
-  if (
-    prismaModelHasObjectField(
-      prisma as any,
-      "PosCustomerPurchase",
-      "preOrder",
-    )
-  ) {
-    purchaseSelect.preOrder = {
-      select: { displayId: true, brand: true, model: true, colour: true },
-    };
-  }
 
   const [total, payments] = await Promise.all([
     prisma.invoicePayment.count({ where }),
@@ -1359,12 +1300,8 @@ export async function listInvoicePayments(dto: InvoicePaymentQueryDto) {
 
   const data = (payments as any[]).map((p) => {
     const pur = p.purchase;
-    const itemLabel = pur.bikeVehicle
-      ? `${pur.bikeVehicle.brand.name} ${pur.bikeVehicle.model.name} (${pur.bikeVehicle.displayId})`
-      : pur.inventoryProduct
+    const itemLabel = pur.inventoryProduct
       ? `${pur.inventoryProduct.name} (${pur.inventoryProduct.displayId})`
-      : pur.preOrder
-      ? `${pur.preOrder.brand} ${pur.preOrder.model} (${pur.preOrder.displayId})`
       : pur.customCategory
       ? `${pur.customCategory}${pur.customDescription ? ` — ${pur.customDescription}` : ""}`
       : "—";
@@ -1424,9 +1361,6 @@ export async function generateReceiptFromPayment(
               id: true,
               invoiceGroupCode: true,
               customer: { select: { firstName: true, lastName: true, nic: true, mobileNumber: true, address: true } },
-              bikeVehicle: {
-                select: { displayId: true, brand: { select: { name: true } }, model: { select: { name: true } } },
-              },
               inventoryProduct: { select: { displayId: true, name: true } },
             },
           },

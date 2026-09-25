@@ -48,10 +48,7 @@ function errorHandler(err, _req, res, _next) {
                 ? err.meta.target.map(String)
                 : [String(err.meta?.target ?? "")].filter(Boolean);
             const labelMap = {
-                displayId: "Bike ID",
-                registerNo: "Register number",
-                chassisNo: "Chassis number",
-                engineNo: "Engine number",
+                displayId: "ID",
                 code: "Code",
                 email: "Email",
             };
