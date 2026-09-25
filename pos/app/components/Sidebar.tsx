@@ -4,47 +4,79 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  IconAccess,
   IconAccounts,
   IconBar,
   IconBottle,
   IconChevronLeft,
-  IconChevronNav,
   IconChevronRight,
-  IconPreOrders,
+  IconContactRequests,
+  IconDashboard,
+  IconInventory,
+  IconInvoice,
   IconReceipt,
-  IconSearch,
   IconSupplier,
   IconUsers,
 } from "../lib/icons";
 import { useAdmin } from "./AdminContext";
 import { canAccessPath } from "../lib/roles";
 
-const NAV_ITEMS = [
-  { key: "inventory", label: "Sell Products", href: "/dashboard/inventory", Icon: IconBottle },
-  { key: "dashboard", label: "Dashboard", href: "/dashboard", Icon: IconBar },
-  { key: "staff", label: "Staff & Roles", href: "/dashboard/staff", Icon: IconUsers },
-  { key: "users", label: "Customer Management", href: "/dashboard/users", Icon: IconUsers },
-  { key: "suppliers", label: "Beverage Suppliers", href: "/dashboard/suppliers", Icon: IconSupplier },
-  { key: "purchasing", label: "Supplier Requests", href: "/dashboard/purchasing-requests", Icon: IconPreOrders },
-  { key: "invoices", label: "Invoice Management", href: "/dashboard/invoices", Icon: IconReceipt },
-  { key: "accounts", label: "Accounts", href: "/dashboard/accounts", Icon: IconAccounts },
-] as const;
+type NavLink = { label: string; href: string; Icon: () => JSX.Element };
 
-const GROUPS = {
-  users: [["Users", "/dashboard/users"], ["User History", "/dashboard/users/history"]],
-  inventory: [["Sell & Inventory", "/dashboard/inventory"], ["Sold Products", "/dashboard/inventory/sold"], ["Product Setup", "/dashboard/inventory/manage"]],
-  invoices: [["Invoices", "/dashboard/invoices"], ["Account Details", "/dashboard/invoices/accounts"], ["Terms & Conditions", "/dashboard/invoices/terms"]],
-  accounts: [["Receipts", "/dashboard/accounts/receipts"], ["Vouchers", "/dashboard/accounts/vouchers"], ["General Ledger", "/dashboard/accounts/ledger"], ["Manage Accounts", "/dashboard/accounts"]],
-} as const;
+// The sidebar is the same on every page: fixed sections with plain links, filtered by role.
+// No dropdowns, so nothing opens or changes shape while navigating.
+const NAV_SECTIONS: { title: string; links: NavLink[] }[] = [
+  {
+    title: "Sales",
+    links: [
+      { label: "Bar Counter", href: "/dashboard/inventory", Icon: IconBottle },
+      { label: "Sold Products", href: "/dashboard/inventory/sold", Icon: IconReceipt },
+    ],
+  },
+  {
+    title: "Overview",
+    links: [{ label: "Dashboard", href: "/dashboard", Icon: IconDashboard }],
+  },
+  {
+    title: "Stock",
+    links: [
+      { label: "Product Setup", href: "/dashboard/inventory/manage", Icon: IconInventory },
+      { label: "Suppliers", href: "/dashboard/suppliers", Icon: IconSupplier },
+      { label: "Supplier Requests", href: "/dashboard/purchasing-requests", Icon: IconContactRequests },
+    ],
+  },
+  {
+    title: "People",
+    links: [
+      { label: "Customers", href: "/dashboard/users", Icon: IconUsers },
+      { label: "Staff & Roles", href: "/dashboard/staff", Icon: IconAccess },
+    ],
+  },
+  {
+    title: "Invoices",
+    links: [
+      { label: "Invoices", href: "/dashboard/invoices", Icon: IconInvoice },
+      { label: "Invoice Bank Details", href: "/dashboard/invoices/accounts", Icon: IconAccounts },
+      { label: "Terms & Conditions", href: "/dashboard/invoices/terms", Icon: IconReceipt },
+    ],
+  },
+  {
+    title: "Accounts",
+    links: [
+      { label: "Receipts", href: "/dashboard/accounts/receipts", Icon: IconReceipt },
+      { label: "Vouchers", href: "/dashboard/accounts/vouchers", Icon: IconInvoice },
+      { label: "General Ledger", href: "/dashboard/accounts/ledger", Icon: IconBar },
+      { label: "Manage Accounts", href: "/dashboard/accounts", Icon: IconAccounts },
+    ],
+  },
+];
 
 const SIDEBAR_COLLAPSED_KEY = "pos-sidebar-collapsed";
 
 export function Sidebar() {
   const { admin } = useAdmin();
   const pathname = usePathname();
-  const isCounter = pathname === "/dashboard/inventory";
   const [collapsed, setCollapsed] = useState(false);
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     setCollapsed(window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true");
@@ -54,12 +86,18 @@ export function Sidebar() {
     window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed));
   }, [collapsed]);
 
-  const isActive = (href: string) => pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
-  const toggleGroup = (key: string) => setOpenGroups((current) => ({ ...current, [key]: !current[key] }));
-  const visibleNavItems = NAV_ITEMS.filter((item) => {
-    const group = GROUPS[item.key as keyof typeof GROUPS];
-    return canAccessPath(admin.role, item.href) || Boolean(group?.some(([, href]) => canAccessPath(admin.role, href)));
-  });
+  const sections = NAV_SECTIONS
+    .map((section) => ({
+      ...section,
+      links: section.links.filter((link) => canAccessPath(admin.role, link.href)),
+    }))
+    .filter((section) => section.links.length > 0);
+
+  // Highlight only the most specific matching link (e.g. Sold Products, not also Bar Counter).
+  const activeHref = sections
+    .flatMap((section) => section.links.map((link) => link.href))
+    .filter((href) => pathname === href || pathname.startsWith(`${href}/`))
+    .sort((a, b) => b.length - a.length)[0];
 
   return (
     <aside className={`sidebar${collapsed ? " collapsed" : ""}`}>
@@ -70,28 +108,25 @@ export function Sidebar() {
         {!collapsed && <><span className="sidebar-brand-mark" aria-hidden="true"><IconBar /></span><span className="sidebar-brand">Bar Shop <strong>POS</strong></span></>}
       </div>
 
-      {!collapsed && !isCounter && <div className="sidebar-search"><IconSearch /><input type="text" placeholder="Search the bar..." aria-label="Search the bar" /></div>}
-
       <nav className="sidebar-nav">
-        {isCounter ? (
-          <>
-            <Link href="/dashboard/inventory" className="nav-item active"><span className="nav-icon"><IconBottle /></span>{!collapsed && <span className="nav-label">Bar Counter</span>}</Link>
-            <Link href="/dashboard/inventory/sold" className="nav-item"><span className="nav-icon"><IconReceipt /></span>{!collapsed && <span className="nav-label">Recent Sales</span>}</Link>
-            {canAccessPath(admin.role, "/dashboard/inventory/manage") && <Link href="/dashboard/inventory/manage" className="nav-item"><span className="nav-icon"><IconPreOrders /></span>{!collapsed && <span className="nav-label">Product Setup</span>}</Link>}
-            {canAccessPath(admin.role, "/dashboard") && <Link href="/dashboard" className="nav-item"><span className="nav-icon"><IconBar /></span>{!collapsed && <span className="nav-label">Dashboard</span>}</Link>}
-          </>
-        ) : visibleNavItems.map(({ key, label, href, Icon }) => {
-          const group = GROUPS[key as keyof typeof GROUPS]?.filter(([, itemHref]) => canAccessPath(admin.role, itemHref));
-          const active = isActive(href);
-          if (!group || collapsed) {
-            return <Link key={key} href={href} className={`nav-item${active ? " active" : ""}`} title={collapsed ? label : undefined}><span className="nav-icon"><Icon /></span>{!collapsed && <span className="nav-label">{label}</span>}{!collapsed && active && <span className="nav-dot" />}</Link>;
-          }
-          const open = openGroups[key] ?? active;
-          return <div key={key}>
-            <button type="button" className={`nav-item nav-group-toggle${active ? " active" : ""}`} onClick={() => toggleGroup(key)}><span className="nav-icon"><Icon /></span><span className="nav-label">{label}</span><span className="nav-chevron" style={{ transform: open ? "rotate(90deg)" : "rotate(0deg)" }}><IconChevronNav /></span></button>
-            {open && <div className="nav-sub-group">{group.map(([itemLabel, itemHref]) => <Link key={itemHref} href={itemHref} className={`nav-sub-item${pathname === itemHref ? " active" : ""}`}><span className="nav-sub-dot" /><span>{itemLabel}</span></Link>)}</div>}
-          </div>;
-        })}
+        {sections.map((section) => (
+          <div key={section.title} className="nav-section">
+            {sections.length > 1 && (collapsed
+              ? <div className="nav-section-divider" aria-hidden="true" />
+              : <div className="nav-section-title">{section.title}</div>)}
+            {section.links.map(({ label, href, Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                className={`nav-item${href === activeHref ? " active" : ""}`}
+                title={collapsed ? label : undefined}
+              >
+                <span className="nav-icon"><Icon /></span>
+                {!collapsed && <span className="nav-label">{label}</span>}
+              </Link>
+            ))}
+          </div>
+        ))}
       </nav>
 
       {!collapsed && <div className="sidebar-footer"><span>BAR SHOP POS</span><span>Operations</span></div>}

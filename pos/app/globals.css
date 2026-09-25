@@ -823,6 +823,23 @@ html[data-theme="dark"] .pw-wrap input {
   padding-left: calc(0.75rem - 2px);
 }
 
+.nav-section { display: flex; flex-direction: column; gap: 2px; }
+.nav-section + .nav-section { margin-top: 0.6rem; }
+.nav-section-title {
+  padding: 0.35rem 0.75rem 0.2rem;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  white-space: nowrap;
+}
+.nav-section-divider {
+  height: 1px;
+  margin: 0.2rem 0.5rem 0.3rem;
+  background: var(--sidebar-border);
+}
+
 .nav-icon { display: flex; align-items: center; flex-shrink: 0; }
 .nav-label { flex: 1; overflow: hidden; text-overflow: ellipsis; }
 .nav-dot {
@@ -1724,7 +1741,7 @@ html[data-theme="dark"] .bm-btn-ghost {
   .auth-hero   { display: none; }
   .pos-shell   { grid-template-columns: var(--sidebar-cw) 1fr; }
   .sidebar     { width: var(--sidebar-cw) !important; }
-  .nav-label, .sidebar-brand, .sidebar-search input, .sidebar-toggle span { display: none; }
+  .nav-label, .nav-section-title, .sidebar-brand, .sidebar-search input, .sidebar-toggle span { display: none; }
   .kpi-grid    { grid-template-columns: 1fr 1fr; }
   .finance-cards-grid { grid-template-columns: 1fr 1fr; }
   .page-content { padding: 1rem; }
