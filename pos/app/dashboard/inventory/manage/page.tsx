@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAdmin } from "../../../components/AdminContext";
 import { API_URL } from "../../../lib/constants";
-import { IconActivity, IconInventory, IconInvoice } from "../../../lib/icons";
+import { IconActivity, IconBoxIn, IconInventory, IconInvoice } from "../../../lib/icons";
+import { canAccessPath } from "../../../lib/roles";
+import { AddLiquorModal } from "../../../components/products/AddLiquorModal";
 import TablePagination, { paginateRows } from "../../../components/TablePagination";
 
 type ProductBrand = { id: number; name: string; _count?: { products: number } };
@@ -18,7 +20,8 @@ type Product = {
 };
 
 export default function InventoryManagePage() {
-  const { token } = useAdmin();
+  const { admin, token, logout } = useAdmin();
+  const [showAddLiquor, setShowAddLiquor] = useState(false);
   const [brands, setBrands] = useState<ProductBrand[]>([]);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -179,16 +182,20 @@ export default function InventoryManagePage() {
           <div className="page-title-icon"><IconInventory /></div>
           <div>
             <h2 className="page-title">Manage Product Catalog</h2>
-            <p className="page-subtitle">Manage drink brands and categories to keep the bar catalog organized and current.</p>
+            <p className="page-subtitle">Add liquor by barcode or by hand, and keep brands and categories organized.</p>
           </div>
         </div>
+        <button type="button" className="btn-accent pos-add-liquor" onClick={() => setShowAddLiquor(true)}>
+          <IconBoxIn /> Add liquor
+        </button>
       </div>
 
-      <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginBottom: "1rem" }}>
-        <Link href="/dashboard/inventory" className="btn-outline">Drink Inventory</Link>
-        <Link href="/dashboard/inventory/sold" className="btn-outline">Sold Drinks</Link>
-        <Link href="/dashboard/inventory/manage" className="btn-accent">Manage Data</Link>
-      </div>
+      {(canAccessPath(admin.role, "/dashboard/inventory") || canAccessPath(admin.role, "/dashboard/inventory/sold")) && (
+        <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+          {canAccessPath(admin.role, "/dashboard/inventory") && <Link href="/dashboard/inventory" className="btn-outline">Bar Counter</Link>}
+          {canAccessPath(admin.role, "/dashboard/inventory/sold") && <Link href="/dashboard/inventory/sold" className="btn-outline">Sold Drinks</Link>}
+        </div>
+      )}
 
       {error && <div className="bm-alert bm-alert-error">{error}</div>}
 
@@ -268,6 +275,14 @@ export default function InventoryManagePage() {
           <TablePagination page={categoryPage} pageSize={pageSize} total={categories.length} onPageChange={setCategoryPage} onPageSizeChange={setPageSize} />
         </div>
       </div>
+      {showAddLiquor && (
+        <AddLiquorModal
+          token={token}
+          onClose={() => setShowAddLiquor(false)}
+          onStockChanged={() => void loadData()}
+          onAuthExpired={logout}
+        />
+      )}
     </div>
   );
 }

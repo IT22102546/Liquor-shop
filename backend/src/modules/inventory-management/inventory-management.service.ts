@@ -10,6 +10,7 @@ import type {
   CreateProductDto,
   UpdateProductDto,
   RecordProductSaleDto,
+  RestockProductDto,
   ProductQueryDto,
 } from "./dto/product.dto";
 
@@ -36,6 +37,22 @@ async function generateProductDisplayId(): Promise<string> {
     ? Number.parseInt(latest.displayId.replace(/^PRD-/, ""), 10)
     : 0;
   return `PRD-${String(Number.isFinite(current) ? current + 1 : 1).padStart(5, "0")}`;
+}
+
+// partNumber holds the product barcode; a scan must resolve to exactly one product.
+async function assertBarcodeAvailable(barcode: string | null | undefined, excludeProductId?: number) {
+  const value = barcode?.trim();
+  if (!value) return;
+  const existing = await prisma.inventoryProduct.findFirst({
+    where: {
+      partNumber: { equals: value, mode: "insensitive" },
+      ...(excludeProductId ? { id: { not: excludeProductId } } : {}),
+    },
+    select: { name: true, displayId: true },
+  });
+  if (existing) {
+    throw AppError.conflict(`Barcode ${value} is already used by ${existing.name} (${existing.displayId})`);
+  }
 }
 
 async function assertSupplierExists(supplierId?: number) {
@@ -434,6 +451,7 @@ export async function createProduct(dto: CreateProductDto) {
   });
   if (!category) throw AppError.notFound("Product category not found");
   await assertSupplierExists(dto.supplierId);
+  await assertBarcodeAvailable(dto.partNumber);
 
   const pricingUnitCount = getSafePerItemCount(dto.quantity);
   const expenses = normalizeProductExpensesForCount(
@@ -491,6 +509,7 @@ export async function updateProduct(id: number, dto: UpdateProductDto) {
   }
   const supplierId = dto.supplierId === null ? undefined : dto.supplierId;
   await assertSupplierExists(supplierId);
+  await assertBarcodeAvailable(dto.partNumber, id);
 
   const pricingUnitCount = getSafePerItemCount(
     (dto.quantity ?? existingProduct.quantity) +
@@ -562,6 +581,34 @@ export async function updateProduct(id: number, dto: UpdateProductDto) {
               ),
             }
           : {}),
+    },
+    include: productInclude,
+  });
+}
+
+/**
+ * Adds received stock to an existing product. Optional batch purchase price / tax are blended
+ * into the per-unit cost as a weighted average over the units currently in stock.
+ */
+export async function restockProduct(id: number, dto: RestockProductDto) {
+  const product = await getProduct(id);
+  const currentUnits = Math.max(product.quantity, 0);
+  const totalUnits = currentUnits + dto.quantity;
+
+  const blendUnitCost = (currentUnitCost: number | null, batchTotal?: number) => {
+    if (batchTotal === undefined) return undefined;
+    const existingValue = (currentUnitCost ?? 0) * currentUnits;
+    return Math.round(((existingValue + batchTotal) / totalUnits) * 100) / 100;
+  };
+  const purchasePrice = blendUnitCost(product.purchasePrice, dto.purchasePrice);
+  const taxPaid = blendUnitCost(product.taxPaid, dto.taxPaid);
+
+  return prisma.inventoryProduct.update({
+    where: { id },
+    data: {
+      quantity: { increment: dto.quantity },
+      ...(purchasePrice !== undefined ? { purchasePrice } : {}),
+      ...(taxPaid !== undefined ? { taxPaid } : {}),
     },
     include: productInclude,
   });

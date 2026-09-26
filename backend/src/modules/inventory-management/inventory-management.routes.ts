@@ -73,6 +73,7 @@ router.get(   "/products/health",        inventoryAndAccounts, ctrl.getInventory
 router.get(   "/products/:id",           inventoryAndAccounts, ctrl.getProduct);
 router.post(  "/products",               inventory, ctrl.createProduct);
 router.patch( "/products/:id",           inventory, ctrl.updateProduct);
+router.post(  "/products/:id/restock",   inventory, ctrl.restockProduct);
 router.post(  "/products/:id/sell",      sales, ctrl.recordProductSale);
 router.delete("/products/:id",           inventory, ctrl.deleteProduct);
 

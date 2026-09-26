@@ -1,58 +1,82 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap");
 
 /* ════════════════════════════════════════════
-   DESIGN TOKENS  –  LIGHT (default)
-  Bar Shop: Lion Gold #F2C230 · Flag Red/Green · Charcoal content
+   DESIGN TOKENS  –  LIGHT ("daylight")
+   Bar Shop Lounge: champagne gold on warm ivory. Dark ("lounge") is the default
+   theme and lives under html[data-theme="dark"] below.
    ════════════════════════════════════════════ */
 :root {
-  /* Backgrounds */
-  --bg:            #f4f0df;
-  --bg-soft:       #fffdf5;
+  /* Type */
+  --font-sans:     "Plus Jakarta Sans", "DM Sans", system-ui, sans-serif;
+  --font-display:  "Fraunces", Georgia, "Times New Roman", serif;
 
-  /* Sidebar — Charcoal */
-  --sidebar-bg:       #181613;
-  --sidebar-border:   rgba(242,194,48,0.28);
-  --sidebar-text:     rgba(255,255,255,0.52);
+  /* Backgrounds */
+  --bg:            #f5f2ea;
+  --bg-soft:       #fbf9f4;
+
+  /* Sidebar — always the dark lounge rail */
+  --sidebar-bg:       #0f0e0c;
+  --sidebar-border:   rgba(255,240,210,0.07);
+  --sidebar-text:     rgba(244,239,230,0.56);
   --sidebar-text-act: #ffffff;
-  --sidebar-hover:    rgba(242,194,48,0.10);
-  --sidebar-active:   rgba(242,194,48,0.20);
+  --sidebar-hover:    rgba(227,179,92,0.08);
+  --sidebar-active:   rgba(227,179,92,0.14);
 
   /* Panels */
   --panel:         #ffffff;
-  --panel-border:  #e5e2d8;
+  --panel-2:       #fbf9f4;
+  --panel-border:  #e9e3d6;
 
   /* Text (content area) */
-  --text:          #0f0e0a;
-  --text-soft:     #6b6657;
-  --text-xsoft:    #a09a8c;
+  --text:          #17140e;
+  --text-soft:     #6a6356;
+  --text-xsoft:    #9c9585;
+  --text-muted:    #9c9585;
 
-  /* Bar Shop amber accent */
-  --accent:        #F2C230;
-  --accent-hover:  #d7a914;
-  --accent-bg:     rgba(242,194,48,0.16);
-  --accent-text:   #8a6500;
+  /* Champagne gold accent */
+  --accent:        #c4922f;
+  --accent-hover:  #ae7f22;
+  --accent-bg:     rgba(196,146,47,0.12);
+  --accent-text:   #8c6518;
+  --accent-grad:   linear-gradient(135deg, #f3d08a 0%, #d9a748 48%, #b8862f 100%);
+  --on-accent:     #1a1407;
   --flag-red:      #C52F32;
   --flag-green:    #1D6848;
 
   /* Status */
-  --danger:        #dc2626;
-  --danger-bg:     rgba(220,38,38,0.08);
-  --warning:       #d97706;
-  --success:       #059669;
+  --danger:        #d64545;
+  --danger-bg:     rgba(214,69,69,0.09);
+  --warning:       #c98a12;
+  --warning-bg:    rgba(201,138,18,0.12);
+  --success:       #1e9e6a;
+  --success-bg:    rgba(30,158,106,0.11);
 
-  /* Shadows */
-  --shadow-sm:     0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
-  --shadow-md:     0 4px 14px rgba(0,0,0,0.09);
-  --shadow-lg:     0 10px 36px rgba(0,0,0,0.12);
+  /* Chart palette (validated for both themes) */
+  --c1: #c4922f;  /* gold   */
+  --c2: #2a9a8a;  /* teal   */
+  --c3: #d05c6b;  /* rose   */
+  --c4: #6e64d6;  /* violet */
+  --c5: #3d8bc9;  /* sky    */
+  --c6: #c06e30;  /* copper */
+
+  /* Shadows & glow */
+  --shadow-sm:     0 1px 2px rgba(23,20,14,0.05), 0 1px 3px rgba(23,20,14,0.04);
+  --shadow-md:     0 10px 28px -12px rgba(23,20,14,0.18);
+  --shadow-lg:     0 28px 64px -20px rgba(23,20,14,0.28);
+  --glow:          0 0 0 1px rgba(196,146,47,0.28), 0 14px 34px -14px rgba(196,146,47,0.45);
 
   /* Geometry */
-  --radius-sm:     8px;
-  --radius-md:     12px;
-  --radius-lg:     16px;
-  --topbar-h:      68px;
-  --sidebar-w:     240px;
-  --sidebar-cw:    60px;
-  --transition:    0.2s ease;
+  --radius-sm:     10px;
+  --radius-md:     14px;
+  --radius-lg:     20px;
+  --topbar-h:      64px;
+  --sidebar-w:     248px;
+  --sidebar-cw:    68px;
+
+  /* Motion */
+  --ease-out:      cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition:    0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Fast-selling product catalog */
@@ -246,43 +270,50 @@
    DARK MODE  –  html[data-theme="dark"]
    ════════════════════════════════════════════ */
 html[data-theme="dark"] {
-  --bg:            #0b1214;
-  --bg-soft:       #101a1c;
+  color-scheme: dark;
+  --bg:            #0c0b09;
+  --bg-soft:       #11100d;
 
-  --sidebar-bg:       #101718;
-  --sidebar-border:   rgba(231,168,59,0.18);
-  --sidebar-text:     rgba(255,255,255,0.42);
+  --sidebar-bg:       #0a0908;
+  --sidebar-border:   rgba(255,240,210,0.06);
+  --sidebar-text:     rgba(244,239,230,0.5);
   --sidebar-text-act: #ffffff;
-  --sidebar-hover:    rgba(231,168,59,0.08);
-  --sidebar-active:   rgba(231,168,59,0.16);
+  --sidebar-hover:    rgba(227,179,92,0.07);
+  --sidebar-active:   rgba(227,179,92,0.13);
 
-  --panel:         #132124;
-  --panel-border:  rgba(172,196,190,0.12);
-  --text:          #f2eee4;
-  --text-soft:     #91a5a1;
-  --text-xsoft:    #60716f;
+  --panel:         #15130f;
+  --panel-2:       #1b1914;
+  --panel-border:  rgba(255,240,210,0.075);
+  --text:          #f3eee4;
+  --text-soft:     #a59e90;
+  --text-xsoft:    #6f695d;
+  --text-muted:    #6f695d;
 
-  --accent:        #e7a83b;
-  --accent-hover:  #f2bd55;
-  --accent-bg:     rgba(231,168,59,0.14);
-  --accent-text:   #f2bd55;
+  --accent:        #e3b35c;
+  --accent-hover:  #f0c676;
+  --accent-bg:     rgba(227,179,92,0.12);
+  --accent-text:   #edc274;
+  --accent-grad:   linear-gradient(135deg, #f6d898 0%, #e3b35c 48%, #b8862f 100%);
+  --on-accent:     #1a1407;
 
-  --danger:        #f87171;
-  --danger-bg:     rgba(248,113,113,0.10);
-  --warning:       #fbbf24;
-  --success:       #34d399;
+  --danger:        #f07a7a;
+  --danger-bg:     rgba(240,122,122,0.10);
+  --warning:       #f2bd55;
+  --warning-bg:    rgba(242,189,85,0.12);
+  --success:       #4fd49a;
+  --success-bg:    rgba(79,212,154,0.11);
 
-  --shadow-sm:     0 1px 3px rgba(0,0,0,0.5);
-  --shadow-md:     0 4px 20px rgba(0,0,0,0.6);
-  --shadow-lg:     0 12px 48px rgba(0,0,0,0.65);
-}
+  --c1: #e3b35c;
+  --c2: #4fb7a8;
+  --c3: #e07a86;
+  --c4: #8e86e8;
+  --c5: #5fa8e0;
+  --c6: #d98a4e;
 
-html[data-theme="dark"] .sidebar {
-  background: linear-gradient(180deg, #101718 0%, #0c1213 100%);
-}
-
-html[data-theme="dark"] .nav-item.active {
-  box-shadow: inset 3px 0 0 var(--accent);
+  --shadow-sm:     0 1px 2px rgba(0,0,0,0.4);
+  --shadow-md:     0 14px 34px -14px rgba(0,0,0,0.7);
+  --shadow-lg:     0 30px 70px -20px rgba(0,0,0,0.8);
+  --glow:          0 0 0 1px rgba(227,179,92,0.26), 0 16px 40px -16px rgba(227,179,92,0.4);
 }
 
 html[data-theme="dark"] .finance-controls-panel,
@@ -299,7 +330,7 @@ html[data-theme="dark"] .chart-panel {
 
 html, body {
   height: 100%;
-  font-family: "DM Sans", system-ui, sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   background: var(--bg);
   color: var(--text);
@@ -308,7 +339,8 @@ html, body {
 
 input, button { font: inherit; }
 button { cursor: pointer; border: none; background: none; }
-h1, h2, h3, h4, .sidebar-brand, .page-title { font-family: "Space Grotesk", "DM Sans", sans-serif; }
+h1, h2, h3, h4 { font-family: var(--font-sans); letter-spacing: -0.01em; }
+.sidebar-brand, .page-title { font-family: var(--font-display); letter-spacing: -0.01em; }
 
 /* ════════════════════════════════════════════
    AUTH SHELL

@@ -47,6 +47,13 @@ export const updateProductSchema = createProductSchema.partial().extend({
   supplierId: z.union([z.number().int().positive(), z.null()]).optional(),
 });
 
+export const restockProductSchema = z.object({
+  quantity: z.number().int().min(1, "Add at least 1 unit").max(100000),
+  // Batch totals for the units being added; blended into the per-unit cost.
+  purchasePrice: z.number().min(0).optional(),
+  taxPaid: z.number().min(0).optional(),
+});
+
 export const recordProductSaleSchema = z.object({
   quantity: z.number().int().min(1, "Sold quantity must be at least 1"),
 });
@@ -80,4 +87,5 @@ export type UpdateProductCategoryDto = z.infer<
 export type CreateProductDto = z.infer<typeof createProductSchema>;
 export type UpdateProductDto = z.infer<typeof updateProductSchema>;
 export type RecordProductSaleDto = z.infer<typeof recordProductSaleSchema>;
+export type RestockProductDto = z.infer<typeof restockProductSchema>;
 export type ProductQueryDto = z.infer<typeof productQuerySchema>;
