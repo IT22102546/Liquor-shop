@@ -38,6 +38,9 @@ type Figures = {
   emptiesReturned: number;
   emptyDeduction: number;
   memberBills: number;
+  discounts: number;
+  pointsRedeemed: number;
+  pointsValue: number;
 };
 type Summary = {
   range: { from: string; to: string; bucketing: "HOUR" | "DAY" | "MONTH" };
@@ -254,7 +257,7 @@ export default function DashboardPage() {
             <Kpi index={0} label="Sales" value={summary.current.revenue} previous={summary.previous.revenue} format={money} compare={compare} icon={<IconRevenue />} color="var(--c1)" spark={sparks.revenue} />
             <Kpi index={1} label="Bills served" value={summary.current.bills} previous={summary.previous.bills} format={(v) => Math.round(v).toLocaleString()} compare={compare} icon={<IconInvoice />} color="var(--c2)" spark={sparks.bills} foot={`${summary.current.units} units sold`} />
             <Kpi index={2} label="Average bill" value={summary.current.averageBill} previous={summary.previous.averageBill} format={money} compare={compare} icon={<IconTrend />} color="var(--c5)" spark={sparks.average} />
-            <Kpi index={3} label="Gross profit" value={summary.current.grossProfit} previous={summary.previous.grossProfit} format={money} compare={compare} icon={<IconActivity />} color="var(--c4)" spark={sparks.profit} foot={`${summary.current.margin.toFixed(1)}% margin after stock cost`} />
+            <Kpi index={3} label="Gross profit" value={summary.current.grossProfit} previous={summary.previous.grossProfit} format={money} compare={compare} icon={<IconActivity />} color="var(--c4)" spark={sparks.profit} foot={`${summary.current.margin.toFixed(1)}% margin · stock cost ${money(summary.current.cost)}`} />
           </>
         ) : Array.from({ length: 4 }, (_, index) => <div key={index} className="lx-card lx-skel" style={{ height: 176 }} />)}
       </section>
@@ -380,9 +383,9 @@ export default function DashboardPage() {
           <em>{summary ? `bills to members · ${summary.members.newInPeriod} new · ${summary.members.total} total` : ""}</em>
         </div>
         <div className="lx-ledger-item">
-          <span>Cost of stock sold</span>
-          <strong>{summary ? money(summary.current.cost) : "—"}</strong>
-          <em>Based on each product&apos;s average cost</em>
+          <span>Discounts &amp; points</span>
+          <strong>{summary ? money(summary.current.discounts + summary.current.pointsValue) : "—"}</strong>
+          <em>{summary ? `${money(summary.current.discounts)} discounts · ${summary.current.pointsRedeemed} points used` : ""}</em>
         </div>
         <div className="lx-ledger-item highlight">
           <span>Top staff</span>

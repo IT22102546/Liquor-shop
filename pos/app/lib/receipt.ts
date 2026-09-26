@@ -19,7 +19,12 @@ export type SaleReceipt = {
   cashierName: string;
   cashierRole: string;
   /** Loyalty member; null for a walk-in customer. */
-  member?: { name: string; mobileNumber: string; pointsEarned: number; pointsBalance: number } | null;
+  member?: { name: string; mobileNumber: string; pointsEarned: number; pointsRedeemed?: number; pointsBalance: number } | null;
+  /** Bill discount, when one was given. */
+  discount?: { type: "PERCENT" | "AMOUNT"; value: number; amount: number } | null;
+  /** Loyalty points spent on this bill and their rupee value (rate from Shop Settings at the time of sale). */
+  pointsRedeemed?: number;
+  pointsValue?: number;
   paymentMethod: "CASH" | "BANK_TRANSFER" | "CHEQUE";
   lines: ReceiptLine[];
   subtotal: number;
@@ -63,6 +68,7 @@ export function buildReceiptHtml(receipt: SaleReceipt) {
   const time = soldAt.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
   const units = receipt.lines.reduce((sum, line) => sum + line.quantity, 0);
   const isCash = receipt.paymentMethod === "CASH";
+  const totalSaved = receipt.emptyDeduction + (receipt.discount?.amount ?? 0) + (receipt.pointsValue ?? 0);
 
   const items = receipt.lines.map((line) => `
     <div class="item">
@@ -144,6 +150,8 @@ export function buildReceiptHtml(receipt: SaleReceipt) {
       <div class="row"><span>Items</span><span>${units} unit${units === 1 ? "" : "s"} · ${receipt.lines.length} product${receipt.lines.length === 1 ? "" : "s"}</span></div>
       <div class="row"><span>Subtotal</span><span>${amount(receipt.subtotal)}</span></div>
       ${receipt.emptyDeduction > 0 ? `<div class="row"><span>Empty bottles returned (${receipt.emptiesReturned})</span><span>−${amount(receipt.emptyDeduction)}</span></div>` : ""}
+      ${receipt.discount && receipt.discount.amount > 0 ? `<div class="row"><span>Discount${receipt.discount.type === "PERCENT" ? ` (${receipt.discount.value}%)` : ""}</span><span>−${amount(receipt.discount.amount)}</span></div>` : ""}
+      ${receipt.pointsRedeemed ? `<div class="row"><span>Loyalty points used (${receipt.pointsRedeemed})</span><span>−${amount(receipt.pointsValue ?? receipt.pointsRedeemed)}</span></div>` : ""}
     </div>
 
     <div class="total"><div class="row"><span>TOTAL</span><span>Rs. ${amount(receipt.total)}</span></div></div>
@@ -157,11 +165,12 @@ export function buildReceiptHtml(receipt: SaleReceipt) {
 
     ${receipt.member ? `<div class="loyalty">
       <div class="loyalty-title">LOYALTY POINTS</div>
+      ${receipt.pointsRedeemed ? `<div class="row"><span>Used on this bill</span><span>−${receipt.pointsRedeemed}</span></div>` : ""}
       <div class="row"><span>Earned on this bill</span><span>+${receipt.member.pointsEarned}</span></div>
       <div class="row strong"><span>Points balance</span><span>${receipt.member.pointsBalance}</span></div>
     </div>` : ""}
 
-    ${receipt.emptyDeduction > 0 ? `<div class="saved">You saved Rs. ${amount(receipt.emptyDeduction)} by returning ${receipt.emptiesReturned} empty bottle${receipt.emptiesReturned === 1 ? "" : "s"}</div>` : ""}
+    ${totalSaved > 0 ? `<div class="saved">You saved Rs. ${amount(totalSaved)} on this bill</div>` : ""}
 
     <div class="rule"></div>
     <div class="foot">

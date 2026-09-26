@@ -2,6 +2,7 @@ import { Prisma } from "../../generated/prisma";
 import { prisma } from "../../database/prisma.client";
 import { AppError } from "../../common/utils/errors";
 import { loyaltyPointsFor } from "../../config/loyalty";
+import { getSettings } from "../settings/settings.service";
 import type {
   CreateInvoiceAccountDto,
   CreateInvoiceTermDto,
@@ -510,7 +511,7 @@ export async function deletePosUser(id: number) {
   });
 }
 
-export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
+export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cashierRole = "CASHIER") {
   const mergedItems = Array.from(
     dto.items.reduce((items, item) => {
       const existing = items.get(item.productId);
@@ -577,7 +578,64 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
   const subtotal = roundCurrency(lines.reduce((sum, line) => sum + line.grossTotal, 0));
   const emptyDeductionTotal = roundCurrency(lines.reduce((sum, line) => sum + line.emptyDeduction, 0));
   const emptiesReturnedTotal = lines.reduce((sum, line) => sum + line.emptiesReturned, 0);
-  const total = roundCurrency(subtotal - emptyDeductionTotal);
+  const afterEmpties = roundCurrency(subtotal - emptyDeductionTotal);
+  const settings = await getSettings();
+
+  // ── Bill discount (switched on/off in Shop Settings; cashiers are capped) ──
+  let discountAmount = 0;
+  if (dto.discount) {
+    if (!settings.discountsEnabled) {
+      throw AppError.validation({ discount: ["Discounts are switched off in Shop Settings"] });
+    }
+    if (dto.discount.type === "PERCENT" && dto.discount.value > 100) {
+      throw AppError.validation({ discount: ["A percentage discount can't be more than 100%"] });
+    }
+    discountAmount = roundCurrency(
+      dto.discount.type === "PERCENT" ? (afterEmpties * dto.discount.value) / 100 : dto.discount.value,
+    );
+    if (discountAmount > afterEmpties) {
+      throw AppError.validation({ discount: ["The discount can't be more than the bill"] });
+    }
+    const percentOfBill = afterEmpties > 0 ? (discountAmount / afterEmpties) * 100 : 0;
+    if (cashierRole !== "ADMIN" && percentOfBill > settings.maxCashierDiscountPercent + 0.001) {
+      throw AppError.validation({
+        discount: [`Cashiers can give up to ${settings.maxCashierDiscountPercent}% discount. Ask an administrator for more.`],
+      });
+    }
+  }
+  const afterDiscount = roundCurrency(afterEmpties - discountAmount);
+
+  // ── Loyalty points (registered members only; value per point from Shop Settings) ──
+  const pointsRedeemed = dto.redeemPoints ?? 0;
+  if (pointsRedeemed > 0) {
+    if (!settings.loyaltyRedemptionEnabled) {
+      throw AppError.validation({ redeemPoints: ["Using loyalty points is switched off in Shop Settings"] });
+    }
+    if (!member) {
+      throw AppError.validation({ redeemPoints: ["Only registered loyalty members can use points"] });
+    }
+    if (pointsRedeemed > member.loyaltyPoints) {
+      throw AppError.validation({ redeemPoints: [`${member.firstName} has only ${member.loyaltyPoints} points`] });
+    }
+    if (roundCurrency(pointsRedeemed * settings.loyaltyPointValue) > afterDiscount) {
+      throw AppError.validation({ redeemPoints: ["Points can't be more than the bill"] });
+    }
+  }
+  // Rupee value at today's rate is stored on the sale, so later rate changes don't alter old bills.
+  const pointsValue = roundCurrency(pointsRedeemed * settings.loyaltyPointValue);
+  const total = roundCurrency(afterDiscount - pointsValue);
+
+  // Share the bill-level reduction across the lines by value, so each product's revenue is right.
+  const billReduction = roundCurrency(discountAmount + pointsValue);
+  let reductionLeft = billReduction;
+  const lineShares = lines.map((line, index) => {
+    const share = index === lines.length - 1
+      ? reductionLeft
+      : afterEmpties > 0 ? roundCurrency((billReduction * line.lineTotal) / afterEmpties) : 0;
+    reductionLeft = roundCurrency(reductionLeft - share);
+    return share;
+  });
+
   const amountReceived = dto.paymentMethod === "CASH"
     ? roundCurrency(dto.amountReceived ?? Number.NaN)
     : total;
@@ -594,8 +652,9 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
     const customer = member ?? (await getWalkInCustomer(tx));
 
     const purchases = [];
-    for (const item of lines) {
+    for (const [lineIndex, item] of lines.entries()) {
       const product = productById.get(item.productId)!;
+      const billDiscount = lineShares[lineIndex];
       const updated = await tx.inventoryProduct.updateMany({
         where: { id: item.productId, quantity: { gte: item.quantity } },
         data: {
@@ -609,7 +668,7 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
         throw new AppError(`${product.name} does not have enough stock`, 409);
       }
 
-      const lineTotal = item.lineTotal;
+      const lineTotal = roundCurrency(item.lineTotal - billDiscount);
       const purchase = await tx.posCustomerPurchase.create({
         data: {
           customerId: customer.id,
@@ -620,6 +679,7 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
           quantity: item.quantity,
           emptiesReturned: item.emptiesReturned,
           emptyDeduction: item.emptyDeduction,
+          billDiscount,
           currentSellingPrice: item.unitPrice,
           finalSellingPrice: lineTotal,
           paymentType: "DIRECT",
@@ -648,24 +708,30 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
         unitPrice: item.unitPrice,
         emptiesReturned: item.emptiesReturned,
         emptyDeduction: item.emptyDeduction,
-        lineTotal,
+        // Line amount after empties; the bill discount/points are shown once at the bottom.
+        lineTotal: item.lineTotal,
+        billDiscount,
       });
     }
 
-    // Loyalty: members earn points on what they paid (after empties) and their visit is recorded.
-    const pointsEarned = member ? loyaltyPointsFor(total) : 0;
+    // Loyalty: members earn points (rate from Shop Settings) on what they paid, and their visit is recorded.
+    const pointsEarned = member ? loyaltyPointsFor(total, settings.loyaltyRupeesPerPoint) : 0;
     let memberAfter: { loyaltyPoints: number } | null = null;
     if (member) {
       memberAfter = await tx.posCustomer.update({
         where: { id: member.id },
         data: {
-          loyaltyPoints: { increment: pointsEarned },
+          loyaltyPoints: { increment: pointsEarned - pointsRedeemed },
           totalSpent: { increment: total },
           visits: { increment: 1 },
           lastVisitAt: new Date(),
         },
         select: { loyaltyPoints: true },
       });
+      // Two sales at once must not spend the same points twice.
+      if (memberAfter.loyaltyPoints < 0) {
+        throw AppError.validation({ redeemPoints: ["Not enough points — the balance changed. Please try again."] });
+      }
     }
 
     const counterSale = await tx.posCounterSale.create({
@@ -673,6 +739,11 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
         invoiceGroupCode,
         customerId: member?.id ?? null,
         pointsEarned,
+        discountType: dto.discount?.type ?? null,
+        discountValue: dto.discount?.value ?? 0,
+        discountAmount,
+        pointsRedeemed,
+        pointsValue,
         totalAmount: total,
         emptyDeduction: emptyDeductionTotal,
         emptiesReturned: emptiesReturnedTotal,
@@ -698,6 +769,7 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
             name: [member.firstName, member.lastName].filter(Boolean).join(" "),
             mobileNumber: member.mobileNumber,
             pointsEarned,
+            pointsRedeemed,
             pointsBalance: memberAfter?.loyaltyPoints ?? member.loyaltyPoints,
           }
         : null,
@@ -712,6 +784,9 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
     subtotal,
     emptyDeduction: emptyDeductionTotal,
     emptiesReturned: emptiesReturnedTotal,
+    discount: dto.discount ? { type: dto.discount.type, value: dto.discount.value, amount: discountAmount } : null,
+    pointsRedeemed,
+    pointsValue,
     total,
     amountReceived,
     changeGiven,

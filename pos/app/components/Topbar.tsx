@@ -37,6 +37,7 @@ const BREADCRUMBS: Record<string, string> = {
   "/dashboard/staff":      "Staff & Role Management",
   "/dashboard/logs":       "Activity Log",
   "/dashboard/sales":      "Sales Bills",
+  "/dashboard/settings":   "Shop Settings",
   "/dashboard/users":     "Loyalty Customers",
   "/dashboard/users/history": "User Management - User History",
   "/dashboard/invoices":  "Invoice Management",

@@ -128,6 +128,15 @@ export const checkoutSaleSchema = z.object({
   amountReceived: z.number().min(0).optional(),
   /** Loyalty member buying; leave out for a walk-in customer. */
   customerId: z.number().int().positive().optional(),
+  /** Bill discount (only when discounts are switched on in Shop Settings). */
+  discount: z
+    .object({
+      type: z.enum(["PERCENT", "AMOUNT"]),
+      value: z.number().positive("Discount must be more than 0"),
+    })
+    .optional(),
+  /** Loyalty points to spend, 1 point = Rs. 1 (members only, when redemption is switched on). */
+  redeemPoints: z.number().int().min(0).max(10_000_000).optional(),
 });
 
 /** Sales bills list (counter sales). */

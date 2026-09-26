@@ -57,7 +57,7 @@ export async function listSales(query: SalesQueryDto) {
       },
     }),
     prisma.posCounterSale.count({ where }),
-    prisma.posCounterSale.aggregate({ where, _sum: { totalAmount: true, emptiesReturned: true } }),
+    prisma.posCounterSale.aggregate({ where, _sum: { totalAmount: true, emptiesReturned: true, discountAmount: true, pointsValue: true } }),
   ]);
 
   const lines = await prisma.posCustomerPurchase.findMany({
@@ -85,15 +85,19 @@ export async function listSales(query: SalesQueryDto) {
         emptiesReturned: line.emptiesReturned,
         emptyPrice: line.emptiesReturned > 0 ? round2(line.emptyDeduction / line.emptiesReturned) : 0,
         emptyDeduction: line.emptyDeduction,
-        lineTotal: line.finalSellingPrice,
+        // Amount after empties; the bill discount / points are listed once for the whole bill.
+        lineTotal: round2(line.finalSellingPrice + line.billDiscount),
       }));
       return {
         id: sale.id,
         billNo: sale.invoiceGroupCode,
         soldAt: sale.createdAt,
         paymentMethod: sale.paymentMethod,
-        subtotal: round2(sale.totalAmount + sale.emptyDeduction),
+        subtotal: round2(sale.totalAmount + sale.emptyDeduction + sale.discountAmount + sale.pointsValue),
         emptyDeduction: sale.emptyDeduction,
+        discount: sale.discountType ? { type: sale.discountType, value: sale.discountValue, amount: sale.discountAmount } : null,
+        pointsRedeemed: sale.pointsRedeemed,
+        pointsValue: sale.pointsValue,
         emptiesReturned: sale.emptiesReturned,
         total: sale.totalAmount,
         amountReceived: sale.amountReceived,
@@ -107,7 +111,12 @@ export async function listSales(query: SalesQueryDto) {
         items,
       };
     }),
-    summary: { bills: total, revenue: round2(totals._sum.totalAmount ?? 0), emptiesReturned: totals._sum.emptiesReturned ?? 0 },
+    summary: {
+      bills: total,
+      revenue: round2(totals._sum.totalAmount ?? 0),
+      emptiesReturned: totals._sum.emptiesReturned ?? 0,
+      discounts: round2((totals._sum.discountAmount ?? 0) + (totals._sum.pointsValue ?? 0)),
+    },
     pagination: { page: query.page, limit: query.limit, total, pages: Math.ceil(total / query.limit) },
   };
 }
@@ -167,7 +176,7 @@ async function periodFigures(from: Date, to: Date) {
     }),
     prisma.posCounterSale.findMany({
       where: { createdAt: { gte: from, lte: to } },
-      select: { totalAmount: true, paymentMethod: true, customerId: true, createdAt: true, cashier: { select: { id: true, name: true } } },
+      select: { totalAmount: true, paymentMethod: true, customerId: true, createdAt: true, discountAmount: true, pointsValue: true, pointsRedeemed: true, cashier: { select: { id: true, name: true } } },
     }),
   ]);
 
@@ -202,6 +211,9 @@ async function periodFigures(from: Date, to: Date) {
       emptiesReturned: empties,
       emptyDeduction: round2(emptyDeduction),
       memberBills: bills.filter((bill) => bill.customerId != null).length,
+      discounts: round2(bills.reduce((sum, bill) => sum + bill.discountAmount, 0)),
+      pointsRedeemed: bills.reduce((sum, bill) => sum + bill.pointsRedeemed, 0),
+      pointsValue: round2(bills.reduce((sum, bill) => sum + bill.pointsValue, 0)),
     },
   };
 }

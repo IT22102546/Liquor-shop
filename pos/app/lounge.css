@@ -846,3 +846,82 @@ a.btn-outline, a.btn-accent { text-decoration: none; }
 .lx-ledger-item span svg { width: 13px; height: 13px; vertical-align: -2px; margin-right: 0.2rem; }
 .lx-card-head .lx-chip { text-decoration: none; flex-shrink: 0; }
 .lx-card-head .lx-chip svg { width: 13px; height: 13px; }
+
+/* ════════════════════════════════════════════════════════════════
+   SHOP SETTINGS
+   ════════════════════════════════════════════════════════════════ */
+.lx-settings { display: grid; gap: 1rem; max-width: 860px; }
+.lx-setting { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 1.1rem; align-items: start; }
+.lx-setting-icon {
+  display: grid; place-items: center; width: 44px; height: 44px; border-radius: 13px; font-weight: 800; font-size: 1.1rem;
+  color: var(--kpi-color); background: color-mix(in srgb, var(--kpi-color) 14%, transparent); border: 1px solid color-mix(in srgb, var(--kpi-color) 26%, transparent);
+}
+.lx-setting-body h3 { display: flex; align-items: center; gap: 0.6rem; font-size: 1rem; color: var(--text); }
+.lx-setting-body p { margin-top: 0.3rem; font-size: 0.84rem; line-height: 1.55; color: var(--text-soft); }
+.lx-setting-body p strong { color: var(--text); }
+.lx-setting-extra { margin-top: 0.9rem; padding: 0.8rem 0.9rem; border-radius: 12px; background: var(--panel-2); border: 1px solid var(--panel-border); display: grid; gap: 0.4rem; animation: lx-rise 0.3s var(--ease-out) backwards; }
+.lx-setting-extra label { font-size: 0.78rem; font-weight: 700; color: var(--text); }
+.lx-setting-extra small { font-size: 0.72rem; color: var(--text-xsoft); }
+.lx-setting-input { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; font-size: 0.8rem; color: var(--text-soft); }
+.lx-setting-input .bm-input { width: 90px; padding: 0.45rem 0.6rem; }
+.lx-setting-input .btn-outline { padding: 0.42rem 0.8rem; font-size: 0.78rem; }
+.lx-saved { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.72rem; font-weight: 700; color: var(--success); animation: lx-fade 0.3s ease backwards; }
+.lx-switch {
+  position: relative; width: 52px; height: 30px; flex-shrink: 0; border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 16%, var(--panel-2)); border: 1px solid var(--panel-border);
+  transition: background 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+}
+.lx-switch span { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.35); transition: transform 0.35s var(--ease-spring); }
+.lx-switch.on { background: var(--accent-grad); box-shadow: 0 6px 16px -8px color-mix(in srgb, var(--accent) 90%, transparent); }
+.lx-switch.on span { transform: translateX(22px); }
+.lx-switch:disabled { opacity: 0.6; cursor: wait; }
+.lx-switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Counter — member details, discount & points */
+.pos-member-card { display: grid; gap: 0.5rem; padding: 0.55rem; border-radius: 14px; background: color-mix(in srgb, var(--c4) 9%, transparent); border: 1px solid color-mix(in srgb, var(--c4) 32%, transparent); animation: lx-rise 0.3s var(--ease-out) backwards; }
+.pos-member-card .pos-member-selected { padding: 0; background: none; border: 0; animation: none; }
+.pos-member-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.4rem; }
+.pos-member-stats div { padding: 0.4rem 0.5rem; border-radius: 10px; background: var(--panel); border: 1px solid var(--panel-border); min-width: 0; }
+.pos-member-stats span { display: block; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-xsoft); }
+.pos-member-stats strong { display: block; font-size: 0.92rem; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pos-member-stats em { display: block; font-style: normal; font-size: 0.66rem; color: var(--text-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pos-member-stats div:first-child strong { color: var(--c4); }
+.pos-member-history-toggle { justify-self: start; font-size: 0.74rem; font-weight: 700; color: var(--c4); padding: 0.15rem 0.2rem; }
+.pos-member-history { display: grid; gap: 0.3rem; max-height: 170px; overflow-y: auto; animation: lx-rise 0.25s var(--ease-out) backwards; }
+.pos-member-history p { font-size: 0.74rem; color: var(--text-soft); }
+.pos-member-history > div { display: flex; justify-content: space-between; gap: 0.6rem; align-items: center; padding: 0.4rem 0.5rem; border-radius: 9px; background: var(--panel); }
+.pos-member-history span { min-width: 0; }
+.pos-member-history strong { display: block; font-size: 0.74rem; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pos-member-history em { font-style: normal; font-size: 0.66rem; color: var(--text-soft); }
+.pos-member-history b { font-size: 0.76rem; color: var(--text); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.pos-adjust { display: grid; gap: 0.5rem; margin-bottom: 0.7rem; }
+.pos-adjust-toggles { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.pos-adjust-toggles button {
+  display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.38rem 0.7rem; border-radius: 999px;
+  font-size: 0.74rem; font-weight: 700; color: var(--text-soft); background: var(--panel); border: 1px dashed var(--panel-border);
+  transition: all var(--transition);
+}
+.pos-adjust-toggles button:hover { color: var(--text); border-color: color-mix(in srgb, var(--c3) 50%, var(--panel-border)); }
+.pos-adjust-toggles button.active { color: var(--c3); border-style: solid; border-color: color-mix(in srgb, var(--c3) 55%, transparent); background: color-mix(in srgb, var(--c3) 12%, transparent); }
+.pos-adjust-toggles button.points.active, .pos-adjust-toggles button.points:hover { color: var(--c4); border-color: color-mix(in srgb, var(--c4) 55%, transparent); }
+.pos-adjust-toggles button.points.active { background: color-mix(in srgb, var(--c4) 12%, transparent); }
+.pos-adjust-toggles b { font-weight: 800; }
+.pos-adjust-row { display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; animation: lx-rise 0.25s var(--ease-out) backwards; }
+.pos-adjust-row .bm-input { width: 96px; padding: 0.45rem 0.6rem; font-weight: 700; background: var(--panel); }
+.pos-adjust-type { display: inline-flex; padding: 2px; border-radius: 9px; border: 1px solid var(--panel-border); background: var(--panel); }
+.pos-adjust-type button { min-width: 34px; padding: 0.3rem 0.5rem; border-radius: 7px; font-size: 0.78rem; font-weight: 800; color: var(--text-soft); }
+.pos-adjust-type button.active { background: var(--c3); color: #fff; }
+.pos-adjust-quick { display: flex; gap: 0.3rem; }
+.pos-adjust-quick button { padding: 0.3rem 0.5rem; border-radius: 8px; font-size: 0.7rem; font-weight: 700; color: var(--text-soft); border: 1px solid var(--panel-border); background: var(--panel); }
+.pos-adjust-quick button:hover { color: var(--c3); border-color: var(--c3); }
+.pos-adjust-label { font-size: 0.76rem; font-weight: 700; color: var(--c4); min-width: 42px; }
+.pos-adjust-hint { font-size: 0.7rem; color: var(--text-soft); }
+.pos-adjust-warn { font-size: 0.74rem; font-weight: 700; color: var(--danger); }
+.pos-cart-breakdown .deduct.discount { color: var(--c3); }
+.pos-cart-breakdown .deduct.points { color: var(--c4); }
+
+.lx-bill-main .discount { font-weight: 700; color: var(--c3); }
+
+.lx-rate-grid { display: grid; gap: 0.5rem; }
+.lx-setting-input b { font-size: 0.8rem; color: var(--text); }

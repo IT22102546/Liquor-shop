@@ -134,6 +134,11 @@ export type AccountDepositItem = $Result.DefaultSelection<Prisma.$AccountDeposit
  * 
  */
 export type ActivityLog = $Result.DefaultSelection<Prisma.$ActivityLogPayload>
+/**
+ * Model PosSetting
+ * 
+ */
+export type PosSetting = $Result.DefaultSelection<Prisma.$PosSettingPayload>
 
 /**
  * Enums
@@ -708,6 +713,16 @@ export class PrismaClient<
     * ```
     */
   get activityLog(): Prisma.ActivityLogDelegate<ExtArgs>;
+
+  /**
+   * `prisma.posSetting`: Exposes CRUD operations for the **PosSetting** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PosSettings
+    * const posSettings = await prisma.posSetting.findMany()
+    * ```
+    */
+  get posSetting(): Prisma.PosSettingDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -1172,7 +1187,8 @@ export namespace Prisma {
     InvoicePayment: 'InvoicePayment',
     AccountDeposit: 'AccountDeposit',
     AccountDepositItem: 'AccountDepositItem',
-    ActivityLog: 'ActivityLog'
+    ActivityLog: 'ActivityLog',
+    PosSetting: 'PosSetting'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1188,7 +1204,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "posAdmin" | "posCounterSale" | "supplier" | "inventoryBrand" | "inventoryCategory" | "inventoryProduct" | "inventoryProductExpense" | "inventoryProductImage" | "posCustomer" | "posCustomerPurchase" | "posInvoiceTerm" | "posInstallment" | "posInstallmentPayment" | "contactRequest" | "account" | "accountRelationship" | "accountReceipt" | "accountVoucher" | "accountTransaction" | "invoicePayment" | "accountDeposit" | "accountDepositItem" | "activityLog"
+      modelProps: "user" | "posAdmin" | "posCounterSale" | "supplier" | "inventoryBrand" | "inventoryCategory" | "inventoryProduct" | "inventoryProductExpense" | "inventoryProductImage" | "posCustomer" | "posCustomerPurchase" | "posInvoiceTerm" | "posInstallment" | "posInstallmentPayment" | "contactRequest" | "account" | "accountRelationship" | "accountReceipt" | "accountVoucher" | "accountTransaction" | "invoicePayment" | "accountDeposit" | "accountDepositItem" | "activityLog" | "posSetting"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2869,6 +2885,76 @@ export namespace Prisma {
           count: {
             args: Prisma.ActivityLogCountArgs<ExtArgs>
             result: $Utils.Optional<ActivityLogCountAggregateOutputType> | number
+          }
+        }
+      }
+      PosSetting: {
+        payload: Prisma.$PosSettingPayload<ExtArgs>
+        fields: Prisma.PosSettingFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PosSettingFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosSettingPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PosSettingFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosSettingPayload>
+          }
+          findFirst: {
+            args: Prisma.PosSettingFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosSettingPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PosSettingFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosSettingPayload>
+          }
+          findMany: {
+            args: Prisma.PosSettingFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosSettingPayload>[]
+          }
+          create: {
+            args: Prisma.PosSettingCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosSettingPayload>
+          }
+          createMany: {
+            args: Prisma.PosSettingCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PosSettingCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosSettingPayload>[]
+          }
+          delete: {
+            args: Prisma.PosSettingDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosSettingPayload>
+          }
+          update: {
+            args: Prisma.PosSettingUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosSettingPayload>
+          }
+          deleteMany: {
+            args: Prisma.PosSettingDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PosSettingUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.PosSettingUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosSettingPayload>
+          }
+          aggregate: {
+            args: Prisma.PosSettingAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePosSetting>
+          }
+          groupBy: {
+            args: Prisma.PosSettingGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PosSettingGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PosSettingCountArgs<ExtArgs>
+            result: $Utils.Optional<PosSettingCountAggregateOutputType> | number
           }
         }
       }
@@ -5521,6 +5607,10 @@ export namespace Prisma {
     cashierId: number | null
     customerId: number | null
     pointsEarned: number | null
+    discountValue: number | null
+    discountAmount: number | null
+    pointsRedeemed: number | null
+    pointsValue: number | null
   }
 
   export type PosCounterSaleSumAggregateOutputType = {
@@ -5533,6 +5623,10 @@ export namespace Prisma {
     cashierId: number | null
     customerId: number | null
     pointsEarned: number | null
+    discountValue: number | null
+    discountAmount: number | null
+    pointsRedeemed: number | null
+    pointsValue: number | null
   }
 
   export type PosCounterSaleMinAggregateOutputType = {
@@ -5547,6 +5641,11 @@ export namespace Prisma {
     cashierId: number | null
     customerId: number | null
     pointsEarned: number | null
+    discountType: string | null
+    discountValue: number | null
+    discountAmount: number | null
+    pointsRedeemed: number | null
+    pointsValue: number | null
     createdAt: Date | null
   }
 
@@ -5562,6 +5661,11 @@ export namespace Prisma {
     cashierId: number | null
     customerId: number | null
     pointsEarned: number | null
+    discountType: string | null
+    discountValue: number | null
+    discountAmount: number | null
+    pointsRedeemed: number | null
+    pointsValue: number | null
     createdAt: Date | null
   }
 
@@ -5577,6 +5681,11 @@ export namespace Prisma {
     cashierId: number
     customerId: number
     pointsEarned: number
+    discountType: number
+    discountValue: number
+    discountAmount: number
+    pointsRedeemed: number
+    pointsValue: number
     createdAt: number
     _all: number
   }
@@ -5592,6 +5701,10 @@ export namespace Prisma {
     cashierId?: true
     customerId?: true
     pointsEarned?: true
+    discountValue?: true
+    discountAmount?: true
+    pointsRedeemed?: true
+    pointsValue?: true
   }
 
   export type PosCounterSaleSumAggregateInputType = {
@@ -5604,6 +5717,10 @@ export namespace Prisma {
     cashierId?: true
     customerId?: true
     pointsEarned?: true
+    discountValue?: true
+    discountAmount?: true
+    pointsRedeemed?: true
+    pointsValue?: true
   }
 
   export type PosCounterSaleMinAggregateInputType = {
@@ -5618,6 +5735,11 @@ export namespace Prisma {
     cashierId?: true
     customerId?: true
     pointsEarned?: true
+    discountType?: true
+    discountValue?: true
+    discountAmount?: true
+    pointsRedeemed?: true
+    pointsValue?: true
     createdAt?: true
   }
 
@@ -5633,6 +5755,11 @@ export namespace Prisma {
     cashierId?: true
     customerId?: true
     pointsEarned?: true
+    discountType?: true
+    discountValue?: true
+    discountAmount?: true
+    pointsRedeemed?: true
+    pointsValue?: true
     createdAt?: true
   }
 
@@ -5648,6 +5775,11 @@ export namespace Prisma {
     cashierId?: true
     customerId?: true
     pointsEarned?: true
+    discountType?: true
+    discountValue?: true
+    discountAmount?: true
+    pointsRedeemed?: true
+    pointsValue?: true
     createdAt?: true
     _all?: true
   }
@@ -5750,6 +5882,11 @@ export namespace Prisma {
     cashierId: number
     customerId: number | null
     pointsEarned: number
+    discountType: string | null
+    discountValue: number
+    discountAmount: number
+    pointsRedeemed: number
+    pointsValue: number
     createdAt: Date
     _count: PosCounterSaleCountAggregateOutputType | null
     _avg: PosCounterSaleAvgAggregateOutputType | null
@@ -5784,6 +5921,11 @@ export namespace Prisma {
     cashierId?: boolean
     customerId?: boolean
     pointsEarned?: boolean
+    discountType?: boolean
+    discountValue?: boolean
+    discountAmount?: boolean
+    pointsRedeemed?: boolean
+    pointsValue?: boolean
     createdAt?: boolean
     cashier?: boolean | PosAdminDefaultArgs<ExtArgs>
     customer?: boolean | PosCounterSale$customerArgs<ExtArgs>
@@ -5801,6 +5943,11 @@ export namespace Prisma {
     cashierId?: boolean
     customerId?: boolean
     pointsEarned?: boolean
+    discountType?: boolean
+    discountValue?: boolean
+    discountAmount?: boolean
+    pointsRedeemed?: boolean
+    pointsValue?: boolean
     createdAt?: boolean
     cashier?: boolean | PosAdminDefaultArgs<ExtArgs>
     customer?: boolean | PosCounterSale$customerArgs<ExtArgs>
@@ -5818,6 +5965,11 @@ export namespace Prisma {
     cashierId?: boolean
     customerId?: boolean
     pointsEarned?: boolean
+    discountType?: boolean
+    discountValue?: boolean
+    discountAmount?: boolean
+    pointsRedeemed?: boolean
+    pointsValue?: boolean
     createdAt?: boolean
   }
 
@@ -5854,6 +6006,17 @@ export namespace Prisma {
        */
       customerId: number | null
       pointsEarned: number
+      /**
+       * Bill discount: "PERCENT" or "AMOUNT" (null = none), the value entered and the rupees taken off.
+       */
+      discountType: string | null
+      discountValue: number
+      discountAmount: number
+      /**
+       * Loyalty points spent on this bill (1 point = Rs. 1) and their rupee value.
+       */
+      pointsRedeemed: number
+      pointsValue: number
       createdAt: Date
     }, ExtArgs["result"]["posCounterSale"]>
     composites: {}
@@ -6261,6 +6424,11 @@ export namespace Prisma {
     readonly cashierId: FieldRef<"PosCounterSale", 'Int'>
     readonly customerId: FieldRef<"PosCounterSale", 'Int'>
     readonly pointsEarned: FieldRef<"PosCounterSale", 'Int'>
+    readonly discountType: FieldRef<"PosCounterSale", 'String'>
+    readonly discountValue: FieldRef<"PosCounterSale", 'Float'>
+    readonly discountAmount: FieldRef<"PosCounterSale", 'Float'>
+    readonly pointsRedeemed: FieldRef<"PosCounterSale", 'Int'>
+    readonly pointsValue: FieldRef<"PosCounterSale", 'Float'>
     readonly createdAt: FieldRef<"PosCounterSale", 'DateTime'>
   }
     
@@ -14047,6 +14215,7 @@ export namespace Prisma {
     quantity: number | null
     emptiesReturned: number | null
     emptyDeduction: number | null
+    billDiscount: number | null
   }
 
   export type PosCustomerPurchaseSumAggregateOutputType = {
@@ -14064,6 +14233,7 @@ export namespace Prisma {
     quantity: number | null
     emptiesReturned: number | null
     emptyDeduction: number | null
+    billDiscount: number | null
   }
 
   export type PosCustomerPurchaseMinAggregateOutputType = {
@@ -14089,6 +14259,7 @@ export namespace Prisma {
     quantity: number | null
     emptiesReturned: number | null
     emptyDeduction: number | null
+    billDiscount: number | null
     purchasedAt: Date | null
   }
 
@@ -14115,6 +14286,7 @@ export namespace Prisma {
     quantity: number | null
     emptiesReturned: number | null
     emptyDeduction: number | null
+    billDiscount: number | null
     purchasedAt: Date | null
   }
 
@@ -14142,6 +14314,7 @@ export namespace Prisma {
     quantity: number
     emptiesReturned: number
     emptyDeduction: number
+    billDiscount: number
     purchasedAt: number
     _all: number
   }
@@ -14162,6 +14335,7 @@ export namespace Prisma {
     quantity?: true
     emptiesReturned?: true
     emptyDeduction?: true
+    billDiscount?: true
   }
 
   export type PosCustomerPurchaseSumAggregateInputType = {
@@ -14179,6 +14353,7 @@ export namespace Prisma {
     quantity?: true
     emptiesReturned?: true
     emptyDeduction?: true
+    billDiscount?: true
   }
 
   export type PosCustomerPurchaseMinAggregateInputType = {
@@ -14204,6 +14379,7 @@ export namespace Prisma {
     quantity?: true
     emptiesReturned?: true
     emptyDeduction?: true
+    billDiscount?: true
     purchasedAt?: true
   }
 
@@ -14230,6 +14406,7 @@ export namespace Prisma {
     quantity?: true
     emptiesReturned?: true
     emptyDeduction?: true
+    billDiscount?: true
     purchasedAt?: true
   }
 
@@ -14257,6 +14434,7 @@ export namespace Prisma {
     quantity?: true
     emptiesReturned?: true
     emptyDeduction?: true
+    billDiscount?: true
     purchasedAt?: true
     _all?: true
   }
@@ -14371,6 +14549,7 @@ export namespace Prisma {
     quantity: number
     emptiesReturned: number
     emptyDeduction: number
+    billDiscount: number
     purchasedAt: Date
     _count: PosCustomerPurchaseCountAggregateOutputType | null
     _avg: PosCustomerPurchaseAvgAggregateOutputType | null
@@ -14417,6 +14596,7 @@ export namespace Prisma {
     quantity?: boolean
     emptiesReturned?: boolean
     emptyDeduction?: boolean
+    billDiscount?: boolean
     purchasedAt?: boolean
     customer?: boolean | PosCustomerDefaultArgs<ExtArgs>
     inventoryProduct?: boolean | PosCustomerPurchase$inventoryProductArgs<ExtArgs>
@@ -14450,6 +14630,7 @@ export namespace Prisma {
     quantity?: boolean
     emptiesReturned?: boolean
     emptyDeduction?: boolean
+    billDiscount?: boolean
     purchasedAt?: boolean
     customer?: boolean | PosCustomerDefaultArgs<ExtArgs>
     inventoryProduct?: boolean | PosCustomerPurchase$inventoryProductArgs<ExtArgs>
@@ -14479,6 +14660,7 @@ export namespace Prisma {
     quantity?: boolean
     emptiesReturned?: boolean
     emptyDeduction?: boolean
+    billDiscount?: boolean
     purchasedAt?: boolean
   }
 
@@ -14531,6 +14713,10 @@ export namespace Prisma {
        */
       emptiesReturned: number
       emptyDeduction: number
+      /**
+       * This line's share of the bill discount and redeemed points (already taken off finalSellingPrice).
+       */
+      billDiscount: number
       purchasedAt: Date
     }, ExtArgs["result"]["posCustomerPurchase"]>
     composites: {}
@@ -14953,6 +15139,7 @@ export namespace Prisma {
     readonly quantity: FieldRef<"PosCustomerPurchase", 'Int'>
     readonly emptiesReturned: FieldRef<"PosCustomerPurchase", 'Int'>
     readonly emptyDeduction: FieldRef<"PosCustomerPurchase", 'Float'>
+    readonly billDiscount: FieldRef<"PosCustomerPurchase", 'Float'>
     readonly purchasedAt: FieldRef<"PosCustomerPurchase", 'DateTime'>
   }
     
@@ -29242,6 +29429,902 @@ export namespace Prisma {
 
 
   /**
+   * Model PosSetting
+   */
+
+  export type AggregatePosSetting = {
+    _count: PosSettingCountAggregateOutputType | null
+    _avg: PosSettingAvgAggregateOutputType | null
+    _sum: PosSettingSumAggregateOutputType | null
+    _min: PosSettingMinAggregateOutputType | null
+    _max: PosSettingMaxAggregateOutputType | null
+  }
+
+  export type PosSettingAvgAggregateOutputType = {
+    updatedById: number | null
+  }
+
+  export type PosSettingSumAggregateOutputType = {
+    updatedById: number | null
+  }
+
+  export type PosSettingMinAggregateOutputType = {
+    key: string | null
+    updatedById: number | null
+    updatedAt: Date | null
+  }
+
+  export type PosSettingMaxAggregateOutputType = {
+    key: string | null
+    updatedById: number | null
+    updatedAt: Date | null
+  }
+
+  export type PosSettingCountAggregateOutputType = {
+    key: number
+    value: number
+    updatedById: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type PosSettingAvgAggregateInputType = {
+    updatedById?: true
+  }
+
+  export type PosSettingSumAggregateInputType = {
+    updatedById?: true
+  }
+
+  export type PosSettingMinAggregateInputType = {
+    key?: true
+    updatedById?: true
+    updatedAt?: true
+  }
+
+  export type PosSettingMaxAggregateInputType = {
+    key?: true
+    updatedById?: true
+    updatedAt?: true
+  }
+
+  export type PosSettingCountAggregateInputType = {
+    key?: true
+    value?: true
+    updatedById?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type PosSettingAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PosSetting to aggregate.
+     */
+    where?: PosSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosSettings to fetch.
+     */
+    orderBy?: PosSettingOrderByWithRelationInput | PosSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PosSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PosSettings
+    **/
+    _count?: true | PosSettingCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PosSettingAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PosSettingSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PosSettingMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PosSettingMaxAggregateInputType
+  }
+
+  export type GetPosSettingAggregateType<T extends PosSettingAggregateArgs> = {
+        [P in keyof T & keyof AggregatePosSetting]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePosSetting[P]>
+      : GetScalarType<T[P], AggregatePosSetting[P]>
+  }
+
+
+
+
+  export type PosSettingGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PosSettingWhereInput
+    orderBy?: PosSettingOrderByWithAggregationInput | PosSettingOrderByWithAggregationInput[]
+    by: PosSettingScalarFieldEnum[] | PosSettingScalarFieldEnum
+    having?: PosSettingScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PosSettingCountAggregateInputType | true
+    _avg?: PosSettingAvgAggregateInputType
+    _sum?: PosSettingSumAggregateInputType
+    _min?: PosSettingMinAggregateInputType
+    _max?: PosSettingMaxAggregateInputType
+  }
+
+  export type PosSettingGroupByOutputType = {
+    key: string
+    value: JsonValue
+    updatedById: number | null
+    updatedAt: Date
+    _count: PosSettingCountAggregateOutputType | null
+    _avg: PosSettingAvgAggregateOutputType | null
+    _sum: PosSettingSumAggregateOutputType | null
+    _min: PosSettingMinAggregateOutputType | null
+    _max: PosSettingMaxAggregateOutputType | null
+  }
+
+  type GetPosSettingGroupByPayload<T extends PosSettingGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PosSettingGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PosSettingGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PosSettingGroupByOutputType[P]>
+            : GetScalarType<T[P], PosSettingGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PosSettingSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    key?: boolean
+    value?: boolean
+    updatedById?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["posSetting"]>
+
+  export type PosSettingSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    key?: boolean
+    value?: boolean
+    updatedById?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["posSetting"]>
+
+  export type PosSettingSelectScalar = {
+    key?: boolean
+    value?: boolean
+    updatedById?: boolean
+    updatedAt?: boolean
+  }
+
+
+  export type $PosSettingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PosSetting"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      key: string
+      value: Prisma.JsonValue
+      updatedById: number | null
+      updatedAt: Date
+    }, ExtArgs["result"]["posSetting"]>
+    composites: {}
+  }
+
+  type PosSettingGetPayload<S extends boolean | null | undefined | PosSettingDefaultArgs> = $Result.GetResult<Prisma.$PosSettingPayload, S>
+
+  type PosSettingCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<PosSettingFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: PosSettingCountAggregateInputType | true
+    }
+
+  export interface PosSettingDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PosSetting'], meta: { name: 'PosSetting' } }
+    /**
+     * Find zero or one PosSetting that matches the filter.
+     * @param {PosSettingFindUniqueArgs} args - Arguments to find a PosSetting
+     * @example
+     * // Get one PosSetting
+     * const posSetting = await prisma.posSetting.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PosSettingFindUniqueArgs>(args: SelectSubset<T, PosSettingFindUniqueArgs<ExtArgs>>): Prisma__PosSettingClient<$Result.GetResult<Prisma.$PosSettingPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one PosSetting that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {PosSettingFindUniqueOrThrowArgs} args - Arguments to find a PosSetting
+     * @example
+     * // Get one PosSetting
+     * const posSetting = await prisma.posSetting.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PosSettingFindUniqueOrThrowArgs>(args: SelectSubset<T, PosSettingFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PosSettingClient<$Result.GetResult<Prisma.$PosSettingPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first PosSetting that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosSettingFindFirstArgs} args - Arguments to find a PosSetting
+     * @example
+     * // Get one PosSetting
+     * const posSetting = await prisma.posSetting.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PosSettingFindFirstArgs>(args?: SelectSubset<T, PosSettingFindFirstArgs<ExtArgs>>): Prisma__PosSettingClient<$Result.GetResult<Prisma.$PosSettingPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first PosSetting that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosSettingFindFirstOrThrowArgs} args - Arguments to find a PosSetting
+     * @example
+     * // Get one PosSetting
+     * const posSetting = await prisma.posSetting.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PosSettingFindFirstOrThrowArgs>(args?: SelectSubset<T, PosSettingFindFirstOrThrowArgs<ExtArgs>>): Prisma__PosSettingClient<$Result.GetResult<Prisma.$PosSettingPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more PosSettings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosSettingFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PosSettings
+     * const posSettings = await prisma.posSetting.findMany()
+     * 
+     * // Get first 10 PosSettings
+     * const posSettings = await prisma.posSetting.findMany({ take: 10 })
+     * 
+     * // Only select the `key`
+     * const posSettingWithKeyOnly = await prisma.posSetting.findMany({ select: { key: true } })
+     * 
+     */
+    findMany<T extends PosSettingFindManyArgs>(args?: SelectSubset<T, PosSettingFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosSettingPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a PosSetting.
+     * @param {PosSettingCreateArgs} args - Arguments to create a PosSetting.
+     * @example
+     * // Create one PosSetting
+     * const PosSetting = await prisma.posSetting.create({
+     *   data: {
+     *     // ... data to create a PosSetting
+     *   }
+     * })
+     * 
+     */
+    create<T extends PosSettingCreateArgs>(args: SelectSubset<T, PosSettingCreateArgs<ExtArgs>>): Prisma__PosSettingClient<$Result.GetResult<Prisma.$PosSettingPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many PosSettings.
+     * @param {PosSettingCreateManyArgs} args - Arguments to create many PosSettings.
+     * @example
+     * // Create many PosSettings
+     * const posSetting = await prisma.posSetting.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PosSettingCreateManyArgs>(args?: SelectSubset<T, PosSettingCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PosSettings and returns the data saved in the database.
+     * @param {PosSettingCreateManyAndReturnArgs} args - Arguments to create many PosSettings.
+     * @example
+     * // Create many PosSettings
+     * const posSetting = await prisma.posSetting.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PosSettings and only return the `key`
+     * const posSettingWithKeyOnly = await prisma.posSetting.createManyAndReturn({ 
+     *   select: { key: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PosSettingCreateManyAndReturnArgs>(args?: SelectSubset<T, PosSettingCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosSettingPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a PosSetting.
+     * @param {PosSettingDeleteArgs} args - Arguments to delete one PosSetting.
+     * @example
+     * // Delete one PosSetting
+     * const PosSetting = await prisma.posSetting.delete({
+     *   where: {
+     *     // ... filter to delete one PosSetting
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PosSettingDeleteArgs>(args: SelectSubset<T, PosSettingDeleteArgs<ExtArgs>>): Prisma__PosSettingClient<$Result.GetResult<Prisma.$PosSettingPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one PosSetting.
+     * @param {PosSettingUpdateArgs} args - Arguments to update one PosSetting.
+     * @example
+     * // Update one PosSetting
+     * const posSetting = await prisma.posSetting.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PosSettingUpdateArgs>(args: SelectSubset<T, PosSettingUpdateArgs<ExtArgs>>): Prisma__PosSettingClient<$Result.GetResult<Prisma.$PosSettingPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more PosSettings.
+     * @param {PosSettingDeleteManyArgs} args - Arguments to filter PosSettings to delete.
+     * @example
+     * // Delete a few PosSettings
+     * const { count } = await prisma.posSetting.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PosSettingDeleteManyArgs>(args?: SelectSubset<T, PosSettingDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PosSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosSettingUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PosSettings
+     * const posSetting = await prisma.posSetting.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PosSettingUpdateManyArgs>(args: SelectSubset<T, PosSettingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one PosSetting.
+     * @param {PosSettingUpsertArgs} args - Arguments to update or create a PosSetting.
+     * @example
+     * // Update or create a PosSetting
+     * const posSetting = await prisma.posSetting.upsert({
+     *   create: {
+     *     // ... data to create a PosSetting
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PosSetting we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PosSettingUpsertArgs>(args: SelectSubset<T, PosSettingUpsertArgs<ExtArgs>>): Prisma__PosSettingClient<$Result.GetResult<Prisma.$PosSettingPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of PosSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosSettingCountArgs} args - Arguments to filter PosSettings to count.
+     * @example
+     * // Count the number of PosSettings
+     * const count = await prisma.posSetting.count({
+     *   where: {
+     *     // ... the filter for the PosSettings we want to count
+     *   }
+     * })
+    **/
+    count<T extends PosSettingCountArgs>(
+      args?: Subset<T, PosSettingCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PosSettingCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PosSetting.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosSettingAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PosSettingAggregateArgs>(args: Subset<T, PosSettingAggregateArgs>): Prisma.PrismaPromise<GetPosSettingAggregateType<T>>
+
+    /**
+     * Group by PosSetting.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosSettingGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PosSettingGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PosSettingGroupByArgs['orderBy'] }
+        : { orderBy?: PosSettingGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PosSettingGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPosSettingGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PosSetting model
+   */
+  readonly fields: PosSettingFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PosSetting.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PosSettingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PosSetting model
+   */ 
+  interface PosSettingFieldRefs {
+    readonly key: FieldRef<"PosSetting", 'String'>
+    readonly value: FieldRef<"PosSetting", 'Json'>
+    readonly updatedById: FieldRef<"PosSetting", 'Int'>
+    readonly updatedAt: FieldRef<"PosSetting", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PosSetting findUnique
+   */
+  export type PosSettingFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosSetting
+     */
+    select?: PosSettingSelect<ExtArgs> | null
+    /**
+     * Filter, which PosSetting to fetch.
+     */
+    where: PosSettingWhereUniqueInput
+  }
+
+  /**
+   * PosSetting findUniqueOrThrow
+   */
+  export type PosSettingFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosSetting
+     */
+    select?: PosSettingSelect<ExtArgs> | null
+    /**
+     * Filter, which PosSetting to fetch.
+     */
+    where: PosSettingWhereUniqueInput
+  }
+
+  /**
+   * PosSetting findFirst
+   */
+  export type PosSettingFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosSetting
+     */
+    select?: PosSettingSelect<ExtArgs> | null
+    /**
+     * Filter, which PosSetting to fetch.
+     */
+    where?: PosSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosSettings to fetch.
+     */
+    orderBy?: PosSettingOrderByWithRelationInput | PosSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PosSettings.
+     */
+    cursor?: PosSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PosSettings.
+     */
+    distinct?: PosSettingScalarFieldEnum | PosSettingScalarFieldEnum[]
+  }
+
+  /**
+   * PosSetting findFirstOrThrow
+   */
+  export type PosSettingFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosSetting
+     */
+    select?: PosSettingSelect<ExtArgs> | null
+    /**
+     * Filter, which PosSetting to fetch.
+     */
+    where?: PosSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosSettings to fetch.
+     */
+    orderBy?: PosSettingOrderByWithRelationInput | PosSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PosSettings.
+     */
+    cursor?: PosSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PosSettings.
+     */
+    distinct?: PosSettingScalarFieldEnum | PosSettingScalarFieldEnum[]
+  }
+
+  /**
+   * PosSetting findMany
+   */
+  export type PosSettingFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosSetting
+     */
+    select?: PosSettingSelect<ExtArgs> | null
+    /**
+     * Filter, which PosSettings to fetch.
+     */
+    where?: PosSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosSettings to fetch.
+     */
+    orderBy?: PosSettingOrderByWithRelationInput | PosSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PosSettings.
+     */
+    cursor?: PosSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosSettings.
+     */
+    skip?: number
+    distinct?: PosSettingScalarFieldEnum | PosSettingScalarFieldEnum[]
+  }
+
+  /**
+   * PosSetting create
+   */
+  export type PosSettingCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosSetting
+     */
+    select?: PosSettingSelect<ExtArgs> | null
+    /**
+     * The data needed to create a PosSetting.
+     */
+    data: XOR<PosSettingCreateInput, PosSettingUncheckedCreateInput>
+  }
+
+  /**
+   * PosSetting createMany
+   */
+  export type PosSettingCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PosSettings.
+     */
+    data: PosSettingCreateManyInput | PosSettingCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PosSetting createManyAndReturn
+   */
+  export type PosSettingCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosSetting
+     */
+    select?: PosSettingSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many PosSettings.
+     */
+    data: PosSettingCreateManyInput | PosSettingCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PosSetting update
+   */
+  export type PosSettingUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosSetting
+     */
+    select?: PosSettingSelect<ExtArgs> | null
+    /**
+     * The data needed to update a PosSetting.
+     */
+    data: XOR<PosSettingUpdateInput, PosSettingUncheckedUpdateInput>
+    /**
+     * Choose, which PosSetting to update.
+     */
+    where: PosSettingWhereUniqueInput
+  }
+
+  /**
+   * PosSetting updateMany
+   */
+  export type PosSettingUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PosSettings.
+     */
+    data: XOR<PosSettingUpdateManyMutationInput, PosSettingUncheckedUpdateManyInput>
+    /**
+     * Filter which PosSettings to update
+     */
+    where?: PosSettingWhereInput
+  }
+
+  /**
+   * PosSetting upsert
+   */
+  export type PosSettingUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosSetting
+     */
+    select?: PosSettingSelect<ExtArgs> | null
+    /**
+     * The filter to search for the PosSetting to update in case it exists.
+     */
+    where: PosSettingWhereUniqueInput
+    /**
+     * In case the PosSetting found by the `where` argument doesn't exist, create a new PosSetting with this data.
+     */
+    create: XOR<PosSettingCreateInput, PosSettingUncheckedCreateInput>
+    /**
+     * In case the PosSetting was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PosSettingUpdateInput, PosSettingUncheckedUpdateInput>
+  }
+
+  /**
+   * PosSetting delete
+   */
+  export type PosSettingDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosSetting
+     */
+    select?: PosSettingSelect<ExtArgs> | null
+    /**
+     * Filter which PosSetting to delete.
+     */
+    where: PosSettingWhereUniqueInput
+  }
+
+  /**
+   * PosSetting deleteMany
+   */
+  export type PosSettingDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PosSettings to delete
+     */
+    where?: PosSettingWhereInput
+  }
+
+  /**
+   * PosSetting without action
+   */
+  export type PosSettingDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosSetting
+     */
+    select?: PosSettingSelect<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -29296,6 +30379,11 @@ export namespace Prisma {
     cashierId: 'cashierId',
     customerId: 'customerId',
     pointsEarned: 'pointsEarned',
+    discountType: 'discountType',
+    discountValue: 'discountValue',
+    discountAmount: 'discountAmount',
+    pointsRedeemed: 'pointsRedeemed',
+    pointsValue: 'pointsValue',
     createdAt: 'createdAt'
   };
 
@@ -29434,6 +30522,7 @@ export namespace Prisma {
     quantity: 'quantity',
     emptiesReturned: 'emptiesReturned',
     emptyDeduction: 'emptyDeduction',
+    billDiscount: 'billDiscount',
     purchasedAt: 'purchasedAt'
   };
 
@@ -29649,6 +30738,16 @@ export namespace Prisma {
   };
 
   export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[keyof typeof ActivityLogScalarFieldEnum]
+
+
+  export const PosSettingScalarFieldEnum: {
+    key: 'key',
+    value: 'value',
+    updatedById: 'updatedById',
+    updatedAt: 'updatedAt'
+  };
+
+  export type PosSettingScalarFieldEnum = (typeof PosSettingScalarFieldEnum)[keyof typeof PosSettingScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -30162,6 +31261,11 @@ export namespace Prisma {
     cashierId?: IntFilter<"PosCounterSale"> | number
     customerId?: IntNullableFilter<"PosCounterSale"> | number | null
     pointsEarned?: IntFilter<"PosCounterSale"> | number
+    discountType?: StringNullableFilter<"PosCounterSale"> | string | null
+    discountValue?: FloatFilter<"PosCounterSale"> | number
+    discountAmount?: FloatFilter<"PosCounterSale"> | number
+    pointsRedeemed?: IntFilter<"PosCounterSale"> | number
+    pointsValue?: FloatFilter<"PosCounterSale"> | number
     createdAt?: DateTimeFilter<"PosCounterSale"> | Date | string
     cashier?: XOR<PosAdminRelationFilter, PosAdminWhereInput>
     customer?: XOR<PosCustomerNullableRelationFilter, PosCustomerWhereInput> | null
@@ -30179,6 +31283,11 @@ export namespace Prisma {
     cashierId?: SortOrder
     customerId?: SortOrderInput | SortOrder
     pointsEarned?: SortOrder
+    discountType?: SortOrderInput | SortOrder
+    discountValue?: SortOrder
+    discountAmount?: SortOrder
+    pointsRedeemed?: SortOrder
+    pointsValue?: SortOrder
     createdAt?: SortOrder
     cashier?: PosAdminOrderByWithRelationInput
     customer?: PosCustomerOrderByWithRelationInput
@@ -30199,6 +31308,11 @@ export namespace Prisma {
     cashierId?: IntFilter<"PosCounterSale"> | number
     customerId?: IntNullableFilter<"PosCounterSale"> | number | null
     pointsEarned?: IntFilter<"PosCounterSale"> | number
+    discountType?: StringNullableFilter<"PosCounterSale"> | string | null
+    discountValue?: FloatFilter<"PosCounterSale"> | number
+    discountAmount?: FloatFilter<"PosCounterSale"> | number
+    pointsRedeemed?: IntFilter<"PosCounterSale"> | number
+    pointsValue?: FloatFilter<"PosCounterSale"> | number
     createdAt?: DateTimeFilter<"PosCounterSale"> | Date | string
     cashier?: XOR<PosAdminRelationFilter, PosAdminWhereInput>
     customer?: XOR<PosCustomerNullableRelationFilter, PosCustomerWhereInput> | null
@@ -30216,6 +31330,11 @@ export namespace Prisma {
     cashierId?: SortOrder
     customerId?: SortOrderInput | SortOrder
     pointsEarned?: SortOrder
+    discountType?: SortOrderInput | SortOrder
+    discountValue?: SortOrder
+    discountAmount?: SortOrder
+    pointsRedeemed?: SortOrder
+    pointsValue?: SortOrder
     createdAt?: SortOrder
     _count?: PosCounterSaleCountOrderByAggregateInput
     _avg?: PosCounterSaleAvgOrderByAggregateInput
@@ -30239,6 +31358,11 @@ export namespace Prisma {
     cashierId?: IntWithAggregatesFilter<"PosCounterSale"> | number
     customerId?: IntNullableWithAggregatesFilter<"PosCounterSale"> | number | null
     pointsEarned?: IntWithAggregatesFilter<"PosCounterSale"> | number
+    discountType?: StringNullableWithAggregatesFilter<"PosCounterSale"> | string | null
+    discountValue?: FloatWithAggregatesFilter<"PosCounterSale"> | number
+    discountAmount?: FloatWithAggregatesFilter<"PosCounterSale"> | number
+    pointsRedeemed?: IntWithAggregatesFilter<"PosCounterSale"> | number
+    pointsValue?: FloatWithAggregatesFilter<"PosCounterSale"> | number
     createdAt?: DateTimeWithAggregatesFilter<"PosCounterSale"> | Date | string
   }
 
@@ -30841,6 +31965,7 @@ export namespace Prisma {
     quantity?: IntFilter<"PosCustomerPurchase"> | number
     emptiesReturned?: IntFilter<"PosCustomerPurchase"> | number
     emptyDeduction?: FloatFilter<"PosCustomerPurchase"> | number
+    billDiscount?: FloatFilter<"PosCustomerPurchase"> | number
     purchasedAt?: DateTimeFilter<"PosCustomerPurchase"> | Date | string
     customer?: XOR<PosCustomerRelationFilter, PosCustomerWhereInput>
     inventoryProduct?: XOR<InventoryProductNullableRelationFilter, InventoryProductWhereInput> | null
@@ -30873,6 +31998,7 @@ export namespace Prisma {
     quantity?: SortOrder
     emptiesReturned?: SortOrder
     emptyDeduction?: SortOrder
+    billDiscount?: SortOrder
     purchasedAt?: SortOrder
     customer?: PosCustomerOrderByWithRelationInput
     inventoryProduct?: InventoryProductOrderByWithRelationInput
@@ -30908,6 +32034,7 @@ export namespace Prisma {
     quantity?: IntFilter<"PosCustomerPurchase"> | number
     emptiesReturned?: IntFilter<"PosCustomerPurchase"> | number
     emptyDeduction?: FloatFilter<"PosCustomerPurchase"> | number
+    billDiscount?: FloatFilter<"PosCustomerPurchase"> | number
     purchasedAt?: DateTimeFilter<"PosCustomerPurchase"> | Date | string
     customer?: XOR<PosCustomerRelationFilter, PosCustomerWhereInput>
     inventoryProduct?: XOR<InventoryProductNullableRelationFilter, InventoryProductWhereInput> | null
@@ -30940,6 +32067,7 @@ export namespace Prisma {
     quantity?: SortOrder
     emptiesReturned?: SortOrder
     emptyDeduction?: SortOrder
+    billDiscount?: SortOrder
     purchasedAt?: SortOrder
     _count?: PosCustomerPurchaseCountOrderByAggregateInput
     _avg?: PosCustomerPurchaseAvgOrderByAggregateInput
@@ -30975,6 +32103,7 @@ export namespace Prisma {
     quantity?: IntWithAggregatesFilter<"PosCustomerPurchase"> | number
     emptiesReturned?: IntWithAggregatesFilter<"PosCustomerPurchase"> | number
     emptyDeduction?: FloatWithAggregatesFilter<"PosCustomerPurchase"> | number
+    billDiscount?: FloatWithAggregatesFilter<"PosCustomerPurchase"> | number
     purchasedAt?: DateTimeWithAggregatesFilter<"PosCustomerPurchase"> | Date | string
   }
 
@@ -32120,6 +33249,55 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"ActivityLog"> | Date | string
   }
 
+  export type PosSettingWhereInput = {
+    AND?: PosSettingWhereInput | PosSettingWhereInput[]
+    OR?: PosSettingWhereInput[]
+    NOT?: PosSettingWhereInput | PosSettingWhereInput[]
+    key?: StringFilter<"PosSetting"> | string
+    value?: JsonFilter<"PosSetting">
+    updatedById?: IntNullableFilter<"PosSetting"> | number | null
+    updatedAt?: DateTimeFilter<"PosSetting"> | Date | string
+  }
+
+  export type PosSettingOrderByWithRelationInput = {
+    key?: SortOrder
+    value?: SortOrder
+    updatedById?: SortOrderInput | SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PosSettingWhereUniqueInput = Prisma.AtLeast<{
+    key?: string
+    AND?: PosSettingWhereInput | PosSettingWhereInput[]
+    OR?: PosSettingWhereInput[]
+    NOT?: PosSettingWhereInput | PosSettingWhereInput[]
+    value?: JsonFilter<"PosSetting">
+    updatedById?: IntNullableFilter<"PosSetting"> | number | null
+    updatedAt?: DateTimeFilter<"PosSetting"> | Date | string
+  }, "key">
+
+  export type PosSettingOrderByWithAggregationInput = {
+    key?: SortOrder
+    value?: SortOrder
+    updatedById?: SortOrderInput | SortOrder
+    updatedAt?: SortOrder
+    _count?: PosSettingCountOrderByAggregateInput
+    _avg?: PosSettingAvgOrderByAggregateInput
+    _max?: PosSettingMaxOrderByAggregateInput
+    _min?: PosSettingMinOrderByAggregateInput
+    _sum?: PosSettingSumOrderByAggregateInput
+  }
+
+  export type PosSettingScalarWhereWithAggregatesInput = {
+    AND?: PosSettingScalarWhereWithAggregatesInput | PosSettingScalarWhereWithAggregatesInput[]
+    OR?: PosSettingScalarWhereWithAggregatesInput[]
+    NOT?: PosSettingScalarWhereWithAggregatesInput | PosSettingScalarWhereWithAggregatesInput[]
+    key?: StringWithAggregatesFilter<"PosSetting"> | string
+    value?: JsonWithAggregatesFilter<"PosSetting">
+    updatedById?: IntNullableWithAggregatesFilter<"PosSetting"> | number | null
+    updatedAt?: DateTimeWithAggregatesFilter<"PosSetting"> | Date | string
+  }
+
   export type UserCreateInput = {
     name: string
     email: string
@@ -32288,6 +33466,11 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
     pointsEarned?: number
+    discountType?: string | null
+    discountValue?: number
+    discountAmount?: number
+    pointsRedeemed?: number
+    pointsValue?: number
     createdAt?: Date | string
     cashier: PosAdminCreateNestedOneWithoutCounterSalesInput
     customer?: PosCustomerCreateNestedOneWithoutCounterSalesInput
@@ -32305,6 +33488,11 @@ export namespace Prisma {
     cashierId: number
     customerId?: number | null
     pointsEarned?: number
+    discountType?: string | null
+    discountValue?: number
+    discountAmount?: number
+    pointsRedeemed?: number
+    pointsValue?: number
     createdAt?: Date | string
   }
 
@@ -32317,6 +33505,11 @@ export namespace Prisma {
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    discountType?: NullableStringFieldUpdateOperationsInput | string | null
+    discountValue?: FloatFieldUpdateOperationsInput | number
+    discountAmount?: FloatFieldUpdateOperationsInput | number
+    pointsRedeemed?: IntFieldUpdateOperationsInput | number
+    pointsValue?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cashier?: PosAdminUpdateOneRequiredWithoutCounterSalesNestedInput
     customer?: PosCustomerUpdateOneWithoutCounterSalesNestedInput
@@ -32334,6 +33527,11 @@ export namespace Prisma {
     cashierId?: IntFieldUpdateOperationsInput | number
     customerId?: NullableIntFieldUpdateOperationsInput | number | null
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    discountType?: NullableStringFieldUpdateOperationsInput | string | null
+    discountValue?: FloatFieldUpdateOperationsInput | number
+    discountAmount?: FloatFieldUpdateOperationsInput | number
+    pointsRedeemed?: IntFieldUpdateOperationsInput | number
+    pointsValue?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -32349,6 +33547,11 @@ export namespace Prisma {
     cashierId: number
     customerId?: number | null
     pointsEarned?: number
+    discountType?: string | null
+    discountValue?: number
+    discountAmount?: number
+    pointsRedeemed?: number
+    pointsValue?: number
     createdAt?: Date | string
   }
 
@@ -32361,6 +33564,11 @@ export namespace Prisma {
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    discountType?: NullableStringFieldUpdateOperationsInput | string | null
+    discountValue?: FloatFieldUpdateOperationsInput | number
+    discountAmount?: FloatFieldUpdateOperationsInput | number
+    pointsRedeemed?: IntFieldUpdateOperationsInput | number
+    pointsValue?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -32376,6 +33584,11 @@ export namespace Prisma {
     cashierId?: IntFieldUpdateOperationsInput | number
     customerId?: NullableIntFieldUpdateOperationsInput | number | null
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    discountType?: NullableStringFieldUpdateOperationsInput | string | null
+    discountValue?: FloatFieldUpdateOperationsInput | number
+    discountAmount?: FloatFieldUpdateOperationsInput | number
+    pointsRedeemed?: IntFieldUpdateOperationsInput | number
+    pointsValue?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -33015,6 +34228,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    billDiscount?: number
     purchasedAt?: Date | string
     customer: PosCustomerCreateNestedOneWithoutPurchasesInput
     inventoryProduct?: InventoryProductCreateNestedOneWithoutCustomerPurchasesInput
@@ -33047,6 +34261,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    billDiscount?: number
     purchasedAt?: Date | string
     receipts?: AccountReceiptUncheckedCreateNestedManyWithoutPurchaseInput
     installments?: PosInstallmentUncheckedCreateNestedManyWithoutPurchaseInput
@@ -33074,6 +34289,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customer?: PosCustomerUpdateOneRequiredWithoutPurchasesNestedInput
     inventoryProduct?: InventoryProductUpdateOneWithoutCustomerPurchasesNestedInput
@@ -33106,6 +34322,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     receipts?: AccountReceiptUncheckedUpdateManyWithoutPurchaseNestedInput
     installments?: PosInstallmentUncheckedUpdateManyWithoutPurchaseNestedInput
@@ -33136,6 +34353,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    billDiscount?: number
     purchasedAt?: Date | string
   }
 
@@ -33160,6 +34378,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -33187,6 +34406,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -34400,6 +35620,55 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type PosSettingCreateInput = {
+    key: string
+    value: JsonNullValueInput | InputJsonValue
+    updatedById?: number | null
+    updatedAt?: Date | string
+  }
+
+  export type PosSettingUncheckedCreateInput = {
+    key: string
+    value: JsonNullValueInput | InputJsonValue
+    updatedById?: number | null
+    updatedAt?: Date | string
+  }
+
+  export type PosSettingUpdateInput = {
+    key?: StringFieldUpdateOperationsInput | string
+    value?: JsonNullValueInput | InputJsonValue
+    updatedById?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosSettingUncheckedUpdateInput = {
+    key?: StringFieldUpdateOperationsInput | string
+    value?: JsonNullValueInput | InputJsonValue
+    updatedById?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosSettingCreateManyInput = {
+    key: string
+    value: JsonNullValueInput | InputJsonValue
+    updatedById?: number | null
+    updatedAt?: Date | string
+  }
+
+  export type PosSettingUpdateManyMutationInput = {
+    key?: StringFieldUpdateOperationsInput | string
+    value?: JsonNullValueInput | InputJsonValue
+    updatedById?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosSettingUncheckedUpdateManyInput = {
+    key?: StringFieldUpdateOperationsInput | string
+    value?: JsonNullValueInput | InputJsonValue
+    updatedById?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -34741,6 +36010,11 @@ export namespace Prisma {
     cashierId?: SortOrder
     customerId?: SortOrder
     pointsEarned?: SortOrder
+    discountType?: SortOrder
+    discountValue?: SortOrder
+    discountAmount?: SortOrder
+    pointsRedeemed?: SortOrder
+    pointsValue?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -34754,6 +36028,10 @@ export namespace Prisma {
     cashierId?: SortOrder
     customerId?: SortOrder
     pointsEarned?: SortOrder
+    discountValue?: SortOrder
+    discountAmount?: SortOrder
+    pointsRedeemed?: SortOrder
+    pointsValue?: SortOrder
   }
 
   export type PosCounterSaleMaxOrderByAggregateInput = {
@@ -34768,6 +36046,11 @@ export namespace Prisma {
     cashierId?: SortOrder
     customerId?: SortOrder
     pointsEarned?: SortOrder
+    discountType?: SortOrder
+    discountValue?: SortOrder
+    discountAmount?: SortOrder
+    pointsRedeemed?: SortOrder
+    pointsValue?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -34783,6 +36066,11 @@ export namespace Prisma {
     cashierId?: SortOrder
     customerId?: SortOrder
     pointsEarned?: SortOrder
+    discountType?: SortOrder
+    discountValue?: SortOrder
+    discountAmount?: SortOrder
+    pointsRedeemed?: SortOrder
+    pointsValue?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -34796,6 +36084,10 @@ export namespace Prisma {
     cashierId?: SortOrder
     customerId?: SortOrder
     pointsEarned?: SortOrder
+    discountValue?: SortOrder
+    discountAmount?: SortOrder
+    pointsRedeemed?: SortOrder
+    pointsValue?: SortOrder
   }
 
   export type FloatWithAggregatesFilter<$PrismaModel = never> = {
@@ -35403,6 +36695,7 @@ export namespace Prisma {
     quantity?: SortOrder
     emptiesReturned?: SortOrder
     emptyDeduction?: SortOrder
+    billDiscount?: SortOrder
     purchasedAt?: SortOrder
   }
 
@@ -35421,6 +36714,7 @@ export namespace Prisma {
     quantity?: SortOrder
     emptiesReturned?: SortOrder
     emptyDeduction?: SortOrder
+    billDiscount?: SortOrder
   }
 
   export type PosCustomerPurchaseMaxOrderByAggregateInput = {
@@ -35446,6 +36740,7 @@ export namespace Prisma {
     quantity?: SortOrder
     emptiesReturned?: SortOrder
     emptyDeduction?: SortOrder
+    billDiscount?: SortOrder
     purchasedAt?: SortOrder
   }
 
@@ -35472,6 +36767,7 @@ export namespace Prisma {
     quantity?: SortOrder
     emptiesReturned?: SortOrder
     emptyDeduction?: SortOrder
+    billDiscount?: SortOrder
     purchasedAt?: SortOrder
   }
 
@@ -35490,6 +36786,7 @@ export namespace Prisma {
     quantity?: SortOrder
     emptiesReturned?: SortOrder
     emptyDeduction?: SortOrder
+    billDiscount?: SortOrder
   }
 
   export type EnumPosPurchaseItemTypeWithAggregatesFilter<$PrismaModel = never> = {
@@ -36560,6 +37857,33 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedJsonNullableFilter<$PrismaModel>
     _max?: NestedJsonNullableFilter<$PrismaModel>
+  }
+
+  export type PosSettingCountOrderByAggregateInput = {
+    key?: SortOrder
+    value?: SortOrder
+    updatedById?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PosSettingAvgOrderByAggregateInput = {
+    updatedById?: SortOrder
+  }
+
+  export type PosSettingMaxOrderByAggregateInput = {
+    key?: SortOrder
+    updatedById?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PosSettingMinOrderByAggregateInput = {
+    key?: SortOrder
+    updatedById?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PosSettingSumOrderByAggregateInput = {
+    updatedById?: SortOrder
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -38748,6 +40072,11 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
     pointsEarned?: number
+    discountType?: string | null
+    discountValue?: number
+    discountAmount?: number
+    pointsRedeemed?: number
+    pointsValue?: number
     createdAt?: Date | string
     customer?: PosCustomerCreateNestedOneWithoutCounterSalesInput
   }
@@ -38763,6 +40092,11 @@ export namespace Prisma {
     paymentMethod?: $Enums.PaymentMethod
     customerId?: number | null
     pointsEarned?: number
+    discountType?: string | null
+    discountValue?: number
+    discountAmount?: number
+    pointsRedeemed?: number
+    pointsValue?: number
     createdAt?: Date | string
   }
 
@@ -38807,6 +40141,11 @@ export namespace Prisma {
     cashierId?: IntFilter<"PosCounterSale"> | number
     customerId?: IntNullableFilter<"PosCounterSale"> | number | null
     pointsEarned?: IntFilter<"PosCounterSale"> | number
+    discountType?: StringNullableFilter<"PosCounterSale"> | string | null
+    discountValue?: FloatFilter<"PosCounterSale"> | number
+    discountAmount?: FloatFilter<"PosCounterSale"> | number
+    pointsRedeemed?: IntFilter<"PosCounterSale"> | number
+    pointsValue?: FloatFilter<"PosCounterSale"> | number
     createdAt?: DateTimeFilter<"PosCounterSale"> | Date | string
   }
 
@@ -39357,6 +40696,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    billDiscount?: number
     purchasedAt?: Date | string
     customer: PosCustomerCreateNestedOneWithoutPurchasesInput
     receipts?: AccountReceiptCreateNestedManyWithoutPurchaseInput
@@ -39387,6 +40727,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    billDiscount?: number
     purchasedAt?: Date | string
     receipts?: AccountReceiptUncheckedCreateNestedManyWithoutPurchaseInput
     installments?: PosInstallmentUncheckedCreateNestedManyWithoutPurchaseInput
@@ -39587,6 +40928,7 @@ export namespace Prisma {
     quantity?: IntFilter<"PosCustomerPurchase"> | number
     emptiesReturned?: IntFilter<"PosCustomerPurchase"> | number
     emptyDeduction?: FloatFilter<"PosCustomerPurchase"> | number
+    billDiscount?: FloatFilter<"PosCustomerPurchase"> | number
     purchasedAt?: DateTimeFilter<"PosCustomerPurchase"> | Date | string
   }
 
@@ -39847,6 +41189,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    billDiscount?: number
     purchasedAt?: Date | string
     inventoryProduct?: InventoryProductCreateNestedOneWithoutCustomerPurchasesInput
     receipts?: AccountReceiptCreateNestedManyWithoutPurchaseInput
@@ -39877,6 +41220,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    billDiscount?: number
     purchasedAt?: Date | string
     receipts?: AccountReceiptUncheckedCreateNestedManyWithoutPurchaseInput
     installments?: PosInstallmentUncheckedCreateNestedManyWithoutPurchaseInput
@@ -39902,6 +41246,11 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
     pointsEarned?: number
+    discountType?: string | null
+    discountValue?: number
+    discountAmount?: number
+    pointsRedeemed?: number
+    pointsValue?: number
     createdAt?: Date | string
     cashier: PosAdminCreateNestedOneWithoutCounterSalesInput
   }
@@ -39917,6 +41266,11 @@ export namespace Prisma {
     paymentMethod?: $Enums.PaymentMethod
     cashierId: number
     pointsEarned?: number
+    discountType?: string | null
+    discountValue?: number
+    discountAmount?: number
+    pointsRedeemed?: number
+    pointsValue?: number
     createdAt?: Date | string
   }
 
@@ -40424,6 +41778,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    billDiscount?: number
     purchasedAt?: Date | string
     customer: PosCustomerCreateNestedOneWithoutPurchasesInput
     inventoryProduct?: InventoryProductCreateNestedOneWithoutCustomerPurchasesInput
@@ -40455,6 +41810,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    billDiscount?: number
     purchasedAt?: Date | string
     receipts?: AccountReceiptUncheckedCreateNestedManyWithoutPurchaseInput
     invoicePayments?: InvoicePaymentUncheckedCreateNestedManyWithoutPurchaseInput
@@ -40522,6 +41878,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customer?: PosCustomerUpdateOneRequiredWithoutPurchasesNestedInput
     inventoryProduct?: InventoryProductUpdateOneWithoutCustomerPurchasesNestedInput
@@ -40553,6 +41910,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     receipts?: AccountReceiptUncheckedUpdateManyWithoutPurchaseNestedInput
     invoicePayments?: InvoicePaymentUncheckedUpdateManyWithoutPurchaseNestedInput
@@ -41396,6 +42754,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    billDiscount?: number
     purchasedAt?: Date | string
     customer: PosCustomerCreateNestedOneWithoutPurchasesInput
     inventoryProduct?: InventoryProductCreateNestedOneWithoutCustomerPurchasesInput
@@ -41427,6 +42786,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    billDiscount?: number
     purchasedAt?: Date | string
     installments?: PosInstallmentUncheckedCreateNestedManyWithoutPurchaseInput
     invoicePayments?: InvoicePaymentUncheckedCreateNestedManyWithoutPurchaseInput
@@ -41602,6 +42962,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customer?: PosCustomerUpdateOneRequiredWithoutPurchasesNestedInput
     inventoryProduct?: InventoryProductUpdateOneWithoutCustomerPurchasesNestedInput
@@ -41633,6 +42994,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     installments?: PosInstallmentUncheckedUpdateManyWithoutPurchaseNestedInput
     invoicePayments?: InvoicePaymentUncheckedUpdateManyWithoutPurchaseNestedInput
@@ -42308,6 +43670,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    billDiscount?: number
     purchasedAt?: Date | string
     customer: PosCustomerCreateNestedOneWithoutPurchasesInput
     inventoryProduct?: InventoryProductCreateNestedOneWithoutCustomerPurchasesInput
@@ -42339,6 +43702,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    billDiscount?: number
     purchasedAt?: Date | string
     receipts?: AccountReceiptUncheckedCreateNestedManyWithoutPurchaseInput
     installments?: PosInstallmentUncheckedCreateNestedManyWithoutPurchaseInput
@@ -42427,6 +43791,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customer?: PosCustomerUpdateOneRequiredWithoutPurchasesNestedInput
     inventoryProduct?: InventoryProductUpdateOneWithoutCustomerPurchasesNestedInput
@@ -42458,6 +43823,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     receipts?: AccountReceiptUncheckedUpdateManyWithoutPurchaseNestedInput
     installments?: PosInstallmentUncheckedUpdateManyWithoutPurchaseNestedInput
@@ -42978,6 +44344,11 @@ export namespace Prisma {
     paymentMethod?: $Enums.PaymentMethod
     customerId?: number | null
     pointsEarned?: number
+    discountType?: string | null
+    discountValue?: number
+    discountAmount?: number
+    pointsRedeemed?: number
+    pointsValue?: number
     createdAt?: Date | string
   }
 
@@ -42990,6 +44361,11 @@ export namespace Prisma {
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    discountType?: NullableStringFieldUpdateOperationsInput | string | null
+    discountValue?: FloatFieldUpdateOperationsInput | number
+    discountAmount?: FloatFieldUpdateOperationsInput | number
+    pointsRedeemed?: IntFieldUpdateOperationsInput | number
+    pointsValue?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customer?: PosCustomerUpdateOneWithoutCounterSalesNestedInput
   }
@@ -43005,6 +44381,11 @@ export namespace Prisma {
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     customerId?: NullableIntFieldUpdateOperationsInput | number | null
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    discountType?: NullableStringFieldUpdateOperationsInput | string | null
+    discountValue?: FloatFieldUpdateOperationsInput | number
+    discountAmount?: FloatFieldUpdateOperationsInput | number
+    pointsRedeemed?: IntFieldUpdateOperationsInput | number
+    pointsValue?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -43019,6 +44400,11 @@ export namespace Prisma {
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     customerId?: NullableIntFieldUpdateOperationsInput | number | null
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    discountType?: NullableStringFieldUpdateOperationsInput | string | null
+    discountValue?: FloatFieldUpdateOperationsInput | number
+    discountAmount?: FloatFieldUpdateOperationsInput | number
+    pointsRedeemed?: IntFieldUpdateOperationsInput | number
+    pointsValue?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -43351,6 +44737,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    billDiscount?: number
     purchasedAt?: Date | string
   }
 
@@ -43418,6 +44805,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customer?: PosCustomerUpdateOneRequiredWithoutPurchasesNestedInput
     receipts?: AccountReceiptUpdateManyWithoutPurchaseNestedInput
@@ -43448,6 +44836,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     receipts?: AccountReceiptUncheckedUpdateManyWithoutPurchaseNestedInput
     installments?: PosInstallmentUncheckedUpdateManyWithoutPurchaseNestedInput
@@ -43477,6 +44866,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -43503,6 +44893,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    billDiscount?: number
     purchasedAt?: Date | string
   }
 
@@ -43517,6 +44908,11 @@ export namespace Prisma {
     paymentMethod?: $Enums.PaymentMethod
     cashierId: number
     pointsEarned?: number
+    discountType?: string | null
+    discountValue?: number
+    discountAmount?: number
+    pointsRedeemed?: number
+    pointsValue?: number
     createdAt?: Date | string
   }
 
@@ -43541,6 +44937,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     inventoryProduct?: InventoryProductUpdateOneWithoutCustomerPurchasesNestedInput
     receipts?: AccountReceiptUpdateManyWithoutPurchaseNestedInput
@@ -43571,6 +44968,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     receipts?: AccountReceiptUncheckedUpdateManyWithoutPurchaseNestedInput
     installments?: PosInstallmentUncheckedUpdateManyWithoutPurchaseNestedInput
@@ -43600,6 +44998,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -43612,6 +45011,11 @@ export namespace Prisma {
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    discountType?: NullableStringFieldUpdateOperationsInput | string | null
+    discountValue?: FloatFieldUpdateOperationsInput | number
+    discountAmount?: FloatFieldUpdateOperationsInput | number
+    pointsRedeemed?: IntFieldUpdateOperationsInput | number
+    pointsValue?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cashier?: PosAdminUpdateOneRequiredWithoutCounterSalesNestedInput
   }
@@ -43627,6 +45031,11 @@ export namespace Prisma {
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     cashierId?: IntFieldUpdateOperationsInput | number
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    discountType?: NullableStringFieldUpdateOperationsInput | string | null
+    discountValue?: FloatFieldUpdateOperationsInput | number
+    discountAmount?: FloatFieldUpdateOperationsInput | number
+    pointsRedeemed?: IntFieldUpdateOperationsInput | number
+    pointsValue?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -43641,6 +45050,11 @@ export namespace Prisma {
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     cashierId?: IntFieldUpdateOperationsInput | number
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    discountType?: NullableStringFieldUpdateOperationsInput | string | null
+    discountValue?: FloatFieldUpdateOperationsInput | number
+    discountAmount?: FloatFieldUpdateOperationsInput | number
+    pointsRedeemed?: IntFieldUpdateOperationsInput | number
+    pointsValue?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -44637,6 +46051,10 @@ export namespace Prisma {
      * @deprecated Use ActivityLogDefaultArgs instead
      */
     export type ActivityLogArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ActivityLogDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use PosSettingDefaultArgs instead
+     */
+    export type PosSettingArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PosSettingDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

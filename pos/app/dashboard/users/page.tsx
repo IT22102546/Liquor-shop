@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react
 import { useAdmin } from "../../components/AdminContext";
 import { API_URL } from "../../lib/constants";
 import { IconPlus, IconSearch, IconUsers } from "../../lib/icons";
+import { useShopSettings } from "../../lib/useShopSettings";
 
 type Member = {
   id: number;
@@ -30,6 +31,7 @@ const shortDate = (iso: string | null) => (iso ? new Date(iso).toLocaleDateStrin
 
 export default function LoyaltyCustomersPage() {
   const { token, logout } = useAdmin();
+  const { settings } = useShopSettings(token);
   const base = `${API_URL}/api/pos/user-management`;
   const auth = useMemo(() => ({ Authorization: `Bearer ${token}` }), [token]);
   const [members, setMembers] = useState<Member[]>([]);
@@ -132,7 +134,10 @@ export default function LoyaltyCustomersPage() {
           <div className="page-title-icon"><IconUsers /></div>
           <div>
             <h2 className="page-title">Loyalty Customers</h2>
-            <p className="page-subtitle">Members earn 1 point for every Rs. 100 they spend. Everyone else is served as a walk-in customer.</p>
+            <p className="page-subtitle">
+              Members earn 1 point for every {money(settings.loyaltyRupeesPerPoint).replace(".00", "")} they spend, and each point is worth {money(settings.loyaltyPointValue)}
+              {settings.loyaltyRedemptionEnabled ? " at the counter" : " once redemption is switched on in Shop Settings"}. Everyone else is a walk-in customer.
+            </p>
           </div>
         </div>
         <button type="button" className="btn-accent" onClick={() => openForm("new")}><IconPlus /> Add member</button>
@@ -177,7 +182,10 @@ export default function LoyaltyCustomersPage() {
                       <div><strong>{fullName(member)}</strong><span>{member.mobileNumber}{member.email ? ` · ${member.email}` : ""}</span></div>
                     </div>
                   </td>
-                  <td style={{ textAlign: "right" }}><span className="lx-points">{member.loyaltyPoints.toLocaleString()}</span></td>
+                  <td style={{ textAlign: "right" }}>
+                    <span className="lx-points">{member.loyaltyPoints.toLocaleString()}</span>
+                    <div className="td-muted" style={{ fontSize: "0.7rem", marginTop: 2 }}>= {money(member.loyaltyPoints * settings.loyaltyPointValue)}</div>
+                  </td>
                   <td style={{ textAlign: "right" }}>{member.visits}</td>
                   <td style={{ textAlign: "right" }}>{money(member.totalSpent)}</td>
                   <td className="td-muted">{shortDate(member.lastVisitAt)}</td>

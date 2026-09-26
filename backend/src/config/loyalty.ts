@@ -1,6 +1,8 @@
-/** Loyalty programme: members earn 1 point for every Rs. 100 paid (after empty-bottle deductions). */
-export const LOYALTY_RUPEES_PER_POINT = 100;
-
-export function loyaltyPointsFor(amountPaid: number) {
-  return amountPaid > 0 ? Math.floor(amountPaid / LOYALTY_RUPEES_PER_POINT) : 0;
+/**
+ * Loyalty points earned on an amount paid (after empties, discounts and points used).
+ * The rate comes from Shop Settings: 1 point for every `rupeesPerPoint` rupees.
+ */
+export function loyaltyPointsFor(amountPaid: number, rupeesPerPoint: number) {
+  if (!(amountPaid > 0) || !(rupeesPerPoint > 0)) return 0;
+  return Math.floor(amountPaid / rupeesPerPoint);
 }

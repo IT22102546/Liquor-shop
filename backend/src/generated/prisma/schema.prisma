@@ -141,6 +141,13 @@ model PosCounterSale {
   customerId       Int?
   customer         PosCustomer?  @relation(fields: [customerId], references: [id], onDelete: SetNull)
   pointsEarned     Int           @default(0)
+  /// Bill discount: "PERCENT" or "AMOUNT" (null = none), the value entered and the rupees taken off.
+  discountType     String?
+  discountValue    Float         @default(0)
+  discountAmount   Float         @default(0)
+  /// Loyalty points spent on this bill (1 point = Rs. 1) and their rupee value.
+  pointsRedeemed   Int           @default(0)
+  pointsValue      Float         @default(0)
   createdAt        DateTime      @default(now())
 
   @@index([cashierId])
@@ -302,6 +309,8 @@ model PosCustomerPurchase {
   /// Empty bottles handed back on this line and the amount deducted for them.
   emptiesReturned          Int                 @default(0)
   emptyDeduction           Float               @default(0)
+  /// This line's share of the bill discount and redeemed points (already taken off finalSellingPrice).
+  billDiscount             Float               @default(0)
   purchasedAt              DateTime            @default(now())
   customer                 PosCustomer         @relation(fields: [customerId], references: [id], onDelete: Cascade)
   inventoryProduct         InventoryProduct?   @relation(fields: [inventoryProductId], references: [id], onDelete: SetNull)
@@ -582,4 +591,16 @@ model ActivityLog {
   @@index([actorId])
   @@index([category])
   @@map("activity_logs")
+}
+
+// ── Shop settings ─────────────────────────────────────────────────────────────
+// Feature switches the admin can turn on/off (e.g. discounts, loyalty redemption).
+
+model PosSetting {
+  key         String   @id
+  value       Json
+  updatedById Int?
+  updatedAt   DateTime @updatedAt
+
+  @@map("pos_settings")
 }

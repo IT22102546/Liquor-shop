@@ -151,8 +151,8 @@ export async function checkoutSale(
 ) {
   try {
     const dto = validate(checkoutSaleSchema, req.body);
-    const cashierId = (req as unknown as { user: { id: number } }).user.id;
-    return sendCreated(res, await service.checkoutSale(dto, cashierId));
+    const user = (req as unknown as { user: { id: number; role: string } }).user;
+    return sendCreated(res, await service.checkoutSale(dto, user.id, user.role));
   } catch (error) {
     return next(error);
   }

@@ -36,6 +36,9 @@ type Sale = {
   cashier: { name: string; role: PosAdminRole };
   customer: { id: number; name: string | null; mobileNumber: string; pointsBalance: number } | null;
   pointsEarned: number;
+  discount: { type: "PERCENT" | "AMOUNT"; value: number; amount: number } | null;
+  pointsRedeemed: number;
+  pointsValue: number;
   units: number;
   items: SaleItem[];
 };
@@ -51,8 +54,11 @@ function saleToReceipt(sale: Sale): SaleReceipt {
     cashierName: sale.cashier.name,
     cashierRole: ROLE_LABELS[sale.cashier.role] ?? sale.cashier.role,
     member: sale.customer
-      ? { name: sale.customer.name ?? "Member", mobileNumber: sale.customer.mobileNumber, pointsEarned: sale.pointsEarned, pointsBalance: sale.customer.pointsBalance }
+      ? { name: sale.customer.name ?? "Member", mobileNumber: sale.customer.mobileNumber, pointsEarned: sale.pointsEarned, pointsRedeemed: sale.pointsRedeemed, pointsBalance: sale.customer.pointsBalance }
       : null,
+    discount: sale.discount,
+    pointsRedeemed: sale.pointsRedeemed,
+    pointsValue: sale.pointsValue,
     paymentMethod: sale.paymentMethod,
     lines: sale.items.map((item) => ({
       name: item.name,
@@ -84,7 +90,7 @@ const PRESETS: Array<{ key: string; label: string; range: () => [string, string]
 export default function SalesBillsPage() {
   const { token, logout } = useAdmin();
   const [sales, setSales] = useState<Sale[]>([]);
-  const [summary, setSummary] = useState({ bills: 0, revenue: 0, emptiesReturned: 0 });
+  const [summary, setSummary] = useState({ bills: 0, revenue: 0, emptiesReturned: 0, discounts: 0 });
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -155,7 +161,7 @@ export default function SalesBillsPage() {
           <div><span>Bills</span><strong>{summary.bills.toLocaleString()}</strong></div>
           <div><span>Sales total</span><strong>{money(summary.revenue)}</strong></div>
           <div><span>Average bill</span><strong>{summary.bills ? money(summary.revenue / summary.bills) : "—"}</strong></div>
-          <div><span>Empties returned</span><strong>{summary.emptiesReturned.toLocaleString()}</strong></div>
+          <div><span>Discounts &amp; points</span><strong>{money(summary.discounts ?? 0)}</strong></div>
         </div>
       </div>
 
@@ -179,6 +185,8 @@ export default function SalesBillsPage() {
                   <em>
                     {sale.billNo} · {sale.cashier.name} · {sale.customer ? <b className="member">{sale.customer.name} · +{sale.pointsEarned} pts</b> : "Walk-in"}
                     {sale.emptiesReturned > 0 && <> · <IconBottle /> {sale.emptiesReturned} empt{sale.emptiesReturned === 1 ? "y" : "ies"}</>}
+                    {sale.discount && sale.discount.amount > 0 && <> · <b className="discount">−{money(sale.discount.amount)} discount</b></>}
+                    {sale.pointsRedeemed > 0 && <> · <b className="member">{sale.pointsRedeemed} pts used</b></>}
                   </em>
                 </span>
                 <span className={`lx-bill-pay ${sale.paymentMethod === "CASH" ? "cash" : "card"}`}>

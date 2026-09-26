@@ -11,7 +11,13 @@ export type LoyaltyMember = {
   mobileNumber: string;
   loyaltyPoints: number;
   visits: number;
+  totalSpent?: number;
+  lastVisitAt?: string | null;
 };
+
+type RecentBill = { id: number; billNo: string; soldAt: string; total: number; pointsEarned: number; pointsRedeemed?: number; items: Array<{ name: string; quantity: number }> };
+
+const money = (value: number) => `Rs. ${value.toLocaleString("en-LK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export const memberName = (member: Pick<LoyaltyMember, "firstName" | "lastName">) =>
   [member.firstName, member.lastName].filter(Boolean).join(" ");
@@ -19,6 +25,8 @@ export const memberName = (member: Pick<LoyaltyMember, "firstName" | "lastName">
 type MemberPickerProps = {
   token: string;
   member: LoyaltyMember | null;
+  /** Rupee value of one point (Shop Settings), to show what a member's points are worth. */
+  pointValue: number;
   onChange: (member: LoyaltyMember | null) => void;
   onAuthExpired: () => void;
 };
@@ -27,7 +35,7 @@ type MemberPickerProps = {
  * Counter customer selector: every sale is "Walk-in" unless a loyalty member is attached.
  * Find a member by mobile or name, or register a new one with just a name and mobile.
  */
-export function MemberPicker({ token, member, onChange, onAuthExpired }: MemberPickerProps) {
+export function MemberPicker({ token, member, pointValue, onChange, onAuthExpired }: MemberPickerProps) {
   const base = `${API_URL}/api/pos/user-management`;
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -38,6 +46,21 @@ export function MemberPicker({ token, member, onChange, onAuthExpired }: MemberP
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [history, setHistory] = useState<RecentBill[] | null>(null);
+
+  // Member's recent purchases, loaded when "Purchases" is opened.
+  useEffect(() => {
+    setShowHistory(false);
+    setHistory(null);
+  }, [member?.id]);
+  useEffect(() => {
+    if (!showHistory || !member || history) return;
+    void fetch(`${base}/sales?customerId=${member.id}&limit=5`, { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" })
+      .then((res) => res.json())
+      .then((json: { data?: { sales: RecentBill[] } }) => setHistory(json.data?.sales ?? []))
+      .catch(() => setHistory([]));
+  }, [base, history, member, showHistory, token]);
 
   useEffect(() => {
     if (!open || creating) return;
@@ -95,13 +118,38 @@ export function MemberPicker({ token, member, onChange, onAuthExpired }: MemberP
   return (
     <div className="pos-member">
       {member ? (
-        <div className="pos-member-selected">
-          <span className="pos-member-avatar">{member.firstName.charAt(0).toUpperCase()}</span>
-          <div>
-            <strong>{memberName(member)}</strong>
-            <span>{member.mobileNumber} · {member.loyaltyPoints} pts</span>
+        <div className="pos-member-card">
+          <div className="pos-member-selected">
+            <span className="pos-member-avatar">{member.firstName.charAt(0).toUpperCase()}</span>
+            <div>
+              <strong>{memberName(member)}</strong>
+              <span>{member.mobileNumber}</span>
+            </div>
+            <button type="button" onClick={() => onChange(null)} aria-label="Remove member, sell to walk-in">Walk-in</button>
           </div>
-          <button type="button" onClick={() => onChange(null)} aria-label="Remove member, sell to walk-in">Walk-in</button>
+          <div className="pos-member-stats">
+            <div><span>Points</span><strong>{member.loyaltyPoints.toLocaleString()}</strong><em>= {money(member.loyaltyPoints * pointValue)}</em></div>
+            <div><span>Visits</span><strong>{member.visits}</strong><em>{member.lastVisitAt ? `last ${new Date(member.lastVisitAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : "first visit"}</em></div>
+            <div><span>Spent</span><strong>{money(member.totalSpent ?? 0).replace(".00", "")}</strong><em>all time</em></div>
+          </div>
+          <button type="button" className="pos-member-history-toggle" onClick={() => setShowHistory(!showHistory)} aria-expanded={showHistory}>
+            {showHistory ? "Hide purchases" : "Purchases"}
+          </button>
+          {showHistory && (
+            <div className="pos-member-history">
+              {history === null && <div className="lx-skel" style={{ height: 40 }} />}
+              {history?.length === 0 && <p>No purchases yet.</p>}
+              {history?.map((bill) => (
+                <div key={bill.id}>
+                  <span>
+                    <strong>{bill.items.map((item) => `${item.quantity} × ${item.name}`).join(", ")}</strong>
+                    <em>{new Date(bill.soldAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} · +{bill.pointsEarned} pts{bill.pointsRedeemed ? ` · −${bill.pointsRedeemed} used` : ""}</em>
+                  </span>
+                  <b>{money(bill.total)}</b>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       ) : (
         <div className="pos-member-walkin">

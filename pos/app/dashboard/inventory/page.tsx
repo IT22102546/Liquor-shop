@@ -11,6 +11,7 @@ import {
 import { useAdmin } from "../../components/AdminContext";
 import { AddLiquorModal } from "../../components/products/AddLiquorModal";
 import { MemberPicker, type LoyaltyMember } from "../../components/customers/MemberPicker";
+import { useShopSettings } from "../../lib/useShopSettings";
 import { ProductArt } from "../../components/products/ProductArt";
 import type { Product, ProductCategory } from "../../components/products/ProductFormModal";
 import { API_URL } from "../../lib/constants";
@@ -47,7 +48,10 @@ type CheckoutResult = {
   changeGiven: number;
   purchases: Array<{ productId: number; name: string; quantity: number; unitPrice: number; emptiesReturned?: number; emptyDeduction?: number; lineTotal: number }>;
   counterSale?: { createdAt: string };
-  member?: { id: number; name: string; mobileNumber: string; pointsEarned: number; pointsBalance: number } | null;
+  member?: { id: number; name: string; mobileNumber: string; pointsEarned: number; pointsRedeemed?: number; pointsBalance: number } | null;
+  discount?: { type: "PERCENT" | "AMOUNT"; value: number; amount: number } | null;
+  pointsRedeemed?: number;
+  pointsValue?: number;
 };
 /** `empties` = empty bottles the customer hands back for this product (never more than `quantity`). */
 type CartLine = { product: Product; quantity: number; empties: number };
@@ -99,6 +103,23 @@ export default function InventoryPage() {
   const [showReceipt, setShowReceipt] = useState(false);
   // Every sale is walk-in unless a loyalty member is attached.
   const [member, setMember] = useState<LoyaltyMember | null>(null);
+  const { settings } = useShopSettings(token);
+  const [discountOn, setDiscountOn] = useState(false);
+  const [discountType, setDiscountType] = useState<"PERCENT" | "AMOUNT">("PERCENT");
+  const [discountInput, setDiscountInput] = useState("");
+  const [redeemOn, setRedeemOn] = useState(false);
+  const [redeemInput, setRedeemInput] = useState("");
+  const resetAdjustments = () => {
+    setDiscountOn(false);
+    setDiscountInput("");
+    setRedeemOn(false);
+    setRedeemInput("");
+  };
+  const changeMember = (next: LoyaltyMember | null) => {
+    setMember(next);
+    setRedeemOn(false);
+    setRedeemInput("");
+  };
   const [stockIn, setStockIn] = useState<{ initialCode?: string } | null>(null);
   const [toasts, setToasts] = useState<ScanToast[]>([]);
   const [bumpedId, setBumpedId] = useState<number | null>(null);
@@ -196,7 +217,26 @@ export default function InventoryPage() {
     cart.reduce((sum, line) => sum + emptyPriceOf(line.product) * line.empties, 0),
   );
   const cartEmptiesCount = cart.reduce((sum, line) => sum + line.empties, 0);
-  const cartTotal = roundCurrency(cartSubtotal - cartEmptyDeduction);
+  const afterEmpties = roundCurrency(cartSubtotal - cartEmptyDeduction);
+
+  // Discount (when switched on in Shop Settings) — percentage or fixed amount, any customer.
+  const discountValue = Number(discountInput);
+  const discountActive = settings.discountsEnabled && discountOn && Number.isFinite(discountValue) && discountValue > 0;
+  const discountAmount = discountActive
+    ? Math.min(afterEmpties, roundCurrency(discountType === "PERCENT" ? (afterEmpties * Math.min(discountValue, 100)) / 100 : discountValue))
+    : 0;
+  const discountPercentOfBill = afterEmpties > 0 ? (discountAmount / afterEmpties) * 100 : 0;
+  const discountOverLimit = discountActive && admin.role !== "ADMIN" && discountPercentOfBill > settings.maxCashierDiscountPercent + 0.001;
+  const afterDiscount = roundCurrency(afterEmpties - discountAmount);
+
+  // Loyalty points (registered members only, when switched on). Point value comes from Shop Settings.
+  const pointValue = settings.loyaltyPointValue > 0 ? settings.loyaltyPointValue : 1;
+  const canRedeem = settings.loyaltyRedemptionEnabled && Boolean(member) && (member?.loyaltyPoints ?? 0) > 0;
+  const maxPoints = canRedeem ? Math.min(member?.loyaltyPoints ?? 0, Math.floor((afterDiscount + 0.000001) / pointValue)) : 0;
+  const pointsUsed = canRedeem && redeemOn ? Math.max(0, Math.min(maxPoints, Math.floor(Number(redeemInput) || 0))) : 0;
+  const pointsDeduction = roundCurrency(pointsUsed * pointValue);
+  const cartTotal = roundCurrency(afterDiscount - pointsDeduction);
+  const hasAdjustments = cartEmptyDeduction > 0 || discountAmount > 0 || pointsUsed > 0;
   const tendered = Number(amountTendered || "0");
   const changeDue = paymentMethod === "CASH" && Number.isFinite(tendered)
     ? Math.max(0, roundCurrency(tendered - cartTotal))
@@ -293,6 +333,8 @@ export default function InventoryPage() {
           paymentMethod,
           amountReceived: paymentMethod === "CASH" ? tendered : undefined,
           ...(member ? { customerId: member.id } : {}),
+          ...(discountAmount > 0 ? { discount: { type: discountType, value: discountValue } } : {}),
+          ...(pointsUsed > 0 ? { redeemPoints: pointsUsed } : {}),
         }),
       });
       const payload = await response.json().catch(() => null) as { data?: CheckoutResult; message?: string } | null;
@@ -306,6 +348,9 @@ export default function InventoryPage() {
         cashierName: admin.name,
         cashierRole: ROLE_LABELS[admin.role] ?? admin.role,
         member: sale.member ?? null,
+        discount: sale.discount ?? null,
+        pointsRedeemed: sale.pointsRedeemed ?? 0,
+        pointsValue: sale.pointsValue ?? 0,
         paymentMethod: sale.paymentMethod,
         lines: sale.purchases.map((line) => {
           const product = productById.get(line.productId);
@@ -331,6 +376,7 @@ export default function InventoryPage() {
       setCompletedReceipt(receipt);
       setShowReceipt(true);
       setMember(null);
+      resetAdjustments();
       setCart([]);
       setAmountTendered("");
       await loadData();
@@ -493,9 +539,9 @@ export default function InventoryPage() {
       <aside className="pos-cart" aria-label="Current order">
         <div className="pos-cart-header">
           <div><span>Current order</span><strong>{cartItemCount} item{cartItemCount === 1 ? "" : "s"}</strong></div>
-          {cart.length > 0 && <button type="button" onClick={() => { setCart([]); setAmountTendered(""); setMember(null); }}>Clear</button>}
+          {cart.length > 0 && <button type="button" onClick={() => { setCart([]); setAmountTendered(""); setMember(null); resetAdjustments(); }}>Clear</button>}
         </div>
-        <MemberPicker token={token} member={member} onChange={setMember} onAuthExpired={logout} />
+        <MemberPicker token={token} member={member} pointValue={pointValue} onChange={changeMember} onAuthExpired={logout} />
         <div className="pos-cart-lines">
           {cart.length === 0 ? (
             <div className="pos-cart-empty"><IconCart size={38} /><strong>No items yet</strong><p>Scan a barcode or tap a product.</p></div>
@@ -542,10 +588,75 @@ export default function InventoryPage() {
         </div>
 
         <div className="pos-cart-checkout">
-          {cartEmptyDeduction > 0 && (
+          {cart.length > 0 && (settings.discountsEnabled || canRedeem) && (
+            <div className="pos-adjust">
+              <div className="pos-adjust-toggles">
+                {settings.discountsEnabled && (
+                  <button type="button" className={discountOn ? "active" : ""} onClick={() => { setDiscountOn(!discountOn); if (discountOn) setDiscountInput(""); }}>
+                    % Discount
+                  </button>
+                )}
+                {canRedeem && (
+                  <button type="button" className={`points${redeemOn ? " active" : ""}`} onClick={() => { const next = !redeemOn; setRedeemOn(next); setRedeemInput(next ? String(maxPoints) : ""); }}>
+                    Use points <b>{member?.loyaltyPoints}</b>
+                  </button>
+                )}
+              </div>
+
+              {settings.discountsEnabled && discountOn && (
+                <div className="pos-adjust-row">
+                  <div className="pos-adjust-type" role="radiogroup" aria-label="Discount type">
+                    <button type="button" role="radio" aria-checked={discountType === "PERCENT"} className={discountType === "PERCENT" ? "active" : ""} onClick={() => setDiscountType("PERCENT")}>%</button>
+                    <button type="button" role="radio" aria-checked={discountType === "AMOUNT"} className={discountType === "AMOUNT" ? "active" : ""} onClick={() => setDiscountType("AMOUNT")}>Rs.</button>
+                  </div>
+                  <input
+                    className="bm-input"
+                    type="number"
+                    min={0}
+                    step={discountType === "PERCENT" ? "0.5" : "1"}
+                    max={discountType === "PERCENT" ? 100 : afterEmpties}
+                    value={discountInput}
+                    onChange={(event) => setDiscountInput(event.target.value)}
+                    placeholder={discountType === "PERCENT" ? "e.g. 5" : "e.g. 200"}
+                    aria-label={discountType === "PERCENT" ? "Discount percentage" : "Discount amount in rupees"}
+                    autoFocus
+                  />
+                  {discountType === "PERCENT" && (
+                    <div className="pos-adjust-quick">
+                      {[5, 10, 15].map((value) => <button key={value} type="button" onClick={() => setDiscountInput(String(value))}>{value}%</button>)}
+                    </div>
+                  )}
+                </div>
+              )}
+              {discountOverLimit && (
+                <div className="pos-adjust-warn">Cashiers can give up to {settings.maxCashierDiscountPercent}% — this is {discountPercentOfBill.toFixed(1)}%.</div>
+              )}
+
+              {canRedeem && redeemOn && (
+                <div className="pos-adjust-row">
+                  <span className="pos-adjust-label">Points</span>
+                  <input
+                    className="bm-input"
+                    type="number"
+                    min={0}
+                    max={maxPoints}
+                    step="1"
+                    value={redeemInput}
+                    onChange={(event) => setRedeemInput(event.target.value)}
+                    aria-label="Points to use"
+                  />
+                  <span className="pos-adjust-hint">of {maxPoints} usable · 1 pt = {formatCurrency(pointValue)}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {hasAdjustments && (
             <div className="pos-cart-breakdown">
               <div><span>Subtotal</span><span>{formatCurrency(cartSubtotal)}</span></div>
-              <div className="deduct"><span>Empty bottles returned ({cartEmptiesCount})</span><span>− {formatCurrency(cartEmptyDeduction)}</span></div>
+              {cartEmptyDeduction > 0 && <div className="deduct"><span>Empty bottles returned ({cartEmptiesCount})</span><span>− {formatCurrency(cartEmptyDeduction)}</span></div>}
+              {discountAmount > 0 && <div className="deduct discount"><span>Discount{discountType === "PERCENT" ? ` (${Math.min(discountValue, 100)}%)` : ""}</span><span>− {formatCurrency(discountAmount)}</span></div>}
+              {pointsUsed > 0 && <div className="deduct points"><span>Loyalty points ({pointsUsed} pts)</span><span>− {formatCurrency(pointsDeduction)}</span></div>}
             </div>
           )}
           <div className="pos-cart-total"><span>Total</span><strong><AnimatedMoney value={cartTotal} /></strong></div>
@@ -565,7 +676,7 @@ export default function InventoryPage() {
               <div className="pos-change"><span>Change</span><strong>{formatCurrency(changeDue)}</strong></div>
             </div>
           )}
-          <button type="button" className="pos-complete-sale" disabled={cart.length === 0 || checkingOut || (paymentMethod === "CASH" && tendered < cartTotal)} onClick={() => void checkout()}>
+          <button type="button" className="pos-complete-sale" disabled={cart.length === 0 || checkingOut || discountOverLimit || (paymentMethod === "CASH" && tendered < cartTotal)} onClick={() => void checkout()}>
             {checkingOut ? "Completing…" : `Complete sale · ${formatCurrency(cartTotal)}`}
           </button>
           <div className="pos-cart-shortcuts">

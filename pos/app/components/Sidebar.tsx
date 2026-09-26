@@ -39,6 +39,7 @@ const NAV_SECTIONS: { title: string; links: NavLink[] }[] = [
     links: [
       { label: "Dashboard", href: "/dashboard", Icon: IconDashboard },
       { label: "Activity Log", href: "/dashboard/logs", Icon: IconActivity },
+      { label: "Shop Settings", href: "/dashboard/settings", Icon: IconAccess },
     ],
   },
   {

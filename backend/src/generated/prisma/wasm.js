@@ -157,6 +157,11 @@ exports.Prisma.PosCounterSaleScalarFieldEnum = {
   cashierId: 'cashierId',
   customerId: 'customerId',
   pointsEarned: 'pointsEarned',
+  discountType: 'discountType',
+  discountValue: 'discountValue',
+  discountAmount: 'discountAmount',
+  pointsRedeemed: 'pointsRedeemed',
+  pointsValue: 'pointsValue',
   createdAt: 'createdAt'
 };
 
@@ -271,6 +276,7 @@ exports.Prisma.PosCustomerPurchaseScalarFieldEnum = {
   quantity: 'quantity',
   emptiesReturned: 'emptiesReturned',
   emptyDeduction: 'emptyDeduction',
+  billDiscount: 'billDiscount',
   purchasedAt: 'purchasedAt'
 };
 
@@ -446,6 +452,13 @@ exports.Prisma.ActivityLogScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.PosSettingScalarFieldEnum = {
+  key: 'key',
+  value: 'value',
+  updatedById: 'updatedById',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -593,7 +606,8 @@ exports.Prisma.ModelName = {
   InvoicePayment: 'InvoicePayment',
   AccountDeposit: 'AccountDeposit',
   AccountDepositItem: 'AccountDepositItem',
-  ActivityLog: 'ActivityLog'
+  ActivityLog: 'ActivityLog',
+  PosSetting: 'PosSetting'
 };
 
 /**

@@ -109,7 +109,7 @@ export function describePosChange(method: string, path: string, body: Body, resp
       category: "SALE",
       entityType: "sale",
       entityId: str(data.invoiceGroupCode),
-      summary: `Sold ${soldText || `${itemCount} items`} for ${money(data.total)} · ${payment(data.paymentMethod)}${empties > 0 ? ` · ${empties} empt${empties === 1 ? "y" : "ies"} returned` : ""}${member.name ? ` · ${str(member.name)}` : ""}`,
+      summary: `Sold ${soldText || `${itemCount} items`} for ${money(data.total)} · ${payment(data.paymentMethod)}${empties > 0 ? ` · ${empties} empt${empties === 1 ? "y" : "ies"} returned` : ""}${member.name ? ` · ${str(member.name)}` : ""}${obj(data.discount).amount ? ` · discount −${money(obj(data.discount).amount)}` : ""}${Number(data.pointsRedeemed) > 0 ? ` · ${str(data.pointsRedeemed)} points used` : ""}`,
       details: {
         items: lines.map((line) => ({
           name: str(line.name),
@@ -125,6 +125,8 @@ export function describePosChange(method: string, path: string, body: Body, resp
           ...(member.name ? [fact("Points earned", `${str(member.pointsEarned)} (balance ${str(member.pointsBalance)})`)] : []),
           fact("Payment", payment(data.paymentMethod)),
           ...(empties > 0 ? [fact("Subtotal", money(data.subtotal)), fact("Empty bottles returned", `${empties} (− ${money(data.emptyDeduction)})`)] : []),
+          ...(obj(data.discount).amount ? [fact("Discount", `${obj(data.discount).type === "PERCENT" ? `${str(obj(data.discount).value)}% · ` : ""}− ${money(obj(data.discount).amount)}`)] : []),
+          ...(Number(data.pointsRedeemed) > 0 ? [fact("Points used", `${str(data.pointsRedeemed)} (− ${money(data.pointsValue)})`)] : []),
           fact("Total", money(data.total)),
           ...(str(data.paymentMethod) === "CASH" ? [fact("Cash received", money(data.amountReceived)), fact("Change given", money(data.changeGiven))] : []),
         ],
