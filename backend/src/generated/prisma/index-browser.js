@@ -154,6 +154,7 @@ exports.Prisma.PosCounterSaleScalarFieldEnum = {
   amountReceived: 'amountReceived',
   changeGiven: 'changeGiven',
   paymentMethod: 'paymentMethod',
+  paymentReference: 'paymentReference',
   cashierId: 'cashierId',
   customerId: 'customerId',
   pointsEarned: 'pointsEarned',
@@ -162,6 +163,7 @@ exports.Prisma.PosCounterSaleScalarFieldEnum = {
   discountAmount: 'discountAmount',
   pointsRedeemed: 'pointsRedeemed',
   pointsValue: 'pointsValue',
+  shiftId: 'shiftId',
   createdAt: 'createdAt'
 };
 
@@ -459,6 +461,67 @@ exports.Prisma.PosSettingScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.PosShiftScalarFieldEnum = {
+  id: 'id',
+  shiftNo: 'shiftNo',
+  status: 'status',
+  openedById: 'openedById',
+  openedAt: 'openedAt',
+  openingFloat: 'openingFloat',
+  countedCash: 'countedCash',
+  denominations: 'denominations',
+  countedById: 'countedById',
+  countedAt: 'countedAt',
+  expectedCash: 'expectedCash',
+  cashDifference: 'cashDifference',
+  differenceReason: 'differenceReason',
+  cardSlipTotal: 'cardSlipTotal',
+  cardDifferenceReason: 'cardDifferenceReason',
+  floatLeft: 'floatLeft',
+  cashBanked: 'cashBanked',
+  closedById: 'closedById',
+  closedAt: 'closedAt',
+  notes: 'notes',
+  report: 'report'
+};
+
+exports.Prisma.PosCashEntryScalarFieldEnum = {
+  id: 'id',
+  entryNo: 'entryNo',
+  direction: 'direction',
+  category: 'category',
+  amount: 'amount',
+  source: 'source',
+  party: 'party',
+  reference: 'reference',
+  note: 'note',
+  entryDate: 'entryDate',
+  shiftId: 'shiftId',
+  automatic: 'automatic',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  voided: 'voided',
+  voidReason: 'voidReason',
+  voidedById: 'voidedById',
+  voidedAt: 'voidedAt',
+  bankStatus: 'bankStatus',
+  bankedAt: 'bankedAt',
+  bankedById: 'bankedById',
+  bankReference: 'bankReference'
+};
+
+exports.Prisma.InventoryMovementScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  kind: 'kind',
+  type: 'type',
+  quantity: 'quantity',
+  shiftId: 'shiftId',
+  reference: 'reference',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -504,7 +567,8 @@ exports.PosAdminRole = exports.$Enums.PosAdminRole = {
 exports.PaymentMethod = exports.$Enums.PaymentMethod = {
   CASH: 'CASH',
   CHEQUE: 'CHEQUE',
-  BANK_TRANSFER: 'BANK_TRANSFER'
+  BANK_TRANSFER: 'BANK_TRANSFER',
+  CARD: 'CARD'
 };
 
 exports.PosPurchaseItemType = exports.$Enums.PosPurchaseItemType = {
@@ -607,7 +671,10 @@ exports.Prisma.ModelName = {
   AccountDeposit: 'AccountDeposit',
   AccountDepositItem: 'AccountDepositItem',
   ActivityLog: 'ActivityLog',
-  PosSetting: 'PosSetting'
+  PosSetting: 'PosSetting',
+  PosShift: 'PosShift',
+  PosCashEntry: 'PosCashEntry',
+  InventoryMovement: 'InventoryMovement'
 };
 
 /**

@@ -63,6 +63,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Browsers change a focused number box when the mouse wheel moves over it. At a till that silently
+  // changes discounts, quantities or cash received while scrolling, so the wheel should only scroll.
+  useEffect(() => {
+    const stopWheelFromChangingNumbers = (event: WheelEvent) => {
+      const field = document.activeElement;
+      if (field instanceof HTMLInputElement && field.type === "number" && event.target === field) field.blur();
+    };
+    window.addEventListener("wheel", stopWheelFromChangingNumbers, { capture: true, passive: true });
+    return () => window.removeEventListener("wheel", stopWheelFromChangingNumbers, { capture: true });
+  }, []);
+
   useEffect(() => {
     if (admin && !canAccessPath(admin.role, pathname)) {
       router.replace(ROLE_HOME[admin.role] ?? "/signin");

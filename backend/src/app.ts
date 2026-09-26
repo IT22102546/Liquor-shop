@@ -17,6 +17,7 @@ import contactRequestsPosRouter, {
 import accountsRouter from "./modules/accounts/accounts.routes";
 import activityLogRouter from "./modules/activity-log/activity-log.routes";
 import settingsRouter from "./modules/settings/settings.routes";
+import { cashBookRouter, shiftRouter } from "./modules/book/book.routes";
 import { recordPosActivity } from "./modules/activity-log/activity-log.middleware";
 
 const app = express();
@@ -59,6 +60,8 @@ app.use("/api/pos/contact-requests", contactRequestsPosRouter);
 app.use("/api/pos/accounts", accountsRouter);
 app.use("/api/pos/activity-logs", activityLogRouter);
 app.use("/api/pos/settings", settingsRouter);
+app.use("/api/pos/shifts", shiftRouter);
+app.use("/api/pos/cash-book", cashBookRouter);
 
 /* ──────────────────── Error handling ────────────────────── */
 app.use(notFoundHandler);

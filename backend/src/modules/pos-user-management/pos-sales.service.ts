@@ -93,6 +93,7 @@ export async function listSales(query: SalesQueryDto) {
         billNo: sale.invoiceGroupCode,
         soldAt: sale.createdAt,
         paymentMethod: sale.paymentMethod,
+        paymentReference: sale.paymentReference,
         subtotal: round2(sale.totalAmount + sale.emptyDeduction + sale.discountAmount + sale.pointsValue),
         emptyDeduction: sale.emptyDeduction,
         discount: sale.discountType ? { type: sale.discountType, value: sale.discountValue, amount: sale.discountAmount } : null,

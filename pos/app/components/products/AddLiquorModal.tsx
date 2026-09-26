@@ -6,6 +6,7 @@ import { beep } from "../../lib/beep";
 import { looksLikeBarcode, normalizeBarcode, useBarcodeScanner } from "../../lib/useBarcodeScanner";
 import { IconBoxIn, IconPlus, IconScan } from "../../lib/icons";
 import { ProductArt } from "./ProductArt";
+import { hasCostPrice, stockCostHint } from "../../lib/stockCost";
 import {
   ProductModal,
   type Product,
@@ -148,6 +149,9 @@ export function AddLiquorModal({ token, initialCode, onClose, onStockChanged, on
 
   const totalUnits = lines.reduce((sum, line) => sum + line.quantity, 0);
 
+  // Products with no cost price yet must get one, or their profit would count the bottles as free.
+  const costsMissing = lines.some((line) => !hasCostPrice(line.product) && !line.batchCost.trim());
+
   const saveStock = async () => {
     setSaving(true);
     setError(null);
@@ -246,15 +250,19 @@ export function AddLiquorModal({ token, initialCode, onClose, onStockChanged, on
               <div className="lx-receive-main">
                 <strong>{line.product.name}</strong>
                 <span>{line.product.brand.name} · now {line.product.quantity} → <b>{line.product.quantity + line.quantity}</b> in stock</span>
+                {(() => {
+                  const hint = stockCostHint(line.product, String(line.quantity), line.batchCost);
+                  return <em className={`lx-quick-stock-hint ${hint.tone}`}>{hint.text}</em>;
+                })()}
               </div>
               <input
-                className="bm-input lx-receive-cost"
+                className={`bm-input lx-receive-cost${!hasCostPrice(line.product) && !line.batchCost.trim() ? " needed" : ""}`}
                 type="number"
                 min={0}
                 step="0.01"
                 value={line.batchCost}
                 onChange={(event) => setLine(line.product.id, { batchCost: event.target.value })}
-                placeholder="Total cost (optional)"
+                placeholder={hasCostPrice(line.product) ? "Total cost (optional)" : "Total cost *"}
                 aria-label={`Total cost paid for ${line.product.name}`}
               />
               <div className="pos-cart-line-controls">
@@ -279,14 +287,16 @@ export function AddLiquorModal({ token, initialCode, onClose, onStockChanged, on
           </button>
           <div className="lx-stockin-actions">
             {lines.length > 0 && <span className="lx-card-sub">{lines.length} product{lines.length === 1 ? "" : "s"} · {totalUnits} unit{totalUnits === 1 ? "" : "s"}</span>}
-            <button type="button" className="btn-accent" disabled={lines.length === 0 || saving} onClick={() => void saveStock()}>
+            <button type="button" className="btn-accent" disabled={lines.length === 0 || saving || costsMissing} onClick={() => void saveStock()}>
               {saving ? "Saving…" : "Add to stock"}
             </button>
           </div>
         </div>
-        {lines.some((line) => line.batchCost.trim()) && (
-          <p className="lx-field-hint">Total cost is what you paid for the units being added. It updates the product&apos;s average cost per unit, which the dashboard uses for profit.</p>
-        )}
+        <p className="lx-field-hint">
+          {costsMissing
+            ? "Enter the total cost for products marked *. They have no cost price yet, so profit can't be worked out without it."
+            : "Total cost is what you paid for the units being added. Leave it empty to keep the current cost per unit; enter it when the supplier price changed."}
+        </p>
       </div>
 
       {creating && (

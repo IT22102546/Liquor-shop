@@ -11,6 +11,7 @@ import {
   IconBottle,
   IconChevronLeft,
   IconChevronRight,
+  IconClock,
   // IconContactRequests, // used by the hidden "Supplier Requests" link
   IconDashboard,
   IconInventory,
@@ -68,12 +69,14 @@ const NAV_SECTIONS: { title: string; links: NavLink[] }[] = [
     ],
   },
   {
-    title: "Accounts",
+    title: "Book Keeping",
     links: [
-      { label: "Receipts", href: "/dashboard/accounts/receipts", Icon: IconReceipt },
-      { label: "Vouchers", href: "/dashboard/accounts/vouchers", Icon: IconInvoice },
-      { label: "General Ledger", href: "/dashboard/accounts/ledger", Icon: IconBar },
-      { label: "Manage Accounts", href: "/dashboard/accounts", Icon: IconAccounts },
+      { label: "Day End", href: "/dashboard/day-end", Icon: IconClock },
+      { label: "Expenses (Vouchers)", href: "/dashboard/accounts/vouchers", Icon: IconInvoice },
+      { label: "Money In (Receipts)", href: "/dashboard/accounts/receipts", Icon: IconReceipt },
+      // Old invoice-style ledger pages, replaced by Day End + the cash book. Pages still exist.
+      // { label: "General Ledger", href: "/dashboard/accounts/ledger", Icon: IconBar },
+      // { label: "Manage Accounts", href: "/dashboard/accounts", Icon: IconAccounts },
     ],
   },
 ];

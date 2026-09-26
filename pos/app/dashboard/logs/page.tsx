@@ -38,6 +38,7 @@ const CATEGORIES: Array<{ value: string; label: string; color: string }> = [
   { value: "STOCK", label: "Stock", color: "var(--c2)" },
   { value: "PRODUCT", label: "Products", color: "var(--c1)" },
   { value: "STAFF", label: "Staff", color: "var(--c4)" },
+  { value: "CASHBOOK", label: "Day End & cash", color: "var(--c6)" },
   { value: "ACCOUNTS", label: "Accounts", color: "var(--c6)" },
   { value: "CUSTOMER", label: "Customers", color: "var(--c3)" },
   { value: "OTHER", label: "Other", color: "var(--text-soft)" },

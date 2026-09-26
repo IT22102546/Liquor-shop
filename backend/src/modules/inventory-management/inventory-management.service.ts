@@ -4,6 +4,7 @@ import { Prisma } from "../../generated/prisma";
 import { prisma } from "../../database/prisma.client";
 import { AppError } from "../../common/utils/errors";
 import type { CreateSupplierDto, UpdateSupplierDto } from "./dto/supplier.dto";
+import { recordMovements } from "../book/stock-movements";
 import type {
   CreateProductBrandDto,
   UpdateProductBrandDto,
@@ -444,7 +445,7 @@ export async function getProduct(id: number) {
   return product;
 }
 
-export async function createProduct(dto: CreateProductDto) {
+export async function createProduct(dto: CreateProductDto, actorId?: number) {
   const brand = await prisma.inventoryBrand.findUnique({
     where: { id: dto.brandId },
   });
@@ -466,7 +467,7 @@ export async function createProduct(dto: CreateProductDto) {
     dto.descriptionPoints,
   );
 
-  return createProductWithUniqueDisplayId({
+  const created = await createProductWithUniqueDisplayId({
     brandId: dto.brandId,
     categoryId: dto.categoryId,
     supplierId: dto.supplierId,
@@ -495,9 +496,13 @@ export async function createProduct(dto: CreateProductDto) {
         }
       : {}),
   });
+  await recordMovements(prisma, [
+    { productId: created.id, kind: "STOCK", type: "OPENING", quantity: created.quantity, reference: created.displayId, createdById: actorId },
+  ]);
+  return created;
 }
 
-export async function updateProduct(id: number, dto: UpdateProductDto) {
+export async function updateProduct(id: number, dto: UpdateProductDto, actorId?: number) {
   const existingProduct = await getProduct(id);
   if (dto.brandId) {
     const brand = await prisma.inventoryBrand.findUnique({
@@ -528,7 +533,7 @@ export async function updateProduct(id: number, dto: UpdateProductDto) {
       ? normalizeProductDescription(dto.description, dto.descriptionPoints)
       : undefined;
 
-  return prisma.inventoryProduct.update({
+  const updated = await prisma.inventoryProduct.update({
     where: { id },
     data: {
       ...(dto.brandId !== undefined ? { brandId: dto.brandId } : {}),
@@ -591,26 +596,41 @@ export async function updateProduct(id: number, dto: UpdateProductDto) {
     },
     include: productInclude,
   });
+  // Stock typed in on the edit form is a correction; record the difference for the stock day book.
+  await recordMovements(prisma, [
+    { productId: id, kind: "STOCK", type: "ADJUSTED", quantity: updated.quantity - existingProduct.quantity, reference: "Edited in Product Setup", createdById: actorId },
+  ]);
+  return updated;
 }
 
 /**
- * Adds received stock to an existing product. Optional batch purchase price / tax are blended
- * into the per-unit cost as a weighted average over the units currently in stock.
+ * Adds received stock to an existing product. The batch purchase price is blended into the per-unit
+ * cost as a weighted average over the units currently in stock; when it's left out, the new units are
+ * assumed to cost the current per-unit price. It's required only for a product with no cost price yet.
  */
-export async function restockProduct(id: number, dto: RestockProductDto) {
+export async function restockProduct(id: number, dto: RestockProductDto, actorId?: number) {
   const product = await getProduct(id);
+  // Without a cost price the new bottles would count as free, and every sale of them as pure profit.
+  if (!(product.purchasePrice && product.purchasePrice > 0) && dto.purchasePrice === undefined) {
+    throw AppError.validation({
+      purchasePrice: [`${product.name} has no cost price yet — enter what you paid for these ${dto.quantity} unit(s)`],
+    });
+  }
   const currentUnits = Math.max(product.quantity, 0);
   const totalUnits = currentUnits + dto.quantity;
 
   const blendUnitCost = (currentUnitCost: number | null, batchTotal?: number) => {
     if (batchTotal === undefined) return undefined;
-    const existingValue = (currentUnitCost ?? 0) * currentUnits;
+    // No cost recorded before: the batch's own price is the best figure for every unit
+    // (averaging in "free" old units would understate the cost and overstate profit).
+    if (!(currentUnitCost && currentUnitCost > 0)) return Math.round((batchTotal / dto.quantity) * 100) / 100;
+    const existingValue = currentUnitCost * currentUnits;
     return Math.round(((existingValue + batchTotal) / totalUnits) * 100) / 100;
   };
   const purchasePrice = blendUnitCost(product.purchasePrice, dto.purchasePrice);
   const taxPaid = blendUnitCost(product.taxPaid, dto.taxPaid);
 
-  return prisma.inventoryProduct.update({
+  const updated = await prisma.inventoryProduct.update({
     where: { id },
     data: {
       quantity: { increment: dto.quantity },
@@ -619,24 +639,28 @@ export async function restockProduct(id: number, dto: RestockProductDto) {
     },
     include: productInclude,
   });
+  await recordMovements(prisma, [{ productId: id, kind: "STOCK", type: "RECEIVED", quantity: dto.quantity, reference: "Stock added", createdById: actorId }]);
+  return updated;
 }
 
 /** Empties handed back to the supplier/distributor: takes them off the on-hand count. */
-export async function returnEmptiesToSupplier(id: number, dto: ReturnEmptiesDto) {
+export async function returnEmptiesToSupplier(id: number, dto: ReturnEmptiesDto, actorId?: number) {
   const product = await getProduct(id);
   if (dto.quantity > product.emptyBottlesOnHand) {
     throw AppError.validation({
       quantity: [`Only ${product.emptyBottlesOnHand} empty bottle(s) of ${product.name} are on hand`],
     });
   }
-  return prisma.inventoryProduct.update({
+  const updated = await prisma.inventoryProduct.update({
     where: { id },
     data: { emptyBottlesOnHand: { decrement: dto.quantity } },
     include: productInclude,
   });
+  await recordMovements(prisma, [{ productId: id, kind: "EMPTIES", type: "RETURNED", quantity: -dto.quantity, reference: "Returned to supplier", createdById: actorId }]);
+  return updated;
 }
 
-export async function recordProductSale(id: number, dto: RecordProductSaleDto) {
+export async function recordProductSale(id: number, dto: RecordProductSaleDto, actorId?: number) {
   const product = await getProduct(id);
   if (dto.quantity > product.quantity) {
     throw new AppError(
@@ -645,7 +669,7 @@ export async function recordProductSale(id: number, dto: RecordProductSaleDto) {
     );
   }
 
-  return prisma.inventoryProduct.update({
+  const updated = await prisma.inventoryProduct.update({
     where: { id },
     data: {
       quantity: { decrement: dto.quantity },
@@ -654,6 +678,8 @@ export async function recordProductSale(id: number, dto: RecordProductSaleDto) {
     },
     include: productInclude,
   });
+  await recordMovements(prisma, [{ productId: id, kind: "STOCK", type: "SOLD", quantity: -dto.quantity, reference: "Marked as sold", createdById: actorId }]);
+  return updated;
 }
 
 export async function deleteProduct(id: number) {

@@ -27,6 +27,7 @@ type Sale = {
   billNo: string;
   soldAt: string;
   paymentMethod: SaleReceipt["paymentMethod"];
+  paymentReference?: string | null;
   subtotal: number;
   emptyDeduction: number;
   emptiesReturned: number;
@@ -60,6 +61,7 @@ function saleToReceipt(sale: Sale): SaleReceipt {
     pointsRedeemed: sale.pointsRedeemed,
     pointsValue: sale.pointsValue,
     paymentMethod: sale.paymentMethod,
+    paymentReference: sale.paymentReference,
     lines: sale.items.map((item) => ({
       name: item.name,
       detail: [item.brand, item.size].filter(Boolean).join(" · ") || undefined,
@@ -191,7 +193,7 @@ export default function SalesBillsPage() {
                 </span>
                 <span className={`lx-bill-pay ${sale.paymentMethod === "CASH" ? "cash" : "card"}`}>
                   {sale.paymentMethod === "CASH" ? <IconCash size={14} /> : <IconCard size={14} />}
-                  {sale.paymentMethod === "CASH" ? "Cash" : "Card"}
+                  {sale.paymentMethod === "CASH" ? "Cash" : sale.paymentMethod === "CARD" ? "Card" : "Transfer / QR"}
                 </span>
                 <span className="lx-bill-total">{money(sale.total)}</span>
                 <span className="lx-bill-print" aria-hidden="true"><IconPrinter size={16} /></span>

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { API_URL } from "../../lib/constants";
 import { IconBottle, IconSearch } from "../../lib/icons";
 import { ProductArt } from "./ProductArt";
+import { hasCostPrice, stockCostHint } from "../../lib/stockCost";
 import {
   formatCurrency,
   ProductModal,
@@ -180,10 +181,26 @@ export function ProductStockTable({ token, products, brands, categories, loading
                 <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
                   {canEdit && stocking?.id === product.id ? (
                     <form className="lx-quick-stock" onSubmit={(event) => { event.preventDefault(); void submitStock(); }}>
-                      <input className="bm-input" type="number" min={1} value={stocking.qty} onChange={(event) => setStocking({ ...stocking, qty: event.target.value })} placeholder="Qty" aria-label={`Units of ${product.name} received`} autoFocus />
-                      <input className="bm-input cost" type="number" min={0} step="0.01" value={stocking.cost} onChange={(event) => setStocking({ ...stocking, cost: event.target.value })} placeholder="Total cost" aria-label="Total cost paid (optional)" />
-                      <button type="submit" className="btn-outline lx-row-btn primary" disabled={saving}>{saving ? "…" : "Add"}</button>
-                      <button type="button" className="btn-outline lx-row-btn" onClick={() => setStocking(null)} aria-label="Cancel">✕</button>
+                      <div className="lx-quick-stock-fields">
+                        <input className="bm-input" type="number" min={1} value={stocking.qty} onChange={(event) => setStocking({ ...stocking, qty: event.target.value })} placeholder="Qty" aria-label={`Units of ${product.name} received`} required autoFocus />
+                        <input
+                          className={`bm-input cost${!hasCostPrice(product) && !stocking.cost.trim() ? " needed" : ""}`}
+                          type="number"
+                          min={0}
+                          step="0.01"
+                          value={stocking.cost}
+                          onChange={(event) => setStocking({ ...stocking, cost: event.target.value })}
+                          placeholder={hasCostPrice(product) ? "Total cost" : "Total cost *"}
+                          aria-label={hasCostPrice(product) ? "Total cost paid (optional)" : "Total cost paid (required)"}
+                          required={!hasCostPrice(product)}
+                        />
+                        <button type="submit" className="btn-outline lx-row-btn primary" disabled={saving}>{saving ? "…" : "Add"}</button>
+                        <button type="button" className="btn-outline lx-row-btn" onClick={() => setStocking(null)} aria-label="Cancel">✕</button>
+                      </div>
+                      {(() => {
+                        const hint = stockCostHint(product, stocking.qty, stocking.cost);
+                        return <span className={`lx-quick-stock-hint ${hint.tone}`}>{hint.text}</span>;
+                      })()}
                     </form>
                   ) : canEdit && (
                     <button type="button" className="btn-outline lx-row-btn primary" onClick={() => { setStocking({ id: product.id, qty: "", cost: "" }); setError(null); }}>+ Stock</button>

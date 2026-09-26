@@ -548,6 +548,11 @@ export const IconCard = ({ size = 18 }: { size?: number }) => lineIcon(size, <>
   <rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" /><path d="M6 15h4" />
 </>);
 
+/** Bank transfer / LankaQR payment. */
+export const IconQr = ({ size = 18 }: { size?: number }) => lineIcon(size, <>
+  <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3" />
+</>);
+
 export const IconRefresh = ({ size = 18 }: { size?: number }) => lineIcon(size, <>
   <path d="M21 12a9 9 0 1 1-2.64-6.36" /><path d="M21 3v6h-6" />
 </>);

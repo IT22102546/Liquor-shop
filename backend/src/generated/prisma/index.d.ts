@@ -139,6 +139,21 @@ export type ActivityLog = $Result.DefaultSelection<Prisma.$ActivityLogPayload>
  * 
  */
 export type PosSetting = $Result.DefaultSelection<Prisma.$PosSettingPayload>
+/**
+ * Model PosShift
+ * A till session: opened with a float, closed with a blind cash count and a locked Z report.
+ */
+export type PosShift = $Result.DefaultSelection<Prisma.$PosShiftPayload>
+/**
+ * Model PosCashEntry
+ * Cash book entry: money in (receipt, RCP-) or money out (voucher/expense, VCH-).
+ */
+export type PosCashEntry = $Result.DefaultSelection<Prisma.$PosCashEntryPayload>
+/**
+ * Model InventoryMovement
+ * Every change to a product's stock or empties, for the stock day book.
+ */
+export type InventoryMovement = $Result.DefaultSelection<Prisma.$InventoryMovementPayload>
 
 /**
  * Enums
@@ -166,7 +181,8 @@ export type PosAdminRole = (typeof PosAdminRole)[keyof typeof PosAdminRole]
 export const PaymentMethod: {
   CASH: 'CASH',
   CHEQUE: 'CHEQUE',
-  BANK_TRANSFER: 'BANK_TRANSFER'
+  BANK_TRANSFER: 'BANK_TRANSFER',
+  CARD: 'CARD'
 };
 
 export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]
@@ -723,6 +739,36 @@ export class PrismaClient<
     * ```
     */
   get posSetting(): Prisma.PosSettingDelegate<ExtArgs>;
+
+  /**
+   * `prisma.posShift`: Exposes CRUD operations for the **PosShift** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PosShifts
+    * const posShifts = await prisma.posShift.findMany()
+    * ```
+    */
+  get posShift(): Prisma.PosShiftDelegate<ExtArgs>;
+
+  /**
+   * `prisma.posCashEntry`: Exposes CRUD operations for the **PosCashEntry** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PosCashEntries
+    * const posCashEntries = await prisma.posCashEntry.findMany()
+    * ```
+    */
+  get posCashEntry(): Prisma.PosCashEntryDelegate<ExtArgs>;
+
+  /**
+   * `prisma.inventoryMovement`: Exposes CRUD operations for the **InventoryMovement** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more InventoryMovements
+    * const inventoryMovements = await prisma.inventoryMovement.findMany()
+    * ```
+    */
+  get inventoryMovement(): Prisma.InventoryMovementDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -1188,7 +1234,10 @@ export namespace Prisma {
     AccountDeposit: 'AccountDeposit',
     AccountDepositItem: 'AccountDepositItem',
     ActivityLog: 'ActivityLog',
-    PosSetting: 'PosSetting'
+    PosSetting: 'PosSetting',
+    PosShift: 'PosShift',
+    PosCashEntry: 'PosCashEntry',
+    InventoryMovement: 'InventoryMovement'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1204,7 +1253,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "posAdmin" | "posCounterSale" | "supplier" | "inventoryBrand" | "inventoryCategory" | "inventoryProduct" | "inventoryProductExpense" | "inventoryProductImage" | "posCustomer" | "posCustomerPurchase" | "posInvoiceTerm" | "posInstallment" | "posInstallmentPayment" | "contactRequest" | "account" | "accountRelationship" | "accountReceipt" | "accountVoucher" | "accountTransaction" | "invoicePayment" | "accountDeposit" | "accountDepositItem" | "activityLog" | "posSetting"
+      modelProps: "user" | "posAdmin" | "posCounterSale" | "supplier" | "inventoryBrand" | "inventoryCategory" | "inventoryProduct" | "inventoryProductExpense" | "inventoryProductImage" | "posCustomer" | "posCustomerPurchase" | "posInvoiceTerm" | "posInstallment" | "posInstallmentPayment" | "contactRequest" | "account" | "accountRelationship" | "accountReceipt" | "accountVoucher" | "accountTransaction" | "invoicePayment" | "accountDeposit" | "accountDepositItem" | "activityLog" | "posSetting" | "posShift" | "posCashEntry" | "inventoryMovement"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2958,6 +3007,216 @@ export namespace Prisma {
           }
         }
       }
+      PosShift: {
+        payload: Prisma.$PosShiftPayload<ExtArgs>
+        fields: Prisma.PosShiftFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PosShiftFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosShiftPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PosShiftFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosShiftPayload>
+          }
+          findFirst: {
+            args: Prisma.PosShiftFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosShiftPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PosShiftFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosShiftPayload>
+          }
+          findMany: {
+            args: Prisma.PosShiftFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosShiftPayload>[]
+          }
+          create: {
+            args: Prisma.PosShiftCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosShiftPayload>
+          }
+          createMany: {
+            args: Prisma.PosShiftCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PosShiftCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosShiftPayload>[]
+          }
+          delete: {
+            args: Prisma.PosShiftDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosShiftPayload>
+          }
+          update: {
+            args: Prisma.PosShiftUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosShiftPayload>
+          }
+          deleteMany: {
+            args: Prisma.PosShiftDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PosShiftUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.PosShiftUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosShiftPayload>
+          }
+          aggregate: {
+            args: Prisma.PosShiftAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePosShift>
+          }
+          groupBy: {
+            args: Prisma.PosShiftGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PosShiftGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PosShiftCountArgs<ExtArgs>
+            result: $Utils.Optional<PosShiftCountAggregateOutputType> | number
+          }
+        }
+      }
+      PosCashEntry: {
+        payload: Prisma.$PosCashEntryPayload<ExtArgs>
+        fields: Prisma.PosCashEntryFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PosCashEntryFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosCashEntryPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PosCashEntryFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosCashEntryPayload>
+          }
+          findFirst: {
+            args: Prisma.PosCashEntryFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosCashEntryPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PosCashEntryFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosCashEntryPayload>
+          }
+          findMany: {
+            args: Prisma.PosCashEntryFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosCashEntryPayload>[]
+          }
+          create: {
+            args: Prisma.PosCashEntryCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosCashEntryPayload>
+          }
+          createMany: {
+            args: Prisma.PosCashEntryCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PosCashEntryCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosCashEntryPayload>[]
+          }
+          delete: {
+            args: Prisma.PosCashEntryDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosCashEntryPayload>
+          }
+          update: {
+            args: Prisma.PosCashEntryUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosCashEntryPayload>
+          }
+          deleteMany: {
+            args: Prisma.PosCashEntryDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PosCashEntryUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.PosCashEntryUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosCashEntryPayload>
+          }
+          aggregate: {
+            args: Prisma.PosCashEntryAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePosCashEntry>
+          }
+          groupBy: {
+            args: Prisma.PosCashEntryGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PosCashEntryGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PosCashEntryCountArgs<ExtArgs>
+            result: $Utils.Optional<PosCashEntryCountAggregateOutputType> | number
+          }
+        }
+      }
+      InventoryMovement: {
+        payload: Prisma.$InventoryMovementPayload<ExtArgs>
+        fields: Prisma.InventoryMovementFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.InventoryMovementFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryMovementPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.InventoryMovementFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryMovementPayload>
+          }
+          findFirst: {
+            args: Prisma.InventoryMovementFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryMovementPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.InventoryMovementFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryMovementPayload>
+          }
+          findMany: {
+            args: Prisma.InventoryMovementFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryMovementPayload>[]
+          }
+          create: {
+            args: Prisma.InventoryMovementCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryMovementPayload>
+          }
+          createMany: {
+            args: Prisma.InventoryMovementCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.InventoryMovementCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryMovementPayload>[]
+          }
+          delete: {
+            args: Prisma.InventoryMovementDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryMovementPayload>
+          }
+          update: {
+            args: Prisma.InventoryMovementUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryMovementPayload>
+          }
+          deleteMany: {
+            args: Prisma.InventoryMovementDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.InventoryMovementUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.InventoryMovementUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryMovementPayload>
+          }
+          aggregate: {
+            args: Prisma.InventoryMovementAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateInventoryMovement>
+          }
+          groupBy: {
+            args: Prisma.InventoryMovementGroupByArgs<ExtArgs>
+            result: $Utils.Optional<InventoryMovementGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.InventoryMovementCountArgs<ExtArgs>
+            result: $Utils.Optional<InventoryMovementCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -3600,6 +3859,55 @@ export namespace Prisma {
    */
   export type AccountDepositCountOutputTypeCountTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: AccountTransactionWhereInput
+  }
+
+
+  /**
+   * Count Type PosShiftCountOutputType
+   */
+
+  export type PosShiftCountOutputType = {
+    sales: number
+    cashEntries: number
+    movements: number
+  }
+
+  export type PosShiftCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    sales?: boolean | PosShiftCountOutputTypeCountSalesArgs
+    cashEntries?: boolean | PosShiftCountOutputTypeCountCashEntriesArgs
+    movements?: boolean | PosShiftCountOutputTypeCountMovementsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * PosShiftCountOutputType without action
+   */
+  export type PosShiftCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosShiftCountOutputType
+     */
+    select?: PosShiftCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * PosShiftCountOutputType without action
+   */
+  export type PosShiftCountOutputTypeCountSalesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PosCounterSaleWhereInput
+  }
+
+  /**
+   * PosShiftCountOutputType without action
+   */
+  export type PosShiftCountOutputTypeCountCashEntriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PosCashEntryWhereInput
+  }
+
+  /**
+   * PosShiftCountOutputType without action
+   */
+  export type PosShiftCountOutputTypeCountMovementsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InventoryMovementWhereInput
   }
 
 
@@ -5611,6 +5919,7 @@ export namespace Prisma {
     discountAmount: number | null
     pointsRedeemed: number | null
     pointsValue: number | null
+    shiftId: number | null
   }
 
   export type PosCounterSaleSumAggregateOutputType = {
@@ -5627,6 +5936,7 @@ export namespace Prisma {
     discountAmount: number | null
     pointsRedeemed: number | null
     pointsValue: number | null
+    shiftId: number | null
   }
 
   export type PosCounterSaleMinAggregateOutputType = {
@@ -5638,6 +5948,7 @@ export namespace Prisma {
     amountReceived: number | null
     changeGiven: number | null
     paymentMethod: $Enums.PaymentMethod | null
+    paymentReference: string | null
     cashierId: number | null
     customerId: number | null
     pointsEarned: number | null
@@ -5646,6 +5957,7 @@ export namespace Prisma {
     discountAmount: number | null
     pointsRedeemed: number | null
     pointsValue: number | null
+    shiftId: number | null
     createdAt: Date | null
   }
 
@@ -5658,6 +5970,7 @@ export namespace Prisma {
     amountReceived: number | null
     changeGiven: number | null
     paymentMethod: $Enums.PaymentMethod | null
+    paymentReference: string | null
     cashierId: number | null
     customerId: number | null
     pointsEarned: number | null
@@ -5666,6 +5979,7 @@ export namespace Prisma {
     discountAmount: number | null
     pointsRedeemed: number | null
     pointsValue: number | null
+    shiftId: number | null
     createdAt: Date | null
   }
 
@@ -5678,6 +5992,7 @@ export namespace Prisma {
     amountReceived: number
     changeGiven: number
     paymentMethod: number
+    paymentReference: number
     cashierId: number
     customerId: number
     pointsEarned: number
@@ -5686,6 +6001,7 @@ export namespace Prisma {
     discountAmount: number
     pointsRedeemed: number
     pointsValue: number
+    shiftId: number
     createdAt: number
     _all: number
   }
@@ -5705,6 +6021,7 @@ export namespace Prisma {
     discountAmount?: true
     pointsRedeemed?: true
     pointsValue?: true
+    shiftId?: true
   }
 
   export type PosCounterSaleSumAggregateInputType = {
@@ -5721,6 +6038,7 @@ export namespace Prisma {
     discountAmount?: true
     pointsRedeemed?: true
     pointsValue?: true
+    shiftId?: true
   }
 
   export type PosCounterSaleMinAggregateInputType = {
@@ -5732,6 +6050,7 @@ export namespace Prisma {
     amountReceived?: true
     changeGiven?: true
     paymentMethod?: true
+    paymentReference?: true
     cashierId?: true
     customerId?: true
     pointsEarned?: true
@@ -5740,6 +6059,7 @@ export namespace Prisma {
     discountAmount?: true
     pointsRedeemed?: true
     pointsValue?: true
+    shiftId?: true
     createdAt?: true
   }
 
@@ -5752,6 +6072,7 @@ export namespace Prisma {
     amountReceived?: true
     changeGiven?: true
     paymentMethod?: true
+    paymentReference?: true
     cashierId?: true
     customerId?: true
     pointsEarned?: true
@@ -5760,6 +6081,7 @@ export namespace Prisma {
     discountAmount?: true
     pointsRedeemed?: true
     pointsValue?: true
+    shiftId?: true
     createdAt?: true
   }
 
@@ -5772,6 +6094,7 @@ export namespace Prisma {
     amountReceived?: true
     changeGiven?: true
     paymentMethod?: true
+    paymentReference?: true
     cashierId?: true
     customerId?: true
     pointsEarned?: true
@@ -5780,6 +6103,7 @@ export namespace Prisma {
     discountAmount?: true
     pointsRedeemed?: true
     pointsValue?: true
+    shiftId?: true
     createdAt?: true
     _all?: true
   }
@@ -5879,6 +6203,7 @@ export namespace Prisma {
     amountReceived: number
     changeGiven: number
     paymentMethod: $Enums.PaymentMethod
+    paymentReference: string | null
     cashierId: number
     customerId: number | null
     pointsEarned: number
@@ -5887,6 +6212,7 @@ export namespace Prisma {
     discountAmount: number
     pointsRedeemed: number
     pointsValue: number
+    shiftId: number | null
     createdAt: Date
     _count: PosCounterSaleCountAggregateOutputType | null
     _avg: PosCounterSaleAvgAggregateOutputType | null
@@ -5918,6 +6244,7 @@ export namespace Prisma {
     amountReceived?: boolean
     changeGiven?: boolean
     paymentMethod?: boolean
+    paymentReference?: boolean
     cashierId?: boolean
     customerId?: boolean
     pointsEarned?: boolean
@@ -5926,9 +6253,11 @@ export namespace Prisma {
     discountAmount?: boolean
     pointsRedeemed?: boolean
     pointsValue?: boolean
+    shiftId?: boolean
     createdAt?: boolean
     cashier?: boolean | PosAdminDefaultArgs<ExtArgs>
     customer?: boolean | PosCounterSale$customerArgs<ExtArgs>
+    shift?: boolean | PosCounterSale$shiftArgs<ExtArgs>
   }, ExtArgs["result"]["posCounterSale"]>
 
   export type PosCounterSaleSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -5940,6 +6269,7 @@ export namespace Prisma {
     amountReceived?: boolean
     changeGiven?: boolean
     paymentMethod?: boolean
+    paymentReference?: boolean
     cashierId?: boolean
     customerId?: boolean
     pointsEarned?: boolean
@@ -5948,9 +6278,11 @@ export namespace Prisma {
     discountAmount?: boolean
     pointsRedeemed?: boolean
     pointsValue?: boolean
+    shiftId?: boolean
     createdAt?: boolean
     cashier?: boolean | PosAdminDefaultArgs<ExtArgs>
     customer?: boolean | PosCounterSale$customerArgs<ExtArgs>
+    shift?: boolean | PosCounterSale$shiftArgs<ExtArgs>
   }, ExtArgs["result"]["posCounterSale"]>
 
   export type PosCounterSaleSelectScalar = {
@@ -5962,6 +6294,7 @@ export namespace Prisma {
     amountReceived?: boolean
     changeGiven?: boolean
     paymentMethod?: boolean
+    paymentReference?: boolean
     cashierId?: boolean
     customerId?: boolean
     pointsEarned?: boolean
@@ -5970,16 +6303,19 @@ export namespace Prisma {
     discountAmount?: boolean
     pointsRedeemed?: boolean
     pointsValue?: boolean
+    shiftId?: boolean
     createdAt?: boolean
   }
 
   export type PosCounterSaleInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cashier?: boolean | PosAdminDefaultArgs<ExtArgs>
     customer?: boolean | PosCounterSale$customerArgs<ExtArgs>
+    shift?: boolean | PosCounterSale$shiftArgs<ExtArgs>
   }
   export type PosCounterSaleIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cashier?: boolean | PosAdminDefaultArgs<ExtArgs>
     customer?: boolean | PosCounterSale$customerArgs<ExtArgs>
+    shift?: boolean | PosCounterSale$shiftArgs<ExtArgs>
   }
 
   export type $PosCounterSalePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5987,6 +6323,7 @@ export namespace Prisma {
     objects: {
       cashier: Prisma.$PosAdminPayload<ExtArgs>
       customer: Prisma.$PosCustomerPayload<ExtArgs> | null
+      shift: Prisma.$PosShiftPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -6000,6 +6337,10 @@ export namespace Prisma {
       amountReceived: number
       changeGiven: number
       paymentMethod: $Enums.PaymentMethod
+      /**
+       * Card approval code (from the card machine slip) or bank transfer / QR reference.
+       */
+      paymentReference: string | null
       cashierId: number
       /**
        * Loyalty member the sale was made to; null = walk-in customer.
@@ -6017,6 +6358,10 @@ export namespace Prisma {
        */
       pointsRedeemed: number
       pointsValue: number
+      /**
+       * Shift (till session) the sale was made in; null for sales made before shifts existed.
+       */
+      shiftId: number | null
       createdAt: Date
     }, ExtArgs["result"]["posCounterSale"]>
     composites: {}
@@ -6384,6 +6729,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     cashier<T extends PosAdminDefaultArgs<ExtArgs> = {}>(args?: Subset<T, PosAdminDefaultArgs<ExtArgs>>): Prisma__PosAdminClient<$Result.GetResult<Prisma.$PosAdminPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     customer<T extends PosCounterSale$customerArgs<ExtArgs> = {}>(args?: Subset<T, PosCounterSale$customerArgs<ExtArgs>>): Prisma__PosCustomerClient<$Result.GetResult<Prisma.$PosCustomerPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
+    shift<T extends PosCounterSale$shiftArgs<ExtArgs> = {}>(args?: Subset<T, PosCounterSale$shiftArgs<ExtArgs>>): Prisma__PosShiftClient<$Result.GetResult<Prisma.$PosShiftPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6421,6 +6767,7 @@ export namespace Prisma {
     readonly amountReceived: FieldRef<"PosCounterSale", 'Float'>
     readonly changeGiven: FieldRef<"PosCounterSale", 'Float'>
     readonly paymentMethod: FieldRef<"PosCounterSale", 'PaymentMethod'>
+    readonly paymentReference: FieldRef<"PosCounterSale", 'String'>
     readonly cashierId: FieldRef<"PosCounterSale", 'Int'>
     readonly customerId: FieldRef<"PosCounterSale", 'Int'>
     readonly pointsEarned: FieldRef<"PosCounterSale", 'Int'>
@@ -6429,6 +6776,7 @@ export namespace Prisma {
     readonly discountAmount: FieldRef<"PosCounterSale", 'Float'>
     readonly pointsRedeemed: FieldRef<"PosCounterSale", 'Int'>
     readonly pointsValue: FieldRef<"PosCounterSale", 'Float'>
+    readonly shiftId: FieldRef<"PosCounterSale", 'Int'>
     readonly createdAt: FieldRef<"PosCounterSale", 'DateTime'>
   }
     
@@ -6760,6 +7108,21 @@ export namespace Prisma {
      */
     include?: PosCustomerInclude<ExtArgs> | null
     where?: PosCustomerWhereInput
+  }
+
+  /**
+   * PosCounterSale.shift
+   */
+  export type PosCounterSale$shiftArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosShift
+     */
+    select?: PosShiftSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosShiftInclude<ExtArgs> | null
+    where?: PosShiftWhereInput
   }
 
   /**
@@ -30325,6 +30688,3540 @@ export namespace Prisma {
 
 
   /**
+   * Model PosShift
+   */
+
+  export type AggregatePosShift = {
+    _count: PosShiftCountAggregateOutputType | null
+    _avg: PosShiftAvgAggregateOutputType | null
+    _sum: PosShiftSumAggregateOutputType | null
+    _min: PosShiftMinAggregateOutputType | null
+    _max: PosShiftMaxAggregateOutputType | null
+  }
+
+  export type PosShiftAvgAggregateOutputType = {
+    id: number | null
+    openedById: number | null
+    openingFloat: number | null
+    countedCash: number | null
+    countedById: number | null
+    expectedCash: number | null
+    cashDifference: number | null
+    cardSlipTotal: number | null
+    floatLeft: number | null
+    cashBanked: number | null
+    closedById: number | null
+  }
+
+  export type PosShiftSumAggregateOutputType = {
+    id: number | null
+    openedById: number | null
+    openingFloat: number | null
+    countedCash: number | null
+    countedById: number | null
+    expectedCash: number | null
+    cashDifference: number | null
+    cardSlipTotal: number | null
+    floatLeft: number | null
+    cashBanked: number | null
+    closedById: number | null
+  }
+
+  export type PosShiftMinAggregateOutputType = {
+    id: number | null
+    shiftNo: string | null
+    status: string | null
+    openedById: number | null
+    openedAt: Date | null
+    openingFloat: number | null
+    countedCash: number | null
+    countedById: number | null
+    countedAt: Date | null
+    expectedCash: number | null
+    cashDifference: number | null
+    differenceReason: string | null
+    cardSlipTotal: number | null
+    cardDifferenceReason: string | null
+    floatLeft: number | null
+    cashBanked: number | null
+    closedById: number | null
+    closedAt: Date | null
+    notes: string | null
+  }
+
+  export type PosShiftMaxAggregateOutputType = {
+    id: number | null
+    shiftNo: string | null
+    status: string | null
+    openedById: number | null
+    openedAt: Date | null
+    openingFloat: number | null
+    countedCash: number | null
+    countedById: number | null
+    countedAt: Date | null
+    expectedCash: number | null
+    cashDifference: number | null
+    differenceReason: string | null
+    cardSlipTotal: number | null
+    cardDifferenceReason: string | null
+    floatLeft: number | null
+    cashBanked: number | null
+    closedById: number | null
+    closedAt: Date | null
+    notes: string | null
+  }
+
+  export type PosShiftCountAggregateOutputType = {
+    id: number
+    shiftNo: number
+    status: number
+    openedById: number
+    openedAt: number
+    openingFloat: number
+    countedCash: number
+    denominations: number
+    countedById: number
+    countedAt: number
+    expectedCash: number
+    cashDifference: number
+    differenceReason: number
+    cardSlipTotal: number
+    cardDifferenceReason: number
+    floatLeft: number
+    cashBanked: number
+    closedById: number
+    closedAt: number
+    notes: number
+    report: number
+    _all: number
+  }
+
+
+  export type PosShiftAvgAggregateInputType = {
+    id?: true
+    openedById?: true
+    openingFloat?: true
+    countedCash?: true
+    countedById?: true
+    expectedCash?: true
+    cashDifference?: true
+    cardSlipTotal?: true
+    floatLeft?: true
+    cashBanked?: true
+    closedById?: true
+  }
+
+  export type PosShiftSumAggregateInputType = {
+    id?: true
+    openedById?: true
+    openingFloat?: true
+    countedCash?: true
+    countedById?: true
+    expectedCash?: true
+    cashDifference?: true
+    cardSlipTotal?: true
+    floatLeft?: true
+    cashBanked?: true
+    closedById?: true
+  }
+
+  export type PosShiftMinAggregateInputType = {
+    id?: true
+    shiftNo?: true
+    status?: true
+    openedById?: true
+    openedAt?: true
+    openingFloat?: true
+    countedCash?: true
+    countedById?: true
+    countedAt?: true
+    expectedCash?: true
+    cashDifference?: true
+    differenceReason?: true
+    cardSlipTotal?: true
+    cardDifferenceReason?: true
+    floatLeft?: true
+    cashBanked?: true
+    closedById?: true
+    closedAt?: true
+    notes?: true
+  }
+
+  export type PosShiftMaxAggregateInputType = {
+    id?: true
+    shiftNo?: true
+    status?: true
+    openedById?: true
+    openedAt?: true
+    openingFloat?: true
+    countedCash?: true
+    countedById?: true
+    countedAt?: true
+    expectedCash?: true
+    cashDifference?: true
+    differenceReason?: true
+    cardSlipTotal?: true
+    cardDifferenceReason?: true
+    floatLeft?: true
+    cashBanked?: true
+    closedById?: true
+    closedAt?: true
+    notes?: true
+  }
+
+  export type PosShiftCountAggregateInputType = {
+    id?: true
+    shiftNo?: true
+    status?: true
+    openedById?: true
+    openedAt?: true
+    openingFloat?: true
+    countedCash?: true
+    denominations?: true
+    countedById?: true
+    countedAt?: true
+    expectedCash?: true
+    cashDifference?: true
+    differenceReason?: true
+    cardSlipTotal?: true
+    cardDifferenceReason?: true
+    floatLeft?: true
+    cashBanked?: true
+    closedById?: true
+    closedAt?: true
+    notes?: true
+    report?: true
+    _all?: true
+  }
+
+  export type PosShiftAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PosShift to aggregate.
+     */
+    where?: PosShiftWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosShifts to fetch.
+     */
+    orderBy?: PosShiftOrderByWithRelationInput | PosShiftOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PosShiftWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosShifts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosShifts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PosShifts
+    **/
+    _count?: true | PosShiftCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PosShiftAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PosShiftSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PosShiftMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PosShiftMaxAggregateInputType
+  }
+
+  export type GetPosShiftAggregateType<T extends PosShiftAggregateArgs> = {
+        [P in keyof T & keyof AggregatePosShift]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePosShift[P]>
+      : GetScalarType<T[P], AggregatePosShift[P]>
+  }
+
+
+
+
+  export type PosShiftGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PosShiftWhereInput
+    orderBy?: PosShiftOrderByWithAggregationInput | PosShiftOrderByWithAggregationInput[]
+    by: PosShiftScalarFieldEnum[] | PosShiftScalarFieldEnum
+    having?: PosShiftScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PosShiftCountAggregateInputType | true
+    _avg?: PosShiftAvgAggregateInputType
+    _sum?: PosShiftSumAggregateInputType
+    _min?: PosShiftMinAggregateInputType
+    _max?: PosShiftMaxAggregateInputType
+  }
+
+  export type PosShiftGroupByOutputType = {
+    id: number
+    shiftNo: string
+    status: string
+    openedById: number
+    openedAt: Date
+    openingFloat: number
+    countedCash: number | null
+    denominations: JsonValue | null
+    countedById: number | null
+    countedAt: Date | null
+    expectedCash: number | null
+    cashDifference: number | null
+    differenceReason: string | null
+    cardSlipTotal: number | null
+    cardDifferenceReason: string | null
+    floatLeft: number | null
+    cashBanked: number | null
+    closedById: number | null
+    closedAt: Date | null
+    notes: string | null
+    report: JsonValue | null
+    _count: PosShiftCountAggregateOutputType | null
+    _avg: PosShiftAvgAggregateOutputType | null
+    _sum: PosShiftSumAggregateOutputType | null
+    _min: PosShiftMinAggregateOutputType | null
+    _max: PosShiftMaxAggregateOutputType | null
+  }
+
+  type GetPosShiftGroupByPayload<T extends PosShiftGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PosShiftGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PosShiftGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PosShiftGroupByOutputType[P]>
+            : GetScalarType<T[P], PosShiftGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PosShiftSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    shiftNo?: boolean
+    status?: boolean
+    openedById?: boolean
+    openedAt?: boolean
+    openingFloat?: boolean
+    countedCash?: boolean
+    denominations?: boolean
+    countedById?: boolean
+    countedAt?: boolean
+    expectedCash?: boolean
+    cashDifference?: boolean
+    differenceReason?: boolean
+    cardSlipTotal?: boolean
+    cardDifferenceReason?: boolean
+    floatLeft?: boolean
+    cashBanked?: boolean
+    closedById?: boolean
+    closedAt?: boolean
+    notes?: boolean
+    report?: boolean
+    sales?: boolean | PosShift$salesArgs<ExtArgs>
+    cashEntries?: boolean | PosShift$cashEntriesArgs<ExtArgs>
+    movements?: boolean | PosShift$movementsArgs<ExtArgs>
+    _count?: boolean | PosShiftCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["posShift"]>
+
+  export type PosShiftSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    shiftNo?: boolean
+    status?: boolean
+    openedById?: boolean
+    openedAt?: boolean
+    openingFloat?: boolean
+    countedCash?: boolean
+    denominations?: boolean
+    countedById?: boolean
+    countedAt?: boolean
+    expectedCash?: boolean
+    cashDifference?: boolean
+    differenceReason?: boolean
+    cardSlipTotal?: boolean
+    cardDifferenceReason?: boolean
+    floatLeft?: boolean
+    cashBanked?: boolean
+    closedById?: boolean
+    closedAt?: boolean
+    notes?: boolean
+    report?: boolean
+  }, ExtArgs["result"]["posShift"]>
+
+  export type PosShiftSelectScalar = {
+    id?: boolean
+    shiftNo?: boolean
+    status?: boolean
+    openedById?: boolean
+    openedAt?: boolean
+    openingFloat?: boolean
+    countedCash?: boolean
+    denominations?: boolean
+    countedById?: boolean
+    countedAt?: boolean
+    expectedCash?: boolean
+    cashDifference?: boolean
+    differenceReason?: boolean
+    cardSlipTotal?: boolean
+    cardDifferenceReason?: boolean
+    floatLeft?: boolean
+    cashBanked?: boolean
+    closedById?: boolean
+    closedAt?: boolean
+    notes?: boolean
+    report?: boolean
+  }
+
+  export type PosShiftInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    sales?: boolean | PosShift$salesArgs<ExtArgs>
+    cashEntries?: boolean | PosShift$cashEntriesArgs<ExtArgs>
+    movements?: boolean | PosShift$movementsArgs<ExtArgs>
+    _count?: boolean | PosShiftCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type PosShiftIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $PosShiftPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PosShift"
+    objects: {
+      sales: Prisma.$PosCounterSalePayload<ExtArgs>[]
+      cashEntries: Prisma.$PosCashEntryPayload<ExtArgs>[]
+      movements: Prisma.$InventoryMovementPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      shiftNo: string
+      status: string
+      openedById: number
+      openedAt: Date
+      openingFloat: number
+      /**
+       * Blind count: saved before the expected amount is shown.
+       */
+      countedCash: number | null
+      denominations: Prisma.JsonValue | null
+      countedById: number | null
+      countedAt: Date | null
+      expectedCash: number | null
+      cashDifference: number | null
+      differenceReason: string | null
+      cardSlipTotal: number | null
+      /**
+       * Why the card machine settlement didn't match the card sales (or "not settled yet").
+       */
+      cardDifferenceReason: string | null
+      floatLeft: number | null
+      cashBanked: number | null
+      closedById: number | null
+      closedAt: Date | null
+      notes: string | null
+      /**
+       * Frozen Z report figures at close.
+       */
+      report: Prisma.JsonValue | null
+    }, ExtArgs["result"]["posShift"]>
+    composites: {}
+  }
+
+  type PosShiftGetPayload<S extends boolean | null | undefined | PosShiftDefaultArgs> = $Result.GetResult<Prisma.$PosShiftPayload, S>
+
+  type PosShiftCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<PosShiftFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: PosShiftCountAggregateInputType | true
+    }
+
+  export interface PosShiftDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PosShift'], meta: { name: 'PosShift' } }
+    /**
+     * Find zero or one PosShift that matches the filter.
+     * @param {PosShiftFindUniqueArgs} args - Arguments to find a PosShift
+     * @example
+     * // Get one PosShift
+     * const posShift = await prisma.posShift.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PosShiftFindUniqueArgs>(args: SelectSubset<T, PosShiftFindUniqueArgs<ExtArgs>>): Prisma__PosShiftClient<$Result.GetResult<Prisma.$PosShiftPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one PosShift that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {PosShiftFindUniqueOrThrowArgs} args - Arguments to find a PosShift
+     * @example
+     * // Get one PosShift
+     * const posShift = await prisma.posShift.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PosShiftFindUniqueOrThrowArgs>(args: SelectSubset<T, PosShiftFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PosShiftClient<$Result.GetResult<Prisma.$PosShiftPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first PosShift that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosShiftFindFirstArgs} args - Arguments to find a PosShift
+     * @example
+     * // Get one PosShift
+     * const posShift = await prisma.posShift.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PosShiftFindFirstArgs>(args?: SelectSubset<T, PosShiftFindFirstArgs<ExtArgs>>): Prisma__PosShiftClient<$Result.GetResult<Prisma.$PosShiftPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first PosShift that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosShiftFindFirstOrThrowArgs} args - Arguments to find a PosShift
+     * @example
+     * // Get one PosShift
+     * const posShift = await prisma.posShift.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PosShiftFindFirstOrThrowArgs>(args?: SelectSubset<T, PosShiftFindFirstOrThrowArgs<ExtArgs>>): Prisma__PosShiftClient<$Result.GetResult<Prisma.$PosShiftPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more PosShifts that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosShiftFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PosShifts
+     * const posShifts = await prisma.posShift.findMany()
+     * 
+     * // Get first 10 PosShifts
+     * const posShifts = await prisma.posShift.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const posShiftWithIdOnly = await prisma.posShift.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PosShiftFindManyArgs>(args?: SelectSubset<T, PosShiftFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosShiftPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a PosShift.
+     * @param {PosShiftCreateArgs} args - Arguments to create a PosShift.
+     * @example
+     * // Create one PosShift
+     * const PosShift = await prisma.posShift.create({
+     *   data: {
+     *     // ... data to create a PosShift
+     *   }
+     * })
+     * 
+     */
+    create<T extends PosShiftCreateArgs>(args: SelectSubset<T, PosShiftCreateArgs<ExtArgs>>): Prisma__PosShiftClient<$Result.GetResult<Prisma.$PosShiftPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many PosShifts.
+     * @param {PosShiftCreateManyArgs} args - Arguments to create many PosShifts.
+     * @example
+     * // Create many PosShifts
+     * const posShift = await prisma.posShift.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PosShiftCreateManyArgs>(args?: SelectSubset<T, PosShiftCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PosShifts and returns the data saved in the database.
+     * @param {PosShiftCreateManyAndReturnArgs} args - Arguments to create many PosShifts.
+     * @example
+     * // Create many PosShifts
+     * const posShift = await prisma.posShift.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PosShifts and only return the `id`
+     * const posShiftWithIdOnly = await prisma.posShift.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PosShiftCreateManyAndReturnArgs>(args?: SelectSubset<T, PosShiftCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosShiftPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a PosShift.
+     * @param {PosShiftDeleteArgs} args - Arguments to delete one PosShift.
+     * @example
+     * // Delete one PosShift
+     * const PosShift = await prisma.posShift.delete({
+     *   where: {
+     *     // ... filter to delete one PosShift
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PosShiftDeleteArgs>(args: SelectSubset<T, PosShiftDeleteArgs<ExtArgs>>): Prisma__PosShiftClient<$Result.GetResult<Prisma.$PosShiftPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one PosShift.
+     * @param {PosShiftUpdateArgs} args - Arguments to update one PosShift.
+     * @example
+     * // Update one PosShift
+     * const posShift = await prisma.posShift.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PosShiftUpdateArgs>(args: SelectSubset<T, PosShiftUpdateArgs<ExtArgs>>): Prisma__PosShiftClient<$Result.GetResult<Prisma.$PosShiftPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more PosShifts.
+     * @param {PosShiftDeleteManyArgs} args - Arguments to filter PosShifts to delete.
+     * @example
+     * // Delete a few PosShifts
+     * const { count } = await prisma.posShift.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PosShiftDeleteManyArgs>(args?: SelectSubset<T, PosShiftDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PosShifts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosShiftUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PosShifts
+     * const posShift = await prisma.posShift.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PosShiftUpdateManyArgs>(args: SelectSubset<T, PosShiftUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one PosShift.
+     * @param {PosShiftUpsertArgs} args - Arguments to update or create a PosShift.
+     * @example
+     * // Update or create a PosShift
+     * const posShift = await prisma.posShift.upsert({
+     *   create: {
+     *     // ... data to create a PosShift
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PosShift we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PosShiftUpsertArgs>(args: SelectSubset<T, PosShiftUpsertArgs<ExtArgs>>): Prisma__PosShiftClient<$Result.GetResult<Prisma.$PosShiftPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of PosShifts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosShiftCountArgs} args - Arguments to filter PosShifts to count.
+     * @example
+     * // Count the number of PosShifts
+     * const count = await prisma.posShift.count({
+     *   where: {
+     *     // ... the filter for the PosShifts we want to count
+     *   }
+     * })
+    **/
+    count<T extends PosShiftCountArgs>(
+      args?: Subset<T, PosShiftCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PosShiftCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PosShift.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosShiftAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PosShiftAggregateArgs>(args: Subset<T, PosShiftAggregateArgs>): Prisma.PrismaPromise<GetPosShiftAggregateType<T>>
+
+    /**
+     * Group by PosShift.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosShiftGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PosShiftGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PosShiftGroupByArgs['orderBy'] }
+        : { orderBy?: PosShiftGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PosShiftGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPosShiftGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PosShift model
+   */
+  readonly fields: PosShiftFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PosShift.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PosShiftClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    sales<T extends PosShift$salesArgs<ExtArgs> = {}>(args?: Subset<T, PosShift$salesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosCounterSalePayload<ExtArgs>, T, "findMany"> | Null>
+    cashEntries<T extends PosShift$cashEntriesArgs<ExtArgs> = {}>(args?: Subset<T, PosShift$cashEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosCashEntryPayload<ExtArgs>, T, "findMany"> | Null>
+    movements<T extends PosShift$movementsArgs<ExtArgs> = {}>(args?: Subset<T, PosShift$movementsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryMovementPayload<ExtArgs>, T, "findMany"> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PosShift model
+   */ 
+  interface PosShiftFieldRefs {
+    readonly id: FieldRef<"PosShift", 'Int'>
+    readonly shiftNo: FieldRef<"PosShift", 'String'>
+    readonly status: FieldRef<"PosShift", 'String'>
+    readonly openedById: FieldRef<"PosShift", 'Int'>
+    readonly openedAt: FieldRef<"PosShift", 'DateTime'>
+    readonly openingFloat: FieldRef<"PosShift", 'Float'>
+    readonly countedCash: FieldRef<"PosShift", 'Float'>
+    readonly denominations: FieldRef<"PosShift", 'Json'>
+    readonly countedById: FieldRef<"PosShift", 'Int'>
+    readonly countedAt: FieldRef<"PosShift", 'DateTime'>
+    readonly expectedCash: FieldRef<"PosShift", 'Float'>
+    readonly cashDifference: FieldRef<"PosShift", 'Float'>
+    readonly differenceReason: FieldRef<"PosShift", 'String'>
+    readonly cardSlipTotal: FieldRef<"PosShift", 'Float'>
+    readonly cardDifferenceReason: FieldRef<"PosShift", 'String'>
+    readonly floatLeft: FieldRef<"PosShift", 'Float'>
+    readonly cashBanked: FieldRef<"PosShift", 'Float'>
+    readonly closedById: FieldRef<"PosShift", 'Int'>
+    readonly closedAt: FieldRef<"PosShift", 'DateTime'>
+    readonly notes: FieldRef<"PosShift", 'String'>
+    readonly report: FieldRef<"PosShift", 'Json'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PosShift findUnique
+   */
+  export type PosShiftFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosShift
+     */
+    select?: PosShiftSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosShiftInclude<ExtArgs> | null
+    /**
+     * Filter, which PosShift to fetch.
+     */
+    where: PosShiftWhereUniqueInput
+  }
+
+  /**
+   * PosShift findUniqueOrThrow
+   */
+  export type PosShiftFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosShift
+     */
+    select?: PosShiftSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosShiftInclude<ExtArgs> | null
+    /**
+     * Filter, which PosShift to fetch.
+     */
+    where: PosShiftWhereUniqueInput
+  }
+
+  /**
+   * PosShift findFirst
+   */
+  export type PosShiftFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosShift
+     */
+    select?: PosShiftSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosShiftInclude<ExtArgs> | null
+    /**
+     * Filter, which PosShift to fetch.
+     */
+    where?: PosShiftWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosShifts to fetch.
+     */
+    orderBy?: PosShiftOrderByWithRelationInput | PosShiftOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PosShifts.
+     */
+    cursor?: PosShiftWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosShifts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosShifts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PosShifts.
+     */
+    distinct?: PosShiftScalarFieldEnum | PosShiftScalarFieldEnum[]
+  }
+
+  /**
+   * PosShift findFirstOrThrow
+   */
+  export type PosShiftFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosShift
+     */
+    select?: PosShiftSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosShiftInclude<ExtArgs> | null
+    /**
+     * Filter, which PosShift to fetch.
+     */
+    where?: PosShiftWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosShifts to fetch.
+     */
+    orderBy?: PosShiftOrderByWithRelationInput | PosShiftOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PosShifts.
+     */
+    cursor?: PosShiftWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosShifts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosShifts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PosShifts.
+     */
+    distinct?: PosShiftScalarFieldEnum | PosShiftScalarFieldEnum[]
+  }
+
+  /**
+   * PosShift findMany
+   */
+  export type PosShiftFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosShift
+     */
+    select?: PosShiftSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosShiftInclude<ExtArgs> | null
+    /**
+     * Filter, which PosShifts to fetch.
+     */
+    where?: PosShiftWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosShifts to fetch.
+     */
+    orderBy?: PosShiftOrderByWithRelationInput | PosShiftOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PosShifts.
+     */
+    cursor?: PosShiftWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosShifts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosShifts.
+     */
+    skip?: number
+    distinct?: PosShiftScalarFieldEnum | PosShiftScalarFieldEnum[]
+  }
+
+  /**
+   * PosShift create
+   */
+  export type PosShiftCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosShift
+     */
+    select?: PosShiftSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosShiftInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PosShift.
+     */
+    data: XOR<PosShiftCreateInput, PosShiftUncheckedCreateInput>
+  }
+
+  /**
+   * PosShift createMany
+   */
+  export type PosShiftCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PosShifts.
+     */
+    data: PosShiftCreateManyInput | PosShiftCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PosShift createManyAndReturn
+   */
+  export type PosShiftCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosShift
+     */
+    select?: PosShiftSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many PosShifts.
+     */
+    data: PosShiftCreateManyInput | PosShiftCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PosShift update
+   */
+  export type PosShiftUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosShift
+     */
+    select?: PosShiftSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosShiftInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PosShift.
+     */
+    data: XOR<PosShiftUpdateInput, PosShiftUncheckedUpdateInput>
+    /**
+     * Choose, which PosShift to update.
+     */
+    where: PosShiftWhereUniqueInput
+  }
+
+  /**
+   * PosShift updateMany
+   */
+  export type PosShiftUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PosShifts.
+     */
+    data: XOR<PosShiftUpdateManyMutationInput, PosShiftUncheckedUpdateManyInput>
+    /**
+     * Filter which PosShifts to update
+     */
+    where?: PosShiftWhereInput
+  }
+
+  /**
+   * PosShift upsert
+   */
+  export type PosShiftUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosShift
+     */
+    select?: PosShiftSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosShiftInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PosShift to update in case it exists.
+     */
+    where: PosShiftWhereUniqueInput
+    /**
+     * In case the PosShift found by the `where` argument doesn't exist, create a new PosShift with this data.
+     */
+    create: XOR<PosShiftCreateInput, PosShiftUncheckedCreateInput>
+    /**
+     * In case the PosShift was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PosShiftUpdateInput, PosShiftUncheckedUpdateInput>
+  }
+
+  /**
+   * PosShift delete
+   */
+  export type PosShiftDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosShift
+     */
+    select?: PosShiftSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosShiftInclude<ExtArgs> | null
+    /**
+     * Filter which PosShift to delete.
+     */
+    where: PosShiftWhereUniqueInput
+  }
+
+  /**
+   * PosShift deleteMany
+   */
+  export type PosShiftDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PosShifts to delete
+     */
+    where?: PosShiftWhereInput
+  }
+
+  /**
+   * PosShift.sales
+   */
+  export type PosShift$salesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCounterSale
+     */
+    select?: PosCounterSaleSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCounterSaleInclude<ExtArgs> | null
+    where?: PosCounterSaleWhereInput
+    orderBy?: PosCounterSaleOrderByWithRelationInput | PosCounterSaleOrderByWithRelationInput[]
+    cursor?: PosCounterSaleWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PosCounterSaleScalarFieldEnum | PosCounterSaleScalarFieldEnum[]
+  }
+
+  /**
+   * PosShift.cashEntries
+   */
+  export type PosShift$cashEntriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCashEntry
+     */
+    select?: PosCashEntrySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCashEntryInclude<ExtArgs> | null
+    where?: PosCashEntryWhereInput
+    orderBy?: PosCashEntryOrderByWithRelationInput | PosCashEntryOrderByWithRelationInput[]
+    cursor?: PosCashEntryWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PosCashEntryScalarFieldEnum | PosCashEntryScalarFieldEnum[]
+  }
+
+  /**
+   * PosShift.movements
+   */
+  export type PosShift$movementsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryMovement
+     */
+    select?: InventoryMovementSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryMovementInclude<ExtArgs> | null
+    where?: InventoryMovementWhereInput
+    orderBy?: InventoryMovementOrderByWithRelationInput | InventoryMovementOrderByWithRelationInput[]
+    cursor?: InventoryMovementWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InventoryMovementScalarFieldEnum | InventoryMovementScalarFieldEnum[]
+  }
+
+  /**
+   * PosShift without action
+   */
+  export type PosShiftDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosShift
+     */
+    select?: PosShiftSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosShiftInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model PosCashEntry
+   */
+
+  export type AggregatePosCashEntry = {
+    _count: PosCashEntryCountAggregateOutputType | null
+    _avg: PosCashEntryAvgAggregateOutputType | null
+    _sum: PosCashEntrySumAggregateOutputType | null
+    _min: PosCashEntryMinAggregateOutputType | null
+    _max: PosCashEntryMaxAggregateOutputType | null
+  }
+
+  export type PosCashEntryAvgAggregateOutputType = {
+    id: number | null
+    amount: number | null
+    shiftId: number | null
+    createdById: number | null
+    voidedById: number | null
+    bankedById: number | null
+  }
+
+  export type PosCashEntrySumAggregateOutputType = {
+    id: number | null
+    amount: number | null
+    shiftId: number | null
+    createdById: number | null
+    voidedById: number | null
+    bankedById: number | null
+  }
+
+  export type PosCashEntryMinAggregateOutputType = {
+    id: number | null
+    entryNo: string | null
+    direction: string | null
+    category: string | null
+    amount: number | null
+    source: string | null
+    party: string | null
+    reference: string | null
+    note: string | null
+    entryDate: Date | null
+    shiftId: number | null
+    automatic: boolean | null
+    createdById: number | null
+    createdAt: Date | null
+    voided: boolean | null
+    voidReason: string | null
+    voidedById: number | null
+    voidedAt: Date | null
+    bankStatus: string | null
+    bankedAt: Date | null
+    bankedById: number | null
+    bankReference: string | null
+  }
+
+  export type PosCashEntryMaxAggregateOutputType = {
+    id: number | null
+    entryNo: string | null
+    direction: string | null
+    category: string | null
+    amount: number | null
+    source: string | null
+    party: string | null
+    reference: string | null
+    note: string | null
+    entryDate: Date | null
+    shiftId: number | null
+    automatic: boolean | null
+    createdById: number | null
+    createdAt: Date | null
+    voided: boolean | null
+    voidReason: string | null
+    voidedById: number | null
+    voidedAt: Date | null
+    bankStatus: string | null
+    bankedAt: Date | null
+    bankedById: number | null
+    bankReference: string | null
+  }
+
+  export type PosCashEntryCountAggregateOutputType = {
+    id: number
+    entryNo: number
+    direction: number
+    category: number
+    amount: number
+    source: number
+    party: number
+    reference: number
+    note: number
+    entryDate: number
+    shiftId: number
+    automatic: number
+    createdById: number
+    createdAt: number
+    voided: number
+    voidReason: number
+    voidedById: number
+    voidedAt: number
+    bankStatus: number
+    bankedAt: number
+    bankedById: number
+    bankReference: number
+    _all: number
+  }
+
+
+  export type PosCashEntryAvgAggregateInputType = {
+    id?: true
+    amount?: true
+    shiftId?: true
+    createdById?: true
+    voidedById?: true
+    bankedById?: true
+  }
+
+  export type PosCashEntrySumAggregateInputType = {
+    id?: true
+    amount?: true
+    shiftId?: true
+    createdById?: true
+    voidedById?: true
+    bankedById?: true
+  }
+
+  export type PosCashEntryMinAggregateInputType = {
+    id?: true
+    entryNo?: true
+    direction?: true
+    category?: true
+    amount?: true
+    source?: true
+    party?: true
+    reference?: true
+    note?: true
+    entryDate?: true
+    shiftId?: true
+    automatic?: true
+    createdById?: true
+    createdAt?: true
+    voided?: true
+    voidReason?: true
+    voidedById?: true
+    voidedAt?: true
+    bankStatus?: true
+    bankedAt?: true
+    bankedById?: true
+    bankReference?: true
+  }
+
+  export type PosCashEntryMaxAggregateInputType = {
+    id?: true
+    entryNo?: true
+    direction?: true
+    category?: true
+    amount?: true
+    source?: true
+    party?: true
+    reference?: true
+    note?: true
+    entryDate?: true
+    shiftId?: true
+    automatic?: true
+    createdById?: true
+    createdAt?: true
+    voided?: true
+    voidReason?: true
+    voidedById?: true
+    voidedAt?: true
+    bankStatus?: true
+    bankedAt?: true
+    bankedById?: true
+    bankReference?: true
+  }
+
+  export type PosCashEntryCountAggregateInputType = {
+    id?: true
+    entryNo?: true
+    direction?: true
+    category?: true
+    amount?: true
+    source?: true
+    party?: true
+    reference?: true
+    note?: true
+    entryDate?: true
+    shiftId?: true
+    automatic?: true
+    createdById?: true
+    createdAt?: true
+    voided?: true
+    voidReason?: true
+    voidedById?: true
+    voidedAt?: true
+    bankStatus?: true
+    bankedAt?: true
+    bankedById?: true
+    bankReference?: true
+    _all?: true
+  }
+
+  export type PosCashEntryAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PosCashEntry to aggregate.
+     */
+    where?: PosCashEntryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosCashEntries to fetch.
+     */
+    orderBy?: PosCashEntryOrderByWithRelationInput | PosCashEntryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PosCashEntryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosCashEntries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosCashEntries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PosCashEntries
+    **/
+    _count?: true | PosCashEntryCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PosCashEntryAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PosCashEntrySumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PosCashEntryMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PosCashEntryMaxAggregateInputType
+  }
+
+  export type GetPosCashEntryAggregateType<T extends PosCashEntryAggregateArgs> = {
+        [P in keyof T & keyof AggregatePosCashEntry]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePosCashEntry[P]>
+      : GetScalarType<T[P], AggregatePosCashEntry[P]>
+  }
+
+
+
+
+  export type PosCashEntryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PosCashEntryWhereInput
+    orderBy?: PosCashEntryOrderByWithAggregationInput | PosCashEntryOrderByWithAggregationInput[]
+    by: PosCashEntryScalarFieldEnum[] | PosCashEntryScalarFieldEnum
+    having?: PosCashEntryScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PosCashEntryCountAggregateInputType | true
+    _avg?: PosCashEntryAvgAggregateInputType
+    _sum?: PosCashEntrySumAggregateInputType
+    _min?: PosCashEntryMinAggregateInputType
+    _max?: PosCashEntryMaxAggregateInputType
+  }
+
+  export type PosCashEntryGroupByOutputType = {
+    id: number
+    entryNo: string
+    direction: string
+    category: string
+    amount: number
+    source: string
+    party: string | null
+    reference: string | null
+    note: string | null
+    entryDate: Date
+    shiftId: number | null
+    automatic: boolean
+    createdById: number
+    createdAt: Date
+    voided: boolean
+    voidReason: string | null
+    voidedById: number | null
+    voidedAt: Date | null
+    bankStatus: string | null
+    bankedAt: Date | null
+    bankedById: number | null
+    bankReference: string | null
+    _count: PosCashEntryCountAggregateOutputType | null
+    _avg: PosCashEntryAvgAggregateOutputType | null
+    _sum: PosCashEntrySumAggregateOutputType | null
+    _min: PosCashEntryMinAggregateOutputType | null
+    _max: PosCashEntryMaxAggregateOutputType | null
+  }
+
+  type GetPosCashEntryGroupByPayload<T extends PosCashEntryGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PosCashEntryGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PosCashEntryGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PosCashEntryGroupByOutputType[P]>
+            : GetScalarType<T[P], PosCashEntryGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PosCashEntrySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    entryNo?: boolean
+    direction?: boolean
+    category?: boolean
+    amount?: boolean
+    source?: boolean
+    party?: boolean
+    reference?: boolean
+    note?: boolean
+    entryDate?: boolean
+    shiftId?: boolean
+    automatic?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    voided?: boolean
+    voidReason?: boolean
+    voidedById?: boolean
+    voidedAt?: boolean
+    bankStatus?: boolean
+    bankedAt?: boolean
+    bankedById?: boolean
+    bankReference?: boolean
+    shift?: boolean | PosCashEntry$shiftArgs<ExtArgs>
+  }, ExtArgs["result"]["posCashEntry"]>
+
+  export type PosCashEntrySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    entryNo?: boolean
+    direction?: boolean
+    category?: boolean
+    amount?: boolean
+    source?: boolean
+    party?: boolean
+    reference?: boolean
+    note?: boolean
+    entryDate?: boolean
+    shiftId?: boolean
+    automatic?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    voided?: boolean
+    voidReason?: boolean
+    voidedById?: boolean
+    voidedAt?: boolean
+    bankStatus?: boolean
+    bankedAt?: boolean
+    bankedById?: boolean
+    bankReference?: boolean
+    shift?: boolean | PosCashEntry$shiftArgs<ExtArgs>
+  }, ExtArgs["result"]["posCashEntry"]>
+
+  export type PosCashEntrySelectScalar = {
+    id?: boolean
+    entryNo?: boolean
+    direction?: boolean
+    category?: boolean
+    amount?: boolean
+    source?: boolean
+    party?: boolean
+    reference?: boolean
+    note?: boolean
+    entryDate?: boolean
+    shiftId?: boolean
+    automatic?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    voided?: boolean
+    voidReason?: boolean
+    voidedById?: boolean
+    voidedAt?: boolean
+    bankStatus?: boolean
+    bankedAt?: boolean
+    bankedById?: boolean
+    bankReference?: boolean
+  }
+
+  export type PosCashEntryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    shift?: boolean | PosCashEntry$shiftArgs<ExtArgs>
+  }
+  export type PosCashEntryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    shift?: boolean | PosCashEntry$shiftArgs<ExtArgs>
+  }
+
+  export type $PosCashEntryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PosCashEntry"
+    objects: {
+      shift: Prisma.$PosShiftPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      entryNo: string
+      direction: string
+      category: string
+      amount: number
+      /**
+       * Where the money came from / went: DRAWER (till), BANK or OWNER. Shift-close entries start in
+       * SAFE (cash takings) or CARD (card company) and move to BANK when marked as banked.
+       */
+      source: string
+      party: string | null
+      reference: string | null
+      note: string | null
+      entryDate: Date
+      shiftId: number | null
+      /**
+       * True for entries the system creates at shift close (takings banked, card settlement).
+       */
+      automatic: boolean
+      createdById: number
+      createdAt: Date
+      voided: boolean
+      voidReason: string | null
+      voidedById: number | null
+      voidedAt: Date | null
+      /**
+       * Takings waiting to be banked have bankStatus PENDING; BANKED once the deposit is confirmed.
+       */
+      bankStatus: string | null
+      bankedAt: Date | null
+      bankedById: number | null
+      bankReference: string | null
+    }, ExtArgs["result"]["posCashEntry"]>
+    composites: {}
+  }
+
+  type PosCashEntryGetPayload<S extends boolean | null | undefined | PosCashEntryDefaultArgs> = $Result.GetResult<Prisma.$PosCashEntryPayload, S>
+
+  type PosCashEntryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<PosCashEntryFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: PosCashEntryCountAggregateInputType | true
+    }
+
+  export interface PosCashEntryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PosCashEntry'], meta: { name: 'PosCashEntry' } }
+    /**
+     * Find zero or one PosCashEntry that matches the filter.
+     * @param {PosCashEntryFindUniqueArgs} args - Arguments to find a PosCashEntry
+     * @example
+     * // Get one PosCashEntry
+     * const posCashEntry = await prisma.posCashEntry.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PosCashEntryFindUniqueArgs>(args: SelectSubset<T, PosCashEntryFindUniqueArgs<ExtArgs>>): Prisma__PosCashEntryClient<$Result.GetResult<Prisma.$PosCashEntryPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one PosCashEntry that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {PosCashEntryFindUniqueOrThrowArgs} args - Arguments to find a PosCashEntry
+     * @example
+     * // Get one PosCashEntry
+     * const posCashEntry = await prisma.posCashEntry.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PosCashEntryFindUniqueOrThrowArgs>(args: SelectSubset<T, PosCashEntryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PosCashEntryClient<$Result.GetResult<Prisma.$PosCashEntryPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first PosCashEntry that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosCashEntryFindFirstArgs} args - Arguments to find a PosCashEntry
+     * @example
+     * // Get one PosCashEntry
+     * const posCashEntry = await prisma.posCashEntry.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PosCashEntryFindFirstArgs>(args?: SelectSubset<T, PosCashEntryFindFirstArgs<ExtArgs>>): Prisma__PosCashEntryClient<$Result.GetResult<Prisma.$PosCashEntryPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first PosCashEntry that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosCashEntryFindFirstOrThrowArgs} args - Arguments to find a PosCashEntry
+     * @example
+     * // Get one PosCashEntry
+     * const posCashEntry = await prisma.posCashEntry.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PosCashEntryFindFirstOrThrowArgs>(args?: SelectSubset<T, PosCashEntryFindFirstOrThrowArgs<ExtArgs>>): Prisma__PosCashEntryClient<$Result.GetResult<Prisma.$PosCashEntryPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more PosCashEntries that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosCashEntryFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PosCashEntries
+     * const posCashEntries = await prisma.posCashEntry.findMany()
+     * 
+     * // Get first 10 PosCashEntries
+     * const posCashEntries = await prisma.posCashEntry.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const posCashEntryWithIdOnly = await prisma.posCashEntry.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PosCashEntryFindManyArgs>(args?: SelectSubset<T, PosCashEntryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosCashEntryPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a PosCashEntry.
+     * @param {PosCashEntryCreateArgs} args - Arguments to create a PosCashEntry.
+     * @example
+     * // Create one PosCashEntry
+     * const PosCashEntry = await prisma.posCashEntry.create({
+     *   data: {
+     *     // ... data to create a PosCashEntry
+     *   }
+     * })
+     * 
+     */
+    create<T extends PosCashEntryCreateArgs>(args: SelectSubset<T, PosCashEntryCreateArgs<ExtArgs>>): Prisma__PosCashEntryClient<$Result.GetResult<Prisma.$PosCashEntryPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many PosCashEntries.
+     * @param {PosCashEntryCreateManyArgs} args - Arguments to create many PosCashEntries.
+     * @example
+     * // Create many PosCashEntries
+     * const posCashEntry = await prisma.posCashEntry.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PosCashEntryCreateManyArgs>(args?: SelectSubset<T, PosCashEntryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PosCashEntries and returns the data saved in the database.
+     * @param {PosCashEntryCreateManyAndReturnArgs} args - Arguments to create many PosCashEntries.
+     * @example
+     * // Create many PosCashEntries
+     * const posCashEntry = await prisma.posCashEntry.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PosCashEntries and only return the `id`
+     * const posCashEntryWithIdOnly = await prisma.posCashEntry.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PosCashEntryCreateManyAndReturnArgs>(args?: SelectSubset<T, PosCashEntryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosCashEntryPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a PosCashEntry.
+     * @param {PosCashEntryDeleteArgs} args - Arguments to delete one PosCashEntry.
+     * @example
+     * // Delete one PosCashEntry
+     * const PosCashEntry = await prisma.posCashEntry.delete({
+     *   where: {
+     *     // ... filter to delete one PosCashEntry
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PosCashEntryDeleteArgs>(args: SelectSubset<T, PosCashEntryDeleteArgs<ExtArgs>>): Prisma__PosCashEntryClient<$Result.GetResult<Prisma.$PosCashEntryPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one PosCashEntry.
+     * @param {PosCashEntryUpdateArgs} args - Arguments to update one PosCashEntry.
+     * @example
+     * // Update one PosCashEntry
+     * const posCashEntry = await prisma.posCashEntry.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PosCashEntryUpdateArgs>(args: SelectSubset<T, PosCashEntryUpdateArgs<ExtArgs>>): Prisma__PosCashEntryClient<$Result.GetResult<Prisma.$PosCashEntryPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more PosCashEntries.
+     * @param {PosCashEntryDeleteManyArgs} args - Arguments to filter PosCashEntries to delete.
+     * @example
+     * // Delete a few PosCashEntries
+     * const { count } = await prisma.posCashEntry.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PosCashEntryDeleteManyArgs>(args?: SelectSubset<T, PosCashEntryDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PosCashEntries.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosCashEntryUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PosCashEntries
+     * const posCashEntry = await prisma.posCashEntry.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PosCashEntryUpdateManyArgs>(args: SelectSubset<T, PosCashEntryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one PosCashEntry.
+     * @param {PosCashEntryUpsertArgs} args - Arguments to update or create a PosCashEntry.
+     * @example
+     * // Update or create a PosCashEntry
+     * const posCashEntry = await prisma.posCashEntry.upsert({
+     *   create: {
+     *     // ... data to create a PosCashEntry
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PosCashEntry we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PosCashEntryUpsertArgs>(args: SelectSubset<T, PosCashEntryUpsertArgs<ExtArgs>>): Prisma__PosCashEntryClient<$Result.GetResult<Prisma.$PosCashEntryPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of PosCashEntries.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosCashEntryCountArgs} args - Arguments to filter PosCashEntries to count.
+     * @example
+     * // Count the number of PosCashEntries
+     * const count = await prisma.posCashEntry.count({
+     *   where: {
+     *     // ... the filter for the PosCashEntries we want to count
+     *   }
+     * })
+    **/
+    count<T extends PosCashEntryCountArgs>(
+      args?: Subset<T, PosCashEntryCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PosCashEntryCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PosCashEntry.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosCashEntryAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PosCashEntryAggregateArgs>(args: Subset<T, PosCashEntryAggregateArgs>): Prisma.PrismaPromise<GetPosCashEntryAggregateType<T>>
+
+    /**
+     * Group by PosCashEntry.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosCashEntryGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PosCashEntryGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PosCashEntryGroupByArgs['orderBy'] }
+        : { orderBy?: PosCashEntryGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PosCashEntryGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPosCashEntryGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PosCashEntry model
+   */
+  readonly fields: PosCashEntryFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PosCashEntry.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PosCashEntryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    shift<T extends PosCashEntry$shiftArgs<ExtArgs> = {}>(args?: Subset<T, PosCashEntry$shiftArgs<ExtArgs>>): Prisma__PosShiftClient<$Result.GetResult<Prisma.$PosShiftPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PosCashEntry model
+   */ 
+  interface PosCashEntryFieldRefs {
+    readonly id: FieldRef<"PosCashEntry", 'Int'>
+    readonly entryNo: FieldRef<"PosCashEntry", 'String'>
+    readonly direction: FieldRef<"PosCashEntry", 'String'>
+    readonly category: FieldRef<"PosCashEntry", 'String'>
+    readonly amount: FieldRef<"PosCashEntry", 'Float'>
+    readonly source: FieldRef<"PosCashEntry", 'String'>
+    readonly party: FieldRef<"PosCashEntry", 'String'>
+    readonly reference: FieldRef<"PosCashEntry", 'String'>
+    readonly note: FieldRef<"PosCashEntry", 'String'>
+    readonly entryDate: FieldRef<"PosCashEntry", 'DateTime'>
+    readonly shiftId: FieldRef<"PosCashEntry", 'Int'>
+    readonly automatic: FieldRef<"PosCashEntry", 'Boolean'>
+    readonly createdById: FieldRef<"PosCashEntry", 'Int'>
+    readonly createdAt: FieldRef<"PosCashEntry", 'DateTime'>
+    readonly voided: FieldRef<"PosCashEntry", 'Boolean'>
+    readonly voidReason: FieldRef<"PosCashEntry", 'String'>
+    readonly voidedById: FieldRef<"PosCashEntry", 'Int'>
+    readonly voidedAt: FieldRef<"PosCashEntry", 'DateTime'>
+    readonly bankStatus: FieldRef<"PosCashEntry", 'String'>
+    readonly bankedAt: FieldRef<"PosCashEntry", 'DateTime'>
+    readonly bankedById: FieldRef<"PosCashEntry", 'Int'>
+    readonly bankReference: FieldRef<"PosCashEntry", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PosCashEntry findUnique
+   */
+  export type PosCashEntryFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCashEntry
+     */
+    select?: PosCashEntrySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCashEntryInclude<ExtArgs> | null
+    /**
+     * Filter, which PosCashEntry to fetch.
+     */
+    where: PosCashEntryWhereUniqueInput
+  }
+
+  /**
+   * PosCashEntry findUniqueOrThrow
+   */
+  export type PosCashEntryFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCashEntry
+     */
+    select?: PosCashEntrySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCashEntryInclude<ExtArgs> | null
+    /**
+     * Filter, which PosCashEntry to fetch.
+     */
+    where: PosCashEntryWhereUniqueInput
+  }
+
+  /**
+   * PosCashEntry findFirst
+   */
+  export type PosCashEntryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCashEntry
+     */
+    select?: PosCashEntrySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCashEntryInclude<ExtArgs> | null
+    /**
+     * Filter, which PosCashEntry to fetch.
+     */
+    where?: PosCashEntryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosCashEntries to fetch.
+     */
+    orderBy?: PosCashEntryOrderByWithRelationInput | PosCashEntryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PosCashEntries.
+     */
+    cursor?: PosCashEntryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosCashEntries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosCashEntries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PosCashEntries.
+     */
+    distinct?: PosCashEntryScalarFieldEnum | PosCashEntryScalarFieldEnum[]
+  }
+
+  /**
+   * PosCashEntry findFirstOrThrow
+   */
+  export type PosCashEntryFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCashEntry
+     */
+    select?: PosCashEntrySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCashEntryInclude<ExtArgs> | null
+    /**
+     * Filter, which PosCashEntry to fetch.
+     */
+    where?: PosCashEntryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosCashEntries to fetch.
+     */
+    orderBy?: PosCashEntryOrderByWithRelationInput | PosCashEntryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PosCashEntries.
+     */
+    cursor?: PosCashEntryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosCashEntries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosCashEntries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PosCashEntries.
+     */
+    distinct?: PosCashEntryScalarFieldEnum | PosCashEntryScalarFieldEnum[]
+  }
+
+  /**
+   * PosCashEntry findMany
+   */
+  export type PosCashEntryFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCashEntry
+     */
+    select?: PosCashEntrySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCashEntryInclude<ExtArgs> | null
+    /**
+     * Filter, which PosCashEntries to fetch.
+     */
+    where?: PosCashEntryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosCashEntries to fetch.
+     */
+    orderBy?: PosCashEntryOrderByWithRelationInput | PosCashEntryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PosCashEntries.
+     */
+    cursor?: PosCashEntryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosCashEntries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosCashEntries.
+     */
+    skip?: number
+    distinct?: PosCashEntryScalarFieldEnum | PosCashEntryScalarFieldEnum[]
+  }
+
+  /**
+   * PosCashEntry create
+   */
+  export type PosCashEntryCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCashEntry
+     */
+    select?: PosCashEntrySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCashEntryInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PosCashEntry.
+     */
+    data: XOR<PosCashEntryCreateInput, PosCashEntryUncheckedCreateInput>
+  }
+
+  /**
+   * PosCashEntry createMany
+   */
+  export type PosCashEntryCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PosCashEntries.
+     */
+    data: PosCashEntryCreateManyInput | PosCashEntryCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PosCashEntry createManyAndReturn
+   */
+  export type PosCashEntryCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCashEntry
+     */
+    select?: PosCashEntrySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many PosCashEntries.
+     */
+    data: PosCashEntryCreateManyInput | PosCashEntryCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCashEntryIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PosCashEntry update
+   */
+  export type PosCashEntryUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCashEntry
+     */
+    select?: PosCashEntrySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCashEntryInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PosCashEntry.
+     */
+    data: XOR<PosCashEntryUpdateInput, PosCashEntryUncheckedUpdateInput>
+    /**
+     * Choose, which PosCashEntry to update.
+     */
+    where: PosCashEntryWhereUniqueInput
+  }
+
+  /**
+   * PosCashEntry updateMany
+   */
+  export type PosCashEntryUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PosCashEntries.
+     */
+    data: XOR<PosCashEntryUpdateManyMutationInput, PosCashEntryUncheckedUpdateManyInput>
+    /**
+     * Filter which PosCashEntries to update
+     */
+    where?: PosCashEntryWhereInput
+  }
+
+  /**
+   * PosCashEntry upsert
+   */
+  export type PosCashEntryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCashEntry
+     */
+    select?: PosCashEntrySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCashEntryInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PosCashEntry to update in case it exists.
+     */
+    where: PosCashEntryWhereUniqueInput
+    /**
+     * In case the PosCashEntry found by the `where` argument doesn't exist, create a new PosCashEntry with this data.
+     */
+    create: XOR<PosCashEntryCreateInput, PosCashEntryUncheckedCreateInput>
+    /**
+     * In case the PosCashEntry was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PosCashEntryUpdateInput, PosCashEntryUncheckedUpdateInput>
+  }
+
+  /**
+   * PosCashEntry delete
+   */
+  export type PosCashEntryDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCashEntry
+     */
+    select?: PosCashEntrySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCashEntryInclude<ExtArgs> | null
+    /**
+     * Filter which PosCashEntry to delete.
+     */
+    where: PosCashEntryWhereUniqueInput
+  }
+
+  /**
+   * PosCashEntry deleteMany
+   */
+  export type PosCashEntryDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PosCashEntries to delete
+     */
+    where?: PosCashEntryWhereInput
+  }
+
+  /**
+   * PosCashEntry.shift
+   */
+  export type PosCashEntry$shiftArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosShift
+     */
+    select?: PosShiftSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosShiftInclude<ExtArgs> | null
+    where?: PosShiftWhereInput
+  }
+
+  /**
+   * PosCashEntry without action
+   */
+  export type PosCashEntryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCashEntry
+     */
+    select?: PosCashEntrySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCashEntryInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model InventoryMovement
+   */
+
+  export type AggregateInventoryMovement = {
+    _count: InventoryMovementCountAggregateOutputType | null
+    _avg: InventoryMovementAvgAggregateOutputType | null
+    _sum: InventoryMovementSumAggregateOutputType | null
+    _min: InventoryMovementMinAggregateOutputType | null
+    _max: InventoryMovementMaxAggregateOutputType | null
+  }
+
+  export type InventoryMovementAvgAggregateOutputType = {
+    id: number | null
+    productId: number | null
+    quantity: number | null
+    shiftId: number | null
+    createdById: number | null
+  }
+
+  export type InventoryMovementSumAggregateOutputType = {
+    id: number | null
+    productId: number | null
+    quantity: number | null
+    shiftId: number | null
+    createdById: number | null
+  }
+
+  export type InventoryMovementMinAggregateOutputType = {
+    id: number | null
+    productId: number | null
+    kind: string | null
+    type: string | null
+    quantity: number | null
+    shiftId: number | null
+    reference: string | null
+    createdById: number | null
+    createdAt: Date | null
+  }
+
+  export type InventoryMovementMaxAggregateOutputType = {
+    id: number | null
+    productId: number | null
+    kind: string | null
+    type: string | null
+    quantity: number | null
+    shiftId: number | null
+    reference: string | null
+    createdById: number | null
+    createdAt: Date | null
+  }
+
+  export type InventoryMovementCountAggregateOutputType = {
+    id: number
+    productId: number
+    kind: number
+    type: number
+    quantity: number
+    shiftId: number
+    reference: number
+    createdById: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type InventoryMovementAvgAggregateInputType = {
+    id?: true
+    productId?: true
+    quantity?: true
+    shiftId?: true
+    createdById?: true
+  }
+
+  export type InventoryMovementSumAggregateInputType = {
+    id?: true
+    productId?: true
+    quantity?: true
+    shiftId?: true
+    createdById?: true
+  }
+
+  export type InventoryMovementMinAggregateInputType = {
+    id?: true
+    productId?: true
+    kind?: true
+    type?: true
+    quantity?: true
+    shiftId?: true
+    reference?: true
+    createdById?: true
+    createdAt?: true
+  }
+
+  export type InventoryMovementMaxAggregateInputType = {
+    id?: true
+    productId?: true
+    kind?: true
+    type?: true
+    quantity?: true
+    shiftId?: true
+    reference?: true
+    createdById?: true
+    createdAt?: true
+  }
+
+  export type InventoryMovementCountAggregateInputType = {
+    id?: true
+    productId?: true
+    kind?: true
+    type?: true
+    quantity?: true
+    shiftId?: true
+    reference?: true
+    createdById?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type InventoryMovementAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which InventoryMovement to aggregate.
+     */
+    where?: InventoryMovementWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryMovements to fetch.
+     */
+    orderBy?: InventoryMovementOrderByWithRelationInput | InventoryMovementOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: InventoryMovementWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryMovements from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryMovements.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned InventoryMovements
+    **/
+    _count?: true | InventoryMovementCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: InventoryMovementAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: InventoryMovementSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: InventoryMovementMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: InventoryMovementMaxAggregateInputType
+  }
+
+  export type GetInventoryMovementAggregateType<T extends InventoryMovementAggregateArgs> = {
+        [P in keyof T & keyof AggregateInventoryMovement]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateInventoryMovement[P]>
+      : GetScalarType<T[P], AggregateInventoryMovement[P]>
+  }
+
+
+
+
+  export type InventoryMovementGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InventoryMovementWhereInput
+    orderBy?: InventoryMovementOrderByWithAggregationInput | InventoryMovementOrderByWithAggregationInput[]
+    by: InventoryMovementScalarFieldEnum[] | InventoryMovementScalarFieldEnum
+    having?: InventoryMovementScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: InventoryMovementCountAggregateInputType | true
+    _avg?: InventoryMovementAvgAggregateInputType
+    _sum?: InventoryMovementSumAggregateInputType
+    _min?: InventoryMovementMinAggregateInputType
+    _max?: InventoryMovementMaxAggregateInputType
+  }
+
+  export type InventoryMovementGroupByOutputType = {
+    id: number
+    productId: number
+    kind: string
+    type: string
+    quantity: number
+    shiftId: number | null
+    reference: string | null
+    createdById: number | null
+    createdAt: Date
+    _count: InventoryMovementCountAggregateOutputType | null
+    _avg: InventoryMovementAvgAggregateOutputType | null
+    _sum: InventoryMovementSumAggregateOutputType | null
+    _min: InventoryMovementMinAggregateOutputType | null
+    _max: InventoryMovementMaxAggregateOutputType | null
+  }
+
+  type GetInventoryMovementGroupByPayload<T extends InventoryMovementGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<InventoryMovementGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof InventoryMovementGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], InventoryMovementGroupByOutputType[P]>
+            : GetScalarType<T[P], InventoryMovementGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type InventoryMovementSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    productId?: boolean
+    kind?: boolean
+    type?: boolean
+    quantity?: boolean
+    shiftId?: boolean
+    reference?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    shift?: boolean | InventoryMovement$shiftArgs<ExtArgs>
+  }, ExtArgs["result"]["inventoryMovement"]>
+
+  export type InventoryMovementSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    productId?: boolean
+    kind?: boolean
+    type?: boolean
+    quantity?: boolean
+    shiftId?: boolean
+    reference?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    shift?: boolean | InventoryMovement$shiftArgs<ExtArgs>
+  }, ExtArgs["result"]["inventoryMovement"]>
+
+  export type InventoryMovementSelectScalar = {
+    id?: boolean
+    productId?: boolean
+    kind?: boolean
+    type?: boolean
+    quantity?: boolean
+    shiftId?: boolean
+    reference?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+  }
+
+  export type InventoryMovementInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    shift?: boolean | InventoryMovement$shiftArgs<ExtArgs>
+  }
+  export type InventoryMovementIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    shift?: boolean | InventoryMovement$shiftArgs<ExtArgs>
+  }
+
+  export type $InventoryMovementPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "InventoryMovement"
+    objects: {
+      shift: Prisma.$PosShiftPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      productId: number
+      /**
+       * STOCK (bottles for sale) or EMPTIES (empty bottles on hand).
+       */
+      kind: string
+      /**
+       * OPENING | RECEIVED | SOLD | ADJUSTED | COLLECTED | RETURNED
+       */
+      type: string
+      /**
+       * Signed change in units.
+       */
+      quantity: number
+      shiftId: number | null
+      reference: string | null
+      createdById: number | null
+      createdAt: Date
+    }, ExtArgs["result"]["inventoryMovement"]>
+    composites: {}
+  }
+
+  type InventoryMovementGetPayload<S extends boolean | null | undefined | InventoryMovementDefaultArgs> = $Result.GetResult<Prisma.$InventoryMovementPayload, S>
+
+  type InventoryMovementCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<InventoryMovementFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: InventoryMovementCountAggregateInputType | true
+    }
+
+  export interface InventoryMovementDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['InventoryMovement'], meta: { name: 'InventoryMovement' } }
+    /**
+     * Find zero or one InventoryMovement that matches the filter.
+     * @param {InventoryMovementFindUniqueArgs} args - Arguments to find a InventoryMovement
+     * @example
+     * // Get one InventoryMovement
+     * const inventoryMovement = await prisma.inventoryMovement.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends InventoryMovementFindUniqueArgs>(args: SelectSubset<T, InventoryMovementFindUniqueArgs<ExtArgs>>): Prisma__InventoryMovementClient<$Result.GetResult<Prisma.$InventoryMovementPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one InventoryMovement that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {InventoryMovementFindUniqueOrThrowArgs} args - Arguments to find a InventoryMovement
+     * @example
+     * // Get one InventoryMovement
+     * const inventoryMovement = await prisma.inventoryMovement.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends InventoryMovementFindUniqueOrThrowArgs>(args: SelectSubset<T, InventoryMovementFindUniqueOrThrowArgs<ExtArgs>>): Prisma__InventoryMovementClient<$Result.GetResult<Prisma.$InventoryMovementPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first InventoryMovement that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryMovementFindFirstArgs} args - Arguments to find a InventoryMovement
+     * @example
+     * // Get one InventoryMovement
+     * const inventoryMovement = await prisma.inventoryMovement.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends InventoryMovementFindFirstArgs>(args?: SelectSubset<T, InventoryMovementFindFirstArgs<ExtArgs>>): Prisma__InventoryMovementClient<$Result.GetResult<Prisma.$InventoryMovementPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first InventoryMovement that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryMovementFindFirstOrThrowArgs} args - Arguments to find a InventoryMovement
+     * @example
+     * // Get one InventoryMovement
+     * const inventoryMovement = await prisma.inventoryMovement.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends InventoryMovementFindFirstOrThrowArgs>(args?: SelectSubset<T, InventoryMovementFindFirstOrThrowArgs<ExtArgs>>): Prisma__InventoryMovementClient<$Result.GetResult<Prisma.$InventoryMovementPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more InventoryMovements that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryMovementFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all InventoryMovements
+     * const inventoryMovements = await prisma.inventoryMovement.findMany()
+     * 
+     * // Get first 10 InventoryMovements
+     * const inventoryMovements = await prisma.inventoryMovement.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const inventoryMovementWithIdOnly = await prisma.inventoryMovement.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends InventoryMovementFindManyArgs>(args?: SelectSubset<T, InventoryMovementFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryMovementPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a InventoryMovement.
+     * @param {InventoryMovementCreateArgs} args - Arguments to create a InventoryMovement.
+     * @example
+     * // Create one InventoryMovement
+     * const InventoryMovement = await prisma.inventoryMovement.create({
+     *   data: {
+     *     // ... data to create a InventoryMovement
+     *   }
+     * })
+     * 
+     */
+    create<T extends InventoryMovementCreateArgs>(args: SelectSubset<T, InventoryMovementCreateArgs<ExtArgs>>): Prisma__InventoryMovementClient<$Result.GetResult<Prisma.$InventoryMovementPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many InventoryMovements.
+     * @param {InventoryMovementCreateManyArgs} args - Arguments to create many InventoryMovements.
+     * @example
+     * // Create many InventoryMovements
+     * const inventoryMovement = await prisma.inventoryMovement.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends InventoryMovementCreateManyArgs>(args?: SelectSubset<T, InventoryMovementCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many InventoryMovements and returns the data saved in the database.
+     * @param {InventoryMovementCreateManyAndReturnArgs} args - Arguments to create many InventoryMovements.
+     * @example
+     * // Create many InventoryMovements
+     * const inventoryMovement = await prisma.inventoryMovement.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many InventoryMovements and only return the `id`
+     * const inventoryMovementWithIdOnly = await prisma.inventoryMovement.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends InventoryMovementCreateManyAndReturnArgs>(args?: SelectSubset<T, InventoryMovementCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryMovementPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a InventoryMovement.
+     * @param {InventoryMovementDeleteArgs} args - Arguments to delete one InventoryMovement.
+     * @example
+     * // Delete one InventoryMovement
+     * const InventoryMovement = await prisma.inventoryMovement.delete({
+     *   where: {
+     *     // ... filter to delete one InventoryMovement
+     *   }
+     * })
+     * 
+     */
+    delete<T extends InventoryMovementDeleteArgs>(args: SelectSubset<T, InventoryMovementDeleteArgs<ExtArgs>>): Prisma__InventoryMovementClient<$Result.GetResult<Prisma.$InventoryMovementPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one InventoryMovement.
+     * @param {InventoryMovementUpdateArgs} args - Arguments to update one InventoryMovement.
+     * @example
+     * // Update one InventoryMovement
+     * const inventoryMovement = await prisma.inventoryMovement.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends InventoryMovementUpdateArgs>(args: SelectSubset<T, InventoryMovementUpdateArgs<ExtArgs>>): Prisma__InventoryMovementClient<$Result.GetResult<Prisma.$InventoryMovementPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more InventoryMovements.
+     * @param {InventoryMovementDeleteManyArgs} args - Arguments to filter InventoryMovements to delete.
+     * @example
+     * // Delete a few InventoryMovements
+     * const { count } = await prisma.inventoryMovement.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends InventoryMovementDeleteManyArgs>(args?: SelectSubset<T, InventoryMovementDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more InventoryMovements.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryMovementUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many InventoryMovements
+     * const inventoryMovement = await prisma.inventoryMovement.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends InventoryMovementUpdateManyArgs>(args: SelectSubset<T, InventoryMovementUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one InventoryMovement.
+     * @param {InventoryMovementUpsertArgs} args - Arguments to update or create a InventoryMovement.
+     * @example
+     * // Update or create a InventoryMovement
+     * const inventoryMovement = await prisma.inventoryMovement.upsert({
+     *   create: {
+     *     // ... data to create a InventoryMovement
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the InventoryMovement we want to update
+     *   }
+     * })
+     */
+    upsert<T extends InventoryMovementUpsertArgs>(args: SelectSubset<T, InventoryMovementUpsertArgs<ExtArgs>>): Prisma__InventoryMovementClient<$Result.GetResult<Prisma.$InventoryMovementPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of InventoryMovements.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryMovementCountArgs} args - Arguments to filter InventoryMovements to count.
+     * @example
+     * // Count the number of InventoryMovements
+     * const count = await prisma.inventoryMovement.count({
+     *   where: {
+     *     // ... the filter for the InventoryMovements we want to count
+     *   }
+     * })
+    **/
+    count<T extends InventoryMovementCountArgs>(
+      args?: Subset<T, InventoryMovementCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], InventoryMovementCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a InventoryMovement.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryMovementAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends InventoryMovementAggregateArgs>(args: Subset<T, InventoryMovementAggregateArgs>): Prisma.PrismaPromise<GetInventoryMovementAggregateType<T>>
+
+    /**
+     * Group by InventoryMovement.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryMovementGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends InventoryMovementGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: InventoryMovementGroupByArgs['orderBy'] }
+        : { orderBy?: InventoryMovementGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, InventoryMovementGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetInventoryMovementGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the InventoryMovement model
+   */
+  readonly fields: InventoryMovementFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for InventoryMovement.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__InventoryMovementClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    shift<T extends InventoryMovement$shiftArgs<ExtArgs> = {}>(args?: Subset<T, InventoryMovement$shiftArgs<ExtArgs>>): Prisma__PosShiftClient<$Result.GetResult<Prisma.$PosShiftPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the InventoryMovement model
+   */ 
+  interface InventoryMovementFieldRefs {
+    readonly id: FieldRef<"InventoryMovement", 'Int'>
+    readonly productId: FieldRef<"InventoryMovement", 'Int'>
+    readonly kind: FieldRef<"InventoryMovement", 'String'>
+    readonly type: FieldRef<"InventoryMovement", 'String'>
+    readonly quantity: FieldRef<"InventoryMovement", 'Int'>
+    readonly shiftId: FieldRef<"InventoryMovement", 'Int'>
+    readonly reference: FieldRef<"InventoryMovement", 'String'>
+    readonly createdById: FieldRef<"InventoryMovement", 'Int'>
+    readonly createdAt: FieldRef<"InventoryMovement", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * InventoryMovement findUnique
+   */
+  export type InventoryMovementFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryMovement
+     */
+    select?: InventoryMovementSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryMovementInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryMovement to fetch.
+     */
+    where: InventoryMovementWhereUniqueInput
+  }
+
+  /**
+   * InventoryMovement findUniqueOrThrow
+   */
+  export type InventoryMovementFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryMovement
+     */
+    select?: InventoryMovementSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryMovementInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryMovement to fetch.
+     */
+    where: InventoryMovementWhereUniqueInput
+  }
+
+  /**
+   * InventoryMovement findFirst
+   */
+  export type InventoryMovementFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryMovement
+     */
+    select?: InventoryMovementSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryMovementInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryMovement to fetch.
+     */
+    where?: InventoryMovementWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryMovements to fetch.
+     */
+    orderBy?: InventoryMovementOrderByWithRelationInput | InventoryMovementOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for InventoryMovements.
+     */
+    cursor?: InventoryMovementWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryMovements from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryMovements.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of InventoryMovements.
+     */
+    distinct?: InventoryMovementScalarFieldEnum | InventoryMovementScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryMovement findFirstOrThrow
+   */
+  export type InventoryMovementFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryMovement
+     */
+    select?: InventoryMovementSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryMovementInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryMovement to fetch.
+     */
+    where?: InventoryMovementWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryMovements to fetch.
+     */
+    orderBy?: InventoryMovementOrderByWithRelationInput | InventoryMovementOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for InventoryMovements.
+     */
+    cursor?: InventoryMovementWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryMovements from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryMovements.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of InventoryMovements.
+     */
+    distinct?: InventoryMovementScalarFieldEnum | InventoryMovementScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryMovement findMany
+   */
+  export type InventoryMovementFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryMovement
+     */
+    select?: InventoryMovementSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryMovementInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryMovements to fetch.
+     */
+    where?: InventoryMovementWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryMovements to fetch.
+     */
+    orderBy?: InventoryMovementOrderByWithRelationInput | InventoryMovementOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing InventoryMovements.
+     */
+    cursor?: InventoryMovementWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryMovements from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryMovements.
+     */
+    skip?: number
+    distinct?: InventoryMovementScalarFieldEnum | InventoryMovementScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryMovement create
+   */
+  export type InventoryMovementCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryMovement
+     */
+    select?: InventoryMovementSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryMovementInclude<ExtArgs> | null
+    /**
+     * The data needed to create a InventoryMovement.
+     */
+    data: XOR<InventoryMovementCreateInput, InventoryMovementUncheckedCreateInput>
+  }
+
+  /**
+   * InventoryMovement createMany
+   */
+  export type InventoryMovementCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many InventoryMovements.
+     */
+    data: InventoryMovementCreateManyInput | InventoryMovementCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * InventoryMovement createManyAndReturn
+   */
+  export type InventoryMovementCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryMovement
+     */
+    select?: InventoryMovementSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many InventoryMovements.
+     */
+    data: InventoryMovementCreateManyInput | InventoryMovementCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryMovementIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * InventoryMovement update
+   */
+  export type InventoryMovementUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryMovement
+     */
+    select?: InventoryMovementSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryMovementInclude<ExtArgs> | null
+    /**
+     * The data needed to update a InventoryMovement.
+     */
+    data: XOR<InventoryMovementUpdateInput, InventoryMovementUncheckedUpdateInput>
+    /**
+     * Choose, which InventoryMovement to update.
+     */
+    where: InventoryMovementWhereUniqueInput
+  }
+
+  /**
+   * InventoryMovement updateMany
+   */
+  export type InventoryMovementUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update InventoryMovements.
+     */
+    data: XOR<InventoryMovementUpdateManyMutationInput, InventoryMovementUncheckedUpdateManyInput>
+    /**
+     * Filter which InventoryMovements to update
+     */
+    where?: InventoryMovementWhereInput
+  }
+
+  /**
+   * InventoryMovement upsert
+   */
+  export type InventoryMovementUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryMovement
+     */
+    select?: InventoryMovementSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryMovementInclude<ExtArgs> | null
+    /**
+     * The filter to search for the InventoryMovement to update in case it exists.
+     */
+    where: InventoryMovementWhereUniqueInput
+    /**
+     * In case the InventoryMovement found by the `where` argument doesn't exist, create a new InventoryMovement with this data.
+     */
+    create: XOR<InventoryMovementCreateInput, InventoryMovementUncheckedCreateInput>
+    /**
+     * In case the InventoryMovement was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<InventoryMovementUpdateInput, InventoryMovementUncheckedUpdateInput>
+  }
+
+  /**
+   * InventoryMovement delete
+   */
+  export type InventoryMovementDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryMovement
+     */
+    select?: InventoryMovementSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryMovementInclude<ExtArgs> | null
+    /**
+     * Filter which InventoryMovement to delete.
+     */
+    where: InventoryMovementWhereUniqueInput
+  }
+
+  /**
+   * InventoryMovement deleteMany
+   */
+  export type InventoryMovementDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which InventoryMovements to delete
+     */
+    where?: InventoryMovementWhereInput
+  }
+
+  /**
+   * InventoryMovement.shift
+   */
+  export type InventoryMovement$shiftArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosShift
+     */
+    select?: PosShiftSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosShiftInclude<ExtArgs> | null
+    where?: PosShiftWhereInput
+  }
+
+  /**
+   * InventoryMovement without action
+   */
+  export type InventoryMovementDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryMovement
+     */
+    select?: InventoryMovementSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryMovementInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -30376,6 +34273,7 @@ export namespace Prisma {
     amountReceived: 'amountReceived',
     changeGiven: 'changeGiven',
     paymentMethod: 'paymentMethod',
+    paymentReference: 'paymentReference',
     cashierId: 'cashierId',
     customerId: 'customerId',
     pointsEarned: 'pointsEarned',
@@ -30384,6 +34282,7 @@ export namespace Prisma {
     discountAmount: 'discountAmount',
     pointsRedeemed: 'pointsRedeemed',
     pointsValue: 'pointsValue',
+    shiftId: 'shiftId',
     createdAt: 'createdAt'
   };
 
@@ -30748,6 +34647,76 @@ export namespace Prisma {
   };
 
   export type PosSettingScalarFieldEnum = (typeof PosSettingScalarFieldEnum)[keyof typeof PosSettingScalarFieldEnum]
+
+
+  export const PosShiftScalarFieldEnum: {
+    id: 'id',
+    shiftNo: 'shiftNo',
+    status: 'status',
+    openedById: 'openedById',
+    openedAt: 'openedAt',
+    openingFloat: 'openingFloat',
+    countedCash: 'countedCash',
+    denominations: 'denominations',
+    countedById: 'countedById',
+    countedAt: 'countedAt',
+    expectedCash: 'expectedCash',
+    cashDifference: 'cashDifference',
+    differenceReason: 'differenceReason',
+    cardSlipTotal: 'cardSlipTotal',
+    cardDifferenceReason: 'cardDifferenceReason',
+    floatLeft: 'floatLeft',
+    cashBanked: 'cashBanked',
+    closedById: 'closedById',
+    closedAt: 'closedAt',
+    notes: 'notes',
+    report: 'report'
+  };
+
+  export type PosShiftScalarFieldEnum = (typeof PosShiftScalarFieldEnum)[keyof typeof PosShiftScalarFieldEnum]
+
+
+  export const PosCashEntryScalarFieldEnum: {
+    id: 'id',
+    entryNo: 'entryNo',
+    direction: 'direction',
+    category: 'category',
+    amount: 'amount',
+    source: 'source',
+    party: 'party',
+    reference: 'reference',
+    note: 'note',
+    entryDate: 'entryDate',
+    shiftId: 'shiftId',
+    automatic: 'automatic',
+    createdById: 'createdById',
+    createdAt: 'createdAt',
+    voided: 'voided',
+    voidReason: 'voidReason',
+    voidedById: 'voidedById',
+    voidedAt: 'voidedAt',
+    bankStatus: 'bankStatus',
+    bankedAt: 'bankedAt',
+    bankedById: 'bankedById',
+    bankReference: 'bankReference'
+  };
+
+  export type PosCashEntryScalarFieldEnum = (typeof PosCashEntryScalarFieldEnum)[keyof typeof PosCashEntryScalarFieldEnum]
+
+
+  export const InventoryMovementScalarFieldEnum: {
+    id: 'id',
+    productId: 'productId',
+    kind: 'kind',
+    type: 'type',
+    quantity: 'quantity',
+    shiftId: 'shiftId',
+    reference: 'reference',
+    createdById: 'createdById',
+    createdAt: 'createdAt'
+  };
+
+  export type InventoryMovementScalarFieldEnum = (typeof InventoryMovementScalarFieldEnum)[keyof typeof InventoryMovementScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -31258,6 +35227,7 @@ export namespace Prisma {
     amountReceived?: FloatFilter<"PosCounterSale"> | number
     changeGiven?: FloatFilter<"PosCounterSale"> | number
     paymentMethod?: EnumPaymentMethodFilter<"PosCounterSale"> | $Enums.PaymentMethod
+    paymentReference?: StringNullableFilter<"PosCounterSale"> | string | null
     cashierId?: IntFilter<"PosCounterSale"> | number
     customerId?: IntNullableFilter<"PosCounterSale"> | number | null
     pointsEarned?: IntFilter<"PosCounterSale"> | number
@@ -31266,9 +35236,11 @@ export namespace Prisma {
     discountAmount?: FloatFilter<"PosCounterSale"> | number
     pointsRedeemed?: IntFilter<"PosCounterSale"> | number
     pointsValue?: FloatFilter<"PosCounterSale"> | number
+    shiftId?: IntNullableFilter<"PosCounterSale"> | number | null
     createdAt?: DateTimeFilter<"PosCounterSale"> | Date | string
     cashier?: XOR<PosAdminRelationFilter, PosAdminWhereInput>
     customer?: XOR<PosCustomerNullableRelationFilter, PosCustomerWhereInput> | null
+    shift?: XOR<PosShiftNullableRelationFilter, PosShiftWhereInput> | null
   }
 
   export type PosCounterSaleOrderByWithRelationInput = {
@@ -31280,6 +35252,7 @@ export namespace Prisma {
     amountReceived?: SortOrder
     changeGiven?: SortOrder
     paymentMethod?: SortOrder
+    paymentReference?: SortOrderInput | SortOrder
     cashierId?: SortOrder
     customerId?: SortOrderInput | SortOrder
     pointsEarned?: SortOrder
@@ -31288,9 +35261,11 @@ export namespace Prisma {
     discountAmount?: SortOrder
     pointsRedeemed?: SortOrder
     pointsValue?: SortOrder
+    shiftId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     cashier?: PosAdminOrderByWithRelationInput
     customer?: PosCustomerOrderByWithRelationInput
+    shift?: PosShiftOrderByWithRelationInput
   }
 
   export type PosCounterSaleWhereUniqueInput = Prisma.AtLeast<{
@@ -31305,6 +35280,7 @@ export namespace Prisma {
     amountReceived?: FloatFilter<"PosCounterSale"> | number
     changeGiven?: FloatFilter<"PosCounterSale"> | number
     paymentMethod?: EnumPaymentMethodFilter<"PosCounterSale"> | $Enums.PaymentMethod
+    paymentReference?: StringNullableFilter<"PosCounterSale"> | string | null
     cashierId?: IntFilter<"PosCounterSale"> | number
     customerId?: IntNullableFilter<"PosCounterSale"> | number | null
     pointsEarned?: IntFilter<"PosCounterSale"> | number
@@ -31313,9 +35289,11 @@ export namespace Prisma {
     discountAmount?: FloatFilter<"PosCounterSale"> | number
     pointsRedeemed?: IntFilter<"PosCounterSale"> | number
     pointsValue?: FloatFilter<"PosCounterSale"> | number
+    shiftId?: IntNullableFilter<"PosCounterSale"> | number | null
     createdAt?: DateTimeFilter<"PosCounterSale"> | Date | string
     cashier?: XOR<PosAdminRelationFilter, PosAdminWhereInput>
     customer?: XOR<PosCustomerNullableRelationFilter, PosCustomerWhereInput> | null
+    shift?: XOR<PosShiftNullableRelationFilter, PosShiftWhereInput> | null
   }, "id" | "invoiceGroupCode">
 
   export type PosCounterSaleOrderByWithAggregationInput = {
@@ -31327,6 +35305,7 @@ export namespace Prisma {
     amountReceived?: SortOrder
     changeGiven?: SortOrder
     paymentMethod?: SortOrder
+    paymentReference?: SortOrderInput | SortOrder
     cashierId?: SortOrder
     customerId?: SortOrderInput | SortOrder
     pointsEarned?: SortOrder
@@ -31335,6 +35314,7 @@ export namespace Prisma {
     discountAmount?: SortOrder
     pointsRedeemed?: SortOrder
     pointsValue?: SortOrder
+    shiftId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     _count?: PosCounterSaleCountOrderByAggregateInput
     _avg?: PosCounterSaleAvgOrderByAggregateInput
@@ -31355,6 +35335,7 @@ export namespace Prisma {
     amountReceived?: FloatWithAggregatesFilter<"PosCounterSale"> | number
     changeGiven?: FloatWithAggregatesFilter<"PosCounterSale"> | number
     paymentMethod?: EnumPaymentMethodWithAggregatesFilter<"PosCounterSale"> | $Enums.PaymentMethod
+    paymentReference?: StringNullableWithAggregatesFilter<"PosCounterSale"> | string | null
     cashierId?: IntWithAggregatesFilter<"PosCounterSale"> | number
     customerId?: IntNullableWithAggregatesFilter<"PosCounterSale"> | number | null
     pointsEarned?: IntWithAggregatesFilter<"PosCounterSale"> | number
@@ -31363,6 +35344,7 @@ export namespace Prisma {
     discountAmount?: FloatWithAggregatesFilter<"PosCounterSale"> | number
     pointsRedeemed?: IntWithAggregatesFilter<"PosCounterSale"> | number
     pointsValue?: FloatWithAggregatesFilter<"PosCounterSale"> | number
+    shiftId?: IntNullableWithAggregatesFilter<"PosCounterSale"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"PosCounterSale"> | Date | string
   }
 
@@ -33298,6 +37280,368 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"PosSetting"> | Date | string
   }
 
+  export type PosShiftWhereInput = {
+    AND?: PosShiftWhereInput | PosShiftWhereInput[]
+    OR?: PosShiftWhereInput[]
+    NOT?: PosShiftWhereInput | PosShiftWhereInput[]
+    id?: IntFilter<"PosShift"> | number
+    shiftNo?: StringFilter<"PosShift"> | string
+    status?: StringFilter<"PosShift"> | string
+    openedById?: IntFilter<"PosShift"> | number
+    openedAt?: DateTimeFilter<"PosShift"> | Date | string
+    openingFloat?: FloatFilter<"PosShift"> | number
+    countedCash?: FloatNullableFilter<"PosShift"> | number | null
+    denominations?: JsonNullableFilter<"PosShift">
+    countedById?: IntNullableFilter<"PosShift"> | number | null
+    countedAt?: DateTimeNullableFilter<"PosShift"> | Date | string | null
+    expectedCash?: FloatNullableFilter<"PosShift"> | number | null
+    cashDifference?: FloatNullableFilter<"PosShift"> | number | null
+    differenceReason?: StringNullableFilter<"PosShift"> | string | null
+    cardSlipTotal?: FloatNullableFilter<"PosShift"> | number | null
+    cardDifferenceReason?: StringNullableFilter<"PosShift"> | string | null
+    floatLeft?: FloatNullableFilter<"PosShift"> | number | null
+    cashBanked?: FloatNullableFilter<"PosShift"> | number | null
+    closedById?: IntNullableFilter<"PosShift"> | number | null
+    closedAt?: DateTimeNullableFilter<"PosShift"> | Date | string | null
+    notes?: StringNullableFilter<"PosShift"> | string | null
+    report?: JsonNullableFilter<"PosShift">
+    sales?: PosCounterSaleListRelationFilter
+    cashEntries?: PosCashEntryListRelationFilter
+    movements?: InventoryMovementListRelationFilter
+  }
+
+  export type PosShiftOrderByWithRelationInput = {
+    id?: SortOrder
+    shiftNo?: SortOrder
+    status?: SortOrder
+    openedById?: SortOrder
+    openedAt?: SortOrder
+    openingFloat?: SortOrder
+    countedCash?: SortOrderInput | SortOrder
+    denominations?: SortOrderInput | SortOrder
+    countedById?: SortOrderInput | SortOrder
+    countedAt?: SortOrderInput | SortOrder
+    expectedCash?: SortOrderInput | SortOrder
+    cashDifference?: SortOrderInput | SortOrder
+    differenceReason?: SortOrderInput | SortOrder
+    cardSlipTotal?: SortOrderInput | SortOrder
+    cardDifferenceReason?: SortOrderInput | SortOrder
+    floatLeft?: SortOrderInput | SortOrder
+    cashBanked?: SortOrderInput | SortOrder
+    closedById?: SortOrderInput | SortOrder
+    closedAt?: SortOrderInput | SortOrder
+    notes?: SortOrderInput | SortOrder
+    report?: SortOrderInput | SortOrder
+    sales?: PosCounterSaleOrderByRelationAggregateInput
+    cashEntries?: PosCashEntryOrderByRelationAggregateInput
+    movements?: InventoryMovementOrderByRelationAggregateInput
+  }
+
+  export type PosShiftWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    shiftNo?: string
+    AND?: PosShiftWhereInput | PosShiftWhereInput[]
+    OR?: PosShiftWhereInput[]
+    NOT?: PosShiftWhereInput | PosShiftWhereInput[]
+    status?: StringFilter<"PosShift"> | string
+    openedById?: IntFilter<"PosShift"> | number
+    openedAt?: DateTimeFilter<"PosShift"> | Date | string
+    openingFloat?: FloatFilter<"PosShift"> | number
+    countedCash?: FloatNullableFilter<"PosShift"> | number | null
+    denominations?: JsonNullableFilter<"PosShift">
+    countedById?: IntNullableFilter<"PosShift"> | number | null
+    countedAt?: DateTimeNullableFilter<"PosShift"> | Date | string | null
+    expectedCash?: FloatNullableFilter<"PosShift"> | number | null
+    cashDifference?: FloatNullableFilter<"PosShift"> | number | null
+    differenceReason?: StringNullableFilter<"PosShift"> | string | null
+    cardSlipTotal?: FloatNullableFilter<"PosShift"> | number | null
+    cardDifferenceReason?: StringNullableFilter<"PosShift"> | string | null
+    floatLeft?: FloatNullableFilter<"PosShift"> | number | null
+    cashBanked?: FloatNullableFilter<"PosShift"> | number | null
+    closedById?: IntNullableFilter<"PosShift"> | number | null
+    closedAt?: DateTimeNullableFilter<"PosShift"> | Date | string | null
+    notes?: StringNullableFilter<"PosShift"> | string | null
+    report?: JsonNullableFilter<"PosShift">
+    sales?: PosCounterSaleListRelationFilter
+    cashEntries?: PosCashEntryListRelationFilter
+    movements?: InventoryMovementListRelationFilter
+  }, "id" | "shiftNo">
+
+  export type PosShiftOrderByWithAggregationInput = {
+    id?: SortOrder
+    shiftNo?: SortOrder
+    status?: SortOrder
+    openedById?: SortOrder
+    openedAt?: SortOrder
+    openingFloat?: SortOrder
+    countedCash?: SortOrderInput | SortOrder
+    denominations?: SortOrderInput | SortOrder
+    countedById?: SortOrderInput | SortOrder
+    countedAt?: SortOrderInput | SortOrder
+    expectedCash?: SortOrderInput | SortOrder
+    cashDifference?: SortOrderInput | SortOrder
+    differenceReason?: SortOrderInput | SortOrder
+    cardSlipTotal?: SortOrderInput | SortOrder
+    cardDifferenceReason?: SortOrderInput | SortOrder
+    floatLeft?: SortOrderInput | SortOrder
+    cashBanked?: SortOrderInput | SortOrder
+    closedById?: SortOrderInput | SortOrder
+    closedAt?: SortOrderInput | SortOrder
+    notes?: SortOrderInput | SortOrder
+    report?: SortOrderInput | SortOrder
+    _count?: PosShiftCountOrderByAggregateInput
+    _avg?: PosShiftAvgOrderByAggregateInput
+    _max?: PosShiftMaxOrderByAggregateInput
+    _min?: PosShiftMinOrderByAggregateInput
+    _sum?: PosShiftSumOrderByAggregateInput
+  }
+
+  export type PosShiftScalarWhereWithAggregatesInput = {
+    AND?: PosShiftScalarWhereWithAggregatesInput | PosShiftScalarWhereWithAggregatesInput[]
+    OR?: PosShiftScalarWhereWithAggregatesInput[]
+    NOT?: PosShiftScalarWhereWithAggregatesInput | PosShiftScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"PosShift"> | number
+    shiftNo?: StringWithAggregatesFilter<"PosShift"> | string
+    status?: StringWithAggregatesFilter<"PosShift"> | string
+    openedById?: IntWithAggregatesFilter<"PosShift"> | number
+    openedAt?: DateTimeWithAggregatesFilter<"PosShift"> | Date | string
+    openingFloat?: FloatWithAggregatesFilter<"PosShift"> | number
+    countedCash?: FloatNullableWithAggregatesFilter<"PosShift"> | number | null
+    denominations?: JsonNullableWithAggregatesFilter<"PosShift">
+    countedById?: IntNullableWithAggregatesFilter<"PosShift"> | number | null
+    countedAt?: DateTimeNullableWithAggregatesFilter<"PosShift"> | Date | string | null
+    expectedCash?: FloatNullableWithAggregatesFilter<"PosShift"> | number | null
+    cashDifference?: FloatNullableWithAggregatesFilter<"PosShift"> | number | null
+    differenceReason?: StringNullableWithAggregatesFilter<"PosShift"> | string | null
+    cardSlipTotal?: FloatNullableWithAggregatesFilter<"PosShift"> | number | null
+    cardDifferenceReason?: StringNullableWithAggregatesFilter<"PosShift"> | string | null
+    floatLeft?: FloatNullableWithAggregatesFilter<"PosShift"> | number | null
+    cashBanked?: FloatNullableWithAggregatesFilter<"PosShift"> | number | null
+    closedById?: IntNullableWithAggregatesFilter<"PosShift"> | number | null
+    closedAt?: DateTimeNullableWithAggregatesFilter<"PosShift"> | Date | string | null
+    notes?: StringNullableWithAggregatesFilter<"PosShift"> | string | null
+    report?: JsonNullableWithAggregatesFilter<"PosShift">
+  }
+
+  export type PosCashEntryWhereInput = {
+    AND?: PosCashEntryWhereInput | PosCashEntryWhereInput[]
+    OR?: PosCashEntryWhereInput[]
+    NOT?: PosCashEntryWhereInput | PosCashEntryWhereInput[]
+    id?: IntFilter<"PosCashEntry"> | number
+    entryNo?: StringFilter<"PosCashEntry"> | string
+    direction?: StringFilter<"PosCashEntry"> | string
+    category?: StringFilter<"PosCashEntry"> | string
+    amount?: FloatFilter<"PosCashEntry"> | number
+    source?: StringFilter<"PosCashEntry"> | string
+    party?: StringNullableFilter<"PosCashEntry"> | string | null
+    reference?: StringNullableFilter<"PosCashEntry"> | string | null
+    note?: StringNullableFilter<"PosCashEntry"> | string | null
+    entryDate?: DateTimeFilter<"PosCashEntry"> | Date | string
+    shiftId?: IntNullableFilter<"PosCashEntry"> | number | null
+    automatic?: BoolFilter<"PosCashEntry"> | boolean
+    createdById?: IntFilter<"PosCashEntry"> | number
+    createdAt?: DateTimeFilter<"PosCashEntry"> | Date | string
+    voided?: BoolFilter<"PosCashEntry"> | boolean
+    voidReason?: StringNullableFilter<"PosCashEntry"> | string | null
+    voidedById?: IntNullableFilter<"PosCashEntry"> | number | null
+    voidedAt?: DateTimeNullableFilter<"PosCashEntry"> | Date | string | null
+    bankStatus?: StringNullableFilter<"PosCashEntry"> | string | null
+    bankedAt?: DateTimeNullableFilter<"PosCashEntry"> | Date | string | null
+    bankedById?: IntNullableFilter<"PosCashEntry"> | number | null
+    bankReference?: StringNullableFilter<"PosCashEntry"> | string | null
+    shift?: XOR<PosShiftNullableRelationFilter, PosShiftWhereInput> | null
+  }
+
+  export type PosCashEntryOrderByWithRelationInput = {
+    id?: SortOrder
+    entryNo?: SortOrder
+    direction?: SortOrder
+    category?: SortOrder
+    amount?: SortOrder
+    source?: SortOrder
+    party?: SortOrderInput | SortOrder
+    reference?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    entryDate?: SortOrder
+    shiftId?: SortOrderInput | SortOrder
+    automatic?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    voided?: SortOrder
+    voidReason?: SortOrderInput | SortOrder
+    voidedById?: SortOrderInput | SortOrder
+    voidedAt?: SortOrderInput | SortOrder
+    bankStatus?: SortOrderInput | SortOrder
+    bankedAt?: SortOrderInput | SortOrder
+    bankedById?: SortOrderInput | SortOrder
+    bankReference?: SortOrderInput | SortOrder
+    shift?: PosShiftOrderByWithRelationInput
+  }
+
+  export type PosCashEntryWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    entryNo?: string
+    AND?: PosCashEntryWhereInput | PosCashEntryWhereInput[]
+    OR?: PosCashEntryWhereInput[]
+    NOT?: PosCashEntryWhereInput | PosCashEntryWhereInput[]
+    direction?: StringFilter<"PosCashEntry"> | string
+    category?: StringFilter<"PosCashEntry"> | string
+    amount?: FloatFilter<"PosCashEntry"> | number
+    source?: StringFilter<"PosCashEntry"> | string
+    party?: StringNullableFilter<"PosCashEntry"> | string | null
+    reference?: StringNullableFilter<"PosCashEntry"> | string | null
+    note?: StringNullableFilter<"PosCashEntry"> | string | null
+    entryDate?: DateTimeFilter<"PosCashEntry"> | Date | string
+    shiftId?: IntNullableFilter<"PosCashEntry"> | number | null
+    automatic?: BoolFilter<"PosCashEntry"> | boolean
+    createdById?: IntFilter<"PosCashEntry"> | number
+    createdAt?: DateTimeFilter<"PosCashEntry"> | Date | string
+    voided?: BoolFilter<"PosCashEntry"> | boolean
+    voidReason?: StringNullableFilter<"PosCashEntry"> | string | null
+    voidedById?: IntNullableFilter<"PosCashEntry"> | number | null
+    voidedAt?: DateTimeNullableFilter<"PosCashEntry"> | Date | string | null
+    bankStatus?: StringNullableFilter<"PosCashEntry"> | string | null
+    bankedAt?: DateTimeNullableFilter<"PosCashEntry"> | Date | string | null
+    bankedById?: IntNullableFilter<"PosCashEntry"> | number | null
+    bankReference?: StringNullableFilter<"PosCashEntry"> | string | null
+    shift?: XOR<PosShiftNullableRelationFilter, PosShiftWhereInput> | null
+  }, "id" | "entryNo">
+
+  export type PosCashEntryOrderByWithAggregationInput = {
+    id?: SortOrder
+    entryNo?: SortOrder
+    direction?: SortOrder
+    category?: SortOrder
+    amount?: SortOrder
+    source?: SortOrder
+    party?: SortOrderInput | SortOrder
+    reference?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    entryDate?: SortOrder
+    shiftId?: SortOrderInput | SortOrder
+    automatic?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    voided?: SortOrder
+    voidReason?: SortOrderInput | SortOrder
+    voidedById?: SortOrderInput | SortOrder
+    voidedAt?: SortOrderInput | SortOrder
+    bankStatus?: SortOrderInput | SortOrder
+    bankedAt?: SortOrderInput | SortOrder
+    bankedById?: SortOrderInput | SortOrder
+    bankReference?: SortOrderInput | SortOrder
+    _count?: PosCashEntryCountOrderByAggregateInput
+    _avg?: PosCashEntryAvgOrderByAggregateInput
+    _max?: PosCashEntryMaxOrderByAggregateInput
+    _min?: PosCashEntryMinOrderByAggregateInput
+    _sum?: PosCashEntrySumOrderByAggregateInput
+  }
+
+  export type PosCashEntryScalarWhereWithAggregatesInput = {
+    AND?: PosCashEntryScalarWhereWithAggregatesInput | PosCashEntryScalarWhereWithAggregatesInput[]
+    OR?: PosCashEntryScalarWhereWithAggregatesInput[]
+    NOT?: PosCashEntryScalarWhereWithAggregatesInput | PosCashEntryScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"PosCashEntry"> | number
+    entryNo?: StringWithAggregatesFilter<"PosCashEntry"> | string
+    direction?: StringWithAggregatesFilter<"PosCashEntry"> | string
+    category?: StringWithAggregatesFilter<"PosCashEntry"> | string
+    amount?: FloatWithAggregatesFilter<"PosCashEntry"> | number
+    source?: StringWithAggregatesFilter<"PosCashEntry"> | string
+    party?: StringNullableWithAggregatesFilter<"PosCashEntry"> | string | null
+    reference?: StringNullableWithAggregatesFilter<"PosCashEntry"> | string | null
+    note?: StringNullableWithAggregatesFilter<"PosCashEntry"> | string | null
+    entryDate?: DateTimeWithAggregatesFilter<"PosCashEntry"> | Date | string
+    shiftId?: IntNullableWithAggregatesFilter<"PosCashEntry"> | number | null
+    automatic?: BoolWithAggregatesFilter<"PosCashEntry"> | boolean
+    createdById?: IntWithAggregatesFilter<"PosCashEntry"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"PosCashEntry"> | Date | string
+    voided?: BoolWithAggregatesFilter<"PosCashEntry"> | boolean
+    voidReason?: StringNullableWithAggregatesFilter<"PosCashEntry"> | string | null
+    voidedById?: IntNullableWithAggregatesFilter<"PosCashEntry"> | number | null
+    voidedAt?: DateTimeNullableWithAggregatesFilter<"PosCashEntry"> | Date | string | null
+    bankStatus?: StringNullableWithAggregatesFilter<"PosCashEntry"> | string | null
+    bankedAt?: DateTimeNullableWithAggregatesFilter<"PosCashEntry"> | Date | string | null
+    bankedById?: IntNullableWithAggregatesFilter<"PosCashEntry"> | number | null
+    bankReference?: StringNullableWithAggregatesFilter<"PosCashEntry"> | string | null
+  }
+
+  export type InventoryMovementWhereInput = {
+    AND?: InventoryMovementWhereInput | InventoryMovementWhereInput[]
+    OR?: InventoryMovementWhereInput[]
+    NOT?: InventoryMovementWhereInput | InventoryMovementWhereInput[]
+    id?: IntFilter<"InventoryMovement"> | number
+    productId?: IntFilter<"InventoryMovement"> | number
+    kind?: StringFilter<"InventoryMovement"> | string
+    type?: StringFilter<"InventoryMovement"> | string
+    quantity?: IntFilter<"InventoryMovement"> | number
+    shiftId?: IntNullableFilter<"InventoryMovement"> | number | null
+    reference?: StringNullableFilter<"InventoryMovement"> | string | null
+    createdById?: IntNullableFilter<"InventoryMovement"> | number | null
+    createdAt?: DateTimeFilter<"InventoryMovement"> | Date | string
+    shift?: XOR<PosShiftNullableRelationFilter, PosShiftWhereInput> | null
+  }
+
+  export type InventoryMovementOrderByWithRelationInput = {
+    id?: SortOrder
+    productId?: SortOrder
+    kind?: SortOrder
+    type?: SortOrder
+    quantity?: SortOrder
+    shiftId?: SortOrderInput | SortOrder
+    reference?: SortOrderInput | SortOrder
+    createdById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    shift?: PosShiftOrderByWithRelationInput
+  }
+
+  export type InventoryMovementWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: InventoryMovementWhereInput | InventoryMovementWhereInput[]
+    OR?: InventoryMovementWhereInput[]
+    NOT?: InventoryMovementWhereInput | InventoryMovementWhereInput[]
+    productId?: IntFilter<"InventoryMovement"> | number
+    kind?: StringFilter<"InventoryMovement"> | string
+    type?: StringFilter<"InventoryMovement"> | string
+    quantity?: IntFilter<"InventoryMovement"> | number
+    shiftId?: IntNullableFilter<"InventoryMovement"> | number | null
+    reference?: StringNullableFilter<"InventoryMovement"> | string | null
+    createdById?: IntNullableFilter<"InventoryMovement"> | number | null
+    createdAt?: DateTimeFilter<"InventoryMovement"> | Date | string
+    shift?: XOR<PosShiftNullableRelationFilter, PosShiftWhereInput> | null
+  }, "id">
+
+  export type InventoryMovementOrderByWithAggregationInput = {
+    id?: SortOrder
+    productId?: SortOrder
+    kind?: SortOrder
+    type?: SortOrder
+    quantity?: SortOrder
+    shiftId?: SortOrderInput | SortOrder
+    reference?: SortOrderInput | SortOrder
+    createdById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: InventoryMovementCountOrderByAggregateInput
+    _avg?: InventoryMovementAvgOrderByAggregateInput
+    _max?: InventoryMovementMaxOrderByAggregateInput
+    _min?: InventoryMovementMinOrderByAggregateInput
+    _sum?: InventoryMovementSumOrderByAggregateInput
+  }
+
+  export type InventoryMovementScalarWhereWithAggregatesInput = {
+    AND?: InventoryMovementScalarWhereWithAggregatesInput | InventoryMovementScalarWhereWithAggregatesInput[]
+    OR?: InventoryMovementScalarWhereWithAggregatesInput[]
+    NOT?: InventoryMovementScalarWhereWithAggregatesInput | InventoryMovementScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"InventoryMovement"> | number
+    productId?: IntWithAggregatesFilter<"InventoryMovement"> | number
+    kind?: StringWithAggregatesFilter<"InventoryMovement"> | string
+    type?: StringWithAggregatesFilter<"InventoryMovement"> | string
+    quantity?: IntWithAggregatesFilter<"InventoryMovement"> | number
+    shiftId?: IntNullableWithAggregatesFilter<"InventoryMovement"> | number | null
+    reference?: StringNullableWithAggregatesFilter<"InventoryMovement"> | string | null
+    createdById?: IntNullableWithAggregatesFilter<"InventoryMovement"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"InventoryMovement"> | Date | string
+  }
+
   export type UserCreateInput = {
     name: string
     email: string
@@ -33465,6 +37809,7 @@ export namespace Prisma {
     amountReceived: number
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
+    paymentReference?: string | null
     pointsEarned?: number
     discountType?: string | null
     discountValue?: number
@@ -33474,6 +37819,7 @@ export namespace Prisma {
     createdAt?: Date | string
     cashier: PosAdminCreateNestedOneWithoutCounterSalesInput
     customer?: PosCustomerCreateNestedOneWithoutCounterSalesInput
+    shift?: PosShiftCreateNestedOneWithoutSalesInput
   }
 
   export type PosCounterSaleUncheckedCreateInput = {
@@ -33485,6 +37831,7 @@ export namespace Prisma {
     amountReceived: number
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
+    paymentReference?: string | null
     cashierId: number
     customerId?: number | null
     pointsEarned?: number
@@ -33493,6 +37840,7 @@ export namespace Prisma {
     discountAmount?: number
     pointsRedeemed?: number
     pointsValue?: number
+    shiftId?: number | null
     createdAt?: Date | string
   }
 
@@ -33504,6 +37852,7 @@ export namespace Prisma {
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
     pointsEarned?: IntFieldUpdateOperationsInput | number
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
     discountValue?: FloatFieldUpdateOperationsInput | number
@@ -33513,6 +37862,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cashier?: PosAdminUpdateOneRequiredWithoutCounterSalesNestedInput
     customer?: PosCustomerUpdateOneWithoutCounterSalesNestedInput
+    shift?: PosShiftUpdateOneWithoutSalesNestedInput
   }
 
   export type PosCounterSaleUncheckedUpdateInput = {
@@ -33524,6 +37874,7 @@ export namespace Prisma {
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
     cashierId?: IntFieldUpdateOperationsInput | number
     customerId?: NullableIntFieldUpdateOperationsInput | number | null
     pointsEarned?: IntFieldUpdateOperationsInput | number
@@ -33532,6 +37883,7 @@ export namespace Prisma {
     discountAmount?: FloatFieldUpdateOperationsInput | number
     pointsRedeemed?: IntFieldUpdateOperationsInput | number
     pointsValue?: FloatFieldUpdateOperationsInput | number
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -33544,6 +37896,7 @@ export namespace Prisma {
     amountReceived: number
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
+    paymentReference?: string | null
     cashierId: number
     customerId?: number | null
     pointsEarned?: number
@@ -33552,6 +37905,7 @@ export namespace Prisma {
     discountAmount?: number
     pointsRedeemed?: number
     pointsValue?: number
+    shiftId?: number | null
     createdAt?: Date | string
   }
 
@@ -33563,6 +37917,7 @@ export namespace Prisma {
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
     pointsEarned?: IntFieldUpdateOperationsInput | number
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
     discountValue?: FloatFieldUpdateOperationsInput | number
@@ -33581,6 +37936,7 @@ export namespace Prisma {
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
     cashierId?: IntFieldUpdateOperationsInput | number
     customerId?: NullableIntFieldUpdateOperationsInput | number | null
     pointsEarned?: IntFieldUpdateOperationsInput | number
@@ -33589,6 +37945,7 @@ export namespace Prisma {
     discountAmount?: FloatFieldUpdateOperationsInput | number
     pointsRedeemed?: IntFieldUpdateOperationsInput | number
     pointsValue?: FloatFieldUpdateOperationsInput | number
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -35669,6 +40026,434 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type PosShiftCreateInput = {
+    shiftNo: string
+    status?: string
+    openedById: number
+    openedAt?: Date | string
+    openingFloat: number
+    countedCash?: number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: number | null
+    countedAt?: Date | string | null
+    expectedCash?: number | null
+    cashDifference?: number | null
+    differenceReason?: string | null
+    cardSlipTotal?: number | null
+    cardDifferenceReason?: string | null
+    floatLeft?: number | null
+    cashBanked?: number | null
+    closedById?: number | null
+    closedAt?: Date | string | null
+    notes?: string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    sales?: PosCounterSaleCreateNestedManyWithoutShiftInput
+    cashEntries?: PosCashEntryCreateNestedManyWithoutShiftInput
+    movements?: InventoryMovementCreateNestedManyWithoutShiftInput
+  }
+
+  export type PosShiftUncheckedCreateInput = {
+    id?: number
+    shiftNo: string
+    status?: string
+    openedById: number
+    openedAt?: Date | string
+    openingFloat: number
+    countedCash?: number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: number | null
+    countedAt?: Date | string | null
+    expectedCash?: number | null
+    cashDifference?: number | null
+    differenceReason?: string | null
+    cardSlipTotal?: number | null
+    cardDifferenceReason?: string | null
+    floatLeft?: number | null
+    cashBanked?: number | null
+    closedById?: number | null
+    closedAt?: Date | string | null
+    notes?: string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    sales?: PosCounterSaleUncheckedCreateNestedManyWithoutShiftInput
+    cashEntries?: PosCashEntryUncheckedCreateNestedManyWithoutShiftInput
+    movements?: InventoryMovementUncheckedCreateNestedManyWithoutShiftInput
+  }
+
+  export type PosShiftUpdateInput = {
+    shiftNo?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    openedById?: IntFieldUpdateOperationsInput | number
+    openedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    openingFloat?: FloatFieldUpdateOperationsInput | number
+    countedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: NullableIntFieldUpdateOperationsInput | number | null
+    countedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expectedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashDifference?: NullableFloatFieldUpdateOperationsInput | number | null
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cardSlipTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    cardDifferenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    floatLeft?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashBanked?: NullableFloatFieldUpdateOperationsInput | number | null
+    closedById?: NullableIntFieldUpdateOperationsInput | number | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    sales?: PosCounterSaleUpdateManyWithoutShiftNestedInput
+    cashEntries?: PosCashEntryUpdateManyWithoutShiftNestedInput
+    movements?: InventoryMovementUpdateManyWithoutShiftNestedInput
+  }
+
+  export type PosShiftUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    shiftNo?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    openedById?: IntFieldUpdateOperationsInput | number
+    openedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    openingFloat?: FloatFieldUpdateOperationsInput | number
+    countedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: NullableIntFieldUpdateOperationsInput | number | null
+    countedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expectedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashDifference?: NullableFloatFieldUpdateOperationsInput | number | null
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cardSlipTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    cardDifferenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    floatLeft?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashBanked?: NullableFloatFieldUpdateOperationsInput | number | null
+    closedById?: NullableIntFieldUpdateOperationsInput | number | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    sales?: PosCounterSaleUncheckedUpdateManyWithoutShiftNestedInput
+    cashEntries?: PosCashEntryUncheckedUpdateManyWithoutShiftNestedInput
+    movements?: InventoryMovementUncheckedUpdateManyWithoutShiftNestedInput
+  }
+
+  export type PosShiftCreateManyInput = {
+    id?: number
+    shiftNo: string
+    status?: string
+    openedById: number
+    openedAt?: Date | string
+    openingFloat: number
+    countedCash?: number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: number | null
+    countedAt?: Date | string | null
+    expectedCash?: number | null
+    cashDifference?: number | null
+    differenceReason?: string | null
+    cardSlipTotal?: number | null
+    cardDifferenceReason?: string | null
+    floatLeft?: number | null
+    cashBanked?: number | null
+    closedById?: number | null
+    closedAt?: Date | string | null
+    notes?: string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type PosShiftUpdateManyMutationInput = {
+    shiftNo?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    openedById?: IntFieldUpdateOperationsInput | number
+    openedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    openingFloat?: FloatFieldUpdateOperationsInput | number
+    countedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: NullableIntFieldUpdateOperationsInput | number | null
+    countedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expectedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashDifference?: NullableFloatFieldUpdateOperationsInput | number | null
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cardSlipTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    cardDifferenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    floatLeft?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashBanked?: NullableFloatFieldUpdateOperationsInput | number | null
+    closedById?: NullableIntFieldUpdateOperationsInput | number | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type PosShiftUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    shiftNo?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    openedById?: IntFieldUpdateOperationsInput | number
+    openedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    openingFloat?: FloatFieldUpdateOperationsInput | number
+    countedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: NullableIntFieldUpdateOperationsInput | number | null
+    countedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expectedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashDifference?: NullableFloatFieldUpdateOperationsInput | number | null
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cardSlipTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    cardDifferenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    floatLeft?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashBanked?: NullableFloatFieldUpdateOperationsInput | number | null
+    closedById?: NullableIntFieldUpdateOperationsInput | number | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type PosCashEntryCreateInput = {
+    entryNo: string
+    direction: string
+    category: string
+    amount: number
+    source: string
+    party?: string | null
+    reference?: string | null
+    note?: string | null
+    entryDate?: Date | string
+    automatic?: boolean
+    createdById: number
+    createdAt?: Date | string
+    voided?: boolean
+    voidReason?: string | null
+    voidedById?: number | null
+    voidedAt?: Date | string | null
+    bankStatus?: string | null
+    bankedAt?: Date | string | null
+    bankedById?: number | null
+    bankReference?: string | null
+    shift?: PosShiftCreateNestedOneWithoutCashEntriesInput
+  }
+
+  export type PosCashEntryUncheckedCreateInput = {
+    id?: number
+    entryNo: string
+    direction: string
+    category: string
+    amount: number
+    source: string
+    party?: string | null
+    reference?: string | null
+    note?: string | null
+    entryDate?: Date | string
+    shiftId?: number | null
+    automatic?: boolean
+    createdById: number
+    createdAt?: Date | string
+    voided?: boolean
+    voidReason?: string | null
+    voidedById?: number | null
+    voidedAt?: Date | string | null
+    bankStatus?: string | null
+    bankedAt?: Date | string | null
+    bankedById?: number | null
+    bankReference?: string | null
+  }
+
+  export type PosCashEntryUpdateInput = {
+    entryNo?: StringFieldUpdateOperationsInput | string
+    direction?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    source?: StringFieldUpdateOperationsInput | string
+    party?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    entryDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    automatic?: BoolFieldUpdateOperationsInput | boolean
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    voided?: BoolFieldUpdateOperationsInput | boolean
+    voidReason?: NullableStringFieldUpdateOperationsInput | string | null
+    voidedById?: NullableIntFieldUpdateOperationsInput | number | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    bankedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankedById?: NullableIntFieldUpdateOperationsInput | number | null
+    bankReference?: NullableStringFieldUpdateOperationsInput | string | null
+    shift?: PosShiftUpdateOneWithoutCashEntriesNestedInput
+  }
+
+  export type PosCashEntryUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    entryNo?: StringFieldUpdateOperationsInput | string
+    direction?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    source?: StringFieldUpdateOperationsInput | string
+    party?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    entryDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    automatic?: BoolFieldUpdateOperationsInput | boolean
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    voided?: BoolFieldUpdateOperationsInput | boolean
+    voidReason?: NullableStringFieldUpdateOperationsInput | string | null
+    voidedById?: NullableIntFieldUpdateOperationsInput | number | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    bankedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankedById?: NullableIntFieldUpdateOperationsInput | number | null
+    bankReference?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type PosCashEntryCreateManyInput = {
+    id?: number
+    entryNo: string
+    direction: string
+    category: string
+    amount: number
+    source: string
+    party?: string | null
+    reference?: string | null
+    note?: string | null
+    entryDate?: Date | string
+    shiftId?: number | null
+    automatic?: boolean
+    createdById: number
+    createdAt?: Date | string
+    voided?: boolean
+    voidReason?: string | null
+    voidedById?: number | null
+    voidedAt?: Date | string | null
+    bankStatus?: string | null
+    bankedAt?: Date | string | null
+    bankedById?: number | null
+    bankReference?: string | null
+  }
+
+  export type PosCashEntryUpdateManyMutationInput = {
+    entryNo?: StringFieldUpdateOperationsInput | string
+    direction?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    source?: StringFieldUpdateOperationsInput | string
+    party?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    entryDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    automatic?: BoolFieldUpdateOperationsInput | boolean
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    voided?: BoolFieldUpdateOperationsInput | boolean
+    voidReason?: NullableStringFieldUpdateOperationsInput | string | null
+    voidedById?: NullableIntFieldUpdateOperationsInput | number | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    bankedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankedById?: NullableIntFieldUpdateOperationsInput | number | null
+    bankReference?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type PosCashEntryUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    entryNo?: StringFieldUpdateOperationsInput | string
+    direction?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    source?: StringFieldUpdateOperationsInput | string
+    party?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    entryDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    automatic?: BoolFieldUpdateOperationsInput | boolean
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    voided?: BoolFieldUpdateOperationsInput | boolean
+    voidReason?: NullableStringFieldUpdateOperationsInput | string | null
+    voidedById?: NullableIntFieldUpdateOperationsInput | number | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    bankedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankedById?: NullableIntFieldUpdateOperationsInput | number | null
+    bankReference?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type InventoryMovementCreateInput = {
+    productId: number
+    kind: string
+    type: string
+    quantity: number
+    reference?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+    shift?: PosShiftCreateNestedOneWithoutMovementsInput
+  }
+
+  export type InventoryMovementUncheckedCreateInput = {
+    id?: number
+    productId: number
+    kind: string
+    type: string
+    quantity: number
+    shiftId?: number | null
+    reference?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
+  export type InventoryMovementUpdateInput = {
+    productId?: IntFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    shift?: PosShiftUpdateOneWithoutMovementsNestedInput
+  }
+
+  export type InventoryMovementUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    productId?: IntFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InventoryMovementCreateManyInput = {
+    id?: number
+    productId: number
+    kind: string
+    type: string
+    quantity: number
+    shiftId?: number | null
+    reference?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
+  export type InventoryMovementUpdateManyMutationInput = {
+    productId?: IntFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InventoryMovementUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    productId?: IntFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -35998,6 +40783,11 @@ export namespace Prisma {
     isNot?: PosCustomerWhereInput | null
   }
 
+  export type PosShiftNullableRelationFilter = {
+    is?: PosShiftWhereInput | null
+    isNot?: PosShiftWhereInput | null
+  }
+
   export type PosCounterSaleCountOrderByAggregateInput = {
     id?: SortOrder
     invoiceGroupCode?: SortOrder
@@ -36007,6 +40797,7 @@ export namespace Prisma {
     amountReceived?: SortOrder
     changeGiven?: SortOrder
     paymentMethod?: SortOrder
+    paymentReference?: SortOrder
     cashierId?: SortOrder
     customerId?: SortOrder
     pointsEarned?: SortOrder
@@ -36015,6 +40806,7 @@ export namespace Prisma {
     discountAmount?: SortOrder
     pointsRedeemed?: SortOrder
     pointsValue?: SortOrder
+    shiftId?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -36032,6 +40824,7 @@ export namespace Prisma {
     discountAmount?: SortOrder
     pointsRedeemed?: SortOrder
     pointsValue?: SortOrder
+    shiftId?: SortOrder
   }
 
   export type PosCounterSaleMaxOrderByAggregateInput = {
@@ -36043,6 +40836,7 @@ export namespace Prisma {
     amountReceived?: SortOrder
     changeGiven?: SortOrder
     paymentMethod?: SortOrder
+    paymentReference?: SortOrder
     cashierId?: SortOrder
     customerId?: SortOrder
     pointsEarned?: SortOrder
@@ -36051,6 +40845,7 @@ export namespace Prisma {
     discountAmount?: SortOrder
     pointsRedeemed?: SortOrder
     pointsValue?: SortOrder
+    shiftId?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -36063,6 +40858,7 @@ export namespace Prisma {
     amountReceived?: SortOrder
     changeGiven?: SortOrder
     paymentMethod?: SortOrder
+    paymentReference?: SortOrder
     cashierId?: SortOrder
     customerId?: SortOrder
     pointsEarned?: SortOrder
@@ -36071,6 +40867,7 @@ export namespace Prisma {
     discountAmount?: SortOrder
     pointsRedeemed?: SortOrder
     pointsValue?: SortOrder
+    shiftId?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -36088,6 +40885,7 @@ export namespace Prisma {
     discountAmount?: SortOrder
     pointsRedeemed?: SortOrder
     pointsValue?: SortOrder
+    shiftId?: SortOrder
   }
 
   export type FloatWithAggregatesFilter<$PrismaModel = never> = {
@@ -37886,6 +42684,267 @@ export namespace Prisma {
     updatedById?: SortOrder
   }
 
+  export type PosCashEntryListRelationFilter = {
+    every?: PosCashEntryWhereInput
+    some?: PosCashEntryWhereInput
+    none?: PosCashEntryWhereInput
+  }
+
+  export type InventoryMovementListRelationFilter = {
+    every?: InventoryMovementWhereInput
+    some?: InventoryMovementWhereInput
+    none?: InventoryMovementWhereInput
+  }
+
+  export type PosCashEntryOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type InventoryMovementOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type PosShiftCountOrderByAggregateInput = {
+    id?: SortOrder
+    shiftNo?: SortOrder
+    status?: SortOrder
+    openedById?: SortOrder
+    openedAt?: SortOrder
+    openingFloat?: SortOrder
+    countedCash?: SortOrder
+    denominations?: SortOrder
+    countedById?: SortOrder
+    countedAt?: SortOrder
+    expectedCash?: SortOrder
+    cashDifference?: SortOrder
+    differenceReason?: SortOrder
+    cardSlipTotal?: SortOrder
+    cardDifferenceReason?: SortOrder
+    floatLeft?: SortOrder
+    cashBanked?: SortOrder
+    closedById?: SortOrder
+    closedAt?: SortOrder
+    notes?: SortOrder
+    report?: SortOrder
+  }
+
+  export type PosShiftAvgOrderByAggregateInput = {
+    id?: SortOrder
+    openedById?: SortOrder
+    openingFloat?: SortOrder
+    countedCash?: SortOrder
+    countedById?: SortOrder
+    expectedCash?: SortOrder
+    cashDifference?: SortOrder
+    cardSlipTotal?: SortOrder
+    floatLeft?: SortOrder
+    cashBanked?: SortOrder
+    closedById?: SortOrder
+  }
+
+  export type PosShiftMaxOrderByAggregateInput = {
+    id?: SortOrder
+    shiftNo?: SortOrder
+    status?: SortOrder
+    openedById?: SortOrder
+    openedAt?: SortOrder
+    openingFloat?: SortOrder
+    countedCash?: SortOrder
+    countedById?: SortOrder
+    countedAt?: SortOrder
+    expectedCash?: SortOrder
+    cashDifference?: SortOrder
+    differenceReason?: SortOrder
+    cardSlipTotal?: SortOrder
+    cardDifferenceReason?: SortOrder
+    floatLeft?: SortOrder
+    cashBanked?: SortOrder
+    closedById?: SortOrder
+    closedAt?: SortOrder
+    notes?: SortOrder
+  }
+
+  export type PosShiftMinOrderByAggregateInput = {
+    id?: SortOrder
+    shiftNo?: SortOrder
+    status?: SortOrder
+    openedById?: SortOrder
+    openedAt?: SortOrder
+    openingFloat?: SortOrder
+    countedCash?: SortOrder
+    countedById?: SortOrder
+    countedAt?: SortOrder
+    expectedCash?: SortOrder
+    cashDifference?: SortOrder
+    differenceReason?: SortOrder
+    cardSlipTotal?: SortOrder
+    cardDifferenceReason?: SortOrder
+    floatLeft?: SortOrder
+    cashBanked?: SortOrder
+    closedById?: SortOrder
+    closedAt?: SortOrder
+    notes?: SortOrder
+  }
+
+  export type PosShiftSumOrderByAggregateInput = {
+    id?: SortOrder
+    openedById?: SortOrder
+    openingFloat?: SortOrder
+    countedCash?: SortOrder
+    countedById?: SortOrder
+    expectedCash?: SortOrder
+    cashDifference?: SortOrder
+    cardSlipTotal?: SortOrder
+    floatLeft?: SortOrder
+    cashBanked?: SortOrder
+    closedById?: SortOrder
+  }
+
+  export type PosCashEntryCountOrderByAggregateInput = {
+    id?: SortOrder
+    entryNo?: SortOrder
+    direction?: SortOrder
+    category?: SortOrder
+    amount?: SortOrder
+    source?: SortOrder
+    party?: SortOrder
+    reference?: SortOrder
+    note?: SortOrder
+    entryDate?: SortOrder
+    shiftId?: SortOrder
+    automatic?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    voided?: SortOrder
+    voidReason?: SortOrder
+    voidedById?: SortOrder
+    voidedAt?: SortOrder
+    bankStatus?: SortOrder
+    bankedAt?: SortOrder
+    bankedById?: SortOrder
+    bankReference?: SortOrder
+  }
+
+  export type PosCashEntryAvgOrderByAggregateInput = {
+    id?: SortOrder
+    amount?: SortOrder
+    shiftId?: SortOrder
+    createdById?: SortOrder
+    voidedById?: SortOrder
+    bankedById?: SortOrder
+  }
+
+  export type PosCashEntryMaxOrderByAggregateInput = {
+    id?: SortOrder
+    entryNo?: SortOrder
+    direction?: SortOrder
+    category?: SortOrder
+    amount?: SortOrder
+    source?: SortOrder
+    party?: SortOrder
+    reference?: SortOrder
+    note?: SortOrder
+    entryDate?: SortOrder
+    shiftId?: SortOrder
+    automatic?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    voided?: SortOrder
+    voidReason?: SortOrder
+    voidedById?: SortOrder
+    voidedAt?: SortOrder
+    bankStatus?: SortOrder
+    bankedAt?: SortOrder
+    bankedById?: SortOrder
+    bankReference?: SortOrder
+  }
+
+  export type PosCashEntryMinOrderByAggregateInput = {
+    id?: SortOrder
+    entryNo?: SortOrder
+    direction?: SortOrder
+    category?: SortOrder
+    amount?: SortOrder
+    source?: SortOrder
+    party?: SortOrder
+    reference?: SortOrder
+    note?: SortOrder
+    entryDate?: SortOrder
+    shiftId?: SortOrder
+    automatic?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    voided?: SortOrder
+    voidReason?: SortOrder
+    voidedById?: SortOrder
+    voidedAt?: SortOrder
+    bankStatus?: SortOrder
+    bankedAt?: SortOrder
+    bankedById?: SortOrder
+    bankReference?: SortOrder
+  }
+
+  export type PosCashEntrySumOrderByAggregateInput = {
+    id?: SortOrder
+    amount?: SortOrder
+    shiftId?: SortOrder
+    createdById?: SortOrder
+    voidedById?: SortOrder
+    bankedById?: SortOrder
+  }
+
+  export type InventoryMovementCountOrderByAggregateInput = {
+    id?: SortOrder
+    productId?: SortOrder
+    kind?: SortOrder
+    type?: SortOrder
+    quantity?: SortOrder
+    shiftId?: SortOrder
+    reference?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type InventoryMovementAvgOrderByAggregateInput = {
+    id?: SortOrder
+    productId?: SortOrder
+    quantity?: SortOrder
+    shiftId?: SortOrder
+    createdById?: SortOrder
+  }
+
+  export type InventoryMovementMaxOrderByAggregateInput = {
+    id?: SortOrder
+    productId?: SortOrder
+    kind?: SortOrder
+    type?: SortOrder
+    quantity?: SortOrder
+    shiftId?: SortOrder
+    reference?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type InventoryMovementMinOrderByAggregateInput = {
+    id?: SortOrder
+    productId?: SortOrder
+    kind?: SortOrder
+    type?: SortOrder
+    quantity?: SortOrder
+    shiftId?: SortOrder
+    reference?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type InventoryMovementSumOrderByAggregateInput = {
+    id?: SortOrder
+    productId?: SortOrder
+    quantity?: SortOrder
+    shiftId?: SortOrder
+    createdById?: SortOrder
+  }
+
   export type StringFieldUpdateOperationsInput = {
     set?: string
   }
@@ -37976,6 +43035,12 @@ export namespace Prisma {
     connect?: PosCustomerWhereUniqueInput
   }
 
+  export type PosShiftCreateNestedOneWithoutSalesInput = {
+    create?: XOR<PosShiftCreateWithoutSalesInput, PosShiftUncheckedCreateWithoutSalesInput>
+    connectOrCreate?: PosShiftCreateOrConnectWithoutSalesInput
+    connect?: PosShiftWhereUniqueInput
+  }
+
   export type FloatFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -38004,6 +43069,16 @@ export namespace Prisma {
     delete?: PosCustomerWhereInput | boolean
     connect?: PosCustomerWhereUniqueInput
     update?: XOR<XOR<PosCustomerUpdateToOneWithWhereWithoutCounterSalesInput, PosCustomerUpdateWithoutCounterSalesInput>, PosCustomerUncheckedUpdateWithoutCounterSalesInput>
+  }
+
+  export type PosShiftUpdateOneWithoutSalesNestedInput = {
+    create?: XOR<PosShiftCreateWithoutSalesInput, PosShiftUncheckedCreateWithoutSalesInput>
+    connectOrCreate?: PosShiftCreateOrConnectWithoutSalesInput
+    upsert?: PosShiftUpsertWithoutSalesInput
+    disconnect?: PosShiftWhereInput | boolean
+    delete?: PosShiftWhereInput | boolean
+    connect?: PosShiftWhereUniqueInput
+    update?: XOR<XOR<PosShiftUpdateToOneWithWhereWithoutSalesInput, PosShiftUpdateWithoutSalesInput>, PosShiftUncheckedUpdateWithoutSalesInput>
   }
 
   export type NullableIntFieldUpdateOperationsInput = {
@@ -39514,6 +44589,164 @@ export namespace Prisma {
     update?: XOR<XOR<AccountReceiptUpdateToOneWithWhereWithoutDepositItemInput, AccountReceiptUpdateWithoutDepositItemInput>, AccountReceiptUncheckedUpdateWithoutDepositItemInput>
   }
 
+  export type PosCounterSaleCreateNestedManyWithoutShiftInput = {
+    create?: XOR<PosCounterSaleCreateWithoutShiftInput, PosCounterSaleUncheckedCreateWithoutShiftInput> | PosCounterSaleCreateWithoutShiftInput[] | PosCounterSaleUncheckedCreateWithoutShiftInput[]
+    connectOrCreate?: PosCounterSaleCreateOrConnectWithoutShiftInput | PosCounterSaleCreateOrConnectWithoutShiftInput[]
+    createMany?: PosCounterSaleCreateManyShiftInputEnvelope
+    connect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+  }
+
+  export type PosCashEntryCreateNestedManyWithoutShiftInput = {
+    create?: XOR<PosCashEntryCreateWithoutShiftInput, PosCashEntryUncheckedCreateWithoutShiftInput> | PosCashEntryCreateWithoutShiftInput[] | PosCashEntryUncheckedCreateWithoutShiftInput[]
+    connectOrCreate?: PosCashEntryCreateOrConnectWithoutShiftInput | PosCashEntryCreateOrConnectWithoutShiftInput[]
+    createMany?: PosCashEntryCreateManyShiftInputEnvelope
+    connect?: PosCashEntryWhereUniqueInput | PosCashEntryWhereUniqueInput[]
+  }
+
+  export type InventoryMovementCreateNestedManyWithoutShiftInput = {
+    create?: XOR<InventoryMovementCreateWithoutShiftInput, InventoryMovementUncheckedCreateWithoutShiftInput> | InventoryMovementCreateWithoutShiftInput[] | InventoryMovementUncheckedCreateWithoutShiftInput[]
+    connectOrCreate?: InventoryMovementCreateOrConnectWithoutShiftInput | InventoryMovementCreateOrConnectWithoutShiftInput[]
+    createMany?: InventoryMovementCreateManyShiftInputEnvelope
+    connect?: InventoryMovementWhereUniqueInput | InventoryMovementWhereUniqueInput[]
+  }
+
+  export type PosCounterSaleUncheckedCreateNestedManyWithoutShiftInput = {
+    create?: XOR<PosCounterSaleCreateWithoutShiftInput, PosCounterSaleUncheckedCreateWithoutShiftInput> | PosCounterSaleCreateWithoutShiftInput[] | PosCounterSaleUncheckedCreateWithoutShiftInput[]
+    connectOrCreate?: PosCounterSaleCreateOrConnectWithoutShiftInput | PosCounterSaleCreateOrConnectWithoutShiftInput[]
+    createMany?: PosCounterSaleCreateManyShiftInputEnvelope
+    connect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+  }
+
+  export type PosCashEntryUncheckedCreateNestedManyWithoutShiftInput = {
+    create?: XOR<PosCashEntryCreateWithoutShiftInput, PosCashEntryUncheckedCreateWithoutShiftInput> | PosCashEntryCreateWithoutShiftInput[] | PosCashEntryUncheckedCreateWithoutShiftInput[]
+    connectOrCreate?: PosCashEntryCreateOrConnectWithoutShiftInput | PosCashEntryCreateOrConnectWithoutShiftInput[]
+    createMany?: PosCashEntryCreateManyShiftInputEnvelope
+    connect?: PosCashEntryWhereUniqueInput | PosCashEntryWhereUniqueInput[]
+  }
+
+  export type InventoryMovementUncheckedCreateNestedManyWithoutShiftInput = {
+    create?: XOR<InventoryMovementCreateWithoutShiftInput, InventoryMovementUncheckedCreateWithoutShiftInput> | InventoryMovementCreateWithoutShiftInput[] | InventoryMovementUncheckedCreateWithoutShiftInput[]
+    connectOrCreate?: InventoryMovementCreateOrConnectWithoutShiftInput | InventoryMovementCreateOrConnectWithoutShiftInput[]
+    createMany?: InventoryMovementCreateManyShiftInputEnvelope
+    connect?: InventoryMovementWhereUniqueInput | InventoryMovementWhereUniqueInput[]
+  }
+
+  export type PosCounterSaleUpdateManyWithoutShiftNestedInput = {
+    create?: XOR<PosCounterSaleCreateWithoutShiftInput, PosCounterSaleUncheckedCreateWithoutShiftInput> | PosCounterSaleCreateWithoutShiftInput[] | PosCounterSaleUncheckedCreateWithoutShiftInput[]
+    connectOrCreate?: PosCounterSaleCreateOrConnectWithoutShiftInput | PosCounterSaleCreateOrConnectWithoutShiftInput[]
+    upsert?: PosCounterSaleUpsertWithWhereUniqueWithoutShiftInput | PosCounterSaleUpsertWithWhereUniqueWithoutShiftInput[]
+    createMany?: PosCounterSaleCreateManyShiftInputEnvelope
+    set?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    disconnect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    delete?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    connect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    update?: PosCounterSaleUpdateWithWhereUniqueWithoutShiftInput | PosCounterSaleUpdateWithWhereUniqueWithoutShiftInput[]
+    updateMany?: PosCounterSaleUpdateManyWithWhereWithoutShiftInput | PosCounterSaleUpdateManyWithWhereWithoutShiftInput[]
+    deleteMany?: PosCounterSaleScalarWhereInput | PosCounterSaleScalarWhereInput[]
+  }
+
+  export type PosCashEntryUpdateManyWithoutShiftNestedInput = {
+    create?: XOR<PosCashEntryCreateWithoutShiftInput, PosCashEntryUncheckedCreateWithoutShiftInput> | PosCashEntryCreateWithoutShiftInput[] | PosCashEntryUncheckedCreateWithoutShiftInput[]
+    connectOrCreate?: PosCashEntryCreateOrConnectWithoutShiftInput | PosCashEntryCreateOrConnectWithoutShiftInput[]
+    upsert?: PosCashEntryUpsertWithWhereUniqueWithoutShiftInput | PosCashEntryUpsertWithWhereUniqueWithoutShiftInput[]
+    createMany?: PosCashEntryCreateManyShiftInputEnvelope
+    set?: PosCashEntryWhereUniqueInput | PosCashEntryWhereUniqueInput[]
+    disconnect?: PosCashEntryWhereUniqueInput | PosCashEntryWhereUniqueInput[]
+    delete?: PosCashEntryWhereUniqueInput | PosCashEntryWhereUniqueInput[]
+    connect?: PosCashEntryWhereUniqueInput | PosCashEntryWhereUniqueInput[]
+    update?: PosCashEntryUpdateWithWhereUniqueWithoutShiftInput | PosCashEntryUpdateWithWhereUniqueWithoutShiftInput[]
+    updateMany?: PosCashEntryUpdateManyWithWhereWithoutShiftInput | PosCashEntryUpdateManyWithWhereWithoutShiftInput[]
+    deleteMany?: PosCashEntryScalarWhereInput | PosCashEntryScalarWhereInput[]
+  }
+
+  export type InventoryMovementUpdateManyWithoutShiftNestedInput = {
+    create?: XOR<InventoryMovementCreateWithoutShiftInput, InventoryMovementUncheckedCreateWithoutShiftInput> | InventoryMovementCreateWithoutShiftInput[] | InventoryMovementUncheckedCreateWithoutShiftInput[]
+    connectOrCreate?: InventoryMovementCreateOrConnectWithoutShiftInput | InventoryMovementCreateOrConnectWithoutShiftInput[]
+    upsert?: InventoryMovementUpsertWithWhereUniqueWithoutShiftInput | InventoryMovementUpsertWithWhereUniqueWithoutShiftInput[]
+    createMany?: InventoryMovementCreateManyShiftInputEnvelope
+    set?: InventoryMovementWhereUniqueInput | InventoryMovementWhereUniqueInput[]
+    disconnect?: InventoryMovementWhereUniqueInput | InventoryMovementWhereUniqueInput[]
+    delete?: InventoryMovementWhereUniqueInput | InventoryMovementWhereUniqueInput[]
+    connect?: InventoryMovementWhereUniqueInput | InventoryMovementWhereUniqueInput[]
+    update?: InventoryMovementUpdateWithWhereUniqueWithoutShiftInput | InventoryMovementUpdateWithWhereUniqueWithoutShiftInput[]
+    updateMany?: InventoryMovementUpdateManyWithWhereWithoutShiftInput | InventoryMovementUpdateManyWithWhereWithoutShiftInput[]
+    deleteMany?: InventoryMovementScalarWhereInput | InventoryMovementScalarWhereInput[]
+  }
+
+  export type PosCounterSaleUncheckedUpdateManyWithoutShiftNestedInput = {
+    create?: XOR<PosCounterSaleCreateWithoutShiftInput, PosCounterSaleUncheckedCreateWithoutShiftInput> | PosCounterSaleCreateWithoutShiftInput[] | PosCounterSaleUncheckedCreateWithoutShiftInput[]
+    connectOrCreate?: PosCounterSaleCreateOrConnectWithoutShiftInput | PosCounterSaleCreateOrConnectWithoutShiftInput[]
+    upsert?: PosCounterSaleUpsertWithWhereUniqueWithoutShiftInput | PosCounterSaleUpsertWithWhereUniqueWithoutShiftInput[]
+    createMany?: PosCounterSaleCreateManyShiftInputEnvelope
+    set?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    disconnect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    delete?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    connect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    update?: PosCounterSaleUpdateWithWhereUniqueWithoutShiftInput | PosCounterSaleUpdateWithWhereUniqueWithoutShiftInput[]
+    updateMany?: PosCounterSaleUpdateManyWithWhereWithoutShiftInput | PosCounterSaleUpdateManyWithWhereWithoutShiftInput[]
+    deleteMany?: PosCounterSaleScalarWhereInput | PosCounterSaleScalarWhereInput[]
+  }
+
+  export type PosCashEntryUncheckedUpdateManyWithoutShiftNestedInput = {
+    create?: XOR<PosCashEntryCreateWithoutShiftInput, PosCashEntryUncheckedCreateWithoutShiftInput> | PosCashEntryCreateWithoutShiftInput[] | PosCashEntryUncheckedCreateWithoutShiftInput[]
+    connectOrCreate?: PosCashEntryCreateOrConnectWithoutShiftInput | PosCashEntryCreateOrConnectWithoutShiftInput[]
+    upsert?: PosCashEntryUpsertWithWhereUniqueWithoutShiftInput | PosCashEntryUpsertWithWhereUniqueWithoutShiftInput[]
+    createMany?: PosCashEntryCreateManyShiftInputEnvelope
+    set?: PosCashEntryWhereUniqueInput | PosCashEntryWhereUniqueInput[]
+    disconnect?: PosCashEntryWhereUniqueInput | PosCashEntryWhereUniqueInput[]
+    delete?: PosCashEntryWhereUniqueInput | PosCashEntryWhereUniqueInput[]
+    connect?: PosCashEntryWhereUniqueInput | PosCashEntryWhereUniqueInput[]
+    update?: PosCashEntryUpdateWithWhereUniqueWithoutShiftInput | PosCashEntryUpdateWithWhereUniqueWithoutShiftInput[]
+    updateMany?: PosCashEntryUpdateManyWithWhereWithoutShiftInput | PosCashEntryUpdateManyWithWhereWithoutShiftInput[]
+    deleteMany?: PosCashEntryScalarWhereInput | PosCashEntryScalarWhereInput[]
+  }
+
+  export type InventoryMovementUncheckedUpdateManyWithoutShiftNestedInput = {
+    create?: XOR<InventoryMovementCreateWithoutShiftInput, InventoryMovementUncheckedCreateWithoutShiftInput> | InventoryMovementCreateWithoutShiftInput[] | InventoryMovementUncheckedCreateWithoutShiftInput[]
+    connectOrCreate?: InventoryMovementCreateOrConnectWithoutShiftInput | InventoryMovementCreateOrConnectWithoutShiftInput[]
+    upsert?: InventoryMovementUpsertWithWhereUniqueWithoutShiftInput | InventoryMovementUpsertWithWhereUniqueWithoutShiftInput[]
+    createMany?: InventoryMovementCreateManyShiftInputEnvelope
+    set?: InventoryMovementWhereUniqueInput | InventoryMovementWhereUniqueInput[]
+    disconnect?: InventoryMovementWhereUniqueInput | InventoryMovementWhereUniqueInput[]
+    delete?: InventoryMovementWhereUniqueInput | InventoryMovementWhereUniqueInput[]
+    connect?: InventoryMovementWhereUniqueInput | InventoryMovementWhereUniqueInput[]
+    update?: InventoryMovementUpdateWithWhereUniqueWithoutShiftInput | InventoryMovementUpdateWithWhereUniqueWithoutShiftInput[]
+    updateMany?: InventoryMovementUpdateManyWithWhereWithoutShiftInput | InventoryMovementUpdateManyWithWhereWithoutShiftInput[]
+    deleteMany?: InventoryMovementScalarWhereInput | InventoryMovementScalarWhereInput[]
+  }
+
+  export type PosShiftCreateNestedOneWithoutCashEntriesInput = {
+    create?: XOR<PosShiftCreateWithoutCashEntriesInput, PosShiftUncheckedCreateWithoutCashEntriesInput>
+    connectOrCreate?: PosShiftCreateOrConnectWithoutCashEntriesInput
+    connect?: PosShiftWhereUniqueInput
+  }
+
+  export type PosShiftUpdateOneWithoutCashEntriesNestedInput = {
+    create?: XOR<PosShiftCreateWithoutCashEntriesInput, PosShiftUncheckedCreateWithoutCashEntriesInput>
+    connectOrCreate?: PosShiftCreateOrConnectWithoutCashEntriesInput
+    upsert?: PosShiftUpsertWithoutCashEntriesInput
+    disconnect?: PosShiftWhereInput | boolean
+    delete?: PosShiftWhereInput | boolean
+    connect?: PosShiftWhereUniqueInput
+    update?: XOR<XOR<PosShiftUpdateToOneWithWhereWithoutCashEntriesInput, PosShiftUpdateWithoutCashEntriesInput>, PosShiftUncheckedUpdateWithoutCashEntriesInput>
+  }
+
+  export type PosShiftCreateNestedOneWithoutMovementsInput = {
+    create?: XOR<PosShiftCreateWithoutMovementsInput, PosShiftUncheckedCreateWithoutMovementsInput>
+    connectOrCreate?: PosShiftCreateOrConnectWithoutMovementsInput
+    connect?: PosShiftWhereUniqueInput
+  }
+
+  export type PosShiftUpdateOneWithoutMovementsNestedInput = {
+    create?: XOR<PosShiftCreateWithoutMovementsInput, PosShiftUncheckedCreateWithoutMovementsInput>
+    connectOrCreate?: PosShiftCreateOrConnectWithoutMovementsInput
+    upsert?: PosShiftUpsertWithoutMovementsInput
+    disconnect?: PosShiftWhereInput | boolean
+    delete?: PosShiftWhereInput | boolean
+    connect?: PosShiftWhereUniqueInput
+    update?: XOR<XOR<PosShiftUpdateToOneWithWhereWithoutMovementsInput, PosShiftUpdateWithoutMovementsInput>, PosShiftUncheckedUpdateWithoutMovementsInput>
+  }
+
   export type NestedIntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -40071,6 +45304,7 @@ export namespace Prisma {
     amountReceived: number
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
+    paymentReference?: string | null
     pointsEarned?: number
     discountType?: string | null
     discountValue?: number
@@ -40079,6 +45313,7 @@ export namespace Prisma {
     pointsValue?: number
     createdAt?: Date | string
     customer?: PosCustomerCreateNestedOneWithoutCounterSalesInput
+    shift?: PosShiftCreateNestedOneWithoutSalesInput
   }
 
   export type PosCounterSaleUncheckedCreateWithoutCashierInput = {
@@ -40090,6 +45325,7 @@ export namespace Prisma {
     amountReceived: number
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
+    paymentReference?: string | null
     customerId?: number | null
     pointsEarned?: number
     discountType?: string | null
@@ -40097,6 +45333,7 @@ export namespace Prisma {
     discountAmount?: number
     pointsRedeemed?: number
     pointsValue?: number
+    shiftId?: number | null
     createdAt?: Date | string
   }
 
@@ -40138,6 +45375,7 @@ export namespace Prisma {
     amountReceived?: FloatFilter<"PosCounterSale"> | number
     changeGiven?: FloatFilter<"PosCounterSale"> | number
     paymentMethod?: EnumPaymentMethodFilter<"PosCounterSale"> | $Enums.PaymentMethod
+    paymentReference?: StringNullableFilter<"PosCounterSale"> | string | null
     cashierId?: IntFilter<"PosCounterSale"> | number
     customerId?: IntNullableFilter<"PosCounterSale"> | number | null
     pointsEarned?: IntFilter<"PosCounterSale"> | number
@@ -40146,6 +45384,7 @@ export namespace Prisma {
     discountAmount?: FloatFilter<"PosCounterSale"> | number
     pointsRedeemed?: IntFilter<"PosCounterSale"> | number
     pointsValue?: FloatFilter<"PosCounterSale"> | number
+    shiftId?: IntNullableFilter<"PosCounterSale"> | number | null
     createdAt?: DateTimeFilter<"PosCounterSale"> | Date | string
   }
 
@@ -40217,6 +45456,62 @@ export namespace Prisma {
   export type PosCustomerCreateOrConnectWithoutCounterSalesInput = {
     where: PosCustomerWhereUniqueInput
     create: XOR<PosCustomerCreateWithoutCounterSalesInput, PosCustomerUncheckedCreateWithoutCounterSalesInput>
+  }
+
+  export type PosShiftCreateWithoutSalesInput = {
+    shiftNo: string
+    status?: string
+    openedById: number
+    openedAt?: Date | string
+    openingFloat: number
+    countedCash?: number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: number | null
+    countedAt?: Date | string | null
+    expectedCash?: number | null
+    cashDifference?: number | null
+    differenceReason?: string | null
+    cardSlipTotal?: number | null
+    cardDifferenceReason?: string | null
+    floatLeft?: number | null
+    cashBanked?: number | null
+    closedById?: number | null
+    closedAt?: Date | string | null
+    notes?: string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    cashEntries?: PosCashEntryCreateNestedManyWithoutShiftInput
+    movements?: InventoryMovementCreateNestedManyWithoutShiftInput
+  }
+
+  export type PosShiftUncheckedCreateWithoutSalesInput = {
+    id?: number
+    shiftNo: string
+    status?: string
+    openedById: number
+    openedAt?: Date | string
+    openingFloat: number
+    countedCash?: number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: number | null
+    countedAt?: Date | string | null
+    expectedCash?: number | null
+    cashDifference?: number | null
+    differenceReason?: string | null
+    cardSlipTotal?: number | null
+    cardDifferenceReason?: string | null
+    floatLeft?: number | null
+    cashBanked?: number | null
+    closedById?: number | null
+    closedAt?: Date | string | null
+    notes?: string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    cashEntries?: PosCashEntryUncheckedCreateNestedManyWithoutShiftInput
+    movements?: InventoryMovementUncheckedCreateNestedManyWithoutShiftInput
+  }
+
+  export type PosShiftCreateOrConnectWithoutSalesInput = {
+    where: PosShiftWhereUniqueInput
+    create: XOR<PosShiftCreateWithoutSalesInput, PosShiftUncheckedCreateWithoutSalesInput>
   }
 
   export type PosAdminUpsertWithoutCounterSalesInput = {
@@ -40299,6 +45594,68 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     purchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type PosShiftUpsertWithoutSalesInput = {
+    update: XOR<PosShiftUpdateWithoutSalesInput, PosShiftUncheckedUpdateWithoutSalesInput>
+    create: XOR<PosShiftCreateWithoutSalesInput, PosShiftUncheckedCreateWithoutSalesInput>
+    where?: PosShiftWhereInput
+  }
+
+  export type PosShiftUpdateToOneWithWhereWithoutSalesInput = {
+    where?: PosShiftWhereInput
+    data: XOR<PosShiftUpdateWithoutSalesInput, PosShiftUncheckedUpdateWithoutSalesInput>
+  }
+
+  export type PosShiftUpdateWithoutSalesInput = {
+    shiftNo?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    openedById?: IntFieldUpdateOperationsInput | number
+    openedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    openingFloat?: FloatFieldUpdateOperationsInput | number
+    countedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: NullableIntFieldUpdateOperationsInput | number | null
+    countedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expectedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashDifference?: NullableFloatFieldUpdateOperationsInput | number | null
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cardSlipTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    cardDifferenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    floatLeft?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashBanked?: NullableFloatFieldUpdateOperationsInput | number | null
+    closedById?: NullableIntFieldUpdateOperationsInput | number | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    cashEntries?: PosCashEntryUpdateManyWithoutShiftNestedInput
+    movements?: InventoryMovementUpdateManyWithoutShiftNestedInput
+  }
+
+  export type PosShiftUncheckedUpdateWithoutSalesInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    shiftNo?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    openedById?: IntFieldUpdateOperationsInput | number
+    openedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    openingFloat?: FloatFieldUpdateOperationsInput | number
+    countedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: NullableIntFieldUpdateOperationsInput | number | null
+    countedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expectedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashDifference?: NullableFloatFieldUpdateOperationsInput | number | null
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cardSlipTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    cardDifferenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    floatLeft?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashBanked?: NullableFloatFieldUpdateOperationsInput | number | null
+    closedById?: NullableIntFieldUpdateOperationsInput | number | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    cashEntries?: PosCashEntryUncheckedUpdateManyWithoutShiftNestedInput
+    movements?: InventoryMovementUncheckedUpdateManyWithoutShiftNestedInput
   }
 
   export type InventoryProductCreateWithoutSupplierInput = {
@@ -41245,6 +46602,7 @@ export namespace Prisma {
     amountReceived: number
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
+    paymentReference?: string | null
     pointsEarned?: number
     discountType?: string | null
     discountValue?: number
@@ -41253,6 +46611,7 @@ export namespace Prisma {
     pointsValue?: number
     createdAt?: Date | string
     cashier: PosAdminCreateNestedOneWithoutCounterSalesInput
+    shift?: PosShiftCreateNestedOneWithoutSalesInput
   }
 
   export type PosCounterSaleUncheckedCreateWithoutCustomerInput = {
@@ -41264,6 +46623,7 @@ export namespace Prisma {
     amountReceived: number
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
+    paymentReference?: string | null
     cashierId: number
     pointsEarned?: number
     discountType?: string | null
@@ -41271,6 +46631,7 @@ export namespace Prisma {
     discountAmount?: number
     pointsRedeemed?: number
     pointsValue?: number
+    shiftId?: number | null
     createdAt?: Date | string
   }
 
@@ -44333,6 +49694,472 @@ export namespace Prisma {
     invoicePayment?: InvoicePaymentUncheckedUpdateOneWithoutReceiptNestedInput
   }
 
+  export type PosCounterSaleCreateWithoutShiftInput = {
+    invoiceGroupCode: string
+    totalAmount: number
+    emptyDeduction?: number
+    emptiesReturned?: number
+    amountReceived: number
+    changeGiven: number
+    paymentMethod?: $Enums.PaymentMethod
+    paymentReference?: string | null
+    pointsEarned?: number
+    discountType?: string | null
+    discountValue?: number
+    discountAmount?: number
+    pointsRedeemed?: number
+    pointsValue?: number
+    createdAt?: Date | string
+    cashier: PosAdminCreateNestedOneWithoutCounterSalesInput
+    customer?: PosCustomerCreateNestedOneWithoutCounterSalesInput
+  }
+
+  export type PosCounterSaleUncheckedCreateWithoutShiftInput = {
+    id?: number
+    invoiceGroupCode: string
+    totalAmount: number
+    emptyDeduction?: number
+    emptiesReturned?: number
+    amountReceived: number
+    changeGiven: number
+    paymentMethod?: $Enums.PaymentMethod
+    paymentReference?: string | null
+    cashierId: number
+    customerId?: number | null
+    pointsEarned?: number
+    discountType?: string | null
+    discountValue?: number
+    discountAmount?: number
+    pointsRedeemed?: number
+    pointsValue?: number
+    createdAt?: Date | string
+  }
+
+  export type PosCounterSaleCreateOrConnectWithoutShiftInput = {
+    where: PosCounterSaleWhereUniqueInput
+    create: XOR<PosCounterSaleCreateWithoutShiftInput, PosCounterSaleUncheckedCreateWithoutShiftInput>
+  }
+
+  export type PosCounterSaleCreateManyShiftInputEnvelope = {
+    data: PosCounterSaleCreateManyShiftInput | PosCounterSaleCreateManyShiftInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type PosCashEntryCreateWithoutShiftInput = {
+    entryNo: string
+    direction: string
+    category: string
+    amount: number
+    source: string
+    party?: string | null
+    reference?: string | null
+    note?: string | null
+    entryDate?: Date | string
+    automatic?: boolean
+    createdById: number
+    createdAt?: Date | string
+    voided?: boolean
+    voidReason?: string | null
+    voidedById?: number | null
+    voidedAt?: Date | string | null
+    bankStatus?: string | null
+    bankedAt?: Date | string | null
+    bankedById?: number | null
+    bankReference?: string | null
+  }
+
+  export type PosCashEntryUncheckedCreateWithoutShiftInput = {
+    id?: number
+    entryNo: string
+    direction: string
+    category: string
+    amount: number
+    source: string
+    party?: string | null
+    reference?: string | null
+    note?: string | null
+    entryDate?: Date | string
+    automatic?: boolean
+    createdById: number
+    createdAt?: Date | string
+    voided?: boolean
+    voidReason?: string | null
+    voidedById?: number | null
+    voidedAt?: Date | string | null
+    bankStatus?: string | null
+    bankedAt?: Date | string | null
+    bankedById?: number | null
+    bankReference?: string | null
+  }
+
+  export type PosCashEntryCreateOrConnectWithoutShiftInput = {
+    where: PosCashEntryWhereUniqueInput
+    create: XOR<PosCashEntryCreateWithoutShiftInput, PosCashEntryUncheckedCreateWithoutShiftInput>
+  }
+
+  export type PosCashEntryCreateManyShiftInputEnvelope = {
+    data: PosCashEntryCreateManyShiftInput | PosCashEntryCreateManyShiftInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type InventoryMovementCreateWithoutShiftInput = {
+    productId: number
+    kind: string
+    type: string
+    quantity: number
+    reference?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
+  export type InventoryMovementUncheckedCreateWithoutShiftInput = {
+    id?: number
+    productId: number
+    kind: string
+    type: string
+    quantity: number
+    reference?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
+  export type InventoryMovementCreateOrConnectWithoutShiftInput = {
+    where: InventoryMovementWhereUniqueInput
+    create: XOR<InventoryMovementCreateWithoutShiftInput, InventoryMovementUncheckedCreateWithoutShiftInput>
+  }
+
+  export type InventoryMovementCreateManyShiftInputEnvelope = {
+    data: InventoryMovementCreateManyShiftInput | InventoryMovementCreateManyShiftInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type PosCounterSaleUpsertWithWhereUniqueWithoutShiftInput = {
+    where: PosCounterSaleWhereUniqueInput
+    update: XOR<PosCounterSaleUpdateWithoutShiftInput, PosCounterSaleUncheckedUpdateWithoutShiftInput>
+    create: XOR<PosCounterSaleCreateWithoutShiftInput, PosCounterSaleUncheckedCreateWithoutShiftInput>
+  }
+
+  export type PosCounterSaleUpdateWithWhereUniqueWithoutShiftInput = {
+    where: PosCounterSaleWhereUniqueInput
+    data: XOR<PosCounterSaleUpdateWithoutShiftInput, PosCounterSaleUncheckedUpdateWithoutShiftInput>
+  }
+
+  export type PosCounterSaleUpdateManyWithWhereWithoutShiftInput = {
+    where: PosCounterSaleScalarWhereInput
+    data: XOR<PosCounterSaleUpdateManyMutationInput, PosCounterSaleUncheckedUpdateManyWithoutShiftInput>
+  }
+
+  export type PosCashEntryUpsertWithWhereUniqueWithoutShiftInput = {
+    where: PosCashEntryWhereUniqueInput
+    update: XOR<PosCashEntryUpdateWithoutShiftInput, PosCashEntryUncheckedUpdateWithoutShiftInput>
+    create: XOR<PosCashEntryCreateWithoutShiftInput, PosCashEntryUncheckedCreateWithoutShiftInput>
+  }
+
+  export type PosCashEntryUpdateWithWhereUniqueWithoutShiftInput = {
+    where: PosCashEntryWhereUniqueInput
+    data: XOR<PosCashEntryUpdateWithoutShiftInput, PosCashEntryUncheckedUpdateWithoutShiftInput>
+  }
+
+  export type PosCashEntryUpdateManyWithWhereWithoutShiftInput = {
+    where: PosCashEntryScalarWhereInput
+    data: XOR<PosCashEntryUpdateManyMutationInput, PosCashEntryUncheckedUpdateManyWithoutShiftInput>
+  }
+
+  export type PosCashEntryScalarWhereInput = {
+    AND?: PosCashEntryScalarWhereInput | PosCashEntryScalarWhereInput[]
+    OR?: PosCashEntryScalarWhereInput[]
+    NOT?: PosCashEntryScalarWhereInput | PosCashEntryScalarWhereInput[]
+    id?: IntFilter<"PosCashEntry"> | number
+    entryNo?: StringFilter<"PosCashEntry"> | string
+    direction?: StringFilter<"PosCashEntry"> | string
+    category?: StringFilter<"PosCashEntry"> | string
+    amount?: FloatFilter<"PosCashEntry"> | number
+    source?: StringFilter<"PosCashEntry"> | string
+    party?: StringNullableFilter<"PosCashEntry"> | string | null
+    reference?: StringNullableFilter<"PosCashEntry"> | string | null
+    note?: StringNullableFilter<"PosCashEntry"> | string | null
+    entryDate?: DateTimeFilter<"PosCashEntry"> | Date | string
+    shiftId?: IntNullableFilter<"PosCashEntry"> | number | null
+    automatic?: BoolFilter<"PosCashEntry"> | boolean
+    createdById?: IntFilter<"PosCashEntry"> | number
+    createdAt?: DateTimeFilter<"PosCashEntry"> | Date | string
+    voided?: BoolFilter<"PosCashEntry"> | boolean
+    voidReason?: StringNullableFilter<"PosCashEntry"> | string | null
+    voidedById?: IntNullableFilter<"PosCashEntry"> | number | null
+    voidedAt?: DateTimeNullableFilter<"PosCashEntry"> | Date | string | null
+    bankStatus?: StringNullableFilter<"PosCashEntry"> | string | null
+    bankedAt?: DateTimeNullableFilter<"PosCashEntry"> | Date | string | null
+    bankedById?: IntNullableFilter<"PosCashEntry"> | number | null
+    bankReference?: StringNullableFilter<"PosCashEntry"> | string | null
+  }
+
+  export type InventoryMovementUpsertWithWhereUniqueWithoutShiftInput = {
+    where: InventoryMovementWhereUniqueInput
+    update: XOR<InventoryMovementUpdateWithoutShiftInput, InventoryMovementUncheckedUpdateWithoutShiftInput>
+    create: XOR<InventoryMovementCreateWithoutShiftInput, InventoryMovementUncheckedCreateWithoutShiftInput>
+  }
+
+  export type InventoryMovementUpdateWithWhereUniqueWithoutShiftInput = {
+    where: InventoryMovementWhereUniqueInput
+    data: XOR<InventoryMovementUpdateWithoutShiftInput, InventoryMovementUncheckedUpdateWithoutShiftInput>
+  }
+
+  export type InventoryMovementUpdateManyWithWhereWithoutShiftInput = {
+    where: InventoryMovementScalarWhereInput
+    data: XOR<InventoryMovementUpdateManyMutationInput, InventoryMovementUncheckedUpdateManyWithoutShiftInput>
+  }
+
+  export type InventoryMovementScalarWhereInput = {
+    AND?: InventoryMovementScalarWhereInput | InventoryMovementScalarWhereInput[]
+    OR?: InventoryMovementScalarWhereInput[]
+    NOT?: InventoryMovementScalarWhereInput | InventoryMovementScalarWhereInput[]
+    id?: IntFilter<"InventoryMovement"> | number
+    productId?: IntFilter<"InventoryMovement"> | number
+    kind?: StringFilter<"InventoryMovement"> | string
+    type?: StringFilter<"InventoryMovement"> | string
+    quantity?: IntFilter<"InventoryMovement"> | number
+    shiftId?: IntNullableFilter<"InventoryMovement"> | number | null
+    reference?: StringNullableFilter<"InventoryMovement"> | string | null
+    createdById?: IntNullableFilter<"InventoryMovement"> | number | null
+    createdAt?: DateTimeFilter<"InventoryMovement"> | Date | string
+  }
+
+  export type PosShiftCreateWithoutCashEntriesInput = {
+    shiftNo: string
+    status?: string
+    openedById: number
+    openedAt?: Date | string
+    openingFloat: number
+    countedCash?: number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: number | null
+    countedAt?: Date | string | null
+    expectedCash?: number | null
+    cashDifference?: number | null
+    differenceReason?: string | null
+    cardSlipTotal?: number | null
+    cardDifferenceReason?: string | null
+    floatLeft?: number | null
+    cashBanked?: number | null
+    closedById?: number | null
+    closedAt?: Date | string | null
+    notes?: string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    sales?: PosCounterSaleCreateNestedManyWithoutShiftInput
+    movements?: InventoryMovementCreateNestedManyWithoutShiftInput
+  }
+
+  export type PosShiftUncheckedCreateWithoutCashEntriesInput = {
+    id?: number
+    shiftNo: string
+    status?: string
+    openedById: number
+    openedAt?: Date | string
+    openingFloat: number
+    countedCash?: number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: number | null
+    countedAt?: Date | string | null
+    expectedCash?: number | null
+    cashDifference?: number | null
+    differenceReason?: string | null
+    cardSlipTotal?: number | null
+    cardDifferenceReason?: string | null
+    floatLeft?: number | null
+    cashBanked?: number | null
+    closedById?: number | null
+    closedAt?: Date | string | null
+    notes?: string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    sales?: PosCounterSaleUncheckedCreateNestedManyWithoutShiftInput
+    movements?: InventoryMovementUncheckedCreateNestedManyWithoutShiftInput
+  }
+
+  export type PosShiftCreateOrConnectWithoutCashEntriesInput = {
+    where: PosShiftWhereUniqueInput
+    create: XOR<PosShiftCreateWithoutCashEntriesInput, PosShiftUncheckedCreateWithoutCashEntriesInput>
+  }
+
+  export type PosShiftUpsertWithoutCashEntriesInput = {
+    update: XOR<PosShiftUpdateWithoutCashEntriesInput, PosShiftUncheckedUpdateWithoutCashEntriesInput>
+    create: XOR<PosShiftCreateWithoutCashEntriesInput, PosShiftUncheckedCreateWithoutCashEntriesInput>
+    where?: PosShiftWhereInput
+  }
+
+  export type PosShiftUpdateToOneWithWhereWithoutCashEntriesInput = {
+    where?: PosShiftWhereInput
+    data: XOR<PosShiftUpdateWithoutCashEntriesInput, PosShiftUncheckedUpdateWithoutCashEntriesInput>
+  }
+
+  export type PosShiftUpdateWithoutCashEntriesInput = {
+    shiftNo?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    openedById?: IntFieldUpdateOperationsInput | number
+    openedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    openingFloat?: FloatFieldUpdateOperationsInput | number
+    countedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: NullableIntFieldUpdateOperationsInput | number | null
+    countedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expectedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashDifference?: NullableFloatFieldUpdateOperationsInput | number | null
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cardSlipTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    cardDifferenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    floatLeft?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashBanked?: NullableFloatFieldUpdateOperationsInput | number | null
+    closedById?: NullableIntFieldUpdateOperationsInput | number | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    sales?: PosCounterSaleUpdateManyWithoutShiftNestedInput
+    movements?: InventoryMovementUpdateManyWithoutShiftNestedInput
+  }
+
+  export type PosShiftUncheckedUpdateWithoutCashEntriesInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    shiftNo?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    openedById?: IntFieldUpdateOperationsInput | number
+    openedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    openingFloat?: FloatFieldUpdateOperationsInput | number
+    countedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: NullableIntFieldUpdateOperationsInput | number | null
+    countedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expectedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashDifference?: NullableFloatFieldUpdateOperationsInput | number | null
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cardSlipTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    cardDifferenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    floatLeft?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashBanked?: NullableFloatFieldUpdateOperationsInput | number | null
+    closedById?: NullableIntFieldUpdateOperationsInput | number | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    sales?: PosCounterSaleUncheckedUpdateManyWithoutShiftNestedInput
+    movements?: InventoryMovementUncheckedUpdateManyWithoutShiftNestedInput
+  }
+
+  export type PosShiftCreateWithoutMovementsInput = {
+    shiftNo: string
+    status?: string
+    openedById: number
+    openedAt?: Date | string
+    openingFloat: number
+    countedCash?: number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: number | null
+    countedAt?: Date | string | null
+    expectedCash?: number | null
+    cashDifference?: number | null
+    differenceReason?: string | null
+    cardSlipTotal?: number | null
+    cardDifferenceReason?: string | null
+    floatLeft?: number | null
+    cashBanked?: number | null
+    closedById?: number | null
+    closedAt?: Date | string | null
+    notes?: string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    sales?: PosCounterSaleCreateNestedManyWithoutShiftInput
+    cashEntries?: PosCashEntryCreateNestedManyWithoutShiftInput
+  }
+
+  export type PosShiftUncheckedCreateWithoutMovementsInput = {
+    id?: number
+    shiftNo: string
+    status?: string
+    openedById: number
+    openedAt?: Date | string
+    openingFloat: number
+    countedCash?: number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: number | null
+    countedAt?: Date | string | null
+    expectedCash?: number | null
+    cashDifference?: number | null
+    differenceReason?: string | null
+    cardSlipTotal?: number | null
+    cardDifferenceReason?: string | null
+    floatLeft?: number | null
+    cashBanked?: number | null
+    closedById?: number | null
+    closedAt?: Date | string | null
+    notes?: string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    sales?: PosCounterSaleUncheckedCreateNestedManyWithoutShiftInput
+    cashEntries?: PosCashEntryUncheckedCreateNestedManyWithoutShiftInput
+  }
+
+  export type PosShiftCreateOrConnectWithoutMovementsInput = {
+    where: PosShiftWhereUniqueInput
+    create: XOR<PosShiftCreateWithoutMovementsInput, PosShiftUncheckedCreateWithoutMovementsInput>
+  }
+
+  export type PosShiftUpsertWithoutMovementsInput = {
+    update: XOR<PosShiftUpdateWithoutMovementsInput, PosShiftUncheckedUpdateWithoutMovementsInput>
+    create: XOR<PosShiftCreateWithoutMovementsInput, PosShiftUncheckedCreateWithoutMovementsInput>
+    where?: PosShiftWhereInput
+  }
+
+  export type PosShiftUpdateToOneWithWhereWithoutMovementsInput = {
+    where?: PosShiftWhereInput
+    data: XOR<PosShiftUpdateWithoutMovementsInput, PosShiftUncheckedUpdateWithoutMovementsInput>
+  }
+
+  export type PosShiftUpdateWithoutMovementsInput = {
+    shiftNo?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    openedById?: IntFieldUpdateOperationsInput | number
+    openedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    openingFloat?: FloatFieldUpdateOperationsInput | number
+    countedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: NullableIntFieldUpdateOperationsInput | number | null
+    countedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expectedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashDifference?: NullableFloatFieldUpdateOperationsInput | number | null
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cardSlipTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    cardDifferenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    floatLeft?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashBanked?: NullableFloatFieldUpdateOperationsInput | number | null
+    closedById?: NullableIntFieldUpdateOperationsInput | number | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    sales?: PosCounterSaleUpdateManyWithoutShiftNestedInput
+    cashEntries?: PosCashEntryUpdateManyWithoutShiftNestedInput
+  }
+
+  export type PosShiftUncheckedUpdateWithoutMovementsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    shiftNo?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    openedById?: IntFieldUpdateOperationsInput | number
+    openedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    openingFloat?: FloatFieldUpdateOperationsInput | number
+    countedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: NullableIntFieldUpdateOperationsInput | number | null
+    countedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expectedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashDifference?: NullableFloatFieldUpdateOperationsInput | number | null
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cardSlipTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    cardDifferenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    floatLeft?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashBanked?: NullableFloatFieldUpdateOperationsInput | number | null
+    closedById?: NullableIntFieldUpdateOperationsInput | number | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    sales?: PosCounterSaleUncheckedUpdateManyWithoutShiftNestedInput
+    cashEntries?: PosCashEntryUncheckedUpdateManyWithoutShiftNestedInput
+  }
+
   export type PosCounterSaleCreateManyCashierInput = {
     id?: number
     invoiceGroupCode: string
@@ -44342,6 +50169,7 @@ export namespace Prisma {
     amountReceived: number
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
+    paymentReference?: string | null
     customerId?: number | null
     pointsEarned?: number
     discountType?: string | null
@@ -44349,6 +50177,7 @@ export namespace Prisma {
     discountAmount?: number
     pointsRedeemed?: number
     pointsValue?: number
+    shiftId?: number | null
     createdAt?: Date | string
   }
 
@@ -44360,6 +50189,7 @@ export namespace Prisma {
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
     pointsEarned?: IntFieldUpdateOperationsInput | number
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
     discountValue?: FloatFieldUpdateOperationsInput | number
@@ -44368,6 +50198,7 @@ export namespace Prisma {
     pointsValue?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customer?: PosCustomerUpdateOneWithoutCounterSalesNestedInput
+    shift?: PosShiftUpdateOneWithoutSalesNestedInput
   }
 
   export type PosCounterSaleUncheckedUpdateWithoutCashierInput = {
@@ -44379,6 +50210,7 @@ export namespace Prisma {
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
     customerId?: NullableIntFieldUpdateOperationsInput | number | null
     pointsEarned?: IntFieldUpdateOperationsInput | number
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -44386,6 +50218,7 @@ export namespace Prisma {
     discountAmount?: FloatFieldUpdateOperationsInput | number
     pointsRedeemed?: IntFieldUpdateOperationsInput | number
     pointsValue?: FloatFieldUpdateOperationsInput | number
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -44398,6 +50231,7 @@ export namespace Prisma {
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
     customerId?: NullableIntFieldUpdateOperationsInput | number | null
     pointsEarned?: IntFieldUpdateOperationsInput | number
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -44405,6 +50239,7 @@ export namespace Prisma {
     discountAmount?: FloatFieldUpdateOperationsInput | number
     pointsRedeemed?: IntFieldUpdateOperationsInput | number
     pointsValue?: FloatFieldUpdateOperationsInput | number
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -44906,6 +50741,7 @@ export namespace Prisma {
     amountReceived: number
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
+    paymentReference?: string | null
     cashierId: number
     pointsEarned?: number
     discountType?: string | null
@@ -44913,6 +50749,7 @@ export namespace Prisma {
     discountAmount?: number
     pointsRedeemed?: number
     pointsValue?: number
+    shiftId?: number | null
     createdAt?: Date | string
   }
 
@@ -45010,6 +50847,7 @@ export namespace Prisma {
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
     pointsEarned?: IntFieldUpdateOperationsInput | number
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
     discountValue?: FloatFieldUpdateOperationsInput | number
@@ -45018,6 +50856,7 @@ export namespace Prisma {
     pointsValue?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cashier?: PosAdminUpdateOneRequiredWithoutCounterSalesNestedInput
+    shift?: PosShiftUpdateOneWithoutSalesNestedInput
   }
 
   export type PosCounterSaleUncheckedUpdateWithoutCustomerInput = {
@@ -45029,6 +50868,7 @@ export namespace Prisma {
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
     cashierId?: IntFieldUpdateOperationsInput | number
     pointsEarned?: IntFieldUpdateOperationsInput | number
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -45036,6 +50876,7 @@ export namespace Prisma {
     discountAmount?: FloatFieldUpdateOperationsInput | number
     pointsRedeemed?: IntFieldUpdateOperationsInput | number
     pointsValue?: FloatFieldUpdateOperationsInput | number
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -45048,6 +50889,7 @@ export namespace Prisma {
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
     cashierId?: IntFieldUpdateOperationsInput | number
     pointsEarned?: IntFieldUpdateOperationsInput | number
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -45055,6 +50897,7 @@ export namespace Prisma {
     discountAmount?: FloatFieldUpdateOperationsInput | number
     pointsRedeemed?: IntFieldUpdateOperationsInput | number
     pointsValue?: FloatFieldUpdateOperationsInput | number
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -45902,6 +51745,227 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type PosCounterSaleCreateManyShiftInput = {
+    id?: number
+    invoiceGroupCode: string
+    totalAmount: number
+    emptyDeduction?: number
+    emptiesReturned?: number
+    amountReceived: number
+    changeGiven: number
+    paymentMethod?: $Enums.PaymentMethod
+    paymentReference?: string | null
+    cashierId: number
+    customerId?: number | null
+    pointsEarned?: number
+    discountType?: string | null
+    discountValue?: number
+    discountAmount?: number
+    pointsRedeemed?: number
+    pointsValue?: number
+    createdAt?: Date | string
+  }
+
+  export type PosCashEntryCreateManyShiftInput = {
+    id?: number
+    entryNo: string
+    direction: string
+    category: string
+    amount: number
+    source: string
+    party?: string | null
+    reference?: string | null
+    note?: string | null
+    entryDate?: Date | string
+    automatic?: boolean
+    createdById: number
+    createdAt?: Date | string
+    voided?: boolean
+    voidReason?: string | null
+    voidedById?: number | null
+    voidedAt?: Date | string | null
+    bankStatus?: string | null
+    bankedAt?: Date | string | null
+    bankedById?: number | null
+    bankReference?: string | null
+  }
+
+  export type InventoryMovementCreateManyShiftInput = {
+    id?: number
+    productId: number
+    kind: string
+    type: string
+    quantity: number
+    reference?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
+  export type PosCounterSaleUpdateWithoutShiftInput = {
+    invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    amountReceived?: FloatFieldUpdateOperationsInput | number
+    changeGiven?: FloatFieldUpdateOperationsInput | number
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
+    pointsEarned?: IntFieldUpdateOperationsInput | number
+    discountType?: NullableStringFieldUpdateOperationsInput | string | null
+    discountValue?: FloatFieldUpdateOperationsInput | number
+    discountAmount?: FloatFieldUpdateOperationsInput | number
+    pointsRedeemed?: IntFieldUpdateOperationsInput | number
+    pointsValue?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cashier?: PosAdminUpdateOneRequiredWithoutCounterSalesNestedInput
+    customer?: PosCustomerUpdateOneWithoutCounterSalesNestedInput
+  }
+
+  export type PosCounterSaleUncheckedUpdateWithoutShiftInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    amountReceived?: FloatFieldUpdateOperationsInput | number
+    changeGiven?: FloatFieldUpdateOperationsInput | number
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
+    cashierId?: IntFieldUpdateOperationsInput | number
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    pointsEarned?: IntFieldUpdateOperationsInput | number
+    discountType?: NullableStringFieldUpdateOperationsInput | string | null
+    discountValue?: FloatFieldUpdateOperationsInput | number
+    discountAmount?: FloatFieldUpdateOperationsInput | number
+    pointsRedeemed?: IntFieldUpdateOperationsInput | number
+    pointsValue?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosCounterSaleUncheckedUpdateManyWithoutShiftInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    amountReceived?: FloatFieldUpdateOperationsInput | number
+    changeGiven?: FloatFieldUpdateOperationsInput | number
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
+    cashierId?: IntFieldUpdateOperationsInput | number
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    pointsEarned?: IntFieldUpdateOperationsInput | number
+    discountType?: NullableStringFieldUpdateOperationsInput | string | null
+    discountValue?: FloatFieldUpdateOperationsInput | number
+    discountAmount?: FloatFieldUpdateOperationsInput | number
+    pointsRedeemed?: IntFieldUpdateOperationsInput | number
+    pointsValue?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosCashEntryUpdateWithoutShiftInput = {
+    entryNo?: StringFieldUpdateOperationsInput | string
+    direction?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    source?: StringFieldUpdateOperationsInput | string
+    party?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    entryDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    automatic?: BoolFieldUpdateOperationsInput | boolean
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    voided?: BoolFieldUpdateOperationsInput | boolean
+    voidReason?: NullableStringFieldUpdateOperationsInput | string | null
+    voidedById?: NullableIntFieldUpdateOperationsInput | number | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    bankedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankedById?: NullableIntFieldUpdateOperationsInput | number | null
+    bankReference?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type PosCashEntryUncheckedUpdateWithoutShiftInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    entryNo?: StringFieldUpdateOperationsInput | string
+    direction?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    source?: StringFieldUpdateOperationsInput | string
+    party?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    entryDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    automatic?: BoolFieldUpdateOperationsInput | boolean
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    voided?: BoolFieldUpdateOperationsInput | boolean
+    voidReason?: NullableStringFieldUpdateOperationsInput | string | null
+    voidedById?: NullableIntFieldUpdateOperationsInput | number | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    bankedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankedById?: NullableIntFieldUpdateOperationsInput | number | null
+    bankReference?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type PosCashEntryUncheckedUpdateManyWithoutShiftInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    entryNo?: StringFieldUpdateOperationsInput | string
+    direction?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    source?: StringFieldUpdateOperationsInput | string
+    party?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    entryDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    automatic?: BoolFieldUpdateOperationsInput | boolean
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    voided?: BoolFieldUpdateOperationsInput | boolean
+    voidReason?: NullableStringFieldUpdateOperationsInput | string | null
+    voidedById?: NullableIntFieldUpdateOperationsInput | number | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    bankedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankedById?: NullableIntFieldUpdateOperationsInput | number | null
+    bankReference?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type InventoryMovementUpdateWithoutShiftInput = {
+    productId?: IntFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InventoryMovementUncheckedUpdateWithoutShiftInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    productId?: IntFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InventoryMovementUncheckedUpdateManyWithoutShiftInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    productId?: IntFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
 
 
   /**
@@ -45955,6 +52019,10 @@ export namespace Prisma {
      * @deprecated Use AccountDepositCountOutputTypeDefaultArgs instead
      */
     export type AccountDepositCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = AccountDepositCountOutputTypeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use PosShiftCountOutputTypeDefaultArgs instead
+     */
+    export type PosShiftCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PosShiftCountOutputTypeDefaultArgs<ExtArgs>
     /**
      * @deprecated Use UserDefaultArgs instead
      */
@@ -46055,6 +52123,18 @@ export namespace Prisma {
      * @deprecated Use PosSettingDefaultArgs instead
      */
     export type PosSettingArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PosSettingDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use PosShiftDefaultArgs instead
+     */
+    export type PosShiftArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PosShiftDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use PosCashEntryDefaultArgs instead
+     */
+    export type PosCashEntryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PosCashEntryDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use InventoryMovementDefaultArgs instead
+     */
+    export type InventoryMovementArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = InventoryMovementDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

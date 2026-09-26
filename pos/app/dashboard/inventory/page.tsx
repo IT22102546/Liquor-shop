@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -28,6 +29,8 @@ import {
   IconCart,
   IconCash,
   IconCheck,
+  IconClock,
+  IconQr,
   IconInventory,
   IconPlus,
   IconPrinter,
@@ -40,6 +43,7 @@ import {
 type CheckoutResult = {
   invoiceGroupCode: string;
   paymentMethod: SaleReceipt["paymentMethod"];
+  paymentReference?: string | null;
   subtotal?: number;
   emptyDeduction?: number;
   emptiesReturned?: number;
@@ -88,6 +92,7 @@ function AnimatedMoney({ value }: { value: number }) {
 export default function InventoryPage() {
   const { admin, token, logout } = useAdmin();
   const canManageStock = admin.role === "ADMIN" || admin.role === "INVENTORY_MANAGER";
+  const canStartShift = admin.role === "ADMIN" || admin.role === "CASHIER";
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,7 +100,14 @@ export default function InventoryPage() {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<number | "all">("all");
   const [cart, setCart] = useState<CartLine[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState<"CASH" | "BANK_TRANSFER">("CASH");
+  const [paymentMethod, setPaymentMethod] = useState<"CASH" | "CARD" | "BANK_TRANSFER">("CASH");
+  // Card approval code (printed on the card machine slip) or transfer / QR reference — optional.
+  const [paymentReference, setPaymentReference] = useState("");
+  const choosePayment = (method: "CASH" | "CARD" | "BANK_TRANSFER") => {
+    setPaymentMethod(method);
+    setPaymentReference("");
+    if (method !== "CASH") setAmountTendered("");
+  };
   const [amountTendered, setAmountTendered] = useState("");
   const [checkingOut, setCheckingOut] = useState(false);
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
@@ -121,9 +133,78 @@ export default function InventoryPage() {
     setRedeemInput("");
   };
   const [stockIn, setStockIn] = useState<{ initialCode?: string } | null>(null);
+  // Selling needs an open shift (Day End): undefined = still checking.
+  const [shift, setShift] = useState<{ shiftNo: string } | null | undefined>(undefined);
+  const [suggestedFloat, setSuggestedFloat] = useState("");
+  const [startingShift, setStartingShift] = useState(false);
+  const loadShift = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/pos/shifts/current`, { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
+      const payload = (await response.json()) as { data?: { open: { shiftNo: string } | null; suggestedFloat: number } };
+      if (!response.ok || !payload.data) return;
+      setShift(payload.data.open);
+      setSuggestedFloat((value) => value || String(payload.data?.suggestedFloat ?? ""));
+    } catch {
+      /* the counter still works; checkout will say if no shift is open */
+    }
+  }, [token]);
+  useEffect(() => { void loadShift(); }, [loadShift]);
+  const startShift = async () => {
+    const openingFloat = Number(suggestedFloat || "0");
+    if (!(openingFloat >= 0)) return;
+    setStartingShift(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_URL}/api/pos/shifts/open`, { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ openingFloat }) });
+      const payload = (await response.json().catch(() => null)) as { message?: string } | null;
+      if (!response.ok) setError(payload?.message ?? "Could not start the shift");
+      await loadShift();
+    } finally {
+      setStartingShift(false);
+    }
+  };
   const [toasts, setToasts] = useState<ScanToast[]>([]);
   const [bumpedId, setBumpedId] = useState<number | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const registerRef = useRef<HTMLDivElement>(null);
+
+  // Till layout: the counter fills exactly the space below the heading, so the page itself never
+  // scrolls — the product list and the order panel each scroll on their own. Re-fit when the
+  // window resizes or something above changes height (success banner, errors).
+  useLayoutEffect(() => {
+    const register = registerRef.current;
+    if (!register) return;
+    let frame = 0;
+    const fit = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        if (window.innerWidth <= 760) {
+          register.style.height = "";
+          return;
+        }
+        const top = register.getBoundingClientRect().top + window.scrollY;
+        register.style.height = `${Math.max(420, window.innerHeight - top - 18)}px`;
+      });
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    const observer = new ResizeObserver(fit);
+    if (register.parentElement) {
+      Array.from(register.parentElement.children).forEach((child) => { if (child !== register) observer.observe(child); });
+    }
+    const siblingsWatcher = new MutationObserver(() => {
+      observer.disconnect();
+      Array.from(register.parentElement?.children ?? []).forEach((child) => { if (child !== register) observer.observe(child); });
+      fit();
+    });
+    if (register.parentElement) siblingsWatcher.observe(register.parentElement, { childList: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("resize", fit);
+      observer.disconnect();
+      siblingsWatcher.disconnect();
+    };
+  }, []);
 
   const base = `${API_URL}/api/pos/inventory-management`;
   const auth = { Authorization: `Bearer ${token}` };
@@ -332,13 +413,17 @@ export default function InventoryPage() {
           })),
           paymentMethod,
           amountReceived: paymentMethod === "CASH" ? tendered : undefined,
+          ...(paymentMethod !== "CASH" && paymentReference.trim() ? { paymentReference: paymentReference.trim() } : {}),
           ...(member ? { customerId: member.id } : {}),
           ...(discountAmount > 0 ? { discount: { type: discountType, value: discountValue } } : {}),
           ...(pointsUsed > 0 ? { redeemPoints: pointsUsed } : {}),
         }),
       });
       const payload = await response.json().catch(() => null) as { data?: CheckoutResult; message?: string } | null;
-      if (!response.ok || !payload?.data) throw new Error(payload?.message ?? "Checkout failed");
+      if (!response.ok || !payload?.data) {
+        if (response.status === 422) void loadShift();
+        throw new Error(payload?.message ?? "Checkout failed");
+      }
       const sale = payload.data;
       // Receipt figures come from the server's record of the sale, not the screen's own maths.
       const productById = new Map(cart.map((line) => [line.product.id, line.product]));
@@ -352,6 +437,7 @@ export default function InventoryPage() {
         pointsRedeemed: sale.pointsRedeemed ?? 0,
         pointsValue: sale.pointsValue ?? 0,
         paymentMethod: sale.paymentMethod,
+        paymentReference: sale.paymentReference ?? null,
         lines: sale.purchases.map((line) => {
           const product = productById.get(line.productId);
           return {
@@ -379,6 +465,8 @@ export default function InventoryPage() {
       resetAdjustments();
       setCart([]);
       setAmountTendered("");
+      setPaymentReference("");
+      setPaymentMethod("CASH");
       await loadData();
       window.setTimeout(() => printReceipt(receipt), 100);
     } catch (checkoutError) {
@@ -403,6 +491,7 @@ export default function InventoryPage() {
           </div>
         </div>
         <div className="pos-header-actions">
+          {shift && <Link href="/dashboard/day-end" className="lx-shift-chip" title="Day End: expenses, drawer count and shift close"><IconClock /> {shift.shiftNo}</Link>}
           <span className="lx-scan-status" title="Scan a barcode anytime on this page to add it to the order"><i /> Scanner ready</span>
           {canManageStock && (
             <button type="button" className="btn-accent pos-add-liquor" onClick={() => setStockIn({})}>
@@ -413,6 +502,20 @@ export default function InventoryPage() {
       </div>
 
       {error && <div className="bm-alert bm-alert-error">{error}</div>}
+      {shift === null && (
+        <form className="lx-shift-gate" onSubmit={(event) => { event.preventDefault(); void startShift(); }}>
+          <div>
+            <strong>No shift is open</strong>
+            <span>Count the cash in the drawer (the float) and start a shift to sell. Everything sold is then balanced at Day End.</span>
+          </div>
+          {canStartShift ? (
+            <div className="lx-shift-gate-form">
+              <label>Float Rs.<input className="bm-input" type="number" min={0} step="0.01" value={suggestedFloat} onChange={(event) => setSuggestedFloat(event.target.value)} /></label>
+              <button type="submit" className="btn-accent" disabled={startingShift}>{startingShift ? "Starting…" : "Start shift"}</button>
+            </div>
+          ) : <span className="lx-readonly-pill">Ask a cashier or manager to start a shift</span>}
+        </form>
+      )}
       {checkoutMessage && (
         <div className="pos-sale-success">
           <span className="check"><IconCheck size={20} /> {checkoutMessage}</span>
@@ -425,7 +528,7 @@ export default function InventoryPage() {
         </div>
       )}
 
-      <div className="pos-register-layout">
+      <div ref={registerRef} className="pos-register-layout">
       <section className="pos-catalog" aria-label="Products available to sell">
         <div className="pos-catalog-toolbar">
           <div>
@@ -660,10 +763,18 @@ export default function InventoryPage() {
             </div>
           )}
           <div className="pos-cart-total"><span>Total</span><strong><AnimatedMoney value={cartTotal} /></strong></div>
-          <div className="pos-payment-buttons" aria-label="Payment method">
-            <button type="button" className={paymentMethod === "CASH" ? "active" : ""} onClick={() => setPaymentMethod("CASH")}><IconCash /> Cash</button>
-            <button type="button" className={paymentMethod === "BANK_TRANSFER" ? "active" : ""} onClick={() => { setPaymentMethod("BANK_TRANSFER"); setAmountTendered(""); }}><IconCard /> Card / Transfer</button>
+          <div className="pos-payment-buttons three" aria-label="Payment method">
+            <button type="button" className={paymentMethod === "CASH" ? "active" : ""} onClick={() => choosePayment("CASH")}><IconCash /> Cash</button>
+            <button type="button" className={paymentMethod === "CARD" ? "active" : ""} onClick={() => choosePayment("CARD")}><IconCard /> Card</button>
+            <button type="button" className={paymentMethod === "BANK_TRANSFER" ? "active" : ""} onClick={() => choosePayment("BANK_TRANSFER")}><IconQr /> Transfer / QR</button>
           </div>
+          {paymentMethod !== "CASH" && cart.length > 0 && (
+            <div className="pos-payref">
+              <label htmlFor="payment-ref">{paymentMethod === "CARD" ? "Approval code" : "Transfer / QR reference"} <em>optional</em></label>
+              <input id="payment-ref" value={paymentReference} onChange={(event) => setPaymentReference(event.target.value)} maxLength={60} placeholder={paymentMethod === "CARD" ? "From the card slip, e.g. 004512" : "e.g. last 4 digits of the reference"} autoComplete="off" />
+              <small>{paymentMethod === "CARD" ? "Charge the card on the machine first. The payment is recorded automatically and checked against the machine at Day End." : "Check the money arrived in the bank app before completing."}</small>
+            </div>
+          )}
           {paymentMethod === "CASH" && cart.length > 0 && (
             <div className="pos-cash-area">
               <label htmlFor="cash-received">Cash received</label>
@@ -676,8 +787,8 @@ export default function InventoryPage() {
               <div className="pos-change"><span>Change</span><strong>{formatCurrency(changeDue)}</strong></div>
             </div>
           )}
-          <button type="button" className="pos-complete-sale" disabled={cart.length === 0 || checkingOut || discountOverLimit || (paymentMethod === "CASH" && tendered < cartTotal)} onClick={() => void checkout()}>
-            {checkingOut ? "Completing…" : `Complete sale · ${formatCurrency(cartTotal)}`}
+          <button type="button" className="pos-complete-sale" disabled={cart.length === 0 || checkingOut || shift === null || discountOverLimit || (paymentMethod === "CASH" && tendered < cartTotal)} onClick={() => void checkout()}>
+            {checkingOut ? "Completing…" : shift === null ? "Start a shift to sell" : `Complete sale · ${formatCurrency(cartTotal)}`}
           </button>
           <div className="pos-cart-shortcuts">
             <Link href="/dashboard/inventory/sold">Recent sales</Link>
@@ -709,7 +820,7 @@ export default function InventoryPage() {
           receipt={completedReceipt}
           success
           title="Payment successful"
-          subtitle={`${formatCurrency(completedReceipt.total)} · ${completedReceipt.paymentMethod === "CASH" ? `Change ${formatCurrency(completedReceipt.change)}` : "Card / Transfer"}${completedReceipt.member ? ` · +${completedReceipt.member.pointsEarned} pts for ${completedReceipt.member.name}` : ""}`}
+          subtitle={`${formatCurrency(completedReceipt.total)} · ${completedReceipt.paymentMethod === "CASH" ? `Change ${formatCurrency(completedReceipt.change)}` : completedReceipt.paymentMethod === "CARD" ? `Paid by card${completedReceipt.paymentReference ? ` · ${completedReceipt.paymentReference}` : ""}` : "Paid by transfer / QR"}${completedReceipt.member ? ` · +${completedReceipt.member.pointsEarned} pts for ${completedReceipt.member.name}` : ""}`}
           closeLabel="New sale"
           onClose={() => { setShowReceipt(false); searchInputRef.current?.focus(); }}
         />

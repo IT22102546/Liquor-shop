@@ -1,4 +1,5 @@
 import { SHOP } from "./shop";
+import { printThermal } from "./print";
 
 export type ReceiptLine = {
   name: string;
@@ -25,7 +26,9 @@ export type SaleReceipt = {
   /** Loyalty points spent on this bill and their rupee value (rate from Shop Settings at the time of sale). */
   pointsRedeemed?: number;
   pointsValue?: number;
-  paymentMethod: "CASH" | "BANK_TRANSFER" | "CHEQUE";
+  paymentMethod: "CASH" | "CARD" | "BANK_TRANSFER" | "CHEQUE";
+  /** Card approval code or transfer / QR reference. */
+  paymentReference?: string | null;
   lines: ReceiptLine[];
   subtotal: number;
   emptyDeduction: number;
@@ -37,7 +40,8 @@ export type SaleReceipt = {
 
 const PAYMENT_LABELS: Record<SaleReceipt["paymentMethod"], string> = {
   CASH: "Cash",
-  BANK_TRANSFER: "Card / Bank transfer",
+  CARD: "Card",
+  BANK_TRANSFER: "Bank transfer / QR",
   CHEQUE: "Cheque",
 };
 
@@ -136,6 +140,7 @@ export function buildReceiptHtml(receipt: SaleReceipt) {
       <div class="row"><span>Served by</span><span>${escape(receipt.cashierName)}</span></div>
       <div class="row"><span>Role</span><span>${escape(receipt.cashierRole)}</span></div>
       <div class="row"><span>Payment</span><span>${PAYMENT_LABELS[receipt.paymentMethod] ?? receipt.paymentMethod}</span></div>
+      ${receipt.paymentReference ? `<div class="row"><span>${receipt.paymentMethod === "CARD" ? "Approval code" : "Reference"}</span><span>${escape(receipt.paymentReference)}</span></div>` : ""}
       <div class="row"><span>Customer</span><span>${receipt.member ? escape(receipt.member.name) : "Walk-in"}</span></div>
       ${receipt.member ? `<div class="row"><span>Member mobile</span><span>${escape(maskMobile(receipt.member.mobileNumber))}</span></div>` : ""}
     </div>
@@ -181,37 +186,7 @@ export function buildReceiptHtml(receipt: SaleReceipt) {
   </body></html>`;
 }
 
-/**
- * Prints the receipt through a hidden frame (no new window).
- * Browsers ignore "auto" page height and fall back to A4/Letter, which leaves the receipt in the
- * corner of a big page (e.g. when saving as PDF). So the receipt is measured once it has rendered
- * and the page is set to exactly 80mm × its height.
- */
+/** Prints the receipt (80mm) — saved PDFs are named after the bill (see receiptFileName). */
 export function printReceipt(receipt: SaleReceipt) {
-  const frame = document.createElement("iframe");
-  frame.setAttribute("aria-hidden", "true");
-  // Laid out at receipt width (off-screen) so its height can be measured accurately.
-  Object.assign(frame.style, { position: "fixed", left: "-10000px", top: "0", width: "80mm", height: "100px", border: "0", opacity: "0" });
-  frame.srcdoc = buildReceiptHtml(receipt);
-  frame.onload = () => {
-    const doc = frame.contentDocument;
-    const win = frame.contentWindow;
-    if (!doc || !win) return;
-    const pxToMm = (px: number) => (px * 25.4) / 96;
-    // Measure the receipt itself (body), not the frame, so there's no blank space at the bottom.
-    const heightMm = Math.ceil(pxToMm(doc.body.getBoundingClientRect().height)) + 2;
-    const pageStyle = doc.createElement("style");
-    pageStyle.textContent = `@page { size: 80mm ${heightMm}mm; margin: 0; } @media print { html, body { width: 80mm; height: ${heightMm}mm; margin: 0; overflow: hidden; } }`;
-    doc.head.appendChild(pageStyle);
-    // Chrome names the saved PDF after the main page's title, not the frame's, so borrow it
-    // for the receipt's own name while the print dialog is open, then put it back.
-    const pageTitle = document.title;
-    document.title = receiptFileName(receipt);
-    const restoreTitle = () => { document.title = pageTitle; };
-    win.addEventListener("afterprint", restoreTitle, { once: true });
-    win.focus();
-    win.print();
-    window.setTimeout(() => { restoreTitle(); frame.remove(); }, 1000);
-  };
-  document.body.appendChild(frame);
+  printThermal(buildReceiptHtml(receipt), receiptFileName(receipt));
 }

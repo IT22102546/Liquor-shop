@@ -3,6 +3,7 @@ import { prisma } from "../../database/prisma.client";
 import { AppError } from "../../common/utils/errors";
 import { loyaltyPointsFor } from "../../config/loyalty";
 import { getSettings } from "../settings/settings.service";
+import { findOpenShift, recordMovements } from "../book/stock-movements";
 import type {
   CreateInvoiceAccountDto,
   CreateInvoiceTermDto,
@@ -581,6 +582,12 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
   const afterEmpties = roundCurrency(subtotal - emptyDeductionTotal);
   const settings = await getSettings();
 
+  // Every sale belongs to the open till shift (for book balancing / the Z report).
+  const shift = await findOpenShift();
+  if (!shift) {
+    throw AppError.validation({ shift: ["Start a shift before selling — open Day End or use “Start shift” on the counter"] });
+  }
+
   // ── Bill discount (switched on/off in Shop Settings; cashiers are capped) ──
   let discountAmount = 0;
   if (dto.discount) {
@@ -649,6 +656,11 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
     : 0;
 
   const result = await prisma.$transaction(async (tx) => {
+    // The shift may have been closed a moment ago on another till.
+    const stillOpen = await tx.posShift.findFirst({ where: { id: shift.id, status: "OPEN" }, select: { id: true } });
+    if (!stillOpen) {
+      throw AppError.validation({ shift: ["This shift was just closed — start a new shift to keep selling"] });
+    }
     const customer = member ?? (await getWalkInCustomer(tx));
 
     const purchases = [];
@@ -734,9 +746,20 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
       }
     }
 
+    // Stock day book: bottles sold and empties collected on this bill.
+    await recordMovements(
+      tx,
+      lines.flatMap((line) => [
+        { productId: line.productId, kind: "STOCK" as const, type: "SOLD" as const, quantity: -line.quantity, reference: invoiceGroupCode, createdById: cashierId },
+        { productId: line.productId, kind: "EMPTIES" as const, type: "COLLECTED" as const, quantity: line.emptiesReturned, reference: invoiceGroupCode, createdById: cashierId },
+      ]),
+      shift.id,
+    );
+
     const counterSale = await tx.posCounterSale.create({
       data: {
         invoiceGroupCode,
+        shiftId: shift.id,
         customerId: member?.id ?? null,
         pointsEarned,
         discountType: dto.discount?.type ?? null,
@@ -750,6 +773,7 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
         amountReceived,
         changeGiven,
         paymentMethod: dto.paymentMethod,
+        paymentReference: dto.paymentMethod === "CASH" ? null : dto.paymentReference?.trim() || null,
         cashierId,
       },
       select: {
@@ -757,6 +781,7 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
         amountReceived: true,
         changeGiven: true,
         paymentMethod: true,
+        paymentReference: true,
         createdAt: true,
       },
     });
@@ -781,6 +806,7 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
   return {
     invoiceGroupCode,
     paymentMethod: dto.paymentMethod,
+    paymentReference: dto.paymentMethod === "CASH" ? null : dto.paymentReference?.trim() || null,
     subtotal,
     emptyDeduction: emptyDeductionTotal,
     emptiesReturned: emptiesReturnedTotal,

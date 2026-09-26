@@ -1,4 +1,5 @@
 import type { ActivityCategory } from "./activity-log.service";
+import { EXPENSE_CATEGORIES as EXPENSE_LABELS, INCOME_CATEGORIES as INCOME_LABELS } from "../book/cash-book.service";
 
 type Body = Record<string, unknown>;
 
@@ -31,7 +32,7 @@ const ROLE_NAMES: Record<string, string> = {
   INVENTORY_MANAGER: "Inventory Manager",
   ACCOUNTANT: "Accountant",
 };
-const PAYMENT_NAMES: Record<string, string> = { CASH: "Cash", BANK_TRANSFER: "Card / Transfer", CHEQUE: "Cheque" };
+const PAYMENT_NAMES: Record<string, string> = { CASH: "Cash", CARD: "Card", BANK_TRANSFER: "Bank transfer / QR", CHEQUE: "Cheque" };
 const role = (value: unknown) => ROLE_NAMES[str(value)] ?? str(value);
 const payment = (value: unknown) => PAYMENT_NAMES[str(value)] ?? str(value);
 
@@ -124,11 +125,100 @@ export function describePosChange(method: string, path: string, body: Body, resp
           fact("Customer", member.name ? `${str(member.name)} (loyalty member)` : "Walk-in customer"),
           ...(member.name ? [fact("Points earned", `${str(member.pointsEarned)} (balance ${str(member.pointsBalance)})`)] : []),
           fact("Payment", payment(data.paymentMethod)),
+          ...(str(data.paymentReference) ? [fact(str(data.paymentMethod) === "CARD" ? "Card approval code" : "Transfer reference", str(data.paymentReference))] : []),
           ...(empties > 0 ? [fact("Subtotal", money(data.subtotal)), fact("Empty bottles returned", `${empties} (− ${money(data.emptyDeduction)})`)] : []),
           ...(obj(data.discount).amount ? [fact("Discount", `${obj(data.discount).type === "PERCENT" ? `${str(obj(data.discount).value)}% · ` : ""}− ${money(obj(data.discount).amount)}`)] : []),
           ...(Number(data.pointsRedeemed) > 0 ? [fact("Points used", `${str(data.pointsRedeemed)} (− ${money(data.pointsValue)})`)] : []),
           fact("Total", money(data.total)),
           ...(str(data.paymentMethod) === "CASH" ? [fact("Cash received", money(data.amountReceived)), fact("Change given", money(data.changeGiven))] : []),
+        ],
+      },
+    };
+  }
+
+  // ── Day End: shifts ──────────────────────────────────────────────────────
+  if (module === "shifts") {
+    const shiftNo = str(data.shiftNo) || str(obj(obj(data.report).shift).shiftNo) || `#${resource}`;
+    if (resource === "open") {
+      return {
+        action: "shift.open", category: "CASHBOOK", entityType: "shift", entityId: str(data.shiftNo),
+        summary: `Started shift ${str(data.shiftNo)} with a float of ${money(data.openingFloat)}`,
+        details: { facts: [fact("Shift", data.shiftNo), fact("Opening float", money(data.openingFloat))] },
+      };
+    }
+    if (id === "count") {
+      const diff = Number(data.difference ?? 0);
+      return {
+        action: "shift.count", category: "CASHBOOK", entityType: "shift", entityId: resource,
+        summary: `Counted the drawer: ${money(data.countedCash)} (${Math.abs(diff) < 0.01 ? "balanced" : `${diff > 0 ? "over" : "short"} by ${money(Math.abs(diff))}`})`,
+        details: { facts: [fact("Counted", money(data.countedCash)), fact("Expected", money(data.expectedCash)), fact("Difference", money(diff)), ...(Number(data.recounts) > 0 ? [fact("Recount", `#${str(data.recounts)}`)] : [])] },
+      };
+    }
+    if (id === "close") {
+      const close = obj(obj(data.report).close);
+      const sales = obj(obj(data.report).sales);
+      const diff = Number(close.difference ?? 0);
+      return {
+        action: "shift.close", category: "CASHBOOK", entityType: "shift", entityId: shiftNo,
+        summary: `Closed shift ${shiftNo} · sales ${money(sales.netSales)}${close.cardDifference != null && Math.abs(Number(close.cardDifference)) >= 0.01 ? ` · card machine differs ${money(Math.abs(Number(close.cardDifference)))}` : ""} · ${Math.abs(diff) < 0.01 ? "drawer balanced" : `drawer ${diff > 0 ? "over" : "short"} ${money(Math.abs(diff))}`}`,
+        details: {
+          facts: [
+            fact("Shift", shiftNo), fact("Bills", sales.bills), fact("Net sales", money(sales.netSales)),
+            fact("Cash counted", money(close.countedCash)), fact("Cash expected", money(close.expectedCash)),
+            fact("Over / short", money(diff)), ...(close.differenceReason ? [fact("Reason", close.differenceReason)] : []),
+            fact("Cash banked", money(close.cashBanked)), fact("Float left", money(close.floatLeft)),
+            ...(Number(sales.cardSales) > 0 ? [fact("Card sales", money(sales.cardSales)), fact("Card machine slip", close.cardSlipTotal == null ? "Not settled yet" : money(close.cardSlipTotal))] : []),
+            ...(close.cardDifferenceReason ? [fact("Card note", close.cardDifferenceReason)] : []),
+            ...(Number(sales.transferSales) > 0 ? [fact("Transfer / QR sales", money(sales.transferSales))] : []),
+          ],
+        },
+      };
+    }
+  }
+
+  // ── Cash book: receipts (money in) & vouchers (money out) ────────────────
+  if (module === "cash-book") {
+    const isOut = str(data.direction || body.direction) === "OUT";
+    const label = (isOut ? EXPENSE_LABELS : INCOME_LABELS)[str(data.category || body.category)] ?? str(data.category || body.category);
+    const sourceText = { DRAWER: "the cash drawer", BANK: "the bank", OWNER: "the owner" }[str(data.source || body.source)] ?? str(data.source || body.source);
+    if (resource === "bank") {
+      const list = Array.isArray(data.entries) ? (data.entries as Array<Record<string, unknown>>) : [];
+      return {
+        action: "cashbook.bank", category: "CASHBOOK", entityType: "deposit", entityId: str(data.reference) || null,
+        summary: `Marked ${list.length || str(data.count)} entr${(list.length || Number(data.count)) === 1 ? "y" : "ies"} as banked · ${money(data.amount)}${data.reference ? ` · slip ${str(data.reference)}` : ""}`,
+        details: {
+          facts: [
+            fact("Amount", money(data.amount)), ...(data.reference ? [fact("Deposit slip / reference", data.reference)] : []), ...(body.date ? [fact("Banked on", body.date)] : []),
+            ...list.map((entry) => fact(`${str(entry.entryNo)} · ${str(entry.categoryLabel)}`, money(entry.amount))),
+          ],
+        },
+      };
+    }
+    if (resource && id === "unbank") {
+      return {
+        action: "cashbook.unbank", category: "CASHBOOK", entityType: "cash entry", entityId: resource,
+        summary: `Undid "banked" on ${str(data.entryNo)} (${label} ${money(data.amount)}) — back to waiting`,
+        details: { facts: [fact("Entry", data.entryNo), fact("Amount", money(data.amount))] },
+      };
+    }
+    if (resource && id === "void") {
+      return {
+        action: "cashbook.void", category: "CASHBOOK", entityType: "cash entry", entityId: resource,
+        summary: `Voided ${str(data.entryNo) || `entry #${resource}`}${data.amount != null ? ` (${label} ${money(data.amount)})` : ""} — ${str(body.reason)}`,
+        details: { facts: [fact("Entry", data.entryNo), fact("Amount", money(data.amount)), fact("Reason", body.reason)] },
+      };
+    }
+    return {
+      action: isOut ? "cashbook.expense" : "cashbook.receipt", category: "CASHBOOK", entityType: isOut ? "voucher" : "receipt", entityId: str(data.entryNo),
+      summary: isOut
+        ? `Recorded expense${data.entryNo ? ` ${str(data.entryNo)}` : ""}: ${label} ${money(data.amount ?? body.amount)} from ${sourceText}${data.party || body.party ? ` — paid to ${str(data.party || body.party)}` : ""}`
+        : `Recorded money in${data.entryNo ? ` ${str(data.entryNo)}` : ""}: ${label} ${money(data.amount ?? body.amount)} into ${sourceText}${data.party || body.party ? ` — from ${str(data.party || body.party)}` : ""}`,
+      details: {
+        facts: [
+          fact(isOut ? "Voucher" : "Receipt", data.entryNo), fact("Category", label), fact("Amount", money(data.amount ?? body.amount)),
+          fact(isOut ? "Paid from" : "Paid into", sourceText), ...(data.party || body.party ? [fact(isOut ? "Paid to" : "Received from", data.party || body.party)] : []),
+          ...(data.reference || body.reference ? [fact("Bill / reference", data.reference || body.reference)] : []),
+          ...(data.note || body.note ? [fact("Note", data.note || body.note)] : []),
         ],
       },
     };

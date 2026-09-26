@@ -65,6 +65,7 @@ enum PaymentMethod {
   CASH
   CHEQUE
   BANK_TRANSFER
+  CARD
 }
 
 enum ChequeStatus {
@@ -135,6 +136,8 @@ model PosCounterSale {
   amountReceived   Float
   changeGiven      Float
   paymentMethod    PaymentMethod @default(CASH)
+  /// Card approval code (from the card machine slip) or bank transfer / QR reference.
+  paymentReference String?
   cashierId        Int
   cashier          PosAdmin      @relation(fields: [cashierId], references: [id])
   /// Loyalty member the sale was made to; null = walk-in customer.
@@ -148,10 +151,14 @@ model PosCounterSale {
   /// Loyalty points spent on this bill (1 point = Rs. 1) and their rupee value.
   pointsRedeemed   Int           @default(0)
   pointsValue      Float         @default(0)
+  /// Shift (till session) the sale was made in; null for sales made before shifts existed.
+  shiftId          Int?
+  shift            PosShift?     @relation(fields: [shiftId], references: [id])
   createdAt        DateTime      @default(now())
 
   @@index([cashierId])
   @@index([customerId])
+  @@index([shiftId])
   @@index([createdAt])
   @@map("pos_counter_sales")
 }
@@ -603,4 +610,98 @@ model PosSetting {
   updatedAt   DateTime @updatedAt
 
   @@map("pos_settings")
+}
+
+// ── Book balancing: shifts, cash book, stock movements ──────────────────────
+
+/// A till session: opened with a float, closed with a blind cash count and a locked Z report.
+model PosShift {
+  id                 Int              @id @default(autoincrement())
+  shiftNo            String           @unique
+  status             String           @default("OPEN") // OPEN | CLOSED
+  openedById         Int
+  openedAt           DateTime         @default(now())
+  openingFloat       Float
+  /// Blind count: saved before the expected amount is shown.
+  countedCash        Float?
+  denominations      Json?
+  countedById        Int?
+  countedAt          DateTime?
+  expectedCash       Float?
+  cashDifference     Float?
+  differenceReason   String?
+  cardSlipTotal      Float?
+  /// Why the card machine settlement didn't match the card sales (or "not settled yet").
+  cardDifferenceReason String?
+  floatLeft          Float?
+  cashBanked         Float?
+  closedById         Int?
+  closedAt           DateTime?
+  notes              String?
+  /// Frozen Z report figures at close.
+  report             Json?
+  sales              PosCounterSale[]
+  cashEntries        PosCashEntry[]
+  movements          InventoryMovement[]
+
+  @@index([status])
+  @@index([openedAt])
+  @@map("pos_shifts")
+}
+
+/// Cash book entry: money in (receipt, RCP-) or money out (voucher/expense, VCH-).
+model PosCashEntry {
+  id          Int       @id @default(autoincrement())
+  entryNo     String    @unique
+  direction   String    // IN | OUT
+  category    String
+  amount      Float
+  /// Where the money came from / went: DRAWER (till), BANK or OWNER. Shift-close entries start in
+  /// SAFE (cash takings) or CARD (card company) and move to BANK when marked as banked.
+  source      String
+  party       String?   // paid to / received from
+  reference   String?
+  note        String?
+  entryDate   DateTime  @default(now())
+  shiftId     Int?
+  shift       PosShift? @relation(fields: [shiftId], references: [id])
+  /// True for entries the system creates at shift close (takings banked, card settlement).
+  automatic   Boolean   @default(false)
+  createdById Int
+  createdAt   DateTime  @default(now())
+  voided      Boolean   @default(false)
+  voidReason  String?
+  voidedById  Int?
+  voidedAt    DateTime?
+  /// Takings waiting to be banked have bankStatus PENDING; BANKED once the deposit is confirmed.
+  bankStatus    String?
+  bankedAt      DateTime?
+  bankedById    Int?
+  bankReference String?
+
+  @@index([direction, entryDate])
+  @@index([bankStatus])
+  @@index([shiftId])
+  @@map("pos_cash_entries")
+}
+
+/// Every change to a product's stock or empties, for the stock day book.
+model InventoryMovement {
+  id          Int       @id @default(autoincrement())
+  productId   Int
+  /// STOCK (bottles for sale) or EMPTIES (empty bottles on hand).
+  kind        String
+  /// OPENING | RECEIVED | SOLD | ADJUSTED | COLLECTED | RETURNED
+  type        String
+  /// Signed change in units.
+  quantity    Int
+  shiftId     Int?
+  shift       PosShift? @relation(fields: [shiftId], references: [id])
+  reference   String?
+  createdById Int?
+  createdAt   DateTime  @default(now())
+
+  @@index([productId, createdAt])
+  @@index([shiftId])
+  @@map("inventory_movements")
 }

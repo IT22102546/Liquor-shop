@@ -20,6 +20,8 @@ import {
 } from "./dto/product.dto";
 import * as service from "./inventory-management.service";
 
+const actorId = (req: Request) => (req as unknown as { user?: { id?: number } }).user?.id;
+
 const MAX_TOTAL_IMAGE_BYTES = 60 * 1024 * 1024;
 
 // ── Suppliers ──────────────────────────────────────────────────────────────
@@ -103,19 +105,19 @@ export async function getProduct(req: Request, res: Response, next: NextFunction
   try { return sendSuccess(res, await service.getProduct(Number(req.params.id))); } catch (err) { return next(err); }
 }
 export async function createProduct(req: Request, res: Response, next: NextFunction) {
-  try { return sendCreated(res, await service.createProduct(validate(createProductSchema, req.body))); } catch (err) { return next(err); }
+  try { return sendCreated(res, await service.createProduct(validate(createProductSchema, req.body), actorId(req))); } catch (err) { return next(err); }
 }
 export async function updateProduct(req: Request, res: Response, next: NextFunction) {
-  try { return sendSuccess(res, await service.updateProduct(Number(req.params.id), validate(updateProductSchema, req.body))); } catch (err) { return next(err); }
+  try { return sendSuccess(res, await service.updateProduct(Number(req.params.id), validate(updateProductSchema, req.body), actorId(req))); } catch (err) { return next(err); }
 }
 export async function restockProduct(req: Request, res: Response, next: NextFunction) {
-  try { return sendSuccess(res, await service.restockProduct(Number(req.params.id), validate(restockProductSchema, req.body))); } catch (err) { return next(err); }
+  try { return sendSuccess(res, await service.restockProduct(Number(req.params.id), validate(restockProductSchema, req.body), actorId(req))); } catch (err) { return next(err); }
 }
 export async function returnEmptiesToSupplier(req: Request, res: Response, next: NextFunction) {
-  try { return sendSuccess(res, await service.returnEmptiesToSupplier(Number(req.params.id), validate(returnEmptiesSchema, req.body))); } catch (err) { return next(err); }
+  try { return sendSuccess(res, await service.returnEmptiesToSupplier(Number(req.params.id), validate(returnEmptiesSchema, req.body), actorId(req))); } catch (err) { return next(err); }
 }
 export async function recordProductSale(req: Request, res: Response, next: NextFunction) {
-  try { return sendSuccess(res, await service.recordProductSale(Number(req.params.id), validate(recordProductSaleSchema, req.body))); } catch (err) { return next(err); }
+  try { return sendSuccess(res, await service.recordProductSale(Number(req.params.id), validate(recordProductSaleSchema, req.body), actorId(req))); } catch (err) { return next(err); }
 }
 export async function deleteProduct(req: Request, res: Response, next: NextFunction) {
   try { await service.deleteProduct(Number(req.params.id)); return sendSuccess(res, { message: "Product deleted" }); } catch (err) { return next(err); }

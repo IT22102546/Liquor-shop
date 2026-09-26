@@ -124,7 +124,9 @@ export const checkoutSaleSchema = z.object({
     )
     .min(1, "Add at least one product")
     .max(100),
-  paymentMethod: z.enum(["CASH", "CHEQUE", "BANK_TRANSFER"]).default("CASH"),
+  paymentMethod: z.enum(["CASH", "CHEQUE", "BANK_TRANSFER", "CARD"]).default("CASH"),
+  /** Card approval code from the card slip, or the bank transfer / QR reference. */
+  paymentReference: z.string().trim().max(60).optional(),
   amountReceived: z.number().min(0).optional(),
   /** Loyalty member buying; leave out for a walk-in customer. */
   customerId: z.number().int().positive().optional(),
