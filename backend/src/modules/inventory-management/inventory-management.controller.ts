@@ -15,6 +15,7 @@ import {
   updateProductSchema,
   recordProductSaleSchema,
   restockProductSchema,
+  returnEmptiesSchema,
   productQuerySchema,
 } from "./dto/product.dto";
 import * as service from "./inventory-management.service";
@@ -82,6 +83,8 @@ export async function getProducts(req: Request, res: Response, next: NextFunctio
         soldQuantity: product.soldQuantity,
         lowStockThreshold: product.lowStockThreshold,
         sellingPrice: product.sellingPrice,
+        emptyBottlePrice: product.emptyBottlePrice,
+        emptyBottlesOnHand: product.emptyBottlesOnHand,
         description: product.description,
         lastSoldAt: product.lastSoldAt,
         createdAt: product.createdAt,
@@ -107,6 +110,9 @@ export async function updateProduct(req: Request, res: Response, next: NextFunct
 }
 export async function restockProduct(req: Request, res: Response, next: NextFunction) {
   try { return sendSuccess(res, await service.restockProduct(Number(req.params.id), validate(restockProductSchema, req.body))); } catch (err) { return next(err); }
+}
+export async function returnEmptiesToSupplier(req: Request, res: Response, next: NextFunction) {
+  try { return sendSuccess(res, await service.returnEmptiesToSupplier(Number(req.params.id), validate(returnEmptiesSchema, req.body))); } catch (err) { return next(err); }
 }
 export async function recordProductSale(req: Request, res: Response, next: NextFunction) {
   try { return sendSuccess(res, await service.recordProductSale(Number(req.params.id), validate(recordProductSaleSchema, req.body))); } catch (err) { return next(err); }

@@ -15,6 +15,8 @@ import contactRequestsPosRouter, {
   publicContactRequestsRouter,
 } from "./modules/contact-requests/contact-requests.routes";
 import accountsRouter from "./modules/accounts/accounts.routes";
+import activityLogRouter from "./modules/activity-log/activity-log.routes";
+import { recordPosActivity } from "./modules/activity-log/activity-log.middleware";
 
 const app = express();
 
@@ -41,6 +43,10 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
+/* ──────────────────── Activity log ──────────────────────── */
+// Records who changed what for every POS write; must be mounted before the POS routers.
+app.use("/api/pos", recordPosActivity);
+
 /* ──────────────────── API Routes ────────────────────────── */
 app.use("/api/auth", authRoutes);
 app.use("/api/bikes", bikesRoutes);
@@ -50,6 +56,7 @@ app.use("/api/pos/user-management", posUserManagementRoutes);
 app.use("/api/contact-requests", publicContactRequestsRouter);
 app.use("/api/pos/contact-requests", contactRequestsPosRouter);
 app.use("/api/pos/accounts", accountsRouter);
+app.use("/api/pos/activity-logs", activityLogRouter);
 
 /* ──────────────────── Error handling ────────────────────── */
 app.use(notFoundHandler);

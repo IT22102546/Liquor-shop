@@ -21,8 +21,8 @@ type AddLiquorModalProps = {
   /** A barcode scanned elsewhere (e.g. at the counter) to process as soon as the modal opens. */
   initialCode?: string;
   onClose: () => void;
-  /** Called after stock was added or a product was created, so the caller can reload. */
-  onStockChanged: () => void;
+  /** Called after stock was added or a product was created, so the caller can reload and confirm. */
+  onStockChanged: (message?: string) => void;
   onAuthExpired: () => void;
 };
 
@@ -45,7 +45,6 @@ export function AddLiquorModal({ token, initialCode, onClose, onStockChanged, on
   const [creating, setCreating] = useState<{ barcode?: string } | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
   const [flashId, setFlashId] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const initialCodeHandled = useRef(false);
@@ -89,7 +88,6 @@ export function AddLiquorModal({ token, initialCode, onClose, onStockChanged, on
 
   const addLine = useCallback((product: Product) => {
     setUnknownCode(null);
-    setNotice(null);
     setLines((current) => {
       const existing = current.find((line) => line.product.id === product.id);
       if (existing) {
@@ -168,16 +166,15 @@ export function AddLiquorModal({ token, initialCode, onClose, onStockChanged, on
       if (!response?.ok) failed.push(line.product.name);
     }
     setSaving(false);
-    onStockChanged();
     if (failed.length > 0) {
+      onStockChanged();
       setError(`Could not add stock for: ${failed.join(", ")}`);
       setLines((current) => current.filter((line) => failed.includes(line.product.name)));
       return;
     }
-    setNotice(`Added ${totalUnits} unit${totalUnits === 1 ? "" : "s"} to stock.`);
-    setLines([]);
-    void loadCatalog();
-    inputRef.current?.focus();
+    // Done: go straight back to the selling screen.
+    onStockChanged(`Added ${totalUnits} unit${totalUnits === 1 ? "" : "s"} to stock`);
+    onClose();
   };
 
   return (
@@ -235,7 +232,6 @@ export function AddLiquorModal({ token, initialCode, onClose, onStockChanged, on
           </div>
         )}
         {error && <div className="bm-alert bm-alert-error">{error}</div>}
-        {notice && <div className="bm-alert bm-alert-success">{notice}</div>}
 
         <div className="lx-receive-list">
           {lines.length === 0 ? (
@@ -305,10 +301,9 @@ export function AddLiquorModal({ token, initialCode, onClose, onStockChanged, on
             onRestockInstead={(product) => { setCreating(null); addLine(product); }}
             onClose={() => { setCreating(null); window.setTimeout(() => inputRef.current?.focus(), 50); }}
             onSaved={() => {
-              setUnknownCode(null);
-              setNotice("New product saved with its opening stock.");
-              onStockChanged();
-              void loadCatalog();
+              // New product saved with its opening stock: go straight back to the selling screen.
+              onStockChanged("New product saved and ready to sell");
+              onClose();
             }}
             onBrandCreated={(brand) => setBrands((current) => [...current, brand].sort((a, b) => a.name.localeCompare(b.name)))}
             onCategoryCreated={(category) => setCategories((current) => [...current, category].sort((a, b) => a.name.localeCompare(b.name)))}

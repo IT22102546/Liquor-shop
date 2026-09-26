@@ -149,6 +149,8 @@ exports.Prisma.PosCounterSaleScalarFieldEnum = {
   id: 'id',
   invoiceGroupCode: 'invoiceGroupCode',
   totalAmount: 'totalAmount',
+  emptyDeduction: 'emptyDeduction',
+  emptiesReturned: 'emptiesReturned',
   amountReceived: 'amountReceived',
   changeGiven: 'changeGiven',
   paymentMethod: 'paymentMethod',
@@ -200,6 +202,8 @@ exports.Prisma.InventoryProductScalarFieldEnum = {
   taxPaid: 'taxPaid',
   additionalExpenses: 'additionalExpenses',
   sellingPrice: 'sellingPrice',
+  emptyBottlePrice: 'emptyBottlePrice',
+  emptyBottlesOnHand: 'emptyBottlesOnHand',
   description: 'description',
   lastSoldAt: 'lastSoldAt',
   createdAt: 'createdAt',
@@ -259,6 +263,8 @@ exports.Prisma.PosCustomerPurchaseScalarFieldEnum = {
   monthlyInstallmentAmount: 'monthlyInstallmentAmount',
   totalWithInterest: 'totalWithInterest',
   quantity: 'quantity',
+  emptiesReturned: 'emptiesReturned',
+  emptyDeduction: 'emptyDeduction',
   purchasedAt: 'purchasedAt'
 };
 
@@ -417,12 +423,34 @@ exports.Prisma.AccountDepositItemScalarFieldEnum = {
   amount: 'amount'
 };
 
+exports.Prisma.ActivityLogScalarFieldEnum = {
+  id: 'id',
+  actorId: 'actorId',
+  actorName: 'actorName',
+  actorEmail: 'actorEmail',
+  actorRole: 'actorRole',
+  action: 'action',
+  category: 'category',
+  summary: 'summary',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  details: 'details',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
 };
 
 exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
+};
+
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull
 };
 
@@ -558,7 +586,8 @@ exports.Prisma.ModelName = {
   AccountTransaction: 'AccountTransaction',
   InvoicePayment: 'InvoicePayment',
   AccountDeposit: 'AccountDeposit',
-  AccountDepositItem: 'AccountDepositItem'
+  AccountDepositItem: 'AccountDepositItem',
+  ActivityLog: 'ActivityLog'
 };
 
 /**

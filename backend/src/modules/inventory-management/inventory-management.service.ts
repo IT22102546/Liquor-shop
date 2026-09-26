@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { Prisma } from "../../generated/prisma";
 import { prisma } from "../../database/prisma.client";
 import { AppError } from "../../common/utils/errors";
@@ -11,6 +13,7 @@ import type {
   UpdateProductDto,
   RecordProductSaleDto,
   RestockProductDto,
+  ReturnEmptiesDto,
   ProductQueryDto,
 } from "./dto/product.dto";
 
@@ -478,6 +481,7 @@ export async function createProduct(dto: CreateProductDto) {
     ),
     taxPaid: divideTotalAmountPerItem(dto.taxPaid, pricingUnitCount),
     sellingPrice: dto.sellingPrice,
+    emptyBottlePrice: dto.emptyBottlePrice || null,
     description,
     additionalExpenses:
       expenses.length > 0
@@ -554,6 +558,9 @@ export async function updateProduct(id: number, dto: UpdateProductDto) {
       ...(dto.sellingPrice !== undefined
         ? { sellingPrice: dto.sellingPrice }
         : {}),
+      ...(dto.emptyBottlePrice !== undefined
+        ? { emptyBottlePrice: dto.emptyBottlePrice || null }
+        : {}),
       ...(description !== undefined
         ? { description: description || null }
         : {}),
@@ -614,6 +621,21 @@ export async function restockProduct(id: number, dto: RestockProductDto) {
   });
 }
 
+/** Empties handed back to the supplier/distributor: takes them off the on-hand count. */
+export async function returnEmptiesToSupplier(id: number, dto: ReturnEmptiesDto) {
+  const product = await getProduct(id);
+  if (dto.quantity > product.emptyBottlesOnHand) {
+    throw AppError.validation({
+      quantity: [`Only ${product.emptyBottlesOnHand} empty bottle(s) of ${product.name} are on hand`],
+    });
+  }
+  return prisma.inventoryProduct.update({
+    where: { id },
+    data: { emptyBottlesOnHand: { decrement: dto.quantity } },
+    include: productInclude,
+  });
+}
+
 export async function recordProductSale(id: number, dto: RecordProductSaleDto) {
   const product = await getProduct(id);
   if (dto.quantity > product.quantity) {
@@ -640,6 +662,20 @@ export async function deleteProduct(id: number) {
 }
 
 // ── Product Images ───────────────────────────────────────────────────────────
+
+// Same uploads folder that app.ts serves at /uploads.
+const uploadsRoot = path.join(
+  process.cwd().endsWith("backend") ? process.cwd() : path.join(process.cwd(), "apps", "backend"),
+  "uploads",
+);
+
+/** Deletes a removed photo's file from disk (best effort; the database row is already gone). */
+function removeUploadedFile(url: string) {
+  if (!url.startsWith("/uploads/")) return;
+  const filePath = path.resolve(uploadsRoot, url.slice("/uploads/".length));
+  if (!filePath.startsWith(uploadsRoot + path.sep)) return;
+  fs.promises.unlink(filePath).catch(() => undefined);
+}
 
 export async function addProductImages(
   productId: number,
@@ -687,6 +723,7 @@ export async function deleteProductImage(productId: number, imageId: number) {
   if (!image) throw AppError.notFound("Image not found");
 
   await prisma.inventoryProductImage.delete({ where: { id: imageId } });
+  removeUploadedFile(image.url);
 
   if (image.isPrimary) {
     const next = await prisma.inventoryProductImage.findFirst({

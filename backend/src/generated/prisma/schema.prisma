@@ -129,6 +129,9 @@ model PosCounterSale {
   id               Int           @id @default(autoincrement())
   invoiceGroupCode String        @unique
   totalAmount      Float
+  /// Total deducted for empty bottles returned (already subtracted from totalAmount).
+  emptyDeduction   Float         @default(0)
+  emptiesReturned  Int           @default(0)
   amountReceived   Float
   changeGiven      Float
   paymentMethod    PaymentMethod @default(CASH)
@@ -199,6 +202,10 @@ model InventoryProduct {
   taxPaid            Float?
   additionalExpenses Float?
   sellingPrice       Float?
+  /// Deducted per empty bottle a customer hands back at the counter (null = not returnable).
+  emptyBottlePrice   Float?
+  /// Empty bottles collected at the counter and not yet returned to the supplier.
+  emptyBottlesOnHand Int                       @default(0)
   description        String?
   lastSoldAt         DateTime?
   createdAt          DateTime                  @default(now())
@@ -279,6 +286,9 @@ model PosCustomerPurchase {
   monthlyInstallmentAmount Float?
   totalWithInterest        Float?
   quantity                 Int                 @default(1)
+  /// Empty bottles handed back on this line and the amount deducted for them.
+  emptiesReturned          Int                 @default(0)
+  emptyDeduction           Float               @default(0)
   purchasedAt              DateTime            @default(now())
   customer                 PosCustomer         @relation(fields: [customerId], references: [id], onDelete: Cascade)
   inventoryProduct         InventoryProduct?   @relation(fields: [inventoryProductId], references: [id], onDelete: SetNull)
@@ -531,4 +541,32 @@ model AccountDepositItem {
 
   @@index([depositId])
   @@map("account_deposit_items")
+}
+
+// ── Activity Log ──────────────────────────────────────────────────────────────
+// Append-only audit trail: sign-ins and every change saved through the POS API.
+// Actor name/email/role are snapshotted so entries stay readable if staff change later.
+
+model ActivityLog {
+  id         Int      @id @default(autoincrement())
+  actorId    Int?
+  actorName  String?
+  actorEmail String?
+  actorRole  String?
+  /// Machine-readable action, e.g. "auth.login", "sale.checkout", "product.update".
+  action     String
+  /// Filter group: AUTH, SALE, STOCK, PRODUCT, STAFF, ACCOUNTS, CUSTOMER, OTHER.
+  category   String
+  summary    String
+  entityType String?
+  entityId   String?
+  details    Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([actorId])
+  @@index([category])
+  @@map("activity_logs")
 }

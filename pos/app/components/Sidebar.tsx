@@ -6,11 +6,12 @@ import { usePathname } from "next/navigation";
 import {
   IconAccess,
   IconAccounts,
+  IconActivity,
   IconBar,
   IconBottle,
   IconChevronLeft,
   IconChevronRight,
-  IconContactRequests,
+  // IconContactRequests, // used by the hidden "Supplier Requests" link
   IconDashboard,
   IconInventory,
   IconInvoice,
@@ -35,14 +36,18 @@ const NAV_SECTIONS: { title: string; links: NavLink[] }[] = [
   },
   {
     title: "Overview",
-    links: [{ label: "Dashboard", href: "/dashboard", Icon: IconDashboard }],
+    links: [
+      { label: "Dashboard", href: "/dashboard", Icon: IconDashboard },
+      { label: "Activity Log", href: "/dashboard/logs", Icon: IconActivity },
+    ],
   },
   {
     title: "Stock",
     links: [
       { label: "Product Setup", href: "/dashboard/inventory/manage", Icon: IconInventory },
       { label: "Suppliers", href: "/dashboard/suppliers", Icon: IconSupplier },
-      { label: "Supplier Requests", href: "/dashboard/purchasing-requests", Icon: IconContactRequests },
+      // Hidden from the sidebar for now; the page still exists.
+      // { label: "Supplier Requests", href: "/dashboard/purchasing-requests", Icon: IconContactRequests },
     ],
   },
   {
@@ -57,7 +62,8 @@ const NAV_SECTIONS: { title: string; links: NavLink[] }[] = [
     links: [
       { label: "Invoices", href: "/dashboard/invoices", Icon: IconInvoice },
       { label: "Invoice Bank Details", href: "/dashboard/invoices/accounts", Icon: IconAccounts },
-      { label: "Terms & Conditions", href: "/dashboard/invoices/terms", Icon: IconReceipt },
+      // Hidden from the sidebar for now; the page still exists.
+      // { label: "Terms & Conditions", href: "/dashboard/invoices/terms", Icon: IconReceipt },
     ],
   },
   {

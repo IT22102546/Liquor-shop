@@ -35,7 +35,7 @@ export function ProductArt({
 }) {
   const { Icon, color } = artFor(categoryName);
   return (
-    <div className={className} style={{ ["--art-color" as string]: color }}>
+    <div className={`${className}${imageUrl ? " has-photo" : ""}`} style={{ ["--art-color" as string]: color }}>
       {imageUrl ? <img src={`${API_URL}${imageUrl}`} alt={alt} loading="lazy" /> : <Icon size={iconSize} />}
       {children}
     </div>

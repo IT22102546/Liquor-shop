@@ -128,6 +128,11 @@ export type AccountDeposit = $Result.DefaultSelection<Prisma.$AccountDepositPayl
  * 
  */
 export type AccountDepositItem = $Result.DefaultSelection<Prisma.$AccountDepositItemPayload>
+/**
+ * Model ActivityLog
+ * 
+ */
+export type ActivityLog = $Result.DefaultSelection<Prisma.$ActivityLogPayload>
 
 /**
  * Enums
@@ -692,6 +697,16 @@ export class PrismaClient<
     * ```
     */
   get accountDepositItem(): Prisma.AccountDepositItemDelegate<ExtArgs>;
+
+  /**
+   * `prisma.activityLog`: Exposes CRUD operations for the **ActivityLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ActivityLogs
+    * const activityLogs = await prisma.activityLog.findMany()
+    * ```
+    */
+  get activityLog(): Prisma.ActivityLogDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -1155,7 +1170,8 @@ export namespace Prisma {
     AccountTransaction: 'AccountTransaction',
     InvoicePayment: 'InvoicePayment',
     AccountDeposit: 'AccountDeposit',
-    AccountDepositItem: 'AccountDepositItem'
+    AccountDepositItem: 'AccountDepositItem',
+    ActivityLog: 'ActivityLog'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1171,7 +1187,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "posAdmin" | "posCounterSale" | "supplier" | "inventoryBrand" | "inventoryCategory" | "inventoryProduct" | "inventoryProductExpense" | "inventoryProductImage" | "posCustomer" | "posCustomerPurchase" | "posInvoiceTerm" | "posInstallment" | "posInstallmentPayment" | "contactRequest" | "account" | "accountRelationship" | "accountReceipt" | "accountVoucher" | "accountTransaction" | "invoicePayment" | "accountDeposit" | "accountDepositItem"
+      modelProps: "user" | "posAdmin" | "posCounterSale" | "supplier" | "inventoryBrand" | "inventoryCategory" | "inventoryProduct" | "inventoryProductExpense" | "inventoryProductImage" | "posCustomer" | "posCustomerPurchase" | "posInvoiceTerm" | "posInstallment" | "posInstallmentPayment" | "contactRequest" | "account" | "accountRelationship" | "accountReceipt" | "accountVoucher" | "accountTransaction" | "invoicePayment" | "accountDeposit" | "accountDepositItem" | "activityLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2782,6 +2798,76 @@ export namespace Prisma {
           count: {
             args: Prisma.AccountDepositItemCountArgs<ExtArgs>
             result: $Utils.Optional<AccountDepositItemCountAggregateOutputType> | number
+          }
+        }
+      }
+      ActivityLog: {
+        payload: Prisma.$ActivityLogPayload<ExtArgs>
+        fields: Prisma.ActivityLogFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ActivityLogFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ActivityLogFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload>
+          }
+          findFirst: {
+            args: Prisma.ActivityLogFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ActivityLogFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload>
+          }
+          findMany: {
+            args: Prisma.ActivityLogFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload>[]
+          }
+          create: {
+            args: Prisma.ActivityLogCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload>
+          }
+          createMany: {
+            args: Prisma.ActivityLogCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ActivityLogCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload>[]
+          }
+          delete: {
+            args: Prisma.ActivityLogDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload>
+          }
+          update: {
+            args: Prisma.ActivityLogUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload>
+          }
+          deleteMany: {
+            args: Prisma.ActivityLogDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ActivityLogUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.ActivityLogUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload>
+          }
+          aggregate: {
+            args: Prisma.ActivityLogAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateActivityLog>
+          }
+          groupBy: {
+            args: Prisma.ActivityLogGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ActivityLogGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ActivityLogCountArgs<ExtArgs>
+            result: $Utils.Optional<ActivityLogCountAggregateOutputType> | number
           }
         }
       }
@@ -5418,6 +5504,8 @@ export namespace Prisma {
   export type PosCounterSaleAvgAggregateOutputType = {
     id: number | null
     totalAmount: number | null
+    emptyDeduction: number | null
+    emptiesReturned: number | null
     amountReceived: number | null
     changeGiven: number | null
     cashierId: number | null
@@ -5426,6 +5514,8 @@ export namespace Prisma {
   export type PosCounterSaleSumAggregateOutputType = {
     id: number | null
     totalAmount: number | null
+    emptyDeduction: number | null
+    emptiesReturned: number | null
     amountReceived: number | null
     changeGiven: number | null
     cashierId: number | null
@@ -5435,6 +5525,8 @@ export namespace Prisma {
     id: number | null
     invoiceGroupCode: string | null
     totalAmount: number | null
+    emptyDeduction: number | null
+    emptiesReturned: number | null
     amountReceived: number | null
     changeGiven: number | null
     paymentMethod: $Enums.PaymentMethod | null
@@ -5446,6 +5538,8 @@ export namespace Prisma {
     id: number | null
     invoiceGroupCode: string | null
     totalAmount: number | null
+    emptyDeduction: number | null
+    emptiesReturned: number | null
     amountReceived: number | null
     changeGiven: number | null
     paymentMethod: $Enums.PaymentMethod | null
@@ -5457,6 +5551,8 @@ export namespace Prisma {
     id: number
     invoiceGroupCode: number
     totalAmount: number
+    emptyDeduction: number
+    emptiesReturned: number
     amountReceived: number
     changeGiven: number
     paymentMethod: number
@@ -5469,6 +5565,8 @@ export namespace Prisma {
   export type PosCounterSaleAvgAggregateInputType = {
     id?: true
     totalAmount?: true
+    emptyDeduction?: true
+    emptiesReturned?: true
     amountReceived?: true
     changeGiven?: true
     cashierId?: true
@@ -5477,6 +5575,8 @@ export namespace Prisma {
   export type PosCounterSaleSumAggregateInputType = {
     id?: true
     totalAmount?: true
+    emptyDeduction?: true
+    emptiesReturned?: true
     amountReceived?: true
     changeGiven?: true
     cashierId?: true
@@ -5486,6 +5586,8 @@ export namespace Prisma {
     id?: true
     invoiceGroupCode?: true
     totalAmount?: true
+    emptyDeduction?: true
+    emptiesReturned?: true
     amountReceived?: true
     changeGiven?: true
     paymentMethod?: true
@@ -5497,6 +5599,8 @@ export namespace Prisma {
     id?: true
     invoiceGroupCode?: true
     totalAmount?: true
+    emptyDeduction?: true
+    emptiesReturned?: true
     amountReceived?: true
     changeGiven?: true
     paymentMethod?: true
@@ -5508,6 +5612,8 @@ export namespace Prisma {
     id?: true
     invoiceGroupCode?: true
     totalAmount?: true
+    emptyDeduction?: true
+    emptiesReturned?: true
     amountReceived?: true
     changeGiven?: true
     paymentMethod?: true
@@ -5606,6 +5712,8 @@ export namespace Prisma {
     id: number
     invoiceGroupCode: string
     totalAmount: number
+    emptyDeduction: number
+    emptiesReturned: number
     amountReceived: number
     changeGiven: number
     paymentMethod: $Enums.PaymentMethod
@@ -5636,6 +5744,8 @@ export namespace Prisma {
     id?: boolean
     invoiceGroupCode?: boolean
     totalAmount?: boolean
+    emptyDeduction?: boolean
+    emptiesReturned?: boolean
     amountReceived?: boolean
     changeGiven?: boolean
     paymentMethod?: boolean
@@ -5648,6 +5758,8 @@ export namespace Prisma {
     id?: boolean
     invoiceGroupCode?: boolean
     totalAmount?: boolean
+    emptyDeduction?: boolean
+    emptiesReturned?: boolean
     amountReceived?: boolean
     changeGiven?: boolean
     paymentMethod?: boolean
@@ -5660,6 +5772,8 @@ export namespace Prisma {
     id?: boolean
     invoiceGroupCode?: boolean
     totalAmount?: boolean
+    emptyDeduction?: boolean
+    emptiesReturned?: boolean
     amountReceived?: boolean
     changeGiven?: boolean
     paymentMethod?: boolean
@@ -5683,6 +5797,11 @@ export namespace Prisma {
       id: number
       invoiceGroupCode: string
       totalAmount: number
+      /**
+       * Total deducted for empty bottles returned (already subtracted from totalAmount).
+       */
+      emptyDeduction: number
+      emptiesReturned: number
       amountReceived: number
       changeGiven: number
       paymentMethod: $Enums.PaymentMethod
@@ -6085,6 +6204,8 @@ export namespace Prisma {
     readonly id: FieldRef<"PosCounterSale", 'Int'>
     readonly invoiceGroupCode: FieldRef<"PosCounterSale", 'String'>
     readonly totalAmount: FieldRef<"PosCounterSale", 'Float'>
+    readonly emptyDeduction: FieldRef<"PosCounterSale", 'Float'>
+    readonly emptiesReturned: FieldRef<"PosCounterSale", 'Int'>
     readonly amountReceived: FieldRef<"PosCounterSale", 'Float'>
     readonly changeGiven: FieldRef<"PosCounterSale", 'Float'>
     readonly paymentMethod: FieldRef<"PosCounterSale", 'PaymentMethod'>
@@ -9440,6 +9561,8 @@ export namespace Prisma {
     taxPaid: number | null
     additionalExpenses: number | null
     sellingPrice: number | null
+    emptyBottlePrice: number | null
+    emptyBottlesOnHand: number | null
   }
 
   export type InventoryProductSumAggregateOutputType = {
@@ -9454,6 +9577,8 @@ export namespace Prisma {
     taxPaid: number | null
     additionalExpenses: number | null
     sellingPrice: number | null
+    emptyBottlePrice: number | null
+    emptyBottlesOnHand: number | null
   }
 
   export type InventoryProductMinAggregateOutputType = {
@@ -9472,6 +9597,8 @@ export namespace Prisma {
     taxPaid: number | null
     additionalExpenses: number | null
     sellingPrice: number | null
+    emptyBottlePrice: number | null
+    emptyBottlesOnHand: number | null
     description: string | null
     lastSoldAt: Date | null
     createdAt: Date | null
@@ -9494,6 +9621,8 @@ export namespace Prisma {
     taxPaid: number | null
     additionalExpenses: number | null
     sellingPrice: number | null
+    emptyBottlePrice: number | null
+    emptyBottlesOnHand: number | null
     description: string | null
     lastSoldAt: Date | null
     createdAt: Date | null
@@ -9516,6 +9645,8 @@ export namespace Prisma {
     taxPaid: number
     additionalExpenses: number
     sellingPrice: number
+    emptyBottlePrice: number
+    emptyBottlesOnHand: number
     description: number
     lastSoldAt: number
     createdAt: number
@@ -9536,6 +9667,8 @@ export namespace Prisma {
     taxPaid?: true
     additionalExpenses?: true
     sellingPrice?: true
+    emptyBottlePrice?: true
+    emptyBottlesOnHand?: true
   }
 
   export type InventoryProductSumAggregateInputType = {
@@ -9550,6 +9683,8 @@ export namespace Prisma {
     taxPaid?: true
     additionalExpenses?: true
     sellingPrice?: true
+    emptyBottlePrice?: true
+    emptyBottlesOnHand?: true
   }
 
   export type InventoryProductMinAggregateInputType = {
@@ -9568,6 +9703,8 @@ export namespace Prisma {
     taxPaid?: true
     additionalExpenses?: true
     sellingPrice?: true
+    emptyBottlePrice?: true
+    emptyBottlesOnHand?: true
     description?: true
     lastSoldAt?: true
     createdAt?: true
@@ -9590,6 +9727,8 @@ export namespace Prisma {
     taxPaid?: true
     additionalExpenses?: true
     sellingPrice?: true
+    emptyBottlePrice?: true
+    emptyBottlesOnHand?: true
     description?: true
     lastSoldAt?: true
     createdAt?: true
@@ -9612,6 +9751,8 @@ export namespace Prisma {
     taxPaid?: true
     additionalExpenses?: true
     sellingPrice?: true
+    emptyBottlePrice?: true
+    emptyBottlesOnHand?: true
     description?: true
     lastSoldAt?: true
     createdAt?: true
@@ -9721,6 +9862,8 @@ export namespace Prisma {
     taxPaid: number | null
     additionalExpenses: number | null
     sellingPrice: number | null
+    emptyBottlePrice: number | null
+    emptyBottlesOnHand: number
     description: string | null
     lastSoldAt: Date | null
     createdAt: Date
@@ -9762,6 +9905,8 @@ export namespace Prisma {
     taxPaid?: boolean
     additionalExpenses?: boolean
     sellingPrice?: boolean
+    emptyBottlePrice?: boolean
+    emptyBottlesOnHand?: boolean
     description?: boolean
     lastSoldAt?: boolean
     createdAt?: boolean
@@ -9791,6 +9936,8 @@ export namespace Prisma {
     taxPaid?: boolean
     additionalExpenses?: boolean
     sellingPrice?: boolean
+    emptyBottlePrice?: boolean
+    emptyBottlesOnHand?: boolean
     description?: boolean
     lastSoldAt?: boolean
     createdAt?: boolean
@@ -9816,6 +9963,8 @@ export namespace Prisma {
     taxPaid?: boolean
     additionalExpenses?: boolean
     sellingPrice?: boolean
+    emptyBottlePrice?: boolean
+    emptyBottlesOnHand?: boolean
     description?: boolean
     lastSoldAt?: boolean
     createdAt?: boolean
@@ -9863,6 +10012,14 @@ export namespace Prisma {
       taxPaid: number | null
       additionalExpenses: number | null
       sellingPrice: number | null
+      /**
+       * Deducted per empty bottle a customer hands back at the counter (null = not returnable).
+       */
+      emptyBottlePrice: number | null
+      /**
+       * Empty bottles collected at the counter and not yet returned to the supplier.
+       */
+      emptyBottlesOnHand: number
       description: string | null
       lastSoldAt: Date | null
       createdAt: Date
@@ -10281,6 +10438,8 @@ export namespace Prisma {
     readonly taxPaid: FieldRef<"InventoryProduct", 'Float'>
     readonly additionalExpenses: FieldRef<"InventoryProduct", 'Float'>
     readonly sellingPrice: FieldRef<"InventoryProduct", 'Float'>
+    readonly emptyBottlePrice: FieldRef<"InventoryProduct", 'Float'>
+    readonly emptyBottlesOnHand: FieldRef<"InventoryProduct", 'Int'>
     readonly description: FieldRef<"InventoryProduct", 'String'>
     readonly lastSoldAt: FieldRef<"InventoryProduct", 'DateTime'>
     readonly createdAt: FieldRef<"InventoryProduct", 'DateTime'>
@@ -13733,6 +13892,8 @@ export namespace Prisma {
     monthlyInstallmentAmount: number | null
     totalWithInterest: number | null
     quantity: number | null
+    emptiesReturned: number | null
+    emptyDeduction: number | null
   }
 
   export type PosCustomerPurchaseSumAggregateOutputType = {
@@ -13748,6 +13909,8 @@ export namespace Prisma {
     monthlyInstallmentAmount: number | null
     totalWithInterest: number | null
     quantity: number | null
+    emptiesReturned: number | null
+    emptyDeduction: number | null
   }
 
   export type PosCustomerPurchaseMinAggregateOutputType = {
@@ -13771,6 +13934,8 @@ export namespace Prisma {
     monthlyInstallmentAmount: number | null
     totalWithInterest: number | null
     quantity: number | null
+    emptiesReturned: number | null
+    emptyDeduction: number | null
     purchasedAt: Date | null
   }
 
@@ -13795,6 +13960,8 @@ export namespace Prisma {
     monthlyInstallmentAmount: number | null
     totalWithInterest: number | null
     quantity: number | null
+    emptiesReturned: number | null
+    emptyDeduction: number | null
     purchasedAt: Date | null
   }
 
@@ -13820,6 +13987,8 @@ export namespace Prisma {
     monthlyInstallmentAmount: number
     totalWithInterest: number
     quantity: number
+    emptiesReturned: number
+    emptyDeduction: number
     purchasedAt: number
     _all: number
   }
@@ -13838,6 +14007,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: true
     totalWithInterest?: true
     quantity?: true
+    emptiesReturned?: true
+    emptyDeduction?: true
   }
 
   export type PosCustomerPurchaseSumAggregateInputType = {
@@ -13853,6 +14024,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: true
     totalWithInterest?: true
     quantity?: true
+    emptiesReturned?: true
+    emptyDeduction?: true
   }
 
   export type PosCustomerPurchaseMinAggregateInputType = {
@@ -13876,6 +14049,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: true
     totalWithInterest?: true
     quantity?: true
+    emptiesReturned?: true
+    emptyDeduction?: true
     purchasedAt?: true
   }
 
@@ -13900,6 +14075,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: true
     totalWithInterest?: true
     quantity?: true
+    emptiesReturned?: true
+    emptyDeduction?: true
     purchasedAt?: true
   }
 
@@ -13925,6 +14102,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: true
     totalWithInterest?: true
     quantity?: true
+    emptiesReturned?: true
+    emptyDeduction?: true
     purchasedAt?: true
     _all?: true
   }
@@ -14037,6 +14216,8 @@ export namespace Prisma {
     monthlyInstallmentAmount: number | null
     totalWithInterest: number | null
     quantity: number
+    emptiesReturned: number
+    emptyDeduction: number
     purchasedAt: Date
     _count: PosCustomerPurchaseCountAggregateOutputType | null
     _avg: PosCustomerPurchaseAvgAggregateOutputType | null
@@ -14081,6 +14262,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: boolean
     totalWithInterest?: boolean
     quantity?: boolean
+    emptiesReturned?: boolean
+    emptyDeduction?: boolean
     purchasedAt?: boolean
     customer?: boolean | PosCustomerDefaultArgs<ExtArgs>
     inventoryProduct?: boolean | PosCustomerPurchase$inventoryProductArgs<ExtArgs>
@@ -14112,6 +14295,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: boolean
     totalWithInterest?: boolean
     quantity?: boolean
+    emptiesReturned?: boolean
+    emptyDeduction?: boolean
     purchasedAt?: boolean
     customer?: boolean | PosCustomerDefaultArgs<ExtArgs>
     inventoryProduct?: boolean | PosCustomerPurchase$inventoryProductArgs<ExtArgs>
@@ -14139,6 +14324,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: boolean
     totalWithInterest?: boolean
     quantity?: boolean
+    emptiesReturned?: boolean
+    emptyDeduction?: boolean
     purchasedAt?: boolean
   }
 
@@ -14186,6 +14373,11 @@ export namespace Prisma {
       monthlyInstallmentAmount: number | null
       totalWithInterest: number | null
       quantity: number
+      /**
+       * Empty bottles handed back on this line and the amount deducted for them.
+       */
+      emptiesReturned: number
+      emptyDeduction: number
       purchasedAt: Date
     }, ExtArgs["result"]["posCustomerPurchase"]>
     composites: {}
@@ -14606,6 +14798,8 @@ export namespace Prisma {
     readonly monthlyInstallmentAmount: FieldRef<"PosCustomerPurchase", 'Float'>
     readonly totalWithInterest: FieldRef<"PosCustomerPurchase", 'Float'>
     readonly quantity: FieldRef<"PosCustomerPurchase", 'Int'>
+    readonly emptiesReturned: FieldRef<"PosCustomerPurchase", 'Int'>
+    readonly emptyDeduction: FieldRef<"PosCustomerPurchase", 'Float'>
     readonly purchasedAt: FieldRef<"PosCustomerPurchase", 'DateTime'>
   }
     
@@ -27869,6 +28063,1032 @@ export namespace Prisma {
 
 
   /**
+   * Model ActivityLog
+   */
+
+  export type AggregateActivityLog = {
+    _count: ActivityLogCountAggregateOutputType | null
+    _avg: ActivityLogAvgAggregateOutputType | null
+    _sum: ActivityLogSumAggregateOutputType | null
+    _min: ActivityLogMinAggregateOutputType | null
+    _max: ActivityLogMaxAggregateOutputType | null
+  }
+
+  export type ActivityLogAvgAggregateOutputType = {
+    id: number | null
+    actorId: number | null
+  }
+
+  export type ActivityLogSumAggregateOutputType = {
+    id: number | null
+    actorId: number | null
+  }
+
+  export type ActivityLogMinAggregateOutputType = {
+    id: number | null
+    actorId: number | null
+    actorName: string | null
+    actorEmail: string | null
+    actorRole: string | null
+    action: string | null
+    category: string | null
+    summary: string | null
+    entityType: string | null
+    entityId: string | null
+    ipAddress: string | null
+    userAgent: string | null
+    createdAt: Date | null
+  }
+
+  export type ActivityLogMaxAggregateOutputType = {
+    id: number | null
+    actorId: number | null
+    actorName: string | null
+    actorEmail: string | null
+    actorRole: string | null
+    action: string | null
+    category: string | null
+    summary: string | null
+    entityType: string | null
+    entityId: string | null
+    ipAddress: string | null
+    userAgent: string | null
+    createdAt: Date | null
+  }
+
+  export type ActivityLogCountAggregateOutputType = {
+    id: number
+    actorId: number
+    actorName: number
+    actorEmail: number
+    actorRole: number
+    action: number
+    category: number
+    summary: number
+    entityType: number
+    entityId: number
+    details: number
+    ipAddress: number
+    userAgent: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type ActivityLogAvgAggregateInputType = {
+    id?: true
+    actorId?: true
+  }
+
+  export type ActivityLogSumAggregateInputType = {
+    id?: true
+    actorId?: true
+  }
+
+  export type ActivityLogMinAggregateInputType = {
+    id?: true
+    actorId?: true
+    actorName?: true
+    actorEmail?: true
+    actorRole?: true
+    action?: true
+    category?: true
+    summary?: true
+    entityType?: true
+    entityId?: true
+    ipAddress?: true
+    userAgent?: true
+    createdAt?: true
+  }
+
+  export type ActivityLogMaxAggregateInputType = {
+    id?: true
+    actorId?: true
+    actorName?: true
+    actorEmail?: true
+    actorRole?: true
+    action?: true
+    category?: true
+    summary?: true
+    entityType?: true
+    entityId?: true
+    ipAddress?: true
+    userAgent?: true
+    createdAt?: true
+  }
+
+  export type ActivityLogCountAggregateInputType = {
+    id?: true
+    actorId?: true
+    actorName?: true
+    actorEmail?: true
+    actorRole?: true
+    action?: true
+    category?: true
+    summary?: true
+    entityType?: true
+    entityId?: true
+    details?: true
+    ipAddress?: true
+    userAgent?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type ActivityLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ActivityLog to aggregate.
+     */
+    where?: ActivityLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ActivityLogs to fetch.
+     */
+    orderBy?: ActivityLogOrderByWithRelationInput | ActivityLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ActivityLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ActivityLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ActivityLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ActivityLogs
+    **/
+    _count?: true | ActivityLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ActivityLogAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ActivityLogSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ActivityLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ActivityLogMaxAggregateInputType
+  }
+
+  export type GetActivityLogAggregateType<T extends ActivityLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateActivityLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateActivityLog[P]>
+      : GetScalarType<T[P], AggregateActivityLog[P]>
+  }
+
+
+
+
+  export type ActivityLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ActivityLogWhereInput
+    orderBy?: ActivityLogOrderByWithAggregationInput | ActivityLogOrderByWithAggregationInput[]
+    by: ActivityLogScalarFieldEnum[] | ActivityLogScalarFieldEnum
+    having?: ActivityLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ActivityLogCountAggregateInputType | true
+    _avg?: ActivityLogAvgAggregateInputType
+    _sum?: ActivityLogSumAggregateInputType
+    _min?: ActivityLogMinAggregateInputType
+    _max?: ActivityLogMaxAggregateInputType
+  }
+
+  export type ActivityLogGroupByOutputType = {
+    id: number
+    actorId: number | null
+    actorName: string | null
+    actorEmail: string | null
+    actorRole: string | null
+    action: string
+    category: string
+    summary: string
+    entityType: string | null
+    entityId: string | null
+    details: JsonValue | null
+    ipAddress: string | null
+    userAgent: string | null
+    createdAt: Date
+    _count: ActivityLogCountAggregateOutputType | null
+    _avg: ActivityLogAvgAggregateOutputType | null
+    _sum: ActivityLogSumAggregateOutputType | null
+    _min: ActivityLogMinAggregateOutputType | null
+    _max: ActivityLogMaxAggregateOutputType | null
+  }
+
+  type GetActivityLogGroupByPayload<T extends ActivityLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ActivityLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ActivityLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ActivityLogGroupByOutputType[P]>
+            : GetScalarType<T[P], ActivityLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ActivityLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    actorId?: boolean
+    actorName?: boolean
+    actorEmail?: boolean
+    actorRole?: boolean
+    action?: boolean
+    category?: boolean
+    summary?: boolean
+    entityType?: boolean
+    entityId?: boolean
+    details?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["activityLog"]>
+
+  export type ActivityLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    actorId?: boolean
+    actorName?: boolean
+    actorEmail?: boolean
+    actorRole?: boolean
+    action?: boolean
+    category?: boolean
+    summary?: boolean
+    entityType?: boolean
+    entityId?: boolean
+    details?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["activityLog"]>
+
+  export type ActivityLogSelectScalar = {
+    id?: boolean
+    actorId?: boolean
+    actorName?: boolean
+    actorEmail?: boolean
+    actorRole?: boolean
+    action?: boolean
+    category?: boolean
+    summary?: boolean
+    entityType?: boolean
+    entityId?: boolean
+    details?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    createdAt?: boolean
+  }
+
+
+  export type $ActivityLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ActivityLog"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      actorId: number | null
+      actorName: string | null
+      actorEmail: string | null
+      actorRole: string | null
+      /**
+       * Machine-readable action, e.g. "auth.login", "sale.checkout", "product.update".
+       */
+      action: string
+      /**
+       * Filter group: AUTH, SALE, STOCK, PRODUCT, STAFF, ACCOUNTS, CUSTOMER, OTHER.
+       */
+      category: string
+      summary: string
+      entityType: string | null
+      entityId: string | null
+      details: Prisma.JsonValue | null
+      ipAddress: string | null
+      userAgent: string | null
+      createdAt: Date
+    }, ExtArgs["result"]["activityLog"]>
+    composites: {}
+  }
+
+  type ActivityLogGetPayload<S extends boolean | null | undefined | ActivityLogDefaultArgs> = $Result.GetResult<Prisma.$ActivityLogPayload, S>
+
+  type ActivityLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<ActivityLogFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: ActivityLogCountAggregateInputType | true
+    }
+
+  export interface ActivityLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ActivityLog'], meta: { name: 'ActivityLog' } }
+    /**
+     * Find zero or one ActivityLog that matches the filter.
+     * @param {ActivityLogFindUniqueArgs} args - Arguments to find a ActivityLog
+     * @example
+     * // Get one ActivityLog
+     * const activityLog = await prisma.activityLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ActivityLogFindUniqueArgs>(args: SelectSubset<T, ActivityLogFindUniqueArgs<ExtArgs>>): Prisma__ActivityLogClient<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one ActivityLog that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {ActivityLogFindUniqueOrThrowArgs} args - Arguments to find a ActivityLog
+     * @example
+     * // Get one ActivityLog
+     * const activityLog = await prisma.activityLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ActivityLogFindUniqueOrThrowArgs>(args: SelectSubset<T, ActivityLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ActivityLogClient<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first ActivityLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogFindFirstArgs} args - Arguments to find a ActivityLog
+     * @example
+     * // Get one ActivityLog
+     * const activityLog = await prisma.activityLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ActivityLogFindFirstArgs>(args?: SelectSubset<T, ActivityLogFindFirstArgs<ExtArgs>>): Prisma__ActivityLogClient<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first ActivityLog that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogFindFirstOrThrowArgs} args - Arguments to find a ActivityLog
+     * @example
+     * // Get one ActivityLog
+     * const activityLog = await prisma.activityLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ActivityLogFindFirstOrThrowArgs>(args?: SelectSubset<T, ActivityLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__ActivityLogClient<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more ActivityLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ActivityLogs
+     * const activityLogs = await prisma.activityLog.findMany()
+     * 
+     * // Get first 10 ActivityLogs
+     * const activityLogs = await prisma.activityLog.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const activityLogWithIdOnly = await prisma.activityLog.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ActivityLogFindManyArgs>(args?: SelectSubset<T, ActivityLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a ActivityLog.
+     * @param {ActivityLogCreateArgs} args - Arguments to create a ActivityLog.
+     * @example
+     * // Create one ActivityLog
+     * const ActivityLog = await prisma.activityLog.create({
+     *   data: {
+     *     // ... data to create a ActivityLog
+     *   }
+     * })
+     * 
+     */
+    create<T extends ActivityLogCreateArgs>(args: SelectSubset<T, ActivityLogCreateArgs<ExtArgs>>): Prisma__ActivityLogClient<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many ActivityLogs.
+     * @param {ActivityLogCreateManyArgs} args - Arguments to create many ActivityLogs.
+     * @example
+     * // Create many ActivityLogs
+     * const activityLog = await prisma.activityLog.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ActivityLogCreateManyArgs>(args?: SelectSubset<T, ActivityLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ActivityLogs and returns the data saved in the database.
+     * @param {ActivityLogCreateManyAndReturnArgs} args - Arguments to create many ActivityLogs.
+     * @example
+     * // Create many ActivityLogs
+     * const activityLog = await prisma.activityLog.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ActivityLogs and only return the `id`
+     * const activityLogWithIdOnly = await prisma.activityLog.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ActivityLogCreateManyAndReturnArgs>(args?: SelectSubset<T, ActivityLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a ActivityLog.
+     * @param {ActivityLogDeleteArgs} args - Arguments to delete one ActivityLog.
+     * @example
+     * // Delete one ActivityLog
+     * const ActivityLog = await prisma.activityLog.delete({
+     *   where: {
+     *     // ... filter to delete one ActivityLog
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ActivityLogDeleteArgs>(args: SelectSubset<T, ActivityLogDeleteArgs<ExtArgs>>): Prisma__ActivityLogClient<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one ActivityLog.
+     * @param {ActivityLogUpdateArgs} args - Arguments to update one ActivityLog.
+     * @example
+     * // Update one ActivityLog
+     * const activityLog = await prisma.activityLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ActivityLogUpdateArgs>(args: SelectSubset<T, ActivityLogUpdateArgs<ExtArgs>>): Prisma__ActivityLogClient<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more ActivityLogs.
+     * @param {ActivityLogDeleteManyArgs} args - Arguments to filter ActivityLogs to delete.
+     * @example
+     * // Delete a few ActivityLogs
+     * const { count } = await prisma.activityLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ActivityLogDeleteManyArgs>(args?: SelectSubset<T, ActivityLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ActivityLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ActivityLogs
+     * const activityLog = await prisma.activityLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ActivityLogUpdateManyArgs>(args: SelectSubset<T, ActivityLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one ActivityLog.
+     * @param {ActivityLogUpsertArgs} args - Arguments to update or create a ActivityLog.
+     * @example
+     * // Update or create a ActivityLog
+     * const activityLog = await prisma.activityLog.upsert({
+     *   create: {
+     *     // ... data to create a ActivityLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ActivityLog we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ActivityLogUpsertArgs>(args: SelectSubset<T, ActivityLogUpsertArgs<ExtArgs>>): Prisma__ActivityLogClient<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of ActivityLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogCountArgs} args - Arguments to filter ActivityLogs to count.
+     * @example
+     * // Count the number of ActivityLogs
+     * const count = await prisma.activityLog.count({
+     *   where: {
+     *     // ... the filter for the ActivityLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends ActivityLogCountArgs>(
+      args?: Subset<T, ActivityLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ActivityLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ActivityLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ActivityLogAggregateArgs>(args: Subset<T, ActivityLogAggregateArgs>): Prisma.PrismaPromise<GetActivityLogAggregateType<T>>
+
+    /**
+     * Group by ActivityLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ActivityLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ActivityLogGroupByArgs['orderBy'] }
+        : { orderBy?: ActivityLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ActivityLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetActivityLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ActivityLog model
+   */
+  readonly fields: ActivityLogFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ActivityLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ActivityLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ActivityLog model
+   */ 
+  interface ActivityLogFieldRefs {
+    readonly id: FieldRef<"ActivityLog", 'Int'>
+    readonly actorId: FieldRef<"ActivityLog", 'Int'>
+    readonly actorName: FieldRef<"ActivityLog", 'String'>
+    readonly actorEmail: FieldRef<"ActivityLog", 'String'>
+    readonly actorRole: FieldRef<"ActivityLog", 'String'>
+    readonly action: FieldRef<"ActivityLog", 'String'>
+    readonly category: FieldRef<"ActivityLog", 'String'>
+    readonly summary: FieldRef<"ActivityLog", 'String'>
+    readonly entityType: FieldRef<"ActivityLog", 'String'>
+    readonly entityId: FieldRef<"ActivityLog", 'String'>
+    readonly details: FieldRef<"ActivityLog", 'Json'>
+    readonly ipAddress: FieldRef<"ActivityLog", 'String'>
+    readonly userAgent: FieldRef<"ActivityLog", 'String'>
+    readonly createdAt: FieldRef<"ActivityLog", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ActivityLog findUnique
+   */
+  export type ActivityLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+    /**
+     * Filter, which ActivityLog to fetch.
+     */
+    where: ActivityLogWhereUniqueInput
+  }
+
+  /**
+   * ActivityLog findUniqueOrThrow
+   */
+  export type ActivityLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+    /**
+     * Filter, which ActivityLog to fetch.
+     */
+    where: ActivityLogWhereUniqueInput
+  }
+
+  /**
+   * ActivityLog findFirst
+   */
+  export type ActivityLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+    /**
+     * Filter, which ActivityLog to fetch.
+     */
+    where?: ActivityLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ActivityLogs to fetch.
+     */
+    orderBy?: ActivityLogOrderByWithRelationInput | ActivityLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ActivityLogs.
+     */
+    cursor?: ActivityLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ActivityLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ActivityLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ActivityLogs.
+     */
+    distinct?: ActivityLogScalarFieldEnum | ActivityLogScalarFieldEnum[]
+  }
+
+  /**
+   * ActivityLog findFirstOrThrow
+   */
+  export type ActivityLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+    /**
+     * Filter, which ActivityLog to fetch.
+     */
+    where?: ActivityLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ActivityLogs to fetch.
+     */
+    orderBy?: ActivityLogOrderByWithRelationInput | ActivityLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ActivityLogs.
+     */
+    cursor?: ActivityLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ActivityLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ActivityLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ActivityLogs.
+     */
+    distinct?: ActivityLogScalarFieldEnum | ActivityLogScalarFieldEnum[]
+  }
+
+  /**
+   * ActivityLog findMany
+   */
+  export type ActivityLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+    /**
+     * Filter, which ActivityLogs to fetch.
+     */
+    where?: ActivityLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ActivityLogs to fetch.
+     */
+    orderBy?: ActivityLogOrderByWithRelationInput | ActivityLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ActivityLogs.
+     */
+    cursor?: ActivityLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ActivityLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ActivityLogs.
+     */
+    skip?: number
+    distinct?: ActivityLogScalarFieldEnum | ActivityLogScalarFieldEnum[]
+  }
+
+  /**
+   * ActivityLog create
+   */
+  export type ActivityLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+    /**
+     * The data needed to create a ActivityLog.
+     */
+    data: XOR<ActivityLogCreateInput, ActivityLogUncheckedCreateInput>
+  }
+
+  /**
+   * ActivityLog createMany
+   */
+  export type ActivityLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ActivityLogs.
+     */
+    data: ActivityLogCreateManyInput | ActivityLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ActivityLog createManyAndReturn
+   */
+  export type ActivityLogCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many ActivityLogs.
+     */
+    data: ActivityLogCreateManyInput | ActivityLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ActivityLog update
+   */
+  export type ActivityLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+    /**
+     * The data needed to update a ActivityLog.
+     */
+    data: XOR<ActivityLogUpdateInput, ActivityLogUncheckedUpdateInput>
+    /**
+     * Choose, which ActivityLog to update.
+     */
+    where: ActivityLogWhereUniqueInput
+  }
+
+  /**
+   * ActivityLog updateMany
+   */
+  export type ActivityLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ActivityLogs.
+     */
+    data: XOR<ActivityLogUpdateManyMutationInput, ActivityLogUncheckedUpdateManyInput>
+    /**
+     * Filter which ActivityLogs to update
+     */
+    where?: ActivityLogWhereInput
+  }
+
+  /**
+   * ActivityLog upsert
+   */
+  export type ActivityLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+    /**
+     * The filter to search for the ActivityLog to update in case it exists.
+     */
+    where: ActivityLogWhereUniqueInput
+    /**
+     * In case the ActivityLog found by the `where` argument doesn't exist, create a new ActivityLog with this data.
+     */
+    create: XOR<ActivityLogCreateInput, ActivityLogUncheckedCreateInput>
+    /**
+     * In case the ActivityLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ActivityLogUpdateInput, ActivityLogUncheckedUpdateInput>
+  }
+
+  /**
+   * ActivityLog delete
+   */
+  export type ActivityLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+    /**
+     * Filter which ActivityLog to delete.
+     */
+    where: ActivityLogWhereUniqueInput
+  }
+
+  /**
+   * ActivityLog deleteMany
+   */
+  export type ActivityLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ActivityLogs to delete
+     */
+    where?: ActivityLogWhereInput
+  }
+
+  /**
+   * ActivityLog without action
+   */
+  export type ActivityLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -27915,6 +29135,8 @@ export namespace Prisma {
     id: 'id',
     invoiceGroupCode: 'invoiceGroupCode',
     totalAmount: 'totalAmount',
+    emptyDeduction: 'emptyDeduction',
+    emptiesReturned: 'emptiesReturned',
     amountReceived: 'amountReceived',
     changeGiven: 'changeGiven',
     paymentMethod: 'paymentMethod',
@@ -27978,6 +29200,8 @@ export namespace Prisma {
     taxPaid: 'taxPaid',
     additionalExpenses: 'additionalExpenses',
     sellingPrice: 'sellingPrice',
+    emptyBottlePrice: 'emptyBottlePrice',
+    emptyBottlesOnHand: 'emptyBottlesOnHand',
     description: 'description',
     lastSoldAt: 'lastSoldAt',
     createdAt: 'createdAt',
@@ -28049,6 +29273,8 @@ export namespace Prisma {
     monthlyInstallmentAmount: 'monthlyInstallmentAmount',
     totalWithInterest: 'totalWithInterest',
     quantity: 'quantity',
+    emptiesReturned: 'emptiesReturned',
+    emptyDeduction: 'emptyDeduction',
     purchasedAt: 'purchasedAt'
   };
 
@@ -28246,6 +29472,26 @@ export namespace Prisma {
   export type AccountDepositItemScalarFieldEnum = (typeof AccountDepositItemScalarFieldEnum)[keyof typeof AccountDepositItemScalarFieldEnum]
 
 
+  export const ActivityLogScalarFieldEnum: {
+    id: 'id',
+    actorId: 'actorId',
+    actorName: 'actorName',
+    actorEmail: 'actorEmail',
+    actorRole: 'actorRole',
+    action: 'action',
+    category: 'category',
+    summary: 'summary',
+    entityType: 'entityType',
+    entityId: 'entityId',
+    details: 'details',
+    ipAddress: 'ipAddress',
+    userAgent: 'userAgent',
+    createdAt: 'createdAt'
+  };
+
+  export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[keyof typeof ActivityLogScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -28259,6 +29505,14 @@ export namespace Prisma {
   };
 
   export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
+  export const NullableJsonNullValueInput: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull
+  };
+
+  export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
   export const QueryMode: {
@@ -28741,6 +29995,8 @@ export namespace Prisma {
     id?: IntFilter<"PosCounterSale"> | number
     invoiceGroupCode?: StringFilter<"PosCounterSale"> | string
     totalAmount?: FloatFilter<"PosCounterSale"> | number
+    emptyDeduction?: FloatFilter<"PosCounterSale"> | number
+    emptiesReturned?: IntFilter<"PosCounterSale"> | number
     amountReceived?: FloatFilter<"PosCounterSale"> | number
     changeGiven?: FloatFilter<"PosCounterSale"> | number
     paymentMethod?: EnumPaymentMethodFilter<"PosCounterSale"> | $Enums.PaymentMethod
@@ -28753,6 +30009,8 @@ export namespace Prisma {
     id?: SortOrder
     invoiceGroupCode?: SortOrder
     totalAmount?: SortOrder
+    emptyDeduction?: SortOrder
+    emptiesReturned?: SortOrder
     amountReceived?: SortOrder
     changeGiven?: SortOrder
     paymentMethod?: SortOrder
@@ -28768,6 +30026,8 @@ export namespace Prisma {
     OR?: PosCounterSaleWhereInput[]
     NOT?: PosCounterSaleWhereInput | PosCounterSaleWhereInput[]
     totalAmount?: FloatFilter<"PosCounterSale"> | number
+    emptyDeduction?: FloatFilter<"PosCounterSale"> | number
+    emptiesReturned?: IntFilter<"PosCounterSale"> | number
     amountReceived?: FloatFilter<"PosCounterSale"> | number
     changeGiven?: FloatFilter<"PosCounterSale"> | number
     paymentMethod?: EnumPaymentMethodFilter<"PosCounterSale"> | $Enums.PaymentMethod
@@ -28780,6 +30040,8 @@ export namespace Prisma {
     id?: SortOrder
     invoiceGroupCode?: SortOrder
     totalAmount?: SortOrder
+    emptyDeduction?: SortOrder
+    emptiesReturned?: SortOrder
     amountReceived?: SortOrder
     changeGiven?: SortOrder
     paymentMethod?: SortOrder
@@ -28799,6 +30061,8 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"PosCounterSale"> | number
     invoiceGroupCode?: StringWithAggregatesFilter<"PosCounterSale"> | string
     totalAmount?: FloatWithAggregatesFilter<"PosCounterSale"> | number
+    emptyDeduction?: FloatWithAggregatesFilter<"PosCounterSale"> | number
+    emptiesReturned?: IntWithAggregatesFilter<"PosCounterSale"> | number
     amountReceived?: FloatWithAggregatesFilter<"PosCounterSale"> | number
     changeGiven?: FloatWithAggregatesFilter<"PosCounterSale"> | number
     paymentMethod?: EnumPaymentMethodWithAggregatesFilter<"PosCounterSale"> | $Enums.PaymentMethod
@@ -29016,6 +30280,8 @@ export namespace Prisma {
     taxPaid?: FloatNullableFilter<"InventoryProduct"> | number | null
     additionalExpenses?: FloatNullableFilter<"InventoryProduct"> | number | null
     sellingPrice?: FloatNullableFilter<"InventoryProduct"> | number | null
+    emptyBottlePrice?: FloatNullableFilter<"InventoryProduct"> | number | null
+    emptyBottlesOnHand?: IntFilter<"InventoryProduct"> | number
     description?: StringNullableFilter<"InventoryProduct"> | string | null
     lastSoldAt?: DateTimeNullableFilter<"InventoryProduct"> | Date | string | null
     createdAt?: DateTimeFilter<"InventoryProduct"> | Date | string
@@ -29044,6 +30310,8 @@ export namespace Prisma {
     taxPaid?: SortOrderInput | SortOrder
     additionalExpenses?: SortOrderInput | SortOrder
     sellingPrice?: SortOrderInput | SortOrder
+    emptyBottlePrice?: SortOrderInput | SortOrder
+    emptyBottlesOnHand?: SortOrder
     description?: SortOrderInput | SortOrder
     lastSoldAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -29075,6 +30343,8 @@ export namespace Prisma {
     taxPaid?: FloatNullableFilter<"InventoryProduct"> | number | null
     additionalExpenses?: FloatNullableFilter<"InventoryProduct"> | number | null
     sellingPrice?: FloatNullableFilter<"InventoryProduct"> | number | null
+    emptyBottlePrice?: FloatNullableFilter<"InventoryProduct"> | number | null
+    emptyBottlesOnHand?: IntFilter<"InventoryProduct"> | number
     description?: StringNullableFilter<"InventoryProduct"> | string | null
     lastSoldAt?: DateTimeNullableFilter<"InventoryProduct"> | Date | string | null
     createdAt?: DateTimeFilter<"InventoryProduct"> | Date | string
@@ -29103,6 +30373,8 @@ export namespace Prisma {
     taxPaid?: SortOrderInput | SortOrder
     additionalExpenses?: SortOrderInput | SortOrder
     sellingPrice?: SortOrderInput | SortOrder
+    emptyBottlePrice?: SortOrderInput | SortOrder
+    emptyBottlesOnHand?: SortOrder
     description?: SortOrderInput | SortOrder
     lastSoldAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -29133,6 +30405,8 @@ export namespace Prisma {
     taxPaid?: FloatNullableWithAggregatesFilter<"InventoryProduct"> | number | null
     additionalExpenses?: FloatNullableWithAggregatesFilter<"InventoryProduct"> | number | null
     sellingPrice?: FloatNullableWithAggregatesFilter<"InventoryProduct"> | number | null
+    emptyBottlePrice?: FloatNullableWithAggregatesFilter<"InventoryProduct"> | number | null
+    emptyBottlesOnHand?: IntWithAggregatesFilter<"InventoryProduct"> | number
     description?: StringNullableWithAggregatesFilter<"InventoryProduct"> | string | null
     lastSoldAt?: DateTimeNullableWithAggregatesFilter<"InventoryProduct"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"InventoryProduct"> | Date | string
@@ -29370,6 +30644,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: FloatNullableFilter<"PosCustomerPurchase"> | number | null
     totalWithInterest?: FloatNullableFilter<"PosCustomerPurchase"> | number | null
     quantity?: IntFilter<"PosCustomerPurchase"> | number
+    emptiesReturned?: IntFilter<"PosCustomerPurchase"> | number
+    emptyDeduction?: FloatFilter<"PosCustomerPurchase"> | number
     purchasedAt?: DateTimeFilter<"PosCustomerPurchase"> | Date | string
     customer?: XOR<PosCustomerRelationFilter, PosCustomerWhereInput>
     inventoryProduct?: XOR<InventoryProductNullableRelationFilter, InventoryProductWhereInput> | null
@@ -29400,6 +30676,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: SortOrderInput | SortOrder
     totalWithInterest?: SortOrderInput | SortOrder
     quantity?: SortOrder
+    emptiesReturned?: SortOrder
+    emptyDeduction?: SortOrder
     purchasedAt?: SortOrder
     customer?: PosCustomerOrderByWithRelationInput
     inventoryProduct?: InventoryProductOrderByWithRelationInput
@@ -29433,6 +30711,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: FloatNullableFilter<"PosCustomerPurchase"> | number | null
     totalWithInterest?: FloatNullableFilter<"PosCustomerPurchase"> | number | null
     quantity?: IntFilter<"PosCustomerPurchase"> | number
+    emptiesReturned?: IntFilter<"PosCustomerPurchase"> | number
+    emptyDeduction?: FloatFilter<"PosCustomerPurchase"> | number
     purchasedAt?: DateTimeFilter<"PosCustomerPurchase"> | Date | string
     customer?: XOR<PosCustomerRelationFilter, PosCustomerWhereInput>
     inventoryProduct?: XOR<InventoryProductNullableRelationFilter, InventoryProductWhereInput> | null
@@ -29463,6 +30743,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: SortOrderInput | SortOrder
     totalWithInterest?: SortOrderInput | SortOrder
     quantity?: SortOrder
+    emptiesReturned?: SortOrder
+    emptyDeduction?: SortOrder
     purchasedAt?: SortOrder
     _count?: PosCustomerPurchaseCountOrderByAggregateInput
     _avg?: PosCustomerPurchaseAvgOrderByAggregateInput
@@ -29496,6 +30778,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: FloatNullableWithAggregatesFilter<"PosCustomerPurchase"> | number | null
     totalWithInterest?: FloatNullableWithAggregatesFilter<"PosCustomerPurchase"> | number | null
     quantity?: IntWithAggregatesFilter<"PosCustomerPurchase"> | number
+    emptiesReturned?: IntWithAggregatesFilter<"PosCustomerPurchase"> | number
+    emptyDeduction?: FloatWithAggregatesFilter<"PosCustomerPurchase"> | number
     purchasedAt?: DateTimeWithAggregatesFilter<"PosCustomerPurchase"> | Date | string
   }
 
@@ -30542,6 +31826,105 @@ export namespace Prisma {
     amount?: FloatWithAggregatesFilter<"AccountDepositItem"> | number
   }
 
+  export type ActivityLogWhereInput = {
+    AND?: ActivityLogWhereInput | ActivityLogWhereInput[]
+    OR?: ActivityLogWhereInput[]
+    NOT?: ActivityLogWhereInput | ActivityLogWhereInput[]
+    id?: IntFilter<"ActivityLog"> | number
+    actorId?: IntNullableFilter<"ActivityLog"> | number | null
+    actorName?: StringNullableFilter<"ActivityLog"> | string | null
+    actorEmail?: StringNullableFilter<"ActivityLog"> | string | null
+    actorRole?: StringNullableFilter<"ActivityLog"> | string | null
+    action?: StringFilter<"ActivityLog"> | string
+    category?: StringFilter<"ActivityLog"> | string
+    summary?: StringFilter<"ActivityLog"> | string
+    entityType?: StringNullableFilter<"ActivityLog"> | string | null
+    entityId?: StringNullableFilter<"ActivityLog"> | string | null
+    details?: JsonNullableFilter<"ActivityLog">
+    ipAddress?: StringNullableFilter<"ActivityLog"> | string | null
+    userAgent?: StringNullableFilter<"ActivityLog"> | string | null
+    createdAt?: DateTimeFilter<"ActivityLog"> | Date | string
+  }
+
+  export type ActivityLogOrderByWithRelationInput = {
+    id?: SortOrder
+    actorId?: SortOrderInput | SortOrder
+    actorName?: SortOrderInput | SortOrder
+    actorEmail?: SortOrderInput | SortOrder
+    actorRole?: SortOrderInput | SortOrder
+    action?: SortOrder
+    category?: SortOrder
+    summary?: SortOrder
+    entityType?: SortOrderInput | SortOrder
+    entityId?: SortOrderInput | SortOrder
+    details?: SortOrderInput | SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ActivityLogWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: ActivityLogWhereInput | ActivityLogWhereInput[]
+    OR?: ActivityLogWhereInput[]
+    NOT?: ActivityLogWhereInput | ActivityLogWhereInput[]
+    actorId?: IntNullableFilter<"ActivityLog"> | number | null
+    actorName?: StringNullableFilter<"ActivityLog"> | string | null
+    actorEmail?: StringNullableFilter<"ActivityLog"> | string | null
+    actorRole?: StringNullableFilter<"ActivityLog"> | string | null
+    action?: StringFilter<"ActivityLog"> | string
+    category?: StringFilter<"ActivityLog"> | string
+    summary?: StringFilter<"ActivityLog"> | string
+    entityType?: StringNullableFilter<"ActivityLog"> | string | null
+    entityId?: StringNullableFilter<"ActivityLog"> | string | null
+    details?: JsonNullableFilter<"ActivityLog">
+    ipAddress?: StringNullableFilter<"ActivityLog"> | string | null
+    userAgent?: StringNullableFilter<"ActivityLog"> | string | null
+    createdAt?: DateTimeFilter<"ActivityLog"> | Date | string
+  }, "id">
+
+  export type ActivityLogOrderByWithAggregationInput = {
+    id?: SortOrder
+    actorId?: SortOrderInput | SortOrder
+    actorName?: SortOrderInput | SortOrder
+    actorEmail?: SortOrderInput | SortOrder
+    actorRole?: SortOrderInput | SortOrder
+    action?: SortOrder
+    category?: SortOrder
+    summary?: SortOrder
+    entityType?: SortOrderInput | SortOrder
+    entityId?: SortOrderInput | SortOrder
+    details?: SortOrderInput | SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: ActivityLogCountOrderByAggregateInput
+    _avg?: ActivityLogAvgOrderByAggregateInput
+    _max?: ActivityLogMaxOrderByAggregateInput
+    _min?: ActivityLogMinOrderByAggregateInput
+    _sum?: ActivityLogSumOrderByAggregateInput
+  }
+
+  export type ActivityLogScalarWhereWithAggregatesInput = {
+    AND?: ActivityLogScalarWhereWithAggregatesInput | ActivityLogScalarWhereWithAggregatesInput[]
+    OR?: ActivityLogScalarWhereWithAggregatesInput[]
+    NOT?: ActivityLogScalarWhereWithAggregatesInput | ActivityLogScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"ActivityLog"> | number
+    actorId?: IntNullableWithAggregatesFilter<"ActivityLog"> | number | null
+    actorName?: StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
+    actorEmail?: StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
+    actorRole?: StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
+    action?: StringWithAggregatesFilter<"ActivityLog"> | string
+    category?: StringWithAggregatesFilter<"ActivityLog"> | string
+    summary?: StringWithAggregatesFilter<"ActivityLog"> | string
+    entityType?: StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
+    entityId?: StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
+    details?: JsonNullableWithAggregatesFilter<"ActivityLog">
+    ipAddress?: StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
+    userAgent?: StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"ActivityLog"> | Date | string
+  }
+
   export type UserCreateInput = {
     name: string
     email: string
@@ -30704,6 +32087,8 @@ export namespace Prisma {
   export type PosCounterSaleCreateInput = {
     invoiceGroupCode: string
     totalAmount: number
+    emptyDeduction?: number
+    emptiesReturned?: number
     amountReceived: number
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
@@ -30715,6 +32100,8 @@ export namespace Prisma {
     id?: number
     invoiceGroupCode: string
     totalAmount: number
+    emptyDeduction?: number
+    emptiesReturned?: number
     amountReceived: number
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
@@ -30725,6 +32112,8 @@ export namespace Prisma {
   export type PosCounterSaleUpdateInput = {
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
@@ -30736,6 +32125,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
@@ -30747,6 +32138,8 @@ export namespace Prisma {
     id?: number
     invoiceGroupCode: string
     totalAmount: number
+    emptyDeduction?: number
+    emptiesReturned?: number
     amountReceived: number
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
@@ -30757,6 +32150,8 @@ export namespace Prisma {
   export type PosCounterSaleUpdateManyMutationInput = {
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
@@ -30767,6 +32162,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
@@ -30985,6 +32382,8 @@ export namespace Prisma {
     taxPaid?: number | null
     additionalExpenses?: number | null
     sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -31013,6 +32412,8 @@ export namespace Prisma {
     taxPaid?: number | null
     additionalExpenses?: number | null
     sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -31034,6 +32435,8 @@ export namespace Prisma {
     taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
     additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -31062,6 +32465,8 @@ export namespace Prisma {
     taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
     additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -31087,6 +32492,8 @@ export namespace Prisma {
     taxPaid?: number | null
     additionalExpenses?: number | null
     sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -31105,6 +32512,8 @@ export namespace Prisma {
     taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
     additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -31127,6 +32536,8 @@ export namespace Prisma {
     taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
     additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -31362,6 +32773,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: number | null
     totalWithInterest?: number | null
     quantity?: number
+    emptiesReturned?: number
+    emptyDeduction?: number
     purchasedAt?: Date | string
     customer: PosCustomerCreateNestedOneWithoutPurchasesInput
     inventoryProduct?: InventoryProductCreateNestedOneWithoutCustomerPurchasesInput
@@ -31392,6 +32805,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: number | null
     totalWithInterest?: number | null
     quantity?: number
+    emptiesReturned?: number
+    emptyDeduction?: number
     purchasedAt?: Date | string
     receipts?: AccountReceiptUncheckedCreateNestedManyWithoutPurchaseInput
     installments?: PosInstallmentUncheckedCreateNestedManyWithoutPurchaseInput
@@ -31417,6 +32832,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     totalWithInterest?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: IntFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customer?: PosCustomerUpdateOneRequiredWithoutPurchasesNestedInput
     inventoryProduct?: InventoryProductUpdateOneWithoutCustomerPurchasesNestedInput
@@ -31447,6 +32864,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     totalWithInterest?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: IntFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     receipts?: AccountReceiptUncheckedUpdateManyWithoutPurchaseNestedInput
     installments?: PosInstallmentUncheckedUpdateManyWithoutPurchaseNestedInput
@@ -31475,6 +32894,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: number | null
     totalWithInterest?: number | null
     quantity?: number
+    emptiesReturned?: number
+    emptyDeduction?: number
     purchasedAt?: Date | string
   }
 
@@ -31497,6 +32918,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     totalWithInterest?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: IntFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -31522,6 +32945,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     totalWithInterest?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: IntFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -32619,6 +34044,122 @@ export namespace Prisma {
     amount?: FloatFieldUpdateOperationsInput | number
   }
 
+  export type ActivityLogCreateInput = {
+    actorId?: number | null
+    actorName?: string | null
+    actorEmail?: string | null
+    actorRole?: string | null
+    action: string
+    category: string
+    summary: string
+    entityType?: string | null
+    entityId?: string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+  }
+
+  export type ActivityLogUncheckedCreateInput = {
+    id?: number
+    actorId?: number | null
+    actorName?: string | null
+    actorEmail?: string | null
+    actorRole?: string | null
+    action: string
+    category: string
+    summary: string
+    entityType?: string | null
+    entityId?: string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+  }
+
+  export type ActivityLogUpdateInput = {
+    actorId?: NullableIntFieldUpdateOperationsInput | number | null
+    actorName?: NullableStringFieldUpdateOperationsInput | string | null
+    actorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    actorRole?: NullableStringFieldUpdateOperationsInput | string | null
+    action?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    summary?: StringFieldUpdateOperationsInput | string
+    entityType?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ActivityLogUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    actorId?: NullableIntFieldUpdateOperationsInput | number | null
+    actorName?: NullableStringFieldUpdateOperationsInput | string | null
+    actorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    actorRole?: NullableStringFieldUpdateOperationsInput | string | null
+    action?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    summary?: StringFieldUpdateOperationsInput | string
+    entityType?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ActivityLogCreateManyInput = {
+    id?: number
+    actorId?: number | null
+    actorName?: string | null
+    actorEmail?: string | null
+    actorRole?: string | null
+    action: string
+    category: string
+    summary: string
+    entityType?: string | null
+    entityId?: string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+  }
+
+  export type ActivityLogUpdateManyMutationInput = {
+    actorId?: NullableIntFieldUpdateOperationsInput | number | null
+    actorName?: NullableStringFieldUpdateOperationsInput | string | null
+    actorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    actorRole?: NullableStringFieldUpdateOperationsInput | string | null
+    action?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    summary?: StringFieldUpdateOperationsInput | string
+    entityType?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ActivityLogUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    actorId?: NullableIntFieldUpdateOperationsInput | number | null
+    actorName?: NullableStringFieldUpdateOperationsInput | string | null
+    actorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    actorRole?: NullableStringFieldUpdateOperationsInput | string | null
+    action?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    summary?: StringFieldUpdateOperationsInput | string
+    entityType?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -32936,6 +34477,8 @@ export namespace Prisma {
     id?: SortOrder
     invoiceGroupCode?: SortOrder
     totalAmount?: SortOrder
+    emptyDeduction?: SortOrder
+    emptiesReturned?: SortOrder
     amountReceived?: SortOrder
     changeGiven?: SortOrder
     paymentMethod?: SortOrder
@@ -32946,6 +34489,8 @@ export namespace Prisma {
   export type PosCounterSaleAvgOrderByAggregateInput = {
     id?: SortOrder
     totalAmount?: SortOrder
+    emptyDeduction?: SortOrder
+    emptiesReturned?: SortOrder
     amountReceived?: SortOrder
     changeGiven?: SortOrder
     cashierId?: SortOrder
@@ -32955,6 +34500,8 @@ export namespace Prisma {
     id?: SortOrder
     invoiceGroupCode?: SortOrder
     totalAmount?: SortOrder
+    emptyDeduction?: SortOrder
+    emptiesReturned?: SortOrder
     amountReceived?: SortOrder
     changeGiven?: SortOrder
     paymentMethod?: SortOrder
@@ -32966,6 +34513,8 @@ export namespace Prisma {
     id?: SortOrder
     invoiceGroupCode?: SortOrder
     totalAmount?: SortOrder
+    emptyDeduction?: SortOrder
+    emptiesReturned?: SortOrder
     amountReceived?: SortOrder
     changeGiven?: SortOrder
     paymentMethod?: SortOrder
@@ -32976,6 +34525,8 @@ export namespace Prisma {
   export type PosCounterSaleSumOrderByAggregateInput = {
     id?: SortOrder
     totalAmount?: SortOrder
+    emptyDeduction?: SortOrder
+    emptiesReturned?: SortOrder
     amountReceived?: SortOrder
     changeGiven?: SortOrder
     cashierId?: SortOrder
@@ -33208,6 +34759,8 @@ export namespace Prisma {
     taxPaid?: SortOrder
     additionalExpenses?: SortOrder
     sellingPrice?: SortOrder
+    emptyBottlePrice?: SortOrder
+    emptyBottlesOnHand?: SortOrder
     description?: SortOrder
     lastSoldAt?: SortOrder
     createdAt?: SortOrder
@@ -33226,6 +34779,8 @@ export namespace Prisma {
     taxPaid?: SortOrder
     additionalExpenses?: SortOrder
     sellingPrice?: SortOrder
+    emptyBottlePrice?: SortOrder
+    emptyBottlesOnHand?: SortOrder
   }
 
   export type InventoryProductMaxOrderByAggregateInput = {
@@ -33244,6 +34799,8 @@ export namespace Prisma {
     taxPaid?: SortOrder
     additionalExpenses?: SortOrder
     sellingPrice?: SortOrder
+    emptyBottlePrice?: SortOrder
+    emptyBottlesOnHand?: SortOrder
     description?: SortOrder
     lastSoldAt?: SortOrder
     createdAt?: SortOrder
@@ -33266,6 +34823,8 @@ export namespace Prisma {
     taxPaid?: SortOrder
     additionalExpenses?: SortOrder
     sellingPrice?: SortOrder
+    emptyBottlePrice?: SortOrder
+    emptyBottlesOnHand?: SortOrder
     description?: SortOrder
     lastSoldAt?: SortOrder
     createdAt?: SortOrder
@@ -33284,6 +34843,8 @@ export namespace Prisma {
     taxPaid?: SortOrder
     additionalExpenses?: SortOrder
     sellingPrice?: SortOrder
+    emptyBottlePrice?: SortOrder
+    emptyBottlesOnHand?: SortOrder
   }
 
   export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -33567,6 +35128,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: SortOrder
     totalWithInterest?: SortOrder
     quantity?: SortOrder
+    emptiesReturned?: SortOrder
+    emptyDeduction?: SortOrder
     purchasedAt?: SortOrder
   }
 
@@ -33583,6 +35146,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: SortOrder
     totalWithInterest?: SortOrder
     quantity?: SortOrder
+    emptiesReturned?: SortOrder
+    emptyDeduction?: SortOrder
   }
 
   export type PosCustomerPurchaseMaxOrderByAggregateInput = {
@@ -33606,6 +35171,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: SortOrder
     totalWithInterest?: SortOrder
     quantity?: SortOrder
+    emptiesReturned?: SortOrder
+    emptyDeduction?: SortOrder
     purchasedAt?: SortOrder
   }
 
@@ -33630,6 +35197,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: SortOrder
     totalWithInterest?: SortOrder
     quantity?: SortOrder
+    emptiesReturned?: SortOrder
+    emptyDeduction?: SortOrder
     purchasedAt?: SortOrder
   }
 
@@ -33646,6 +35215,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: SortOrder
     totalWithInterest?: SortOrder
     quantity?: SortOrder
+    emptiesReturned?: SortOrder
+    emptyDeduction?: SortOrder
   }
 
   export type EnumPosPurchaseItemTypeWithAggregatesFilter<$PrismaModel = never> = {
@@ -34610,6 +36181,112 @@ export namespace Prisma {
     depositId?: SortOrder
     receiptId?: SortOrder
     amount?: SortOrder
+  }
+  export type JsonNullableFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type ActivityLogCountOrderByAggregateInput = {
+    id?: SortOrder
+    actorId?: SortOrder
+    actorName?: SortOrder
+    actorEmail?: SortOrder
+    actorRole?: SortOrder
+    action?: SortOrder
+    category?: SortOrder
+    summary?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrder
+    details?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ActivityLogAvgOrderByAggregateInput = {
+    id?: SortOrder
+    actorId?: SortOrder
+  }
+
+  export type ActivityLogMaxOrderByAggregateInput = {
+    id?: SortOrder
+    actorId?: SortOrder
+    actorName?: SortOrder
+    actorEmail?: SortOrder
+    actorRole?: SortOrder
+    action?: SortOrder
+    category?: SortOrder
+    summary?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ActivityLogMinOrderByAggregateInput = {
+    id?: SortOrder
+    actorId?: SortOrder
+    actorName?: SortOrder
+    actorEmail?: SortOrder
+    actorRole?: SortOrder
+    action?: SortOrder
+    category?: SortOrder
+    summary?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ActivityLogSumOrderByAggregateInput = {
+    id?: SortOrder
+    actorId?: SortOrder
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -36708,10 +38385,34 @@ export namespace Prisma {
     _min?: NestedEnumTransactionDirectionFilter<$PrismaModel>
     _max?: NestedEnumTransactionDirectionFilter<$PrismaModel>
   }
+  export type NestedJsonNullableFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type PosCounterSaleCreateWithoutCashierInput = {
     invoiceGroupCode: string
     totalAmount: number
+    emptyDeduction?: number
+    emptiesReturned?: number
     amountReceived: number
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
@@ -36722,6 +38423,8 @@ export namespace Prisma {
     id?: number
     invoiceGroupCode: string
     totalAmount: number
+    emptyDeduction?: number
+    emptiesReturned?: number
     amountReceived: number
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
@@ -36761,6 +38464,8 @@ export namespace Prisma {
     id?: IntFilter<"PosCounterSale"> | number
     invoiceGroupCode?: StringFilter<"PosCounterSale"> | string
     totalAmount?: FloatFilter<"PosCounterSale"> | number
+    emptyDeduction?: FloatFilter<"PosCounterSale"> | number
+    emptiesReturned?: IntFilter<"PosCounterSale"> | number
     amountReceived?: FloatFilter<"PosCounterSale"> | number
     changeGiven?: FloatFilter<"PosCounterSale"> | number
     paymentMethod?: EnumPaymentMethodFilter<"PosCounterSale"> | $Enums.PaymentMethod
@@ -36842,6 +38547,8 @@ export namespace Prisma {
     taxPaid?: number | null
     additionalExpenses?: number | null
     sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -36868,6 +38575,8 @@ export namespace Prisma {
     taxPaid?: number | null
     additionalExpenses?: number | null
     sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -36922,6 +38631,8 @@ export namespace Prisma {
     taxPaid?: FloatNullableFilter<"InventoryProduct"> | number | null
     additionalExpenses?: FloatNullableFilter<"InventoryProduct"> | number | null
     sellingPrice?: FloatNullableFilter<"InventoryProduct"> | number | null
+    emptyBottlePrice?: FloatNullableFilter<"InventoryProduct"> | number | null
+    emptyBottlesOnHand?: IntFilter<"InventoryProduct"> | number
     description?: StringNullableFilter<"InventoryProduct"> | string | null
     lastSoldAt?: DateTimeNullableFilter<"InventoryProduct"> | Date | string | null
     createdAt?: DateTimeFilter<"InventoryProduct"> | Date | string
@@ -36940,6 +38651,8 @@ export namespace Prisma {
     taxPaid?: number | null
     additionalExpenses?: number | null
     sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -36966,6 +38679,8 @@ export namespace Prisma {
     taxPaid?: number | null
     additionalExpenses?: number | null
     sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -37013,6 +38728,8 @@ export namespace Prisma {
     taxPaid?: number | null
     additionalExpenses?: number | null
     sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -37039,6 +38756,8 @@ export namespace Prisma {
     taxPaid?: number | null
     additionalExpenses?: number | null
     sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -37209,6 +38928,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: number | null
     totalWithInterest?: number | null
     quantity?: number
+    emptiesReturned?: number
+    emptyDeduction?: number
     purchasedAt?: Date | string
     customer: PosCustomerCreateNestedOneWithoutPurchasesInput
     receipts?: AccountReceiptCreateNestedManyWithoutPurchaseInput
@@ -37237,6 +38958,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: number | null
     totalWithInterest?: number | null
     quantity?: number
+    emptiesReturned?: number
+    emptyDeduction?: number
     purchasedAt?: Date | string
     receipts?: AccountReceiptUncheckedCreateNestedManyWithoutPurchaseInput
     installments?: PosInstallmentUncheckedCreateNestedManyWithoutPurchaseInput
@@ -37435,6 +39158,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: FloatNullableFilter<"PosCustomerPurchase"> | number | null
     totalWithInterest?: FloatNullableFilter<"PosCustomerPurchase"> | number | null
     quantity?: IntFilter<"PosCustomerPurchase"> | number
+    emptiesReturned?: IntFilter<"PosCustomerPurchase"> | number
+    emptyDeduction?: FloatFilter<"PosCustomerPurchase"> | number
     purchasedAt?: DateTimeFilter<"PosCustomerPurchase"> | Date | string
   }
 
@@ -37450,6 +39175,8 @@ export namespace Prisma {
     taxPaid?: number | null
     additionalExpenses?: number | null
     sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -37477,6 +39204,8 @@ export namespace Prisma {
     taxPaid?: number | null
     additionalExpenses?: number | null
     sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -37513,6 +39242,8 @@ export namespace Prisma {
     taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
     additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -37540,6 +39271,8 @@ export namespace Prisma {
     taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
     additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -37560,6 +39293,8 @@ export namespace Prisma {
     taxPaid?: number | null
     additionalExpenses?: number | null
     sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -37587,6 +39322,8 @@ export namespace Prisma {
     taxPaid?: number | null
     additionalExpenses?: number | null
     sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -37623,6 +39360,8 @@ export namespace Prisma {
     taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
     additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -37650,6 +39389,8 @@ export namespace Prisma {
     taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
     additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -37677,6 +39418,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: number | null
     totalWithInterest?: number | null
     quantity?: number
+    emptiesReturned?: number
+    emptyDeduction?: number
     purchasedAt?: Date | string
     inventoryProduct?: InventoryProductCreateNestedOneWithoutCustomerPurchasesInput
     receipts?: AccountReceiptCreateNestedManyWithoutPurchaseInput
@@ -37705,6 +39448,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: number | null
     totalWithInterest?: number | null
     quantity?: number
+    emptiesReturned?: number
+    emptyDeduction?: number
     purchasedAt?: Date | string
     receipts?: AccountReceiptUncheckedCreateNestedManyWithoutPurchaseInput
     installments?: PosInstallmentUncheckedCreateNestedManyWithoutPurchaseInput
@@ -37781,6 +39526,8 @@ export namespace Prisma {
     taxPaid?: number | null
     additionalExpenses?: number | null
     sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -37808,6 +39555,8 @@ export namespace Prisma {
     taxPaid?: number | null
     additionalExpenses?: number | null
     sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -38009,6 +39758,8 @@ export namespace Prisma {
     taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
     additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -38036,6 +39787,8 @@ export namespace Prisma {
     taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
     additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -38169,6 +39922,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: number | null
     totalWithInterest?: number | null
     quantity?: number
+    emptiesReturned?: number
+    emptyDeduction?: number
     purchasedAt?: Date | string
     customer: PosCustomerCreateNestedOneWithoutPurchasesInput
     inventoryProduct?: InventoryProductCreateNestedOneWithoutCustomerPurchasesInput
@@ -38198,6 +39953,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: number | null
     totalWithInterest?: number | null
     quantity?: number
+    emptiesReturned?: number
+    emptyDeduction?: number
     purchasedAt?: Date | string
     receipts?: AccountReceiptUncheckedCreateNestedManyWithoutPurchaseInput
     invoicePayments?: InvoicePaymentUncheckedCreateNestedManyWithoutPurchaseInput
@@ -38263,6 +40020,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     totalWithInterest?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: IntFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customer?: PosCustomerUpdateOneRequiredWithoutPurchasesNestedInput
     inventoryProduct?: InventoryProductUpdateOneWithoutCustomerPurchasesNestedInput
@@ -38292,6 +40051,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     totalWithInterest?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: IntFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     receipts?: AccountReceiptUncheckedUpdateManyWithoutPurchaseNestedInput
     invoicePayments?: InvoicePaymentUncheckedUpdateManyWithoutPurchaseNestedInput
@@ -39133,6 +40894,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: number | null
     totalWithInterest?: number | null
     quantity?: number
+    emptiesReturned?: number
+    emptyDeduction?: number
     purchasedAt?: Date | string
     customer: PosCustomerCreateNestedOneWithoutPurchasesInput
     inventoryProduct?: InventoryProductCreateNestedOneWithoutCustomerPurchasesInput
@@ -39162,6 +40925,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: number | null
     totalWithInterest?: number | null
     quantity?: number
+    emptiesReturned?: number
+    emptyDeduction?: number
     purchasedAt?: Date | string
     installments?: PosInstallmentUncheckedCreateNestedManyWithoutPurchaseInput
     invoicePayments?: InvoicePaymentUncheckedCreateNestedManyWithoutPurchaseInput
@@ -39335,6 +41100,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     totalWithInterest?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: IntFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customer?: PosCustomerUpdateOneRequiredWithoutPurchasesNestedInput
     inventoryProduct?: InventoryProductUpdateOneWithoutCustomerPurchasesNestedInput
@@ -39364,6 +41131,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     totalWithInterest?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: IntFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     installments?: PosInstallmentUncheckedUpdateManyWithoutPurchaseNestedInput
     invoicePayments?: InvoicePaymentUncheckedUpdateManyWithoutPurchaseNestedInput
@@ -40037,6 +41806,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: number | null
     totalWithInterest?: number | null
     quantity?: number
+    emptiesReturned?: number
+    emptyDeduction?: number
     purchasedAt?: Date | string
     customer: PosCustomerCreateNestedOneWithoutPurchasesInput
     inventoryProduct?: InventoryProductCreateNestedOneWithoutCustomerPurchasesInput
@@ -40066,6 +41837,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: number | null
     totalWithInterest?: number | null
     quantity?: number
+    emptiesReturned?: number
+    emptyDeduction?: number
     purchasedAt?: Date | string
     receipts?: AccountReceiptUncheckedCreateNestedManyWithoutPurchaseInput
     installments?: PosInstallmentUncheckedCreateNestedManyWithoutPurchaseInput
@@ -40152,6 +41925,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     totalWithInterest?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: IntFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customer?: PosCustomerUpdateOneRequiredWithoutPurchasesNestedInput
     inventoryProduct?: InventoryProductUpdateOneWithoutCustomerPurchasesNestedInput
@@ -40181,6 +41956,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     totalWithInterest?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: IntFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     receipts?: AccountReceiptUncheckedUpdateManyWithoutPurchaseNestedInput
     installments?: PosInstallmentUncheckedUpdateManyWithoutPurchaseNestedInput
@@ -40694,6 +42471,8 @@ export namespace Prisma {
     id?: number
     invoiceGroupCode: string
     totalAmount: number
+    emptyDeduction?: number
+    emptiesReturned?: number
     amountReceived: number
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
@@ -40703,6 +42482,8 @@ export namespace Prisma {
   export type PosCounterSaleUpdateWithoutCashierInput = {
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
@@ -40713,6 +42494,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
@@ -40723,6 +42506,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
@@ -40744,6 +42529,8 @@ export namespace Prisma {
     taxPaid?: number | null
     additionalExpenses?: number | null
     sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -40762,6 +42549,8 @@ export namespace Prisma {
     taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
     additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40788,6 +42577,8 @@ export namespace Prisma {
     taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
     additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40812,6 +42603,8 @@ export namespace Prisma {
     taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
     additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40833,6 +42626,8 @@ export namespace Prisma {
     taxPaid?: number | null
     additionalExpenses?: number | null
     sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -40851,6 +42646,8 @@ export namespace Prisma {
     taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
     additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40877,6 +42674,8 @@ export namespace Prisma {
     taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
     additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40901,6 +42700,8 @@ export namespace Prisma {
     taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
     additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40922,6 +42723,8 @@ export namespace Prisma {
     taxPaid?: number | null
     additionalExpenses?: number | null
     sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -40940,6 +42743,8 @@ export namespace Prisma {
     taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
     additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40966,6 +42771,8 @@ export namespace Prisma {
     taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
     additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40990,6 +42797,8 @@ export namespace Prisma {
     taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
     additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -41032,6 +42841,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: number | null
     totalWithInterest?: number | null
     quantity?: number
+    emptiesReturned?: number
+    emptyDeduction?: number
     purchasedAt?: Date | string
   }
 
@@ -41097,6 +42908,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     totalWithInterest?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: IntFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customer?: PosCustomerUpdateOneRequiredWithoutPurchasesNestedInput
     receipts?: AccountReceiptUpdateManyWithoutPurchaseNestedInput
@@ -41125,6 +42938,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     totalWithInterest?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: IntFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     receipts?: AccountReceiptUncheckedUpdateManyWithoutPurchaseNestedInput
     installments?: PosInstallmentUncheckedUpdateManyWithoutPurchaseNestedInput
@@ -41152,6 +42967,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     totalWithInterest?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: IntFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -41176,6 +42993,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: number | null
     totalWithInterest?: number | null
     quantity?: number
+    emptiesReturned?: number
+    emptyDeduction?: number
     purchasedAt?: Date | string
   }
 
@@ -41198,6 +43017,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     totalWithInterest?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: IntFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     inventoryProduct?: InventoryProductUpdateOneWithoutCustomerPurchasesNestedInput
     receipts?: AccountReceiptUpdateManyWithoutPurchaseNestedInput
@@ -41226,6 +43047,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     totalWithInterest?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: IntFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     receipts?: AccountReceiptUncheckedUpdateManyWithoutPurchaseNestedInput
     installments?: PosInstallmentUncheckedUpdateManyWithoutPurchaseNestedInput
@@ -41253,6 +43076,8 @@ export namespace Prisma {
     monthlyInstallmentAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     totalWithInterest?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: IntFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -42245,6 +44070,10 @@ export namespace Prisma {
      * @deprecated Use AccountDepositItemDefaultArgs instead
      */
     export type AccountDepositItemArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = AccountDepositItemDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use ActivityLogDefaultArgs instead
+     */
+    export type ActivityLogArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ActivityLogDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

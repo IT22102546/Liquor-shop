@@ -113,6 +113,8 @@ export const checkoutSaleSchema = z.object({
         productId: z.number().int().positive(),
         quantity: z.number().int().min(1).max(999),
         unitPrice: z.number().min(0),
+        // Empty bottles handed back for this product; priced server-side from emptyBottlePrice.
+        emptiesReturned: z.number().int().min(0).max(999).default(0),
       }),
     )
     .min(1, "Add at least one product")

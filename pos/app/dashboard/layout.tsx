@@ -70,6 +70,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [admin, pathname, router]);
 
   const logout = () => {
+    // Record the sign-out in the activity log; never block signing out on it.
+    if (token) {
+      void fetch(`${API_URL}/api/pos/auth/logout`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        keepalive: true,
+      }).catch(() => undefined);
+    }
     localStorage.removeItem(STORAGE_TOKEN);
     localStorage.removeItem(STORAGE_ADMIN);
     router.replace("/signin");

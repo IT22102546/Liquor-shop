@@ -14,9 +14,12 @@ import { ProductArt } from "../../components/products/ProductArt";
 import type { Product, ProductCategory } from "../../components/products/ProductFormModal";
 import { API_URL } from "../../lib/constants";
 import { beep } from "../../lib/beep";
+import { buildReceiptHtml, printReceipt, type SaleReceipt } from "../../lib/receipt";
+import { ROLE_LABELS } from "../../lib/roles";
 import { useCountUp } from "../../lib/useCountUp";
 import { normalizeBarcode, useBarcodeScanner } from "../../lib/useBarcodeScanner";
 import {
+  IconBottle,
   IconBoxIn,
   IconCard,
   IconCart,
@@ -30,16 +33,21 @@ import {
   IconSearch,
 } from "../../lib/icons";
 
-type CartLine = { product: Product; quantity: number };
-type CompletedReceipt = {
-  invoiceNumber: string;
-  lines: Array<{ name: string; quantity: number; unitPrice: number; total: number }>;
-  paymentMethod: "CASH" | "BANK_TRANSFER";
+/** What the checkout API returns for a completed sale. */
+type CheckoutResult = {
+  invoiceGroupCode: string;
+  paymentMethod: SaleReceipt["paymentMethod"];
+  subtotal?: number;
+  emptyDeduction?: number;
+  emptiesReturned?: number;
   total: number;
   amountReceived: number;
-  change: number;
-  completedAt: string;
+  changeGiven: number;
+  purchases: Array<{ productId: number; name: string; quantity: number; unitPrice: number; emptiesReturned?: number; emptyDeduction?: number; lineTotal: number }>;
+  counterSale?: { createdAt: string };
 };
+/** `empties` = empty bottles the customer hands back for this product (never more than `quantity`). */
+type CartLine = { product: Product; quantity: number; empties: number };
 function formatCurrency(value: number | undefined) {
   if (typeof value !== "number" || Number.isNaN(value)) {
     return "Rs. 0.00";
@@ -52,33 +60,6 @@ function roundCurrency(value: number) {
   return Math.round(value * 100) / 100;
 }
 
-function escapeReceiptText(value: string) {
-  return value.replace(/[&<>"']/g, (character) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;",
-  })[character] ?? character);
-}
-
-function printReceipt(receipt: CompletedReceipt) {
-  const frame = document.createElement("iframe");
-  frame.setAttribute("aria-hidden", "true");
-  Object.assign(frame.style, { position: "fixed", right: "0", bottom: "0", width: "0", height: "0", border: "0" });
-  const rows = receipt.lines.map((line) => `
-    <tr><td>${escapeReceiptText(line.name)}<br><small>${line.quantity} × Rs. ${line.unitPrice.toFixed(2)}</small></td><td>Rs. ${line.total.toFixed(2)}</td></tr>
-  `).join("");
-  frame.srcdoc = `<!doctype html><html><head><title>${escapeReceiptText(receipt.invoiceNumber)}</title><style>
-    @page{size:80mm auto;margin:4mm}*{box-sizing:border-box}body{width:72mm;margin:0;font:12px Arial,sans-serif;color:#000}.center{text-align:center}h1{margin:0;font-size:18px}p{margin:3px 0}.rule{border-top:1px dashed #000;margin:9px 0}table{width:100%;border-collapse:collapse}td{padding:5px 0;vertical-align:top}td:last-child{text-align:right;white-space:nowrap}.total{font-size:16px;font-weight:700}.summary{display:flex;justify-content:space-between;margin:5px 0}.thanks{margin-top:12px;font-weight:700}small{font-size:10px}
-  </style></head><body><div class="center"><h1>BAR SHOP</h1><p>No:154, Puttalam Road, Kurunegala</p><p>${escapeReceiptText(receipt.invoiceNumber)}</p><p>${new Date(receipt.completedAt).toLocaleString()}</p></div><div class="rule"></div><table>${rows}</table><div class="rule"></div><div class="summary total"><span>TOTAL</span><span>Rs. ${receipt.total.toFixed(2)}</span></div><div class="summary"><span>Payment</span><span>${receipt.paymentMethod === "CASH" ? "Cash" : "Card / Transfer"}</span></div>${receipt.paymentMethod === "CASH" ? `<div class="summary"><span>Cash received</span><span>Rs. ${receipt.amountReceived.toFixed(2)}</span></div><div class="summary"><span>Change</span><span>Rs. ${receipt.change.toFixed(2)}</span></div>` : ""}<div class="rule"></div><p class="center thanks">Thank you!</p></body></html>`;
-  frame.onload = () => {
-    frame.contentWindow?.focus();
-    frame.contentWindow?.print();
-    window.setTimeout(() => frame.remove(), 1000);
-  };
-  document.body.appendChild(frame);
-}
 
 type ScanToast = {
   id: number;
@@ -88,6 +69,10 @@ type ScanToast = {
   /** Unknown barcode that a stock manager can add straight away. */
   unknownCode?: string;
 };
+
+function emptyPriceOf(product: Product) {
+  return product.emptyBottlePrice && product.emptyBottlePrice > 0 ? product.emptyBottlePrice : 0;
+}
 
 function AnimatedMoney({ value }: { value: number }) {
   return <>{formatCurrency(useCountUp(value, 450))}</>;
@@ -107,7 +92,8 @@ export default function InventoryPage() {
   const [amountTendered, setAmountTendered] = useState("");
   const [checkingOut, setCheckingOut] = useState(false);
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
-  const [completedReceipt, setCompletedReceipt] = useState<CompletedReceipt | null>(null);
+  const [completedReceipt, setCompletedReceipt] = useState<SaleReceipt | null>(null);
+  const [showReceipt, setShowReceipt] = useState(false);
   const [stockIn, setStockIn] = useState<{ initialCode?: string } | null>(null);
   const [toasts, setToasts] = useState<ScanToast[]>([]);
   const [bumpedId, setBumpedId] = useState<number | null>(null);
@@ -195,12 +181,17 @@ export default function InventoryPage() {
     return counts;
   }, [products]);
   const cartItemCount = cart.reduce((sum, line) => sum + line.quantity, 0);
-  const cartTotal = roundCurrency(
+  const cartSubtotal = roundCurrency(
     cart.reduce(
       (sum, line) => sum + (line.product.sellingPrice ?? 0) * line.quantity,
       0,
     ),
   );
+  const cartEmptyDeduction = roundCurrency(
+    cart.reduce((sum, line) => sum + emptyPriceOf(line.product) * line.empties, 0),
+  );
+  const cartEmptiesCount = cart.reduce((sum, line) => sum + line.empties, 0);
+  const cartTotal = roundCurrency(cartSubtotal - cartEmptyDeduction);
   const tendered = Number(amountTendered || "0");
   const changeDue = paymentMethod === "CASH" && Number.isFinite(tendered)
     ? Math.max(0, roundCurrency(tendered - cartTotal))
@@ -220,7 +211,7 @@ export default function InventoryPage() {
     setCheckoutMessage(null);
     setCart((current) => {
       const existing = current.find((line) => line.product.id === product.id);
-      if (!existing) return [...current, { product, quantity: 1 }];
+      if (!existing) return [...current, { product, quantity: 1, empties: 0 }];
       return current.map((line) => line.product.id === product.id ? { ...line, quantity: line.quantity + 1 } : line);
     });
     setBumpedId(product.id);
@@ -230,6 +221,7 @@ export default function InventoryPage() {
 
   // Selling by barcode: works from the search box (typed or scanned) and from anywhere on the page.
   const sellByBarcode = (rawCode: string) => {
+    setShowReceipt(false); // scanning the next customer's bottle starts a new sale
     const code = rawCode.trim();
     const product = products.find((item) => normalizeBarcode(item.partNumber) === normalizeBarcode(code));
     if (!product) {
@@ -263,7 +255,14 @@ export default function InventoryPage() {
       .map((line) => line.product.id === productId
         ? { ...line, quantity: Math.min(line.product.quantity, line.quantity + delta) }
         : line)
+      .map((line) => ({ ...line, empties: Math.min(line.empties, line.quantity) }))
       .filter((line) => line.quantity > 0));
+  };
+
+  const setEmpties = (productId: number, empties: number) => {
+    setCart((current) => current.map((line) => line.product.id === productId
+      ? { ...line, empties: Math.max(0, Math.min(line.quantity, empties)) }
+      : line));
   };
 
   const checkout = async () => {
@@ -284,29 +283,46 @@ export default function InventoryPage() {
             productId: line.product.id,
             quantity: line.quantity,
             unitPrice: line.product.sellingPrice ?? 0,
+            emptiesReturned: line.empties,
           })),
           paymentMethod,
           amountReceived: paymentMethod === "CASH" ? tendered : undefined,
         }),
       });
-      const payload = await response.json().catch(() => null) as { data?: { invoiceGroupCode: string }; message?: string } | null;
+      const payload = await response.json().catch(() => null) as { data?: CheckoutResult; message?: string } | null;
       if (!response.ok || !payload?.data) throw new Error(payload?.message ?? "Checkout failed");
-      const receipt: CompletedReceipt = {
-        invoiceNumber: payload.data.invoiceGroupCode,
-        lines: cart.map((line) => ({
-          name: line.product.name,
-          quantity: line.quantity,
-          unitPrice: line.product.sellingPrice ?? 0,
-          total: roundCurrency((line.product.sellingPrice ?? 0) * line.quantity),
-        })),
-        paymentMethod,
-        total: cartTotal,
-        amountReceived: paymentMethod === "CASH" ? tendered : cartTotal,
-        change: paymentMethod === "CASH" ? changeDue : 0,
-        completedAt: new Date().toISOString(),
+      const sale = payload.data;
+      // Receipt figures come from the server's record of the sale, not the screen's own maths.
+      const productById = new Map(cart.map((line) => [line.product.id, line.product]));
+      const receipt: SaleReceipt = {
+        billNo: sale.invoiceGroupCode,
+        soldAt: sale.counterSale?.createdAt ?? new Date().toISOString(),
+        cashierName: admin.name,
+        cashierRole: ROLE_LABELS[admin.role] ?? admin.role,
+        paymentMethod: sale.paymentMethod,
+        lines: sale.purchases.map((line) => {
+          const product = productById.get(line.productId);
+          return {
+            name: line.name,
+            detail: [product?.brand.name, product?.compatibleWith].filter(Boolean).join(" · ") || undefined,
+            quantity: line.quantity,
+            unitPrice: line.unitPrice,
+            empties: line.emptiesReturned ?? 0,
+            emptyPrice: product ? emptyPriceOf(product) : 0,
+            emptyDeduction: line.emptyDeduction ?? 0,
+            total: line.lineTotal,
+          };
+        }),
+        subtotal: sale.subtotal ?? sale.total,
+        emptyDeduction: sale.emptyDeduction ?? 0,
+        emptiesReturned: sale.emptiesReturned ?? 0,
+        total: sale.total,
+        amountReceived: sale.amountReceived,
+        change: sale.changeGiven,
       };
-      setCheckoutMessage(`Sale complete · ${payload.data.invoiceGroupCode}`);
+      setCheckoutMessage(`Sale complete · ${sale.invoiceGroupCode}`);
       setCompletedReceipt(receipt);
+      setShowReceipt(true);
       setCart([]);
       setAmountTendered("");
       await loadData();
@@ -346,7 +362,12 @@ export default function InventoryPage() {
       {checkoutMessage && (
         <div className="pos-sale-success">
           <span className="check"><IconCheck size={20} /> {checkoutMessage}</span>
-          {completedReceipt && <button type="button" onClick={() => printReceipt(completedReceipt)}><IconPrinter size={15} /> Print bill again</button>}
+          {completedReceipt && (
+            <span className="pos-sale-success-actions">
+              <button type="button" onClick={() => setShowReceipt(true)}>View receipt</button>
+              <button type="button" onClick={() => printReceipt(completedReceipt)}><IconPrinter size={15} /> Print again</button>
+            </span>
+          )}
         </div>
       )}
 
@@ -445,7 +466,10 @@ export default function InventoryPage() {
                   <div className="pos-product-body">
                     <div className="pos-product-meta">{product.brand.name}{product.compatibleWith ? ` · ${product.compatibleWith}` : ""}</div>
                     <div className="pos-product-name">{product.name}</div>
-                    <span className={`pos-stock${lowStock ? " low" : ""}`}>{product.quantity} in stock</span>
+                    <span className="pos-product-tags">
+                      <span className={`pos-stock${lowStock ? " low" : ""}`}>{product.quantity} in stock</span>
+                      {emptyPriceOf(product) > 0 && <span className="pos-empty-tag">Empty {formatCurrency(emptyPriceOf(product))}</span>}
+                    </span>
                     <div className="pos-product-foot">
                       <span className="pos-product-price">{formatCurrency(product.sellingPrice)}</span>
                       <span className="pos-product-add" aria-hidden="true"><IconPlus /></span>
@@ -468,6 +492,13 @@ export default function InventoryPage() {
             <div className="pos-cart-empty"><IconCart size={38} /><strong>No items yet</strong><p>Scan a barcode or tap a product.</p></div>
           ) : cart.map((line) => (
             <div key={line.product.id} className="pos-cart-line">
+              <ProductArt
+                className="pos-cart-thumb"
+                categoryName={line.product.category.name}
+                imageUrl={((line.product.images ?? []).find((image) => image.isPrimary) ?? line.product.images?.[0])?.url}
+                alt={line.product.name}
+                iconSize={22}
+              />
               <div className="pos-cart-line-main">
                 <strong>{line.product.name}</strong>
                 <span>{formatCurrency(line.product.sellingPrice)} each</span>
@@ -477,12 +508,37 @@ export default function InventoryPage() {
                 <strong key={line.quantity}>{line.quantity}</strong>
                 <button type="button" onClick={() => changeCartQuantity(line.product.id, 1)} disabled={line.quantity >= line.product.quantity} aria-label={`Add one ${line.product.name}`}>+</button>
               </div>
-              <span className="pos-cart-line-total">{formatCurrency((line.product.sellingPrice ?? 0) * line.quantity)}</span>
+              {emptyPriceOf(line.product) > 0 && (
+                <div className={`pos-empties${line.empties > 0 ? " active" : ""}`}>
+                  <span className="pos-empties-label">
+                    <IconBottle /> Empties given
+                    <em>{formatCurrency(emptyPriceOf(line.product))} each</em>
+                  </span>
+                  <div className="pos-cart-line-controls">
+                    <button type="button" onClick={() => setEmpties(line.product.id, line.empties - 1)} disabled={line.empties <= 0} aria-label={`One less empty ${line.product.name}`}>−</button>
+                    <strong key={line.empties}>{line.empties}</strong>
+                    <button type="button" onClick={() => setEmpties(line.product.id, line.empties + 1)} disabled={line.empties >= line.quantity} aria-label={`One more empty ${line.product.name}`}>+</button>
+                  </div>
+                  {line.empties < line.quantity && (
+                    <button type="button" className="pos-empties-all" onClick={() => setEmpties(line.product.id, line.quantity)}>All {line.quantity}</button>
+                  )}
+                </div>
+              )}
+              <span className="pos-cart-line-total">
+                {line.empties > 0 && <s>{formatCurrency((line.product.sellingPrice ?? 0) * line.quantity)}</s>}
+                {formatCurrency((line.product.sellingPrice ?? 0) * line.quantity - emptyPriceOf(line.product) * line.empties)}
+              </span>
             </div>
           ))}
         </div>
 
         <div className="pos-cart-checkout">
+          {cartEmptyDeduction > 0 && (
+            <div className="pos-cart-breakdown">
+              <div><span>Subtotal</span><span>{formatCurrency(cartSubtotal)}</span></div>
+              <div className="deduct"><span>Empty bottles returned ({cartEmptiesCount})</span><span>− {formatCurrency(cartEmptyDeduction)}</span></div>
+            </div>
+          )}
           <div className="pos-cart-total"><span>Total</span><strong><AnimatedMoney value={cartTotal} /></strong></div>
           <div className="pos-payment-buttons" aria-label="Payment method">
             <button type="button" className={paymentMethod === "CASH" ? "active" : ""} onClick={() => setPaymentMethod("CASH")}><IconCash /> Cash</button>
@@ -528,12 +584,39 @@ export default function InventoryPage() {
         ))}
       </div>
 
+      {showReceipt && completedReceipt && (
+        <div className="bm-modal-backdrop" onClick={() => setShowReceipt(false)}>
+          <div className="pos-receipt-modal" onClick={(event) => event.stopPropagation()} role="dialog" aria-label="Sale receipt">
+            <div className="pos-receipt-head">
+              <span className="pos-receipt-check"><IconCheck size={22} /></span>
+              <div>
+                <strong>Payment successful</strong>
+                <span>
+                  {formatCurrency(completedReceipt.total)} · {completedReceipt.paymentMethod === "CASH" ? `Change ${formatCurrency(completedReceipt.change)}` : "Card / Transfer"}
+                </span>
+              </div>
+            </div>
+            <iframe className="pos-receipt-paper" title="Receipt preview" srcDoc={buildReceiptHtml(completedReceipt)} />
+            <div className="pos-receipt-actions">
+              <button type="button" className="btn-outline" onClick={() => printReceipt(completedReceipt)}><IconPrinter size={16} /> Print</button>
+              <button type="button" className="btn-accent" autoFocus onClick={() => { setShowReceipt(false); searchInputRef.current?.focus(); }}>New sale</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {stockIn && (
         <AddLiquorModal
           token={token}
           initialCode={stockIn.initialCode}
           onClose={() => setStockIn(null)}
-          onStockChanged={() => void loadData()}
+          onStockChanged={(message) => {
+            void loadData();
+            if (message) {
+              beep("ok");
+              showToast({ kind: "ok", title: message, detail: "Ready to sell at the counter." });
+            }
+          }}
           onAuthExpired={logout}
         />
       )}

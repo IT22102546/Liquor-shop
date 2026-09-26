@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { API_URL } from "../../lib/constants";
 import { IconScan } from "../../lib/icons";
 
@@ -54,6 +54,10 @@ export type Product = {
   taxPaid?: number;
   additionalExpenses?: number;
   sellingPrice?: number;
+  /** Taken off the bill per empty bottle handed back; null = not returnable. */
+  emptyBottlePrice?: number | null;
+  /** Empties collected at the counter and not yet returned to the supplier. */
+  emptyBottlesOnHand?: number;
   description?: string;
   expenses?: ProductExpense[];
   images?: ProductImage[];
@@ -155,13 +159,16 @@ function ProductImageUploader({
   images,
   onChange,
   onError,
+  maxImages = MAX_PRODUCT_IMAGES,
 }: {
   images: File[];
   onChange: (files: File[]) => void;
   onError?: (message: string) => void;
+  /** Slots left for new photos (3 minus the photos the product already has). */
+  maxImages?: number;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const remaining = MAX_PRODUCT_IMAGES - images.length;
+  const remaining = maxImages - images.length;
 
   const handleFiles = (fileList: FileList | null) => {
     if (!fileList) return;
@@ -398,6 +405,80 @@ function SupplierQuickAddModal({
   );
 }
 
+/**
+ * Photos already saved on a product (edit mode): shown whole, with "Make main" and a
+ * two-step "Remove". Changes apply immediately.
+ */
+function ExistingPhotos({
+  token,
+  productId,
+  onCountChange,
+  onChanged,
+  onError,
+}: {
+  token: string;
+  productId: number;
+  onCountChange: (count: number) => void;
+  onChanged?: () => void;
+  onError: (message: string) => void;
+}) {
+  const base = `${API_URL}/api/pos/inventory-management/products/${productId}/images`;
+  const [photos, setPhotos] = useState<ProductImage[]>([]);
+  const [confirmingId, setConfirmingId] = useState<number | null>(null);
+  const [busyId, setBusyId] = useState<number | null>(null);
+
+  const load = useCallback(async () => {
+    const response = await fetch(base, { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" }).catch(() => null);
+    const payload = (await response?.json().catch(() => null)) as { data?: ProductImage[] } | null;
+    const list = payload?.data ?? [];
+    setPhotos(list);
+    onCountChange(list.length);
+  }, [base, onCountChange, token]);
+
+  useEffect(() => { void load(); }, [load]);
+
+  const act = async (photoId: number, method: "DELETE" | "PATCH") => {
+    setBusyId(photoId);
+    const response = await fetch(method === "DELETE" ? `${base}/${photoId}` : `${base}/${photoId}/primary`, {
+      method,
+      headers: { Authorization: `Bearer ${token}` },
+    }).catch(() => null);
+    setBusyId(null);
+    setConfirmingId(null);
+    if (!response?.ok) {
+      onError(method === "DELETE" ? "Could not remove the photo" : "Could not change the main photo");
+      return;
+    }
+    await load();
+    onChanged?.();
+  };
+
+  if (photos.length === 0) return null;
+  return (
+    <div className="lx-photo-grid">
+      {photos.map((photo) => (
+        <div key={photo.id} className={`lx-photo${photo.isPrimary ? " main" : ""}`}>
+          <img src={`${API_URL}${photo.url}`} alt="Product photo" />
+          {photo.isPrimary && <span className="lx-photo-badge">Main photo</span>}
+          <div className="lx-photo-actions">
+            {confirmingId === photo.id ? (
+              <>
+                <button type="button" className="danger" disabled={busyId === photo.id} onClick={() => void act(photo.id, "DELETE")}>Yes, remove</button>
+                <button type="button" onClick={() => setConfirmingId(null)}>Keep</button>
+              </>
+            ) : (
+              <>
+                {!photo.isPrimary && <button type="button" disabled={busyId === photo.id} onClick={() => void act(photo.id, "PATCH")}>Make main</button>}
+                <button type="button" className="danger" onClick={() => setConfirmingId(photo.id)}>Remove</button>
+              </>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function ProductModal({
   token,
   brands,
@@ -407,6 +488,7 @@ export function ProductModal({
   initialBarcode,
   existingProducts = [],
   onRestockInstead,
+  onPhotosChanged,
   onClose,
   onSaved,
   onBrandCreated,
@@ -424,6 +506,8 @@ export function ProductModal({
   /** Used to warn when the barcode already belongs to another product. */
   existingProducts?: Product[];
   onRestockInstead?: (product: Product) => void;
+  /** Called when a saved photo is removed or made the main photo (edit mode). */
+  onPhotosChanged?: () => void;
   onClose: () => void;
   onSaved: () => void;
   onBrandCreated: (brand: ProductBrand) => void;
@@ -456,6 +540,8 @@ export function ProductModal({
         : "",
     sellingPrice:
       product?.sellingPrice != null ? String(product.sellingPrice) : "",
+    emptyBottlePrice:
+      product?.emptyBottlePrice != null ? String(product.emptyBottlePrice) : "",
   });
   const [descriptionPoints, setDescriptionPoints] = useState<string[]>(() =>
     parseDescriptionPoints(product?.description),
@@ -483,6 +569,7 @@ export function ProductModal({
     return [];
   });
   const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [existingPhotoCount, setExistingPhotoCount] = useState(0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showSupplierModal, setShowSupplierModal] = useState(false);
@@ -628,6 +715,11 @@ export function ProductModal({
                     0,
                   )
                 : undefined,
+            emptyBottlePrice: form.emptyBottlePrice.trim()
+              ? Number(form.emptyBottlePrice)
+              : isEdit
+                ? null
+                : undefined,
             sellingPrice: form.sellingPrice
               ? Number(form.sellingPrice)
               : undefined,
@@ -706,12 +798,26 @@ export function ProductModal({
         {error && <div className="bm-alert bm-alert-error">{error}</div>}
         <form className="bm-modal-form" onSubmit={submit}>
           <div className="bm-field-group" style={{ gridColumn: "1 / -1" }}>
-            <label>Product Images (max 3)</label>
-            <ProductImageUploader
-              images={imageFiles}
-              onChange={setImageFiles}
-              onError={setError}
-            />
+            <label>Product Photos (max 3)</label>
+            {isEdit && product && (
+              <ExistingPhotos
+                token={token}
+                productId={product.id}
+                onCountChange={setExistingPhotoCount}
+                onChanged={onPhotosChanged}
+                onError={setError}
+              />
+            )}
+            {MAX_PRODUCT_IMAGES - existingPhotoCount > 0 ? (
+              <ProductImageUploader
+                images={imageFiles}
+                onChange={setImageFiles}
+                onError={setError}
+                maxImages={MAX_PRODUCT_IMAGES - existingPhotoCount}
+              />
+            ) : (
+              <p className="bm-img-hint">This product already has 3 photos. Remove one to add another.</p>
+            )}
           </div>
 
           <div className="bm-fields-grid">
@@ -929,6 +1035,26 @@ export function ProductModal({
                 onChange={setEvent("sellingPrice")}
                 placeholder="e.g. 4500"
               />
+            </div>
+
+            <div className="bm-field-group">
+              <label htmlFor="empty-bottle-price">Empty Bottle Price (per bottle)</label>
+              <input
+                id="empty-bottle-price"
+                className="bm-input"
+                type="number"
+                min={0}
+                step="0.01"
+                value={form.emptyBottlePrice}
+                onChange={setEvent("emptyBottlePrice")}
+                placeholder="e.g. 60 — leave empty for cans"
+              />
+              <span className="lx-field-hint">
+                Taken off the bill for each empty bottle the customer gives back.
+                {Number(form.emptyBottlePrice) > 0 && Number(form.sellingPrice) > 0
+                  ? ` With an empty: ${formatCurrency(Number(form.sellingPrice) - Number(form.emptyBottlePrice))}.`
+                  : ""}
+              </span>
             </div>
 
             <div className="bm-field-group">

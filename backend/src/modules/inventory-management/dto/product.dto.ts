@@ -35,6 +35,8 @@ export const createProductSchema = z.object({
   taxPaid: z.number().min(0).optional(),
   additionalExpenses: z.number().min(0).optional(),
   sellingPrice: z.number().min(0).optional(),
+  // Amount taken off the bill per empty bottle handed back; null/0 = not returnable.
+  emptyBottlePrice: z.union([z.number().min(0), z.null()]).optional(),
   description: z.string().trim().max(3000).optional(),
   descriptionPoints: z
     .array(z.string().trim().min(1).max(500))
@@ -52,6 +54,10 @@ export const restockProductSchema = z.object({
   // Batch totals for the units being added; blended into the per-unit cost.
   purchasePrice: z.number().min(0).optional(),
   taxPaid: z.number().min(0).optional(),
+});
+
+export const returnEmptiesSchema = z.object({
+  quantity: z.number().int().min(1, "Return at least 1 empty bottle").max(100000),
 });
 
 export const recordProductSaleSchema = z.object({
@@ -88,4 +94,5 @@ export type CreateProductDto = z.infer<typeof createProductSchema>;
 export type UpdateProductDto = z.infer<typeof updateProductSchema>;
 export type RecordProductSaleDto = z.infer<typeof recordProductSaleSchema>;
 export type RestockProductDto = z.infer<typeof restockProductSchema>;
+export type ReturnEmptiesDto = z.infer<typeof returnEmptiesSchema>;
 export type ProductQueryDto = z.infer<typeof productQuerySchema>;

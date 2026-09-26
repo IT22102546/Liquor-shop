@@ -482,6 +482,7 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
       const existing = items.get(item.productId);
       if (existing) {
         existing.quantity += item.quantity;
+        existing.emptiesReturned += item.emptiesReturned;
         existing.unitPrice = item.unitPrice;
       } else {
         items.set(item.productId, { ...item });
@@ -492,7 +493,7 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
 
   const products = await prisma.inventoryProduct.findMany({
     where: { id: { in: mergedItems.map((item) => item.productId) } },
-    select: { id: true, name: true, displayId: true, quantity: true },
+    select: { id: true, name: true, displayId: true, quantity: true, emptyBottlePrice: true },
   });
   if (products.length !== mergedItems.length) {
     throw AppError.validation({ items: ["One or more products no longer exist"] });
@@ -505,15 +506,37 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
         items: [`Only ${product.quantity} unit(s) of ${product.name} are available`],
       });
     }
+    if (item.emptiesReturned > 0 && !(product.emptyBottlePrice && product.emptyBottlePrice > 0)) {
+      throw AppError.validation({
+        items: [`${product.name} has no empty bottle price, so empties can't be deducted`],
+      });
+    }
+    if (item.emptiesReturned > item.quantity) {
+      throw AppError.validation({
+        items: [`Empties for ${product.name} can't be more than the ${item.quantity} bottle(s) bought`],
+      });
+    }
+  }
+
+  // Empty-bottle deduction is priced from the product record, never from the client.
+  const lines = mergedItems.map((item) => {
+    const product = productById.get(item.productId)!;
+    const grossTotal = roundCurrency(item.unitPrice * item.quantity);
+    const emptyDeduction = roundCurrency(item.emptiesReturned * (product.emptyBottlePrice ?? 0));
+    return { ...item, grossTotal, emptyDeduction, lineTotal: roundCurrency(grossTotal - emptyDeduction) };
+  });
+  const negativeLine = lines.find((line) => line.lineTotal < 0);
+  if (negativeLine) {
+    throw AppError.validation({
+      items: [`Empty bottle deduction is more than the price of ${productById.get(negativeLine.productId)!.name}`],
+    });
   }
 
   const invoiceGroupCode = `POS-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
-  const total = roundCurrency(
-    mergedItems.reduce(
-      (sum, item) => sum + item.unitPrice * item.quantity,
-      0,
-    ),
-  );
+  const subtotal = roundCurrency(lines.reduce((sum, line) => sum + line.grossTotal, 0));
+  const emptyDeductionTotal = roundCurrency(lines.reduce((sum, line) => sum + line.emptyDeduction, 0));
+  const emptiesReturnedTotal = lines.reduce((sum, line) => sum + line.emptiesReturned, 0);
+  const total = roundCurrency(subtotal - emptyDeductionTotal);
   const amountReceived = dto.paymentMethod === "CASH"
     ? roundCurrency(dto.amountReceived ?? Number.NaN)
     : total;
@@ -542,13 +565,14 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
     });
 
     const purchases = [];
-    for (const item of mergedItems) {
+    for (const item of lines) {
       const product = productById.get(item.productId)!;
       const updated = await tx.inventoryProduct.updateMany({
         where: { id: item.productId, quantity: { gte: item.quantity } },
         data: {
           quantity: { decrement: item.quantity },
           soldQuantity: { increment: item.quantity },
+          emptyBottlesOnHand: { increment: item.emptiesReturned },
           lastSoldAt: new Date(),
         },
       });
@@ -556,15 +580,17 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
         throw new AppError(`${product.name} does not have enough stock`, 409);
       }
 
-      const lineTotal = roundCurrency(item.unitPrice * item.quantity);
+      const lineTotal = item.lineTotal;
       const purchase = await tx.posCustomerPurchase.create({
         data: {
           customerId: customer.id,
           itemType: "INVENTORY",
-          purchaseMode: mergedItems.length > 1 ? "BULK" : "SINGLE",
+          purchaseMode: lines.length > 1 ? "BULK" : "SINGLE",
           invoiceGroupCode,
           inventoryProductId: item.productId,
           quantity: item.quantity,
+          emptiesReturned: item.emptiesReturned,
+          emptyDeduction: item.emptyDeduction,
           currentSellingPrice: item.unitPrice,
           finalSellingPrice: lineTotal,
           paymentType: "DIRECT",
@@ -591,6 +617,8 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
         name: product.name,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
+        emptiesReturned: item.emptiesReturned,
+        emptyDeduction: item.emptyDeduction,
         lineTotal,
       });
     }
@@ -599,6 +627,8 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
       data: {
         invoiceGroupCode,
         totalAmount: total,
+        emptyDeduction: emptyDeductionTotal,
+        emptiesReturned: emptiesReturnedTotal,
         amountReceived,
         changeGiven,
         paymentMethod: dto.paymentMethod,
@@ -619,6 +649,9 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
   return {
     invoiceGroupCode,
     paymentMethod: dto.paymentMethod,
+    subtotal,
+    emptyDeduction: emptyDeductionTotal,
+    emptiesReturned: emptiesReturnedTotal,
     total,
     amountReceived,
     changeGiven,
