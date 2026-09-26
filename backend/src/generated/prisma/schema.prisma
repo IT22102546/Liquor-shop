@@ -137,9 +137,14 @@ model PosCounterSale {
   paymentMethod    PaymentMethod @default(CASH)
   cashierId        Int
   cashier          PosAdmin      @relation(fields: [cashierId], references: [id])
+  /// Loyalty member the sale was made to; null = walk-in customer.
+  customerId       Int?
+  customer         PosCustomer?  @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  pointsEarned     Int           @default(0)
   createdAt        DateTime      @default(now())
 
   @@index([cashierId])
+  @@index([customerId])
   @@index([createdAt])
   @@map("pos_counter_sales")
 }
@@ -243,19 +248,27 @@ model InventoryProductImage {
   @@map("inventory_product_images")
 }
 
+/// Loyalty member (or the shared "Walk-in Customer" record, NIC "WALK-IN").
+/// Only name and mobile are required; the rest is optional.
 model PosCustomer {
-  id           Int                   @id @default(autoincrement())
-  firstName    String
-  lastName     String
-  nic          String                @unique
-  mobileNumber String                @unique
-  email        String?               @unique
-  province     String
-  district     String
-  address      String
-  createdAt    DateTime              @default(now())
-  updatedAt    DateTime              @updatedAt
-  purchases    PosCustomerPurchase[]
+  id            Int                   @id @default(autoincrement())
+  firstName     String
+  lastName      String
+  nic           String?               @unique
+  mobileNumber  String                @unique
+  email         String?               @unique
+  province      String?
+  district      String?
+  address       String?
+  /// Loyalty: points balance, lifetime spend and visit count (updated on each counter sale).
+  loyaltyPoints Int                   @default(0)
+  totalSpent    Float                 @default(0)
+  visits        Int                   @default(0)
+  lastVisitAt   DateTime?
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  purchases     PosCustomerPurchase[]
+  counterSales  PosCounterSale[]
 
   @@index([firstName])
   @@index([lastName])

@@ -155,6 +155,8 @@ exports.Prisma.PosCounterSaleScalarFieldEnum = {
   changeGiven: 'changeGiven',
   paymentMethod: 'paymentMethod',
   cashierId: 'cashierId',
+  customerId: 'customerId',
+  pointsEarned: 'pointsEarned',
   createdAt: 'createdAt'
 };
 
@@ -237,6 +239,10 @@ exports.Prisma.PosCustomerScalarFieldEnum = {
   province: 'province',
   district: 'district',
   address: 'address',
+  loyaltyPoints: 'loyaltyPoints',
+  totalSpent: 'totalSpent',
+  visits: 'visits',
+  lastVisitAt: 'lastVisitAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

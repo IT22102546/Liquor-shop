@@ -22,10 +22,15 @@ router.post("/invoice-terms", finance, controller.createInvoiceTerm);
 router.patch("/invoice-terms/:termId", finance, controller.updateInvoiceTerm);
 router.delete("/invoice-terms/:termId", finance, controller.deleteInvoiceTerm);
 
-router.get("/", management, controller.getPosUsers);
+// Sales bills (reprint receipts) and the dashboard summary.
+router.get("/sales", authorizePosRoles("ADMIN", "CASHIER", "ACCOUNTANT"), controller.listSales);
+router.get("/dashboard", management, controller.getDashboard);
+
+// Loyalty members: cashiers can look up and register members at the counter; only admins edit/delete.
+router.get("/", sales, controller.getPosUsers);
 router.get("/:id/purchases", finance, controller.getPurchasesByUser);
 router.get("/:id", management, controller.getPosUser);
-router.post("/", management, controller.createPosUser);
+router.post("/", sales, controller.createPosUser);
 router.patch("/:id", management, controller.updatePosUser);
 router.delete("/:id", management, controller.deletePosUser);
 router.post("/:id/purchases", management, controller.createPurchase);

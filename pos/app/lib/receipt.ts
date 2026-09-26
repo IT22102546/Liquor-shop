@@ -18,6 +18,8 @@ export type SaleReceipt = {
   soldAt: string;
   cashierName: string;
   cashierRole: string;
+  /** Loyalty member; null for a walk-in customer. */
+  member?: { name: string; mobileNumber: string; pointsEarned: number; pointsBalance: number } | null;
   paymentMethod: "CASH" | "BANK_TRANSFER" | "CHEQUE";
   lines: ReceiptLine[];
   subtotal: number;
@@ -34,11 +36,25 @@ const PAYMENT_LABELS: Record<SaleReceipt["paymentMethod"], string> = {
   CHEQUE: "Cheque",
 };
 
+/** Shows only the last 3 digits of a member's mobile on paper, e.g. "07•••••123". */
+const maskMobile = (mobile: string) => (mobile.length > 5 ? `${mobile.slice(0, 2)}${"•".repeat(mobile.length - 5)}${mobile.slice(-3)}` : mobile);
+
 const amount = (value: number) =>
   value.toLocaleString("en-LK", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 const escape = (value: string) =>
   value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character] ?? character);
+
+/**
+ * File name used when the receipt is saved as PDF, e.g. "Receipt_POS-MUI19MZ4-19TB_2026-09-26_12-23".
+ * The bill number is unique per sale, so saved receipts never overwrite or duplicate each other.
+ */
+export function receiptFileName(receipt: SaleReceipt) {
+  const soldAt = new Date(receipt.soldAt);
+  const pad = (value: number) => String(value).padStart(2, "0");
+  const stamp = `${soldAt.getFullYear()}-${pad(soldAt.getMonth() + 1)}-${pad(soldAt.getDate())}_${pad(soldAt.getHours())}-${pad(soldAt.getMinutes())}`;
+  return `Receipt_${receipt.billNo.replace(/[^A-Za-z0-9-]/g, "")}_${stamp}`;
+}
 
 /** 80mm thermal-printer receipt as a standalone HTML document (also used for the on-screen preview). */
 export function buildReceiptHtml(receipt: SaleReceipt) {
@@ -56,7 +72,7 @@ export function buildReceiptHtml(receipt: SaleReceipt) {
       ${line.empties > 0 ? `<div class="row deduct"><span>Empty bottles returned ${line.empties} × ${amount(line.emptyPrice)}</span><span>−${amount(line.emptyDeduction)}</span></div>` : ""}
     </div>`).join("");
 
-  return `<!doctype html><html><head><meta charset="utf-8"><title>${escape(receipt.billNo)}</title><style>
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${escape(receiptFileName(receipt))}</title><style>
     @page { size: 80mm 200mm; margin: 0; } /* replaced with the measured height when printing */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { background: #fff; }
@@ -88,6 +104,10 @@ export function buildReceiptHtml(receipt: SaleReceipt) {
     .total .row span:first-child { font-size: 14px; letter-spacing: 0.12em; }
     .pay .row { padding: 1.5px 0; }
     .pay .strong { font-weight: 800; font-size: 13.5px; }
+    .loyalty { margin-top: 8px; padding: 5px 7px; border: 1px solid #000; border-radius: 4px; }
+    .loyalty-title { font-size: 10px; font-weight: 800; letter-spacing: 0.16em; text-align: center; margin-bottom: 2px; }
+    .loyalty .row { font-size: 11.5px; padding: 1px 0; }
+    .loyalty .strong { font-weight: 800; }
     .saved { margin-top: 7px; padding: 5px; border: 1px dashed #000; text-align: center; font-size: 11px; font-weight: 700; }
     .foot { margin-top: 9px; text-align: center; font-size: 11px; }
     .foot .thanks { font-size: 13px; font-weight: 800; margin-bottom: 2px; }
@@ -110,6 +130,8 @@ export function buildReceiptHtml(receipt: SaleReceipt) {
       <div class="row"><span>Served by</span><span>${escape(receipt.cashierName)}</span></div>
       <div class="row"><span>Role</span><span>${escape(receipt.cashierRole)}</span></div>
       <div class="row"><span>Payment</span><span>${PAYMENT_LABELS[receipt.paymentMethod] ?? receipt.paymentMethod}</span></div>
+      <div class="row"><span>Customer</span><span>${receipt.member ? escape(receipt.member.name) : "Walk-in"}</span></div>
+      ${receipt.member ? `<div class="row"><span>Member mobile</span><span>${escape(maskMobile(receipt.member.mobileNumber))}</span></div>` : ""}
     </div>
 
     <div class="rule solid"></div>
@@ -132,6 +154,12 @@ export function buildReceiptHtml(receipt: SaleReceipt) {
            <div class="row strong"><span>Change given</span><span>${amount(receipt.change)}</span></div>`
         : `<div class="row"><span>Paid by ${PAYMENT_LABELS[receipt.paymentMethod] ?? receipt.paymentMethod}</span><span>${amount(receipt.total)}</span></div>`}
     </div>
+
+    ${receipt.member ? `<div class="loyalty">
+      <div class="loyalty-title">LOYALTY POINTS</div>
+      <div class="row"><span>Earned on this bill</span><span>+${receipt.member.pointsEarned}</span></div>
+      <div class="row strong"><span>Points balance</span><span>${receipt.member.pointsBalance}</span></div>
+    </div>` : ""}
 
     ${receipt.emptyDeduction > 0 ? `<div class="saved">You saved Rs. ${amount(receipt.emptyDeduction)} by returning ${receipt.emptiesReturned} empty bottle${receipt.emptiesReturned === 1 ? "" : "s"}</div>` : ""}
 
@@ -166,9 +194,15 @@ export function printReceipt(receipt: SaleReceipt) {
     const pageStyle = doc.createElement("style");
     pageStyle.textContent = `@page { size: 80mm ${heightMm}mm; margin: 0; } @media print { html, body { width: 80mm; height: ${heightMm}mm; margin: 0; overflow: hidden; } }`;
     doc.head.appendChild(pageStyle);
+    // Chrome names the saved PDF after the main page's title, not the frame's, so borrow it
+    // for the receipt's own name while the print dialog is open, then put it back.
+    const pageTitle = document.title;
+    document.title = receiptFileName(receipt);
+    const restoreTitle = () => { document.title = pageTitle; };
+    win.addEventListener("afterprint", restoreTitle, { once: true });
     win.focus();
     win.print();
-    window.setTimeout(() => frame.remove(), 1000);
+    window.setTimeout(() => { restoreTitle(); frame.remove(); }, 1000);
   };
   document.body.appendChild(frame);
 }

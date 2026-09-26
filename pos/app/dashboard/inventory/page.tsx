@@ -10,11 +10,13 @@ import {
 } from "react";
 import { useAdmin } from "../../components/AdminContext";
 import { AddLiquorModal } from "../../components/products/AddLiquorModal";
+import { MemberPicker, type LoyaltyMember } from "../../components/customers/MemberPicker";
 import { ProductArt } from "../../components/products/ProductArt";
 import type { Product, ProductCategory } from "../../components/products/ProductFormModal";
 import { API_URL } from "../../lib/constants";
 import { beep } from "../../lib/beep";
-import { buildReceiptHtml, printReceipt, type SaleReceipt } from "../../lib/receipt";
+import { printReceipt, type SaleReceipt } from "../../lib/receipt";
+import { ReceiptModal } from "../../components/receipt/ReceiptModal";
 import { ROLE_LABELS } from "../../lib/roles";
 import { useCountUp } from "../../lib/useCountUp";
 import { normalizeBarcode, useBarcodeScanner } from "../../lib/useBarcodeScanner";
@@ -45,6 +47,7 @@ type CheckoutResult = {
   changeGiven: number;
   purchases: Array<{ productId: number; name: string; quantity: number; unitPrice: number; emptiesReturned?: number; emptyDeduction?: number; lineTotal: number }>;
   counterSale?: { createdAt: string };
+  member?: { id: number; name: string; mobileNumber: string; pointsEarned: number; pointsBalance: number } | null;
 };
 /** `empties` = empty bottles the customer hands back for this product (never more than `quantity`). */
 type CartLine = { product: Product; quantity: number; empties: number };
@@ -94,6 +97,8 @@ export default function InventoryPage() {
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [completedReceipt, setCompletedReceipt] = useState<SaleReceipt | null>(null);
   const [showReceipt, setShowReceipt] = useState(false);
+  // Every sale is walk-in unless a loyalty member is attached.
+  const [member, setMember] = useState<LoyaltyMember | null>(null);
   const [stockIn, setStockIn] = useState<{ initialCode?: string } | null>(null);
   const [toasts, setToasts] = useState<ScanToast[]>([]);
   const [bumpedId, setBumpedId] = useState<number | null>(null);
@@ -287,6 +292,7 @@ export default function InventoryPage() {
           })),
           paymentMethod,
           amountReceived: paymentMethod === "CASH" ? tendered : undefined,
+          ...(member ? { customerId: member.id } : {}),
         }),
       });
       const payload = await response.json().catch(() => null) as { data?: CheckoutResult; message?: string } | null;
@@ -299,6 +305,7 @@ export default function InventoryPage() {
         soldAt: sale.counterSale?.createdAt ?? new Date().toISOString(),
         cashierName: admin.name,
         cashierRole: ROLE_LABELS[admin.role] ?? admin.role,
+        member: sale.member ?? null,
         paymentMethod: sale.paymentMethod,
         lines: sale.purchases.map((line) => {
           const product = productById.get(line.productId);
@@ -323,6 +330,7 @@ export default function InventoryPage() {
       setCheckoutMessage(`Sale complete · ${sale.invoiceGroupCode}`);
       setCompletedReceipt(receipt);
       setShowReceipt(true);
+      setMember(null);
       setCart([]);
       setAmountTendered("");
       await loadData();
@@ -485,8 +493,9 @@ export default function InventoryPage() {
       <aside className="pos-cart" aria-label="Current order">
         <div className="pos-cart-header">
           <div><span>Current order</span><strong>{cartItemCount} item{cartItemCount === 1 ? "" : "s"}</strong></div>
-          {cart.length > 0 && <button type="button" onClick={() => { setCart([]); setAmountTendered(""); }}>Clear</button>}
+          {cart.length > 0 && <button type="button" onClick={() => { setCart([]); setAmountTendered(""); setMember(null); }}>Clear</button>}
         </div>
+        <MemberPicker token={token} member={member} onChange={setMember} onAuthExpired={logout} />
         <div className="pos-cart-lines">
           {cart.length === 0 ? (
             <div className="pos-cart-empty"><IconCart size={38} /><strong>No items yet</strong><p>Scan a barcode or tap a product.</p></div>
@@ -585,24 +594,14 @@ export default function InventoryPage() {
       </div>
 
       {showReceipt && completedReceipt && (
-        <div className="bm-modal-backdrop" onClick={() => setShowReceipt(false)}>
-          <div className="pos-receipt-modal" onClick={(event) => event.stopPropagation()} role="dialog" aria-label="Sale receipt">
-            <div className="pos-receipt-head">
-              <span className="pos-receipt-check"><IconCheck size={22} /></span>
-              <div>
-                <strong>Payment successful</strong>
-                <span>
-                  {formatCurrency(completedReceipt.total)} · {completedReceipt.paymentMethod === "CASH" ? `Change ${formatCurrency(completedReceipt.change)}` : "Card / Transfer"}
-                </span>
-              </div>
-            </div>
-            <iframe className="pos-receipt-paper" title="Receipt preview" srcDoc={buildReceiptHtml(completedReceipt)} />
-            <div className="pos-receipt-actions">
-              <button type="button" className="btn-outline" onClick={() => printReceipt(completedReceipt)}><IconPrinter size={16} /> Print</button>
-              <button type="button" className="btn-accent" autoFocus onClick={() => { setShowReceipt(false); searchInputRef.current?.focus(); }}>New sale</button>
-            </div>
-          </div>
-        </div>
+        <ReceiptModal
+          receipt={completedReceipt}
+          success
+          title="Payment successful"
+          subtitle={`${formatCurrency(completedReceipt.total)} · ${completedReceipt.paymentMethod === "CASH" ? `Change ${formatCurrency(completedReceipt.change)}` : "Card / Transfer"}${completedReceipt.member ? ` · +${completedReceipt.member.pointsEarned} pts for ${completedReceipt.member.name}` : ""}`}
+          closeLabel="New sale"
+          onClose={() => { setShowReceipt(false); searchInputRef.current?.focus(); }}
+        />
       )}
 
       {stockIn && (

@@ -7,6 +7,8 @@ import {
   createInvoiceTermSchema,
   createPosUserSchema,
   checkoutSaleSchema,
+  dashboardQuerySchema,
+  salesQuerySchema,
   purchaseQuerySchema,
   posUserQuerySchema,
   settlePurchaseSchema,
@@ -16,6 +18,23 @@ import {
   updatePurchaseSchema,
 } from "./dto/pos-user.dto";
 import * as service from "./pos-user-management.service";
+import * as salesService from "./pos-sales.service";
+
+export async function listSales(req: Request, res: Response, next: NextFunction) {
+  try {
+    return sendSuccess(res, await salesService.listSales(validate(salesQuerySchema, req.query)));
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function getDashboard(req: Request, res: Response, next: NextFunction) {
+  try {
+    return sendSuccess(res, await salesService.getDashboardSummary(validate(dashboardQuerySchema, req.query)));
+  } catch (error) {
+    return next(error);
+  }
+}
 
 function parsePositiveIntParam(
   paramName: string,

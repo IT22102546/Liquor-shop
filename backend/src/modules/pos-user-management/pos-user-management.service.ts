@@ -1,6 +1,7 @@
 import { Prisma } from "../../generated/prisma";
 import { prisma } from "../../database/prisma.client";
 import { AppError } from "../../common/utils/errors";
+import { loyaltyPointsFor } from "../../config/loyalty";
 import type {
   CreateInvoiceAccountDto,
   CreateInvoiceTermDto,
@@ -302,19 +303,25 @@ function ensureDistrictInProvince(province: string, district: string) {
   }
 }
 
-function mapCustomer(customer: {
+type CustomerRecord = {
   id: number;
   firstName: string;
   lastName: string;
-  nic: string;
+  nic: string | null;
   mobileNumber: string;
   email: string | null;
-  province: string;
-  district: string;
-  address: string;
+  province: string | null;
+  district: string | null;
+  address: string | null;
+  loyaltyPoints: number;
+  totalSpent: number;
+  visits: number;
+  lastVisitAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
-}) {
+};
+
+function mapCustomer(customer: CustomerRecord) {
   return {
     id: customer.id,
     firstName: customer.firstName,
@@ -325,9 +332,24 @@ function mapCustomer(customer: {
     province: customer.province,
     district: customer.district,
     address: customer.address,
+    loyaltyPoints: customer.loyaltyPoints,
+    totalSpent: customer.totalSpent,
+    visits: customer.visits,
+    lastVisitAt: customer.lastVisitAt,
     createdAt: customer.createdAt,
     updatedAt: customer.updatedAt,
   };
+}
+
+/** Shared record used for every sale without a loyalty member. */
+export const WALK_IN_MOBILE = "WALK-IN";
+
+export async function getWalkInCustomer(db: Prisma.TransactionClient | typeof prisma = prisma) {
+  return db.posCustomer.upsert({
+    where: { mobileNumber: WALK_IN_MOBILE },
+    update: {},
+    create: { firstName: "Walk-in", lastName: "Customer", nic: "WALK-IN", mobileNumber: WALK_IN_MOBILE },
+  });
 }
 
 export function getProvinceDistrictMeta() {
@@ -346,19 +368,21 @@ export async function listPosUsers(query: PosUserQueryDto) {
   const skip = (page - 1) * limit;
   const search = normalizeSearch(query.search);
 
-  const where: Prisma.PosCustomerWhereInput = search
-    ? {
-        OR: [
-          { firstName: { contains: search, mode: "insensitive" } },
-          { lastName: { contains: search, mode: "insensitive" } },
-          { nic: { contains: search, mode: "insensitive" } },
-          { mobileNumber: { contains: search, mode: "insensitive" } },
-          { email: { contains: search, mode: "insensitive" } },
-          { province: { contains: search, mode: "insensitive" } },
-          { district: { contains: search, mode: "insensitive" } },
-        ],
-      }
-    : {};
+  // Loyalty members only — the shared walk-in record is not a member.
+  const where: Prisma.PosCustomerWhereInput = {
+    mobileNumber: { not: WALK_IN_MOBILE },
+    ...(search
+      ? {
+          OR: [
+            { firstName: { contains: search, mode: "insensitive" } },
+            { lastName: { contains: search, mode: "insensitive" } },
+            { mobileNumber: { contains: search.replace(/\s+/g, "") } },
+            { nic: { contains: search, mode: "insensitive" } },
+            { email: { contains: search, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+  };
 
   const [users, total] = await Promise.all([
     prisma.posCustomer.findMany({
@@ -387,15 +411,15 @@ export async function getPosUser(id: number) {
 }
 
 export async function createPosUser(dto: CreatePosUserDto) {
-  ensureDistrictInProvince(dto.province, dto.district);
+  if (dto.province && dto.district) ensureDistrictInProvince(dto.province, dto.district);
 
   try {
     const created = await prisma.posCustomer.create({
       data: {
         firstName: dto.firstName,
-        lastName: dto.lastName,
-        nic: dto.nic,
-        mobileNumber: dto.mobileNumber,
+        lastName: dto.lastName ?? "",
+        nic: dto.nic ?? null,
+        mobileNumber: dto.mobileNumber.replace(/\s+/g, ""),
         email: dto.email,
         province: dto.province,
         district: dto.district,
@@ -428,8 +452,9 @@ export async function updatePosUser(id: number, dto: UpdatePosUserDto) {
   if (dto.lastName !== undefined) updateData.lastName = dto.lastName;
   if (dto.nic !== undefined) updateData.nic = dto.nic;
   if (dto.mobileNumber !== undefined)
-    updateData.mobileNumber = dto.mobileNumber;
+    updateData.mobileNumber = dto.mobileNumber.replace(/\s+/g, "");
   if (dto.email !== undefined) updateData.email = dto.email ?? null;
+  if (dto.nic !== undefined) updateData.nic = dto.nic ?? null;
   if (dto.province !== undefined) updateData.province = dto.province;
   if (dto.district !== undefined) updateData.district = dto.district;
   if (dto.address !== undefined) updateData.address = dto.address;
@@ -444,10 +469,9 @@ export async function updatePosUser(id: number, dto: UpdatePosUserDto) {
       select: { province: true, district: true },
     });
     if (!current) throw AppError.notFound("User not found");
-    ensureDistrictInProvince(
-      effectiveProvince ?? current.province,
-      effectiveDistrict ?? current.district,
-    );
+    const province = effectiveProvince ?? current.province;
+    const district = effectiveDistrict ?? current.district;
+    if (province && district) ensureDistrictInProvince(province, district);
   }
 
   try {
@@ -470,10 +494,20 @@ export async function updatePosUser(id: number, dto: UpdatePosUserDto) {
 export async function deletePosUser(id: number) {
   const existing = await prisma.posCustomer.findUnique({
     where: { id },
-    select: { id: true },
+    select: { id: true, mobileNumber: true },
   });
   if (!existing) throw AppError.notFound("User not found");
-  await prisma.posCustomer.delete({ where: { id } });
+  if (existing.mobileNumber === WALK_IN_MOBILE) {
+    throw new AppError("The walk-in customer can't be deleted", 400);
+  }
+  // Keep the shop's sales history: move the member's sales to the walk-in customer first
+  // (deleting a customer would otherwise delete their purchase records too).
+  await prisma.$transaction(async (tx) => {
+    const walkIn = await getWalkInCustomer(tx);
+    await tx.posCustomerPurchase.updateMany({ where: { customerId: id }, data: { customerId: walkIn.id } });
+    await tx.posCounterSale.updateMany({ where: { customerId: id }, data: { customerId: null } });
+    await tx.posCustomer.delete({ where: { id } });
+  });
 }
 
 export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
@@ -532,6 +566,13 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
     });
   }
 
+  const member = dto.customerId
+    ? await prisma.posCustomer.findUnique({ where: { id: dto.customerId } })
+    : null;
+  if (dto.customerId && (!member || member.mobileNumber === WALK_IN_MOBILE)) {
+    throw AppError.validation({ customerId: ["Loyalty member not found"] });
+  }
+
   const invoiceGroupCode = `POS-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
   const subtotal = roundCurrency(lines.reduce((sum, line) => sum + line.grossTotal, 0));
   const emptyDeductionTotal = roundCurrency(lines.reduce((sum, line) => sum + line.emptyDeduction, 0));
@@ -550,19 +591,7 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
     : 0;
 
   const result = await prisma.$transaction(async (tx) => {
-    const customer = await tx.posCustomer.upsert({
-      where: { nic: "WALK-IN" },
-      update: {},
-      create: {
-        firstName: "Walk-in",
-        lastName: "Customer",
-        nic: "WALK-IN",
-        mobileNumber: "WALK-IN",
-        province: "North Western",
-        district: "Kurunegala",
-        address: "Bar Shop counter sale",
-      },
-    });
+    const customer = member ?? (await getWalkInCustomer(tx));
 
     const purchases = [];
     for (const item of lines) {
@@ -623,9 +652,27 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
       });
     }
 
+    // Loyalty: members earn points on what they paid (after empties) and their visit is recorded.
+    const pointsEarned = member ? loyaltyPointsFor(total) : 0;
+    let memberAfter: { loyaltyPoints: number } | null = null;
+    if (member) {
+      memberAfter = await tx.posCustomer.update({
+        where: { id: member.id },
+        data: {
+          loyaltyPoints: { increment: pointsEarned },
+          totalSpent: { increment: total },
+          visits: { increment: 1 },
+          lastVisitAt: new Date(),
+        },
+        select: { loyaltyPoints: true },
+      });
+    }
+
     const counterSale = await tx.posCounterSale.create({
       data: {
         invoiceGroupCode,
+        customerId: member?.id ?? null,
+        pointsEarned,
         totalAmount: total,
         emptyDeduction: emptyDeductionTotal,
         emptiesReturned: emptiesReturnedTotal,
@@ -643,7 +690,20 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
       },
     });
 
-    return { customerId: customer.id, purchases, counterSale };
+    return {
+      customerId: customer.id,
+      member: member
+        ? {
+            id: member.id,
+            name: [member.firstName, member.lastName].filter(Boolean).join(" "),
+            mobileNumber: member.mobileNumber,
+            pointsEarned,
+            pointsBalance: memberAfter?.loyaltyPoints ?? member.loyaltyPoints,
+          }
+        : null,
+      purchases,
+      counterSale,
+    };
   });
 
   return {

@@ -99,6 +99,7 @@ export function describePosChange(method: string, path: string, body: Body, resp
   if (module === "user-management" && resource === "checkout") {
     const lines = Array.isArray(data.purchases) ? (data.purchases as Body[]) : [];
     const empties = Number(data.emptiesReturned ?? 0);
+    const member = obj(data.member);
     const itemCount = lines.reduce((sum, line) => sum + Number(line.quantity ?? 0), 0);
     // "3 × Lion Stout, 1 × Carlsberg +2 more" — names what was sold without making the line too long.
     const soldText = lines.slice(0, 2).map((line) => `${str(line.quantity)} × ${str(line.name)}`).join(", ")
@@ -108,7 +109,7 @@ export function describePosChange(method: string, path: string, body: Body, resp
       category: "SALE",
       entityType: "sale",
       entityId: str(data.invoiceGroupCode),
-      summary: `Sold ${soldText || `${itemCount} items`} for ${money(data.total)} · ${payment(data.paymentMethod)}${empties > 0 ? ` · ${empties} empt${empties === 1 ? "y" : "ies"} returned` : ""}`,
+      summary: `Sold ${soldText || `${itemCount} items`} for ${money(data.total)} · ${payment(data.paymentMethod)}${empties > 0 ? ` · ${empties} empt${empties === 1 ? "y" : "ies"} returned` : ""}${member.name ? ` · ${str(member.name)}` : ""}`,
       details: {
         items: lines.map((line) => ({
           name: str(line.name),
@@ -120,6 +121,8 @@ export function describePosChange(method: string, path: string, body: Body, resp
         })),
         facts: [
           fact("Bill number", data.invoiceGroupCode),
+          fact("Customer", member.name ? `${str(member.name)} (loyalty member)` : "Walk-in customer"),
+          ...(member.name ? [fact("Points earned", `${str(member.pointsEarned)} (balance ${str(member.pointsBalance)})`)] : []),
           fact("Payment", payment(data.paymentMethod)),
           ...(empties > 0 ? [fact("Subtotal", money(data.subtotal)), fact("Empty bottles returned", `${empties} (− ${money(data.emptyDeduction)})`)] : []),
           fact("Total", money(data.total)),

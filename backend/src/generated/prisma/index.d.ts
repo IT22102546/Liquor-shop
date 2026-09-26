@@ -60,7 +60,8 @@ export type InventoryProductExpense = $Result.DefaultSelection<Prisma.$Inventory
 export type InventoryProductImage = $Result.DefaultSelection<Prisma.$InventoryProductImagePayload>
 /**
  * Model PosCustomer
- * 
+ * Loyalty member (or the shared "Walk-in Customer" record, NIC "WALK-IN").
+ * Only name and mobile are required; the rest is optional.
  */
 export type PosCustomer = $Result.DefaultSelection<Prisma.$PosCustomerPayload>
 /**
@@ -3206,10 +3207,12 @@ export namespace Prisma {
 
   export type PosCustomerCountOutputType = {
     purchases: number
+    counterSales: number
   }
 
   export type PosCustomerCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     purchases?: boolean | PosCustomerCountOutputTypeCountPurchasesArgs
+    counterSales?: boolean | PosCustomerCountOutputTypeCountCounterSalesArgs
   }
 
   // Custom InputTypes
@@ -3228,6 +3231,13 @@ export namespace Prisma {
    */
   export type PosCustomerCountOutputTypeCountPurchasesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PosCustomerPurchaseWhereInput
+  }
+
+  /**
+   * PosCustomerCountOutputType without action
+   */
+  export type PosCustomerCountOutputTypeCountCounterSalesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PosCounterSaleWhereInput
   }
 
 
@@ -5509,6 +5519,8 @@ export namespace Prisma {
     amountReceived: number | null
     changeGiven: number | null
     cashierId: number | null
+    customerId: number | null
+    pointsEarned: number | null
   }
 
   export type PosCounterSaleSumAggregateOutputType = {
@@ -5519,6 +5531,8 @@ export namespace Prisma {
     amountReceived: number | null
     changeGiven: number | null
     cashierId: number | null
+    customerId: number | null
+    pointsEarned: number | null
   }
 
   export type PosCounterSaleMinAggregateOutputType = {
@@ -5531,6 +5545,8 @@ export namespace Prisma {
     changeGiven: number | null
     paymentMethod: $Enums.PaymentMethod | null
     cashierId: number | null
+    customerId: number | null
+    pointsEarned: number | null
     createdAt: Date | null
   }
 
@@ -5544,6 +5560,8 @@ export namespace Prisma {
     changeGiven: number | null
     paymentMethod: $Enums.PaymentMethod | null
     cashierId: number | null
+    customerId: number | null
+    pointsEarned: number | null
     createdAt: Date | null
   }
 
@@ -5557,6 +5575,8 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod: number
     cashierId: number
+    customerId: number
+    pointsEarned: number
     createdAt: number
     _all: number
   }
@@ -5570,6 +5590,8 @@ export namespace Prisma {
     amountReceived?: true
     changeGiven?: true
     cashierId?: true
+    customerId?: true
+    pointsEarned?: true
   }
 
   export type PosCounterSaleSumAggregateInputType = {
@@ -5580,6 +5602,8 @@ export namespace Prisma {
     amountReceived?: true
     changeGiven?: true
     cashierId?: true
+    customerId?: true
+    pointsEarned?: true
   }
 
   export type PosCounterSaleMinAggregateInputType = {
@@ -5592,6 +5616,8 @@ export namespace Prisma {
     changeGiven?: true
     paymentMethod?: true
     cashierId?: true
+    customerId?: true
+    pointsEarned?: true
     createdAt?: true
   }
 
@@ -5605,6 +5631,8 @@ export namespace Prisma {
     changeGiven?: true
     paymentMethod?: true
     cashierId?: true
+    customerId?: true
+    pointsEarned?: true
     createdAt?: true
   }
 
@@ -5618,6 +5646,8 @@ export namespace Prisma {
     changeGiven?: true
     paymentMethod?: true
     cashierId?: true
+    customerId?: true
+    pointsEarned?: true
     createdAt?: true
     _all?: true
   }
@@ -5718,6 +5748,8 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod: $Enums.PaymentMethod
     cashierId: number
+    customerId: number | null
+    pointsEarned: number
     createdAt: Date
     _count: PosCounterSaleCountAggregateOutputType | null
     _avg: PosCounterSaleAvgAggregateOutputType | null
@@ -5750,8 +5782,11 @@ export namespace Prisma {
     changeGiven?: boolean
     paymentMethod?: boolean
     cashierId?: boolean
+    customerId?: boolean
+    pointsEarned?: boolean
     createdAt?: boolean
     cashier?: boolean | PosAdminDefaultArgs<ExtArgs>
+    customer?: boolean | PosCounterSale$customerArgs<ExtArgs>
   }, ExtArgs["result"]["posCounterSale"]>
 
   export type PosCounterSaleSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -5764,8 +5799,11 @@ export namespace Prisma {
     changeGiven?: boolean
     paymentMethod?: boolean
     cashierId?: boolean
+    customerId?: boolean
+    pointsEarned?: boolean
     createdAt?: boolean
     cashier?: boolean | PosAdminDefaultArgs<ExtArgs>
+    customer?: boolean | PosCounterSale$customerArgs<ExtArgs>
   }, ExtArgs["result"]["posCounterSale"]>
 
   export type PosCounterSaleSelectScalar = {
@@ -5778,20 +5816,25 @@ export namespace Prisma {
     changeGiven?: boolean
     paymentMethod?: boolean
     cashierId?: boolean
+    customerId?: boolean
+    pointsEarned?: boolean
     createdAt?: boolean
   }
 
   export type PosCounterSaleInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cashier?: boolean | PosAdminDefaultArgs<ExtArgs>
+    customer?: boolean | PosCounterSale$customerArgs<ExtArgs>
   }
   export type PosCounterSaleIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cashier?: boolean | PosAdminDefaultArgs<ExtArgs>
+    customer?: boolean | PosCounterSale$customerArgs<ExtArgs>
   }
 
   export type $PosCounterSalePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "PosCounterSale"
     objects: {
       cashier: Prisma.$PosAdminPayload<ExtArgs>
+      customer: Prisma.$PosCustomerPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -5806,6 +5849,11 @@ export namespace Prisma {
       changeGiven: number
       paymentMethod: $Enums.PaymentMethod
       cashierId: number
+      /**
+       * Loyalty member the sale was made to; null = walk-in customer.
+       */
+      customerId: number | null
+      pointsEarned: number
       createdAt: Date
     }, ExtArgs["result"]["posCounterSale"]>
     composites: {}
@@ -6172,6 +6220,7 @@ export namespace Prisma {
   export interface Prisma__PosCounterSaleClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     cashier<T extends PosAdminDefaultArgs<ExtArgs> = {}>(args?: Subset<T, PosAdminDefaultArgs<ExtArgs>>): Prisma__PosAdminClient<$Result.GetResult<Prisma.$PosAdminPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    customer<T extends PosCounterSale$customerArgs<ExtArgs> = {}>(args?: Subset<T, PosCounterSale$customerArgs<ExtArgs>>): Prisma__PosCustomerClient<$Result.GetResult<Prisma.$PosCustomerPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6210,6 +6259,8 @@ export namespace Prisma {
     readonly changeGiven: FieldRef<"PosCounterSale", 'Float'>
     readonly paymentMethod: FieldRef<"PosCounterSale", 'PaymentMethod'>
     readonly cashierId: FieldRef<"PosCounterSale", 'Int'>
+    readonly customerId: FieldRef<"PosCounterSale", 'Int'>
+    readonly pointsEarned: FieldRef<"PosCounterSale", 'Int'>
     readonly createdAt: FieldRef<"PosCounterSale", 'DateTime'>
   }
     
@@ -6526,6 +6577,21 @@ export namespace Prisma {
      * Filter which PosCounterSales to delete
      */
     where?: PosCounterSaleWhereInput
+  }
+
+  /**
+   * PosCounterSale.customer
+   */
+  export type PosCounterSale$customerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCustomer
+     */
+    select?: PosCustomerSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCustomerInclude<ExtArgs> | null
+    where?: PosCustomerWhereInput
   }
 
   /**
@@ -12827,10 +12893,16 @@ export namespace Prisma {
 
   export type PosCustomerAvgAggregateOutputType = {
     id: number | null
+    loyaltyPoints: number | null
+    totalSpent: number | null
+    visits: number | null
   }
 
   export type PosCustomerSumAggregateOutputType = {
     id: number | null
+    loyaltyPoints: number | null
+    totalSpent: number | null
+    visits: number | null
   }
 
   export type PosCustomerMinAggregateOutputType = {
@@ -12843,6 +12915,10 @@ export namespace Prisma {
     province: string | null
     district: string | null
     address: string | null
+    loyaltyPoints: number | null
+    totalSpent: number | null
+    visits: number | null
+    lastVisitAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -12857,6 +12933,10 @@ export namespace Prisma {
     province: string | null
     district: string | null
     address: string | null
+    loyaltyPoints: number | null
+    totalSpent: number | null
+    visits: number | null
+    lastVisitAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -12871,6 +12951,10 @@ export namespace Prisma {
     province: number
     district: number
     address: number
+    loyaltyPoints: number
+    totalSpent: number
+    visits: number
+    lastVisitAt: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -12879,10 +12963,16 @@ export namespace Prisma {
 
   export type PosCustomerAvgAggregateInputType = {
     id?: true
+    loyaltyPoints?: true
+    totalSpent?: true
+    visits?: true
   }
 
   export type PosCustomerSumAggregateInputType = {
     id?: true
+    loyaltyPoints?: true
+    totalSpent?: true
+    visits?: true
   }
 
   export type PosCustomerMinAggregateInputType = {
@@ -12895,6 +12985,10 @@ export namespace Prisma {
     province?: true
     district?: true
     address?: true
+    loyaltyPoints?: true
+    totalSpent?: true
+    visits?: true
+    lastVisitAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -12909,6 +13003,10 @@ export namespace Prisma {
     province?: true
     district?: true
     address?: true
+    loyaltyPoints?: true
+    totalSpent?: true
+    visits?: true
+    lastVisitAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -12923,6 +13021,10 @@ export namespace Prisma {
     province?: true
     district?: true
     address?: true
+    loyaltyPoints?: true
+    totalSpent?: true
+    visits?: true
+    lastVisitAt?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -13018,12 +13120,16 @@ export namespace Prisma {
     id: number
     firstName: string
     lastName: string
-    nic: string
+    nic: string | null
     mobileNumber: string
     email: string | null
-    province: string
-    district: string
-    address: string
+    province: string | null
+    district: string | null
+    address: string | null
+    loyaltyPoints: number
+    totalSpent: number
+    visits: number
+    lastVisitAt: Date | null
     createdAt: Date
     updatedAt: Date
     _count: PosCustomerCountAggregateOutputType | null
@@ -13057,9 +13163,14 @@ export namespace Prisma {
     province?: boolean
     district?: boolean
     address?: boolean
+    loyaltyPoints?: boolean
+    totalSpent?: boolean
+    visits?: boolean
+    lastVisitAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     purchases?: boolean | PosCustomer$purchasesArgs<ExtArgs>
+    counterSales?: boolean | PosCustomer$counterSalesArgs<ExtArgs>
     _count?: boolean | PosCustomerCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["posCustomer"]>
 
@@ -13073,6 +13184,10 @@ export namespace Prisma {
     province?: boolean
     district?: boolean
     address?: boolean
+    loyaltyPoints?: boolean
+    totalSpent?: boolean
+    visits?: boolean
+    lastVisitAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["posCustomer"]>
@@ -13087,12 +13202,17 @@ export namespace Prisma {
     province?: boolean
     district?: boolean
     address?: boolean
+    loyaltyPoints?: boolean
+    totalSpent?: boolean
+    visits?: boolean
+    lastVisitAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
   export type PosCustomerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     purchases?: boolean | PosCustomer$purchasesArgs<ExtArgs>
+    counterSales?: boolean | PosCustomer$counterSalesArgs<ExtArgs>
     _count?: boolean | PosCustomerCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type PosCustomerIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -13101,17 +13221,25 @@ export namespace Prisma {
     name: "PosCustomer"
     objects: {
       purchases: Prisma.$PosCustomerPurchasePayload<ExtArgs>[]
+      counterSales: Prisma.$PosCounterSalePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
       firstName: string
       lastName: string
-      nic: string
+      nic: string | null
       mobileNumber: string
       email: string | null
-      province: string
-      district: string
-      address: string
+      province: string | null
+      district: string | null
+      address: string | null
+      /**
+       * Loyalty: points balance, lifetime spend and visit count (updated on each counter sale).
+       */
+      loyaltyPoints: number
+      totalSpent: number
+      visits: number
+      lastVisitAt: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["posCustomer"]>
@@ -13479,6 +13607,7 @@ export namespace Prisma {
   export interface Prisma__PosCustomerClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     purchases<T extends PosCustomer$purchasesArgs<ExtArgs> = {}>(args?: Subset<T, PosCustomer$purchasesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosCustomerPurchasePayload<ExtArgs>, T, "findMany"> | Null>
+    counterSales<T extends PosCustomer$counterSalesArgs<ExtArgs> = {}>(args?: Subset<T, PosCustomer$counterSalesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosCounterSalePayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -13517,6 +13646,10 @@ export namespace Prisma {
     readonly province: FieldRef<"PosCustomer", 'String'>
     readonly district: FieldRef<"PosCustomer", 'String'>
     readonly address: FieldRef<"PosCustomer", 'String'>
+    readonly loyaltyPoints: FieldRef<"PosCustomer", 'Int'>
+    readonly totalSpent: FieldRef<"PosCustomer", 'Float'>
+    readonly visits: FieldRef<"PosCustomer", 'Int'>
+    readonly lastVisitAt: FieldRef<"PosCustomer", 'DateTime'>
     readonly createdAt: FieldRef<"PosCustomer", 'DateTime'>
     readonly updatedAt: FieldRef<"PosCustomer", 'DateTime'>
   }
@@ -13850,6 +13983,26 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: PosCustomerPurchaseScalarFieldEnum | PosCustomerPurchaseScalarFieldEnum[]
+  }
+
+  /**
+   * PosCustomer.counterSales
+   */
+  export type PosCustomer$counterSalesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCounterSale
+     */
+    select?: PosCounterSaleSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCounterSaleInclude<ExtArgs> | null
+    where?: PosCounterSaleWhereInput
+    orderBy?: PosCounterSaleOrderByWithRelationInput | PosCounterSaleOrderByWithRelationInput[]
+    cursor?: PosCounterSaleWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PosCounterSaleScalarFieldEnum | PosCounterSaleScalarFieldEnum[]
   }
 
   /**
@@ -29141,6 +29294,8 @@ export namespace Prisma {
     changeGiven: 'changeGiven',
     paymentMethod: 'paymentMethod',
     cashierId: 'cashierId',
+    customerId: 'customerId',
+    pointsEarned: 'pointsEarned',
     createdAt: 'createdAt'
   };
 
@@ -29244,6 +29399,10 @@ export namespace Prisma {
     province: 'province',
     district: 'district',
     address: 'address',
+    loyaltyPoints: 'loyaltyPoints',
+    totalSpent: 'totalSpent',
+    visits: 'visits',
+    lastVisitAt: 'lastVisitAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -30001,8 +30160,11 @@ export namespace Prisma {
     changeGiven?: FloatFilter<"PosCounterSale"> | number
     paymentMethod?: EnumPaymentMethodFilter<"PosCounterSale"> | $Enums.PaymentMethod
     cashierId?: IntFilter<"PosCounterSale"> | number
+    customerId?: IntNullableFilter<"PosCounterSale"> | number | null
+    pointsEarned?: IntFilter<"PosCounterSale"> | number
     createdAt?: DateTimeFilter<"PosCounterSale"> | Date | string
     cashier?: XOR<PosAdminRelationFilter, PosAdminWhereInput>
+    customer?: XOR<PosCustomerNullableRelationFilter, PosCustomerWhereInput> | null
   }
 
   export type PosCounterSaleOrderByWithRelationInput = {
@@ -30015,8 +30177,11 @@ export namespace Prisma {
     changeGiven?: SortOrder
     paymentMethod?: SortOrder
     cashierId?: SortOrder
+    customerId?: SortOrderInput | SortOrder
+    pointsEarned?: SortOrder
     createdAt?: SortOrder
     cashier?: PosAdminOrderByWithRelationInput
+    customer?: PosCustomerOrderByWithRelationInput
   }
 
   export type PosCounterSaleWhereUniqueInput = Prisma.AtLeast<{
@@ -30032,8 +30197,11 @@ export namespace Prisma {
     changeGiven?: FloatFilter<"PosCounterSale"> | number
     paymentMethod?: EnumPaymentMethodFilter<"PosCounterSale"> | $Enums.PaymentMethod
     cashierId?: IntFilter<"PosCounterSale"> | number
+    customerId?: IntNullableFilter<"PosCounterSale"> | number | null
+    pointsEarned?: IntFilter<"PosCounterSale"> | number
     createdAt?: DateTimeFilter<"PosCounterSale"> | Date | string
     cashier?: XOR<PosAdminRelationFilter, PosAdminWhereInput>
+    customer?: XOR<PosCustomerNullableRelationFilter, PosCustomerWhereInput> | null
   }, "id" | "invoiceGroupCode">
 
   export type PosCounterSaleOrderByWithAggregationInput = {
@@ -30046,6 +30214,8 @@ export namespace Prisma {
     changeGiven?: SortOrder
     paymentMethod?: SortOrder
     cashierId?: SortOrder
+    customerId?: SortOrderInput | SortOrder
+    pointsEarned?: SortOrder
     createdAt?: SortOrder
     _count?: PosCounterSaleCountOrderByAggregateInput
     _avg?: PosCounterSaleAvgOrderByAggregateInput
@@ -30067,6 +30237,8 @@ export namespace Prisma {
     changeGiven?: FloatWithAggregatesFilter<"PosCounterSale"> | number
     paymentMethod?: EnumPaymentMethodWithAggregatesFilter<"PosCounterSale"> | $Enums.PaymentMethod
     cashierId?: IntWithAggregatesFilter<"PosCounterSale"> | number
+    customerId?: IntNullableWithAggregatesFilter<"PosCounterSale"> | number | null
+    pointsEarned?: IntWithAggregatesFilter<"PosCounterSale"> | number
     createdAt?: DateTimeWithAggregatesFilter<"PosCounterSale"> | Date | string
   }
 
@@ -30539,30 +30711,40 @@ export namespace Prisma {
     id?: IntFilter<"PosCustomer"> | number
     firstName?: StringFilter<"PosCustomer"> | string
     lastName?: StringFilter<"PosCustomer"> | string
-    nic?: StringFilter<"PosCustomer"> | string
+    nic?: StringNullableFilter<"PosCustomer"> | string | null
     mobileNumber?: StringFilter<"PosCustomer"> | string
     email?: StringNullableFilter<"PosCustomer"> | string | null
-    province?: StringFilter<"PosCustomer"> | string
-    district?: StringFilter<"PosCustomer"> | string
-    address?: StringFilter<"PosCustomer"> | string
+    province?: StringNullableFilter<"PosCustomer"> | string | null
+    district?: StringNullableFilter<"PosCustomer"> | string | null
+    address?: StringNullableFilter<"PosCustomer"> | string | null
+    loyaltyPoints?: IntFilter<"PosCustomer"> | number
+    totalSpent?: FloatFilter<"PosCustomer"> | number
+    visits?: IntFilter<"PosCustomer"> | number
+    lastVisitAt?: DateTimeNullableFilter<"PosCustomer"> | Date | string | null
     createdAt?: DateTimeFilter<"PosCustomer"> | Date | string
     updatedAt?: DateTimeFilter<"PosCustomer"> | Date | string
     purchases?: PosCustomerPurchaseListRelationFilter
+    counterSales?: PosCounterSaleListRelationFilter
   }
 
   export type PosCustomerOrderByWithRelationInput = {
     id?: SortOrder
     firstName?: SortOrder
     lastName?: SortOrder
-    nic?: SortOrder
+    nic?: SortOrderInput | SortOrder
     mobileNumber?: SortOrder
     email?: SortOrderInput | SortOrder
-    province?: SortOrder
-    district?: SortOrder
-    address?: SortOrder
+    province?: SortOrderInput | SortOrder
+    district?: SortOrderInput | SortOrder
+    address?: SortOrderInput | SortOrder
+    loyaltyPoints?: SortOrder
+    totalSpent?: SortOrder
+    visits?: SortOrder
+    lastVisitAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     purchases?: PosCustomerPurchaseOrderByRelationAggregateInput
+    counterSales?: PosCounterSaleOrderByRelationAggregateInput
   }
 
   export type PosCustomerWhereUniqueInput = Prisma.AtLeast<{
@@ -30575,24 +30757,33 @@ export namespace Prisma {
     NOT?: PosCustomerWhereInput | PosCustomerWhereInput[]
     firstName?: StringFilter<"PosCustomer"> | string
     lastName?: StringFilter<"PosCustomer"> | string
-    province?: StringFilter<"PosCustomer"> | string
-    district?: StringFilter<"PosCustomer"> | string
-    address?: StringFilter<"PosCustomer"> | string
+    province?: StringNullableFilter<"PosCustomer"> | string | null
+    district?: StringNullableFilter<"PosCustomer"> | string | null
+    address?: StringNullableFilter<"PosCustomer"> | string | null
+    loyaltyPoints?: IntFilter<"PosCustomer"> | number
+    totalSpent?: FloatFilter<"PosCustomer"> | number
+    visits?: IntFilter<"PosCustomer"> | number
+    lastVisitAt?: DateTimeNullableFilter<"PosCustomer"> | Date | string | null
     createdAt?: DateTimeFilter<"PosCustomer"> | Date | string
     updatedAt?: DateTimeFilter<"PosCustomer"> | Date | string
     purchases?: PosCustomerPurchaseListRelationFilter
+    counterSales?: PosCounterSaleListRelationFilter
   }, "id" | "nic" | "mobileNumber" | "email">
 
   export type PosCustomerOrderByWithAggregationInput = {
     id?: SortOrder
     firstName?: SortOrder
     lastName?: SortOrder
-    nic?: SortOrder
+    nic?: SortOrderInput | SortOrder
     mobileNumber?: SortOrder
     email?: SortOrderInput | SortOrder
-    province?: SortOrder
-    district?: SortOrder
-    address?: SortOrder
+    province?: SortOrderInput | SortOrder
+    district?: SortOrderInput | SortOrder
+    address?: SortOrderInput | SortOrder
+    loyaltyPoints?: SortOrder
+    totalSpent?: SortOrder
+    visits?: SortOrder
+    lastVisitAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: PosCustomerCountOrderByAggregateInput
@@ -30609,12 +30800,16 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"PosCustomer"> | number
     firstName?: StringWithAggregatesFilter<"PosCustomer"> | string
     lastName?: StringWithAggregatesFilter<"PosCustomer"> | string
-    nic?: StringWithAggregatesFilter<"PosCustomer"> | string
+    nic?: StringNullableWithAggregatesFilter<"PosCustomer"> | string | null
     mobileNumber?: StringWithAggregatesFilter<"PosCustomer"> | string
     email?: StringNullableWithAggregatesFilter<"PosCustomer"> | string | null
-    province?: StringWithAggregatesFilter<"PosCustomer"> | string
-    district?: StringWithAggregatesFilter<"PosCustomer"> | string
-    address?: StringWithAggregatesFilter<"PosCustomer"> | string
+    province?: StringNullableWithAggregatesFilter<"PosCustomer"> | string | null
+    district?: StringNullableWithAggregatesFilter<"PosCustomer"> | string | null
+    address?: StringNullableWithAggregatesFilter<"PosCustomer"> | string | null
+    loyaltyPoints?: IntWithAggregatesFilter<"PosCustomer"> | number
+    totalSpent?: FloatWithAggregatesFilter<"PosCustomer"> | number
+    visits?: IntWithAggregatesFilter<"PosCustomer"> | number
+    lastVisitAt?: DateTimeNullableWithAggregatesFilter<"PosCustomer"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"PosCustomer"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"PosCustomer"> | Date | string
   }
@@ -32092,8 +32287,10 @@ export namespace Prisma {
     amountReceived: number
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
+    pointsEarned?: number
     createdAt?: Date | string
     cashier: PosAdminCreateNestedOneWithoutCounterSalesInput
+    customer?: PosCustomerCreateNestedOneWithoutCounterSalesInput
   }
 
   export type PosCounterSaleUncheckedCreateInput = {
@@ -32106,6 +32303,8 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
     cashierId: number
+    customerId?: number | null
+    pointsEarned?: number
     createdAt?: Date | string
   }
 
@@ -32117,8 +32316,10 @@ export namespace Prisma {
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    pointsEarned?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cashier?: PosAdminUpdateOneRequiredWithoutCounterSalesNestedInput
+    customer?: PosCustomerUpdateOneWithoutCounterSalesNestedInput
   }
 
   export type PosCounterSaleUncheckedUpdateInput = {
@@ -32131,6 +32332,8 @@ export namespace Prisma {
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     cashierId?: IntFieldUpdateOperationsInput | number
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    pointsEarned?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -32144,6 +32347,8 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
     cashierId: number
+    customerId?: number | null
+    pointsEarned?: number
     createdAt?: Date | string
   }
 
@@ -32155,6 +32360,7 @@ export namespace Prisma {
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    pointsEarned?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -32168,6 +32374,8 @@ export namespace Prisma {
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     cashierId?: IntFieldUpdateOperationsInput | number
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    pointsEarned?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -32658,71 +32866,95 @@ export namespace Prisma {
   export type PosCustomerCreateInput = {
     firstName: string
     lastName: string
-    nic: string
+    nic?: string | null
     mobileNumber: string
     email?: string | null
-    province: string
-    district: string
-    address: string
+    province?: string | null
+    district?: string | null
+    address?: string | null
+    loyaltyPoints?: number
+    totalSpent?: number
+    visits?: number
+    lastVisitAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     purchases?: PosCustomerPurchaseCreateNestedManyWithoutCustomerInput
+    counterSales?: PosCounterSaleCreateNestedManyWithoutCustomerInput
   }
 
   export type PosCustomerUncheckedCreateInput = {
     id?: number
     firstName: string
     lastName: string
-    nic: string
+    nic?: string | null
     mobileNumber: string
     email?: string | null
-    province: string
-    district: string
-    address: string
+    province?: string | null
+    district?: string | null
+    address?: string | null
+    loyaltyPoints?: number
+    totalSpent?: number
+    visits?: number
+    lastVisitAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     purchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutCustomerInput
+    counterSales?: PosCounterSaleUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type PosCustomerUpdateInput = {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
-    nic?: StringFieldUpdateOperationsInput | string
+    nic?: NullableStringFieldUpdateOperationsInput | string | null
     mobileNumber?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    province?: StringFieldUpdateOperationsInput | string
-    district?: StringFieldUpdateOperationsInput | string
-    address?: StringFieldUpdateOperationsInput | string
+    province?: NullableStringFieldUpdateOperationsInput | string | null
+    district?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    visits?: IntFieldUpdateOperationsInput | number
+    lastVisitAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     purchases?: PosCustomerPurchaseUpdateManyWithoutCustomerNestedInput
+    counterSales?: PosCounterSaleUpdateManyWithoutCustomerNestedInput
   }
 
   export type PosCustomerUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
-    nic?: StringFieldUpdateOperationsInput | string
+    nic?: NullableStringFieldUpdateOperationsInput | string | null
     mobileNumber?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    province?: StringFieldUpdateOperationsInput | string
-    district?: StringFieldUpdateOperationsInput | string
-    address?: StringFieldUpdateOperationsInput | string
+    province?: NullableStringFieldUpdateOperationsInput | string | null
+    district?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    visits?: IntFieldUpdateOperationsInput | number
+    lastVisitAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     purchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutCustomerNestedInput
+    counterSales?: PosCounterSaleUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type PosCustomerCreateManyInput = {
     id?: number
     firstName: string
     lastName: string
-    nic: string
+    nic?: string | null
     mobileNumber: string
     email?: string | null
-    province: string
-    district: string
-    address: string
+    province?: string | null
+    district?: string | null
+    address?: string | null
+    loyaltyPoints?: number
+    totalSpent?: number
+    visits?: number
+    lastVisitAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -32730,12 +32962,16 @@ export namespace Prisma {
   export type PosCustomerUpdateManyMutationInput = {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
-    nic?: StringFieldUpdateOperationsInput | string
+    nic?: NullableStringFieldUpdateOperationsInput | string | null
     mobileNumber?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    province?: StringFieldUpdateOperationsInput | string
-    district?: StringFieldUpdateOperationsInput | string
-    address?: StringFieldUpdateOperationsInput | string
+    province?: NullableStringFieldUpdateOperationsInput | string | null
+    district?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    visits?: IntFieldUpdateOperationsInput | number
+    lastVisitAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -32744,12 +32980,16 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
-    nic?: StringFieldUpdateOperationsInput | string
+    nic?: NullableStringFieldUpdateOperationsInput | string | null
     mobileNumber?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    province?: StringFieldUpdateOperationsInput | string
-    district?: StringFieldUpdateOperationsInput | string
-    address?: StringFieldUpdateOperationsInput | string
+    province?: NullableStringFieldUpdateOperationsInput | string | null
+    district?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    visits?: IntFieldUpdateOperationsInput | number
+    lastVisitAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -34468,9 +34708,25 @@ export namespace Prisma {
     not?: NestedEnumPaymentMethodFilter<$PrismaModel> | $Enums.PaymentMethod
   }
 
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type PosAdminRelationFilter = {
     is?: PosAdminWhereInput
     isNot?: PosAdminWhereInput
+  }
+
+  export type PosCustomerNullableRelationFilter = {
+    is?: PosCustomerWhereInput | null
+    isNot?: PosCustomerWhereInput | null
   }
 
   export type PosCounterSaleCountOrderByAggregateInput = {
@@ -34483,6 +34739,8 @@ export namespace Prisma {
     changeGiven?: SortOrder
     paymentMethod?: SortOrder
     cashierId?: SortOrder
+    customerId?: SortOrder
+    pointsEarned?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -34494,6 +34752,8 @@ export namespace Prisma {
     amountReceived?: SortOrder
     changeGiven?: SortOrder
     cashierId?: SortOrder
+    customerId?: SortOrder
+    pointsEarned?: SortOrder
   }
 
   export type PosCounterSaleMaxOrderByAggregateInput = {
@@ -34506,6 +34766,8 @@ export namespace Prisma {
     changeGiven?: SortOrder
     paymentMethod?: SortOrder
     cashierId?: SortOrder
+    customerId?: SortOrder
+    pointsEarned?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -34519,6 +34781,8 @@ export namespace Prisma {
     changeGiven?: SortOrder
     paymentMethod?: SortOrder
     cashierId?: SortOrder
+    customerId?: SortOrder
+    pointsEarned?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -34530,6 +34794,8 @@ export namespace Prisma {
     amountReceived?: SortOrder
     changeGiven?: SortOrder
     cashierId?: SortOrder
+    customerId?: SortOrder
+    pointsEarned?: SortOrder
   }
 
   export type FloatWithAggregatesFilter<$PrismaModel = never> = {
@@ -34556,6 +34822,22 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumPaymentMethodFilter<$PrismaModel>
     _max?: NestedEnumPaymentMethodFilter<$PrismaModel>
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type InventoryProductListRelationFilter = {
@@ -34674,17 +34956,6 @@ export namespace Prisma {
 
   export type InventoryCategorySumOrderByAggregateInput = {
     id?: SortOrder
-  }
-
-  export type IntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
   export type FloatNullableFilter<$PrismaModel = never> = {
@@ -34847,22 +35118,6 @@ export namespace Prisma {
     emptyBottlesOnHand?: SortOrder
   }
 
-  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
-  }
-
   export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel> | null
     in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
@@ -34969,12 +35224,19 @@ export namespace Prisma {
     province?: SortOrder
     district?: SortOrder
     address?: SortOrder
+    loyaltyPoints?: SortOrder
+    totalSpent?: SortOrder
+    visits?: SortOrder
+    lastVisitAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type PosCustomerAvgOrderByAggregateInput = {
     id?: SortOrder
+    loyaltyPoints?: SortOrder
+    totalSpent?: SortOrder
+    visits?: SortOrder
   }
 
   export type PosCustomerMaxOrderByAggregateInput = {
@@ -34987,6 +35249,10 @@ export namespace Prisma {
     province?: SortOrder
     district?: SortOrder
     address?: SortOrder
+    loyaltyPoints?: SortOrder
+    totalSpent?: SortOrder
+    visits?: SortOrder
+    lastVisitAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -35001,12 +35267,19 @@ export namespace Prisma {
     province?: SortOrder
     district?: SortOrder
     address?: SortOrder
+    loyaltyPoints?: SortOrder
+    totalSpent?: SortOrder
+    visits?: SortOrder
+    lastVisitAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type PosCustomerSumOrderByAggregateInput = {
     id?: SortOrder
+    loyaltyPoints?: SortOrder
+    totalSpent?: SortOrder
+    visits?: SortOrder
   }
 
   export type EnumPosPurchaseItemTypeFilter<$PrismaModel = never> = {
@@ -36373,6 +36646,12 @@ export namespace Prisma {
     connect?: PosAdminWhereUniqueInput
   }
 
+  export type PosCustomerCreateNestedOneWithoutCounterSalesInput = {
+    create?: XOR<PosCustomerCreateWithoutCounterSalesInput, PosCustomerUncheckedCreateWithoutCounterSalesInput>
+    connectOrCreate?: PosCustomerCreateOrConnectWithoutCounterSalesInput
+    connect?: PosCustomerWhereUniqueInput
+  }
+
   export type FloatFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -36391,6 +36670,24 @@ export namespace Prisma {
     upsert?: PosAdminUpsertWithoutCounterSalesInput
     connect?: PosAdminWhereUniqueInput
     update?: XOR<XOR<PosAdminUpdateToOneWithWhereWithoutCounterSalesInput, PosAdminUpdateWithoutCounterSalesInput>, PosAdminUncheckedUpdateWithoutCounterSalesInput>
+  }
+
+  export type PosCustomerUpdateOneWithoutCounterSalesNestedInput = {
+    create?: XOR<PosCustomerCreateWithoutCounterSalesInput, PosCustomerUncheckedCreateWithoutCounterSalesInput>
+    connectOrCreate?: PosCustomerCreateOrConnectWithoutCounterSalesInput
+    upsert?: PosCustomerUpsertWithoutCounterSalesInput
+    disconnect?: PosCustomerWhereInput | boolean
+    delete?: PosCustomerWhereInput | boolean
+    connect?: PosCustomerWhereUniqueInput
+    update?: XOR<XOR<PosCustomerUpdateToOneWithWhereWithoutCounterSalesInput, PosCustomerUpdateWithoutCounterSalesInput>, PosCustomerUncheckedUpdateWithoutCounterSalesInput>
+  }
+
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type InventoryProductCreateNestedManyWithoutSupplierInput = {
@@ -36579,14 +36876,6 @@ export namespace Prisma {
     connect?: PosCustomerPurchaseWhereUniqueInput | PosCustomerPurchaseWhereUniqueInput[]
   }
 
-  export type NullableIntFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
-  }
-
   export type NullableFloatFieldUpdateOperationsInput = {
     set?: number | null
     increment?: number
@@ -36740,11 +37029,25 @@ export namespace Prisma {
     connect?: PosCustomerPurchaseWhereUniqueInput | PosCustomerPurchaseWhereUniqueInput[]
   }
 
+  export type PosCounterSaleCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<PosCounterSaleCreateWithoutCustomerInput, PosCounterSaleUncheckedCreateWithoutCustomerInput> | PosCounterSaleCreateWithoutCustomerInput[] | PosCounterSaleUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: PosCounterSaleCreateOrConnectWithoutCustomerInput | PosCounterSaleCreateOrConnectWithoutCustomerInput[]
+    createMany?: PosCounterSaleCreateManyCustomerInputEnvelope
+    connect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+  }
+
   export type PosCustomerPurchaseUncheckedCreateNestedManyWithoutCustomerInput = {
     create?: XOR<PosCustomerPurchaseCreateWithoutCustomerInput, PosCustomerPurchaseUncheckedCreateWithoutCustomerInput> | PosCustomerPurchaseCreateWithoutCustomerInput[] | PosCustomerPurchaseUncheckedCreateWithoutCustomerInput[]
     connectOrCreate?: PosCustomerPurchaseCreateOrConnectWithoutCustomerInput | PosCustomerPurchaseCreateOrConnectWithoutCustomerInput[]
     createMany?: PosCustomerPurchaseCreateManyCustomerInputEnvelope
     connect?: PosCustomerPurchaseWhereUniqueInput | PosCustomerPurchaseWhereUniqueInput[]
+  }
+
+  export type PosCounterSaleUncheckedCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<PosCounterSaleCreateWithoutCustomerInput, PosCounterSaleUncheckedCreateWithoutCustomerInput> | PosCounterSaleCreateWithoutCustomerInput[] | PosCounterSaleUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: PosCounterSaleCreateOrConnectWithoutCustomerInput | PosCounterSaleCreateOrConnectWithoutCustomerInput[]
+    createMany?: PosCounterSaleCreateManyCustomerInputEnvelope
+    connect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
   }
 
   export type PosCustomerPurchaseUpdateManyWithoutCustomerNestedInput = {
@@ -36761,6 +37064,20 @@ export namespace Prisma {
     deleteMany?: PosCustomerPurchaseScalarWhereInput | PosCustomerPurchaseScalarWhereInput[]
   }
 
+  export type PosCounterSaleUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<PosCounterSaleCreateWithoutCustomerInput, PosCounterSaleUncheckedCreateWithoutCustomerInput> | PosCounterSaleCreateWithoutCustomerInput[] | PosCounterSaleUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: PosCounterSaleCreateOrConnectWithoutCustomerInput | PosCounterSaleCreateOrConnectWithoutCustomerInput[]
+    upsert?: PosCounterSaleUpsertWithWhereUniqueWithoutCustomerInput | PosCounterSaleUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: PosCounterSaleCreateManyCustomerInputEnvelope
+    set?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    disconnect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    delete?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    connect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    update?: PosCounterSaleUpdateWithWhereUniqueWithoutCustomerInput | PosCounterSaleUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: PosCounterSaleUpdateManyWithWhereWithoutCustomerInput | PosCounterSaleUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: PosCounterSaleScalarWhereInput | PosCounterSaleScalarWhereInput[]
+  }
+
   export type PosCustomerPurchaseUncheckedUpdateManyWithoutCustomerNestedInput = {
     create?: XOR<PosCustomerPurchaseCreateWithoutCustomerInput, PosCustomerPurchaseUncheckedCreateWithoutCustomerInput> | PosCustomerPurchaseCreateWithoutCustomerInput[] | PosCustomerPurchaseUncheckedCreateWithoutCustomerInput[]
     connectOrCreate?: PosCustomerPurchaseCreateOrConnectWithoutCustomerInput | PosCustomerPurchaseCreateOrConnectWithoutCustomerInput[]
@@ -36773,6 +37090,20 @@ export namespace Prisma {
     update?: PosCustomerPurchaseUpdateWithWhereUniqueWithoutCustomerInput | PosCustomerPurchaseUpdateWithWhereUniqueWithoutCustomerInput[]
     updateMany?: PosCustomerPurchaseUpdateManyWithWhereWithoutCustomerInput | PosCustomerPurchaseUpdateManyWithWhereWithoutCustomerInput[]
     deleteMany?: PosCustomerPurchaseScalarWhereInput | PosCustomerPurchaseScalarWhereInput[]
+  }
+
+  export type PosCounterSaleUncheckedUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<PosCounterSaleCreateWithoutCustomerInput, PosCounterSaleUncheckedCreateWithoutCustomerInput> | PosCounterSaleCreateWithoutCustomerInput[] | PosCounterSaleUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: PosCounterSaleCreateOrConnectWithoutCustomerInput | PosCounterSaleCreateOrConnectWithoutCustomerInput[]
+    upsert?: PosCounterSaleUpsertWithWhereUniqueWithoutCustomerInput | PosCounterSaleUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: PosCounterSaleCreateManyCustomerInputEnvelope
+    set?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    disconnect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    delete?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    connect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+    update?: PosCounterSaleUpdateWithWhereUniqueWithoutCustomerInput | PosCounterSaleUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: PosCounterSaleUpdateManyWithWhereWithoutCustomerInput | PosCounterSaleUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: PosCounterSaleScalarWhereInput | PosCounterSaleScalarWhereInput[]
   }
 
   export type PosCustomerCreateNestedOneWithoutPurchasesInput = {
@@ -38100,17 +38431,6 @@ export namespace Prisma {
     _max?: NestedEnumPaymentMethodFilter<$PrismaModel>
   }
 
-  export type NestedFloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
-  }
-
   export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel> | null
     in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
@@ -38125,6 +38445,17 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -38416,7 +38747,9 @@ export namespace Prisma {
     amountReceived: number
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
+    pointsEarned?: number
     createdAt?: Date | string
+    customer?: PosCustomerCreateNestedOneWithoutCounterSalesInput
   }
 
   export type PosCounterSaleUncheckedCreateWithoutCashierInput = {
@@ -38428,6 +38761,8 @@ export namespace Prisma {
     amountReceived: number
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
+    customerId?: number | null
+    pointsEarned?: number
     createdAt?: Date | string
   }
 
@@ -38470,6 +38805,8 @@ export namespace Prisma {
     changeGiven?: FloatFilter<"PosCounterSale"> | number
     paymentMethod?: EnumPaymentMethodFilter<"PosCounterSale"> | $Enums.PaymentMethod
     cashierId?: IntFilter<"PosCounterSale"> | number
+    customerId?: IntNullableFilter<"PosCounterSale"> | number | null
+    pointsEarned?: IntFilter<"PosCounterSale"> | number
     createdAt?: DateTimeFilter<"PosCounterSale"> | Date | string
   }
 
@@ -38499,6 +38836,48 @@ export namespace Prisma {
   export type PosAdminCreateOrConnectWithoutCounterSalesInput = {
     where: PosAdminWhereUniqueInput
     create: XOR<PosAdminCreateWithoutCounterSalesInput, PosAdminUncheckedCreateWithoutCounterSalesInput>
+  }
+
+  export type PosCustomerCreateWithoutCounterSalesInput = {
+    firstName: string
+    lastName: string
+    nic?: string | null
+    mobileNumber: string
+    email?: string | null
+    province?: string | null
+    district?: string | null
+    address?: string | null
+    loyaltyPoints?: number
+    totalSpent?: number
+    visits?: number
+    lastVisitAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    purchases?: PosCustomerPurchaseCreateNestedManyWithoutCustomerInput
+  }
+
+  export type PosCustomerUncheckedCreateWithoutCounterSalesInput = {
+    id?: number
+    firstName: string
+    lastName: string
+    nic?: string | null
+    mobileNumber: string
+    email?: string | null
+    province?: string | null
+    district?: string | null
+    address?: string | null
+    loyaltyPoints?: number
+    totalSpent?: number
+    visits?: number
+    lastVisitAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    purchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutCustomerInput
+  }
+
+  export type PosCustomerCreateOrConnectWithoutCounterSalesInput = {
+    where: PosCustomerWhereUniqueInput
+    create: XOR<PosCustomerCreateWithoutCounterSalesInput, PosCustomerUncheckedCreateWithoutCounterSalesInput>
   }
 
   export type PosAdminUpsertWithoutCounterSalesInput = {
@@ -38533,6 +38912,54 @@ export namespace Prisma {
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosCustomerUpsertWithoutCounterSalesInput = {
+    update: XOR<PosCustomerUpdateWithoutCounterSalesInput, PosCustomerUncheckedUpdateWithoutCounterSalesInput>
+    create: XOR<PosCustomerCreateWithoutCounterSalesInput, PosCustomerUncheckedCreateWithoutCounterSalesInput>
+    where?: PosCustomerWhereInput
+  }
+
+  export type PosCustomerUpdateToOneWithWhereWithoutCounterSalesInput = {
+    where?: PosCustomerWhereInput
+    data: XOR<PosCustomerUpdateWithoutCounterSalesInput, PosCustomerUncheckedUpdateWithoutCounterSalesInput>
+  }
+
+  export type PosCustomerUpdateWithoutCounterSalesInput = {
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    nic?: NullableStringFieldUpdateOperationsInput | string | null
+    mobileNumber?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    province?: NullableStringFieldUpdateOperationsInput | string | null
+    district?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    visits?: IntFieldUpdateOperationsInput | number
+    lastVisitAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    purchases?: PosCustomerPurchaseUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type PosCustomerUncheckedUpdateWithoutCounterSalesInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    nic?: NullableStringFieldUpdateOperationsInput | string | null
+    mobileNumber?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    province?: NullableStringFieldUpdateOperationsInput | string | null
+    district?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    visits?: IntFieldUpdateOperationsInput | number
+    lastVisitAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    purchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type InventoryProductCreateWithoutSupplierInput = {
@@ -39466,6 +39893,43 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type PosCounterSaleCreateWithoutCustomerInput = {
+    invoiceGroupCode: string
+    totalAmount: number
+    emptyDeduction?: number
+    emptiesReturned?: number
+    amountReceived: number
+    changeGiven: number
+    paymentMethod?: $Enums.PaymentMethod
+    pointsEarned?: number
+    createdAt?: Date | string
+    cashier: PosAdminCreateNestedOneWithoutCounterSalesInput
+  }
+
+  export type PosCounterSaleUncheckedCreateWithoutCustomerInput = {
+    id?: number
+    invoiceGroupCode: string
+    totalAmount: number
+    emptyDeduction?: number
+    emptiesReturned?: number
+    amountReceived: number
+    changeGiven: number
+    paymentMethod?: $Enums.PaymentMethod
+    cashierId: number
+    pointsEarned?: number
+    createdAt?: Date | string
+  }
+
+  export type PosCounterSaleCreateOrConnectWithoutCustomerInput = {
+    where: PosCounterSaleWhereUniqueInput
+    create: XOR<PosCounterSaleCreateWithoutCustomerInput, PosCounterSaleUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type PosCounterSaleCreateManyCustomerInputEnvelope = {
+    data: PosCounterSaleCreateManyCustomerInput | PosCounterSaleCreateManyCustomerInput[]
+    skipDuplicates?: boolean
+  }
+
   export type PosCustomerPurchaseUpsertWithWhereUniqueWithoutCustomerInput = {
     where: PosCustomerPurchaseWhereUniqueInput
     update: XOR<PosCustomerPurchaseUpdateWithoutCustomerInput, PosCustomerPurchaseUncheckedUpdateWithoutCustomerInput>
@@ -39482,31 +39946,57 @@ export namespace Prisma {
     data: XOR<PosCustomerPurchaseUpdateManyMutationInput, PosCustomerPurchaseUncheckedUpdateManyWithoutCustomerInput>
   }
 
+  export type PosCounterSaleUpsertWithWhereUniqueWithoutCustomerInput = {
+    where: PosCounterSaleWhereUniqueInput
+    update: XOR<PosCounterSaleUpdateWithoutCustomerInput, PosCounterSaleUncheckedUpdateWithoutCustomerInput>
+    create: XOR<PosCounterSaleCreateWithoutCustomerInput, PosCounterSaleUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type PosCounterSaleUpdateWithWhereUniqueWithoutCustomerInput = {
+    where: PosCounterSaleWhereUniqueInput
+    data: XOR<PosCounterSaleUpdateWithoutCustomerInput, PosCounterSaleUncheckedUpdateWithoutCustomerInput>
+  }
+
+  export type PosCounterSaleUpdateManyWithWhereWithoutCustomerInput = {
+    where: PosCounterSaleScalarWhereInput
+    data: XOR<PosCounterSaleUpdateManyMutationInput, PosCounterSaleUncheckedUpdateManyWithoutCustomerInput>
+  }
+
   export type PosCustomerCreateWithoutPurchasesInput = {
     firstName: string
     lastName: string
-    nic: string
+    nic?: string | null
     mobileNumber: string
     email?: string | null
-    province: string
-    district: string
-    address: string
+    province?: string | null
+    district?: string | null
+    address?: string | null
+    loyaltyPoints?: number
+    totalSpent?: number
+    visits?: number
+    lastVisitAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    counterSales?: PosCounterSaleCreateNestedManyWithoutCustomerInput
   }
 
   export type PosCustomerUncheckedCreateWithoutPurchasesInput = {
     id?: number
     firstName: string
     lastName: string
-    nic: string
+    nic?: string | null
     mobileNumber: string
     email?: string | null
-    province: string
-    district: string
-    address: string
+    province?: string | null
+    district?: string | null
+    address?: string | null
+    loyaltyPoints?: number
+    totalSpent?: number
+    visits?: number
+    lastVisitAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    counterSales?: PosCounterSaleUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type PosCustomerCreateOrConnectWithoutPurchasesInput = {
@@ -39711,28 +40201,38 @@ export namespace Prisma {
   export type PosCustomerUpdateWithoutPurchasesInput = {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
-    nic?: StringFieldUpdateOperationsInput | string
+    nic?: NullableStringFieldUpdateOperationsInput | string | null
     mobileNumber?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    province?: StringFieldUpdateOperationsInput | string
-    district?: StringFieldUpdateOperationsInput | string
-    address?: StringFieldUpdateOperationsInput | string
+    province?: NullableStringFieldUpdateOperationsInput | string | null
+    district?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    visits?: IntFieldUpdateOperationsInput | number
+    lastVisitAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    counterSales?: PosCounterSaleUpdateManyWithoutCustomerNestedInput
   }
 
   export type PosCustomerUncheckedUpdateWithoutPurchasesInput = {
     id?: IntFieldUpdateOperationsInput | number
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
-    nic?: StringFieldUpdateOperationsInput | string
+    nic?: NullableStringFieldUpdateOperationsInput | string | null
     mobileNumber?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    province?: StringFieldUpdateOperationsInput | string
-    district?: StringFieldUpdateOperationsInput | string
-    address?: StringFieldUpdateOperationsInput | string
+    province?: NullableStringFieldUpdateOperationsInput | string | null
+    district?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    visits?: IntFieldUpdateOperationsInput | number
+    lastVisitAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    counterSales?: PosCounterSaleUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type InventoryProductUpsertWithoutCustomerPurchasesInput = {
@@ -42476,6 +42976,8 @@ export namespace Prisma {
     amountReceived: number
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
+    customerId?: number | null
+    pointsEarned?: number
     createdAt?: Date | string
   }
 
@@ -42487,7 +42989,9 @@ export namespace Prisma {
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    pointsEarned?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customer?: PosCustomerUpdateOneWithoutCounterSalesNestedInput
   }
 
   export type PosCounterSaleUncheckedUpdateWithoutCashierInput = {
@@ -42499,6 +43003,8 @@ export namespace Prisma {
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    pointsEarned?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -42511,6 +43017,8 @@ export namespace Prisma {
     amountReceived?: FloatFieldUpdateOperationsInput | number
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    pointsEarned?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -42998,6 +43506,20 @@ export namespace Prisma {
     purchasedAt?: Date | string
   }
 
+  export type PosCounterSaleCreateManyCustomerInput = {
+    id?: number
+    invoiceGroupCode: string
+    totalAmount: number
+    emptyDeduction?: number
+    emptiesReturned?: number
+    amountReceived: number
+    changeGiven: number
+    paymentMethod?: $Enums.PaymentMethod
+    cashierId: number
+    pointsEarned?: number
+    createdAt?: Date | string
+  }
+
   export type PosCustomerPurchaseUpdateWithoutCustomerInput = {
     itemType?: EnumPosPurchaseItemTypeFieldUpdateOperationsInput | $Enums.PosPurchaseItemType
     purchaseMode?: EnumPosPurchaseModeFieldUpdateOperationsInput | $Enums.PosPurchaseMode
@@ -43079,6 +43601,47 @@ export namespace Prisma {
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosCounterSaleUpdateWithoutCustomerInput = {
+    invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    amountReceived?: FloatFieldUpdateOperationsInput | number
+    changeGiven?: FloatFieldUpdateOperationsInput | number
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    pointsEarned?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cashier?: PosAdminUpdateOneRequiredWithoutCounterSalesNestedInput
+  }
+
+  export type PosCounterSaleUncheckedUpdateWithoutCustomerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    amountReceived?: FloatFieldUpdateOperationsInput | number
+    changeGiven?: FloatFieldUpdateOperationsInput | number
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    cashierId?: IntFieldUpdateOperationsInput | number
+    pointsEarned?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosCounterSaleUncheckedUpdateManyWithoutCustomerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    emptiesReturned?: IntFieldUpdateOperationsInput | number
+    amountReceived?: FloatFieldUpdateOperationsInput | number
+    changeGiven?: FloatFieldUpdateOperationsInput | number
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    cashierId?: IntFieldUpdateOperationsInput | number
+    pointsEarned?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type AccountReceiptCreateManyPurchaseInput = {

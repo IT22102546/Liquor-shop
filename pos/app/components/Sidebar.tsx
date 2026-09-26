@@ -53,14 +53,14 @@ const NAV_SECTIONS: { title: string; links: NavLink[] }[] = [
   {
     title: "People",
     links: [
-      { label: "Customers", href: "/dashboard/users", Icon: IconUsers },
+      { label: "Loyalty Customers", href: "/dashboard/users", Icon: IconUsers },
       { label: "Staff & Roles", href: "/dashboard/staff", Icon: IconAccess },
     ],
   },
   {
-    title: "Invoices",
+    title: "Billing",
     links: [
-      { label: "Invoices", href: "/dashboard/invoices", Icon: IconInvoice },
+      { label: "Sales Bills", href: "/dashboard/sales", Icon: IconInvoice },
       { label: "Invoice Bank Details", href: "/dashboard/invoices/accounts", Icon: IconAccounts },
       // Hidden from the sidebar for now; the page still exists.
       // { label: "Terms & Conditions", href: "/dashboard/invoices/terms", Icon: IconReceipt },

@@ -37,6 +37,9 @@ export function ProductStockTable({ token, products, brands, categories, loading
   const [returning, setReturning] = useState<Product | null>(null);
   const [returnQty, setReturnQty] = useState("");
   const [saving, setSaving] = useState(false);
+  // Quick "+ Stock": add received units right in the table, without opening the edit form.
+  const [stocking, setStocking] = useState<{ id: number; qty: string; cost: string } | null>(null);
+  const [flashId, setFlashId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -57,6 +60,37 @@ export function ProductStockTable({ token, products, brands, categories, loading
 
   const emptiesOnHand = products.reduce((sum, product) => sum + (product.emptyBottlesOnHand ?? 0), 0);
   const emptiesValue = products.reduce((sum, product) => sum + (product.emptyBottlesOnHand ?? 0) * (product.emptyBottlePrice ?? 0), 0);
+
+  const submitStock = async () => {
+    if (!stocking) return;
+    const quantity = Math.floor(Number(stocking.qty));
+    if (!Number.isFinite(quantity) || quantity < 1) {
+      setError("Enter how many units arrived.");
+      return;
+    }
+    const cost = Number(stocking.cost);
+    setSaving(true);
+    setError(null);
+    try {
+      const response = await fetch(`${base}/products/${stocking.id}/restock`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity, ...(stocking.cost.trim() && Number.isFinite(cost) ? { purchasePrice: cost } : {}) }),
+      });
+      if (response.status === 401) { onAuthExpired(); return; }
+      const payload = (await response.json().catch(() => null)) as { message?: string } | null;
+      if (!response.ok) {
+        setError(payload?.message ?? "Could not add stock");
+        return;
+      }
+      setFlashId(stocking.id);
+      window.setTimeout(() => setFlashId(null), 1200);
+      setStocking(null);
+      onChanged();
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const submitReturn = async () => {
     if (!returning) return;
@@ -102,6 +136,7 @@ export function ProductStockTable({ token, products, brands, categories, loading
         </div>
       </div>
 
+      {error && !returning && <div className="bm-alert bm-alert-error" style={{ margin: "0.75rem 1.25rem 0" }}>{error}</div>}
       <div className="data-table-wrap">
         <table className="data-table">
           <thead>
@@ -132,7 +167,7 @@ export function ProductStockTable({ token, products, brands, categories, loading
                   </div>
                 </td>
                 <td className="td-muted">{product.partNumber || "—"}</td>
-                <td style={{ textAlign: "right" }}>{product.quantity}</td>
+                <td style={{ textAlign: "right" }}><span className={flashId === product.id ? "lx-stock-flash" : undefined}>{product.quantity}</span></td>
                 <td style={{ textAlign: "right" }}>{product.sellingPrice != null ? formatCurrency(product.sellingPrice) : "—"}</td>
                 <td style={{ textAlign: "right" }}>
                   {product.emptyBottlePrice ? formatCurrency(product.emptyBottlePrice) : <span className="td-muted">Not returnable</span>}
@@ -143,6 +178,16 @@ export function ProductStockTable({ token, products, brands, categories, loading
                     : <span className="td-muted">—</span>}
                 </td>
                 <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                  {canEdit && stocking?.id === product.id ? (
+                    <form className="lx-quick-stock" onSubmit={(event) => { event.preventDefault(); void submitStock(); }}>
+                      <input className="bm-input" type="number" min={1} value={stocking.qty} onChange={(event) => setStocking({ ...stocking, qty: event.target.value })} placeholder="Qty" aria-label={`Units of ${product.name} received`} autoFocus />
+                      <input className="bm-input cost" type="number" min={0} step="0.01" value={stocking.cost} onChange={(event) => setStocking({ ...stocking, cost: event.target.value })} placeholder="Total cost" aria-label="Total cost paid (optional)" />
+                      <button type="submit" className="btn-outline lx-row-btn primary" disabled={saving}>{saving ? "…" : "Add"}</button>
+                      <button type="button" className="btn-outline lx-row-btn" onClick={() => setStocking(null)} aria-label="Cancel">✕</button>
+                    </form>
+                  ) : canEdit && (
+                    <button type="button" className="btn-outline lx-row-btn primary" onClick={() => { setStocking({ id: product.id, qty: "", cost: "" }); setError(null); }}>+ Stock</button>
+                  )}
                   {(product.emptyBottlesOnHand ?? 0) > 0 && (
                     <button type="button" className="btn-outline lx-row-btn" onClick={() => { setReturning(product); setReturnQty(String(product.emptyBottlesOnHand)); setError(null); }}>
                       Returned to supplier
