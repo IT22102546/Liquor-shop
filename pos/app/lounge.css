@@ -1183,3 +1183,7 @@ a.btn-outline, a.btn-accent { text-decoration: none; }
 .lx-tick:hover { border-color: var(--success); color: var(--success); }
 .lx-tick.on { background: var(--success); border-color: var(--success); color: #fff; }
 .lx-tick:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Rows keep their no-banner size when a banner above the till takes some height (see the counter's fit()). */
+.pos-register-layout > .pos-catalog > .pos-product-grid { grid-auto-rows: calc((100% + var(--till-extra, 0px) - 0.85rem) / 2); }
+.pos-register-layout > .pos-catalog > .pos-product-grid.is-list { grid-auto-rows: max-content; }

@@ -180,17 +180,22 @@ export default function InventoryPage() {
       frame = requestAnimationFrame(() => {
         if (window.innerWidth <= 760) {
           register.style.height = "";
+          register.style.removeProperty("--till-extra");
           return;
         }
-        // Size from the page heading, not from the banners above the till (no shift / sale done /
-        // errors): a banner makes the page taller instead of squashing the product cards.
+        // The till always fits the screen, so the order panel and every product stay reachable
+        // without scrolling the page. Banners above it (no shift / sale done / errors) take some of
+        // that height; --till-extra tells the product grid how much, so its rows keep the size they
+        // have without a banner and the list simply scrolls a bit sooner instead of squashing cards.
         const parent = register.parentElement;
         const heading = parent?.querySelector<HTMLElement>(":scope > .bm-page-header");
         const gap = parent ? parseFloat(getComputedStyle(parent).rowGap) || 0 : 0;
-        const top = heading
-          ? heading.getBoundingClientRect().bottom + window.scrollY + gap
-          : register.getBoundingClientRect().top + window.scrollY;
-        register.style.height = `${Math.max(420, window.innerHeight - top - 18)}px`;
+        const top = register.getBoundingClientRect().top + window.scrollY;
+        const fullTop = heading ? heading.getBoundingClientRect().bottom + window.scrollY + gap : top;
+        const height = Math.max(360, window.innerHeight - top - 18);
+        const fullHeight = Math.max(420, window.innerHeight - fullTop - 18);
+        register.style.height = `${height}px`;
+        register.style.setProperty("--till-extra", `${Math.max(0, fullHeight - height)}px`);
       });
     };
     fit();
