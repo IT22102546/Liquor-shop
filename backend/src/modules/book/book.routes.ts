@@ -4,6 +4,7 @@ import { authenticatePosAdmin, authorizePosRoles } from "../../common/middleware
 import { AppError, validate } from "../../common/utils/errors";
 import { sendCreated, sendSuccess } from "../../common/utils/response";
 import { createCashEntry, listCashEntries, markBanked, unmarkBanked, voidCashEntry } from "./cash-book.service";
+import { getPeriodReport } from "./period-report.service";
 import { closeShift, countShift, DENOMINATIONS, getCurrentShift, getShiftReport, listShifts, openShift } from "./shift.service";
 
 const user = (req: Request) => (req as unknown as { user: { id: number; role: string } }).user;
@@ -112,5 +113,15 @@ cashBookRouter.post("/:id/void", authorizePosRoles("ADMIN", "ACCOUNTANT"), async
   try {
     const dto = validate(z.object({ reason: z.string().trim().min(3, "Give a reason for voiding").max(500) }), req.body);
     return sendSuccess(res, await voidCashEntry(Number(req.params.id), dto.reason, user(req).id));
+  } catch (error) { return next(error); }
+});
+
+// ── Period reports (daily / weekly / monthly / yearly) ───────────────────────
+export const reportRouter = Router();
+reportRouter.use(authenticatePosAdmin);
+reportRouter.get("/period", authorizePosRoles("ADMIN", "ACCOUNTANT"), async (req, res, next) => {
+  try {
+    const q = validate(z.object({ from: date, to: date }), req.query);
+    return sendSuccess(res, await getPeriodReport(q.from, q.to));
   } catch (error) { return next(error); }
 });

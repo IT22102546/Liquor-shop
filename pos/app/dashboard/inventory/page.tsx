@@ -182,7 +182,14 @@ export default function InventoryPage() {
           register.style.height = "";
           return;
         }
-        const top = register.getBoundingClientRect().top + window.scrollY;
+        // Size from the page heading, not from the banners above the till (no shift / sale done /
+        // errors): a banner makes the page taller instead of squashing the product cards.
+        const parent = register.parentElement;
+        const heading = parent?.querySelector<HTMLElement>(":scope > .bm-page-header");
+        const gap = parent ? parseFloat(getComputedStyle(parent).rowGap) || 0 : 0;
+        const top = heading
+          ? heading.getBoundingClientRect().bottom + window.scrollY + gap
+          : register.getBoundingClientRect().top + window.scrollY;
         register.style.height = `${Math.max(420, window.innerHeight - top - 18)}px`;
       });
     };

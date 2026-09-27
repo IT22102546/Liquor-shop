@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   IconAccess,
-  IconAccounts,
+  // IconAccounts, // used by the hidden "Invoice Bank Details" / "Manage Accounts" links
   IconActivity,
   IconBar,
   IconBottle,
@@ -18,6 +18,7 @@ import {
   IconInvoice,
   IconReceipt,
   IconSupplier,
+  IconTrend,
   IconUsers,
 } from "../lib/icons";
 import { useAdmin } from "./AdminContext";
@@ -63,8 +64,8 @@ const NAV_SECTIONS: { title: string; links: NavLink[] }[] = [
     title: "Billing",
     links: [
       { label: "Sales Bills", href: "/dashboard/sales", Icon: IconInvoice },
-      { label: "Invoice Bank Details", href: "/dashboard/invoices/accounts", Icon: IconAccounts },
-      // Hidden from the sidebar for now; the page still exists.
+      // Hidden from the sidebar (left over from the old invoice system); the pages still exist.
+      // { label: "Invoice Bank Details", href: "/dashboard/invoices/accounts", Icon: IconAccounts },
       // { label: "Terms & Conditions", href: "/dashboard/invoices/terms", Icon: IconReceipt },
     ],
   },
@@ -74,6 +75,7 @@ const NAV_SECTIONS: { title: string; links: NavLink[] }[] = [
       { label: "Day End", href: "/dashboard/day-end", Icon: IconClock },
       { label: "Expenses (Vouchers)", href: "/dashboard/accounts/vouchers", Icon: IconInvoice },
       { label: "Money In (Receipts)", href: "/dashboard/accounts/receipts", Icon: IconReceipt },
+      { label: "Reports", href: "/dashboard/reports", Icon: IconTrend },
       // Old invoice-style ledger pages, replaced by Day End + the cash book. Pages still exist.
       // { label: "General Ledger", href: "/dashboard/accounts/ledger", Icon: IconBar },
       // { label: "Manage Accounts", href: "/dashboard/accounts", Icon: IconAccounts },

@@ -1,6 +1,6 @@
 import { SHOP } from "./shop";
-import { escapeHtml as esc } from "./print";
-import { zReportFileName, type ShiftReport } from "./bookPrint";
+import { escapeHtml as esc, printA4 } from "./print";
+import { discountText, zReportFileName, type ShiftReport } from "./bookPrint";
 
 /**
  * A4 Day End report: an office document (not a till slip) for the manager/owner file.
@@ -14,7 +14,8 @@ const timeOnly = (iso: string) => new Date(iso).toLocaleTimeString("en-GB", { ho
 const longDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 const signed = (value: number) => (Math.abs(value) < 0.005 ? "0.00" : `${value > 0 ? "+" : "−"}${amt(Math.abs(value))}`);
 
-const CSS = `
+/** Shared look for A4 reports (Day End, period reports). */
+export const REPORT_CSS = `
   @page { size: A4; margin: 14mm 13mm 16mm; @bottom-right { content: "Page " counter(page) " of " counter(pages); font: 8pt "Helvetica Neue", Arial, sans-serif; color: #777; } }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { background: #e9e9ec; }
@@ -92,6 +93,8 @@ export function buildDayEndReportHtml(report: ShiftReport) {
   const notes = close?.denominations?.counts ?? {};
   const noteRows = Object.entries(notes).filter(([, qty]) => qty > 0).sort((a, b) => Number(b[0]) - Number(a[0]));
   const hasTransfer = Boolean(sales.transferSales);
+  const loyalty = sales.loyalty;
+  const loyaltyRows = loyalty?.rows ?? [];
   const cardRows = sales.cardPayments ?? [];
   const transferRows = sales.transferPayments ?? [];
   const cardDiff = close?.cardDifference ?? 0;
@@ -103,7 +106,7 @@ export function buildDayEndReportHtml(report: ShiftReport) {
   const outTotal = entries.filter((e) => e.direction === "OUT" && !e.voided).reduce((sum, e) => sum + e.amount, 0);
   const inTotal = entries.filter((e) => e.direction === "IN" && !e.voided).reduce((sum, e) => sum + e.amount, 0);
 
-  return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(zReportFileName(report).replace("Z-Report", "Day-End-Report"))}</title><style>${CSS}</style></head><body><div class="sheet">
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(zReportFileName(report).replace("Z-Report", "Day-End-Report"))}</title><style>${REPORT_CSS}</style></head><body><div class="sheet">
 
   <div class="top">
     <div>
@@ -201,6 +204,20 @@ export function buildDayEndReportHtml(report: ShiftReport) {
     </table>
   </section>
 
+  ${loyaltyRows.length || sales.discounts || sales.pointsValue ? `
+  <section>
+    <h2>Discounts &amp; loyalty <small>${loyalty?.discountBills ?? 0} discounted bill(s) · ${loyalty?.memberBills ?? 0} member bill(s) · ${loyalty?.pointsEarned ?? 0} points earned</small></h2>
+    <table>
+      <thead><tr><th>Time</th><th>Bill no</th><th>Sold by</th><th>Member</th><th class="r">Bill before</th><th class="r">Discount</th><th class="r">Points used</th><th class="r">Points earned</th><th class="r">Paid</th></tr></thead>
+      ${loyaltyRows.map((row) => `<tr><td>${timeOnly(row.time)}</td><td style="white-space:nowrap">${esc(row.billNo.slice(-9))}</td><td>${esc(row.cashier)}</td><td>${esc(row.member ?? "Walk-in")}</td><td class="r">${amt(row.billBefore)}</td>
+        <td class="r">${row.discountType ? `<span class="minus">−${amt(row.discountAmount)}</span><div class="muted">${esc(discountText(row))}</div>` : "—"}</td>
+        <td class="r">${row.pointsRedeemed ? `${row.pointsRedeemed}<div class="muted">−${amt(row.pointsValue)}</div>` : "—"}</td>
+        <td class="r">${row.pointsEarned ? `+${row.pointsEarned}` : "—"}</td><td class="r">${amt(row.total)}</td></tr>`).join("") || `<tr><td colspan="9" class="empty">No bill-level detail in this report</td></tr>`}
+      <tr class="total"><td colspan="5">Total taken off bills</td><td class="r">${amt(sales.discounts)}</td><td class="r">${amt(sales.pointsValue)}</td><td class="r">${loyalty?.pointsEarned ?? ""}</td><td></td></tr>
+    </table>
+    ${loyalty?.discountByStaff.length ? `<div class="reason"><b>Discounts given by:</b> ${loyalty.discountByStaff.map((row) => `${esc(row.name)} ${row.bills} bill(s) Rs. ${amt(row.amount)}`).join(" · ")}</div>` : ""}
+  </section>` : ""}
+
   <section>
     <h2>Expenses &amp; cash in <small>${entries.length} entr${entries.length === 1 ? "y" : "ies"}</small></h2>
     <table>
@@ -265,24 +282,7 @@ export function buildDayEndReportHtml(report: ShiftReport) {
   </div></body></html>`;
 }
 
-/** Prints (or saves as PDF) the A4 report through a hidden frame; the PDF gets a unique file name. */
+/** Prints (or saves as PDF) the A4 report; the PDF gets a unique file name. */
 export function printDayEndReport(report: ShiftReport) {
-  const html = buildDayEndReportHtml(report);
-  const fileName = zReportFileName(report).replace("Z-Report", "Day-End-Report");
-  const frame = document.createElement("iframe");
-  frame.setAttribute("aria-hidden", "true");
-  Object.assign(frame.style, { position: "fixed", left: "-10000px", top: "0", width: "210mm", height: "297mm", border: "0", opacity: "0" });
-  frame.srcdoc = html;
-  frame.onload = () => {
-    const win = frame.contentWindow;
-    if (!win) return;
-    const pageTitle = document.title;
-    document.title = fileName;
-    const restore = () => { document.title = pageTitle; };
-    win.addEventListener("afterprint", restore, { once: true });
-    win.focus();
-    win.print();
-    window.setTimeout(() => { restore(); frame.remove(); }, 1000);
-  };
-  document.body.appendChild(frame);
+  printA4(buildDayEndReportHtml(report), zReportFileName(report).replace("Z-Report", "Day-End-Report"));
 }

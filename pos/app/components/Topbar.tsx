@@ -39,6 +39,7 @@ const BREADCRUMBS: Record<string, string> = {
   "/dashboard/sales":      "Sales Bills",
   "/dashboard/settings":   "Shop Settings",
   "/dashboard/day-end":    "Book Keeping - Day End",
+  "/dashboard/reports":    "Book Keeping - Reports",
   "/dashboard/accounts/vouchers": "Book Keeping - Expenses (Vouchers)",
   "/dashboard/accounts/receipts": "Book Keeping - Money In (Receipts)",
   "/dashboard/users":     "Loyalty Customers",

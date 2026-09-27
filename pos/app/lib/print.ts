@@ -61,3 +61,23 @@ export const THERMAL_BASE_CSS = `
   .sign div { flex: 1; border-top: 1px solid #000; padding-top: 3px; font-size: 10px; text-align: center; }
   .printed { margin-top: 10px; text-align: center; font-size: 9px; color: #444; }
 `;
+
+/** Prints an A4 document (Day End and period reports) through a hidden frame, saved PDF named `fileName`. */
+export function printA4(html: string, fileName: string) {
+  const frame = document.createElement("iframe");
+  frame.setAttribute("aria-hidden", "true");
+  Object.assign(frame.style, { position: "fixed", left: "-10000px", top: "0", width: "210mm", height: "297mm", border: "0", opacity: "0" });
+  frame.srcdoc = html;
+  frame.onload = () => {
+    const win = frame.contentWindow;
+    if (!win) return;
+    const pageTitle = document.title;
+    document.title = fileName;
+    const restore = () => { document.title = pageTitle; };
+    win.addEventListener("afterprint", restore, { once: true });
+    win.focus();
+    win.print();
+    window.setTimeout(() => { restore(); frame.remove(); }, 1000);
+  };
+  document.body.appendChild(frame);
+}

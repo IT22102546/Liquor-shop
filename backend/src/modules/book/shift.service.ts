@@ -59,9 +59,45 @@ export async function summarizeShift(shiftId: number) {
       units: items.reduce((sum, line) => sum + line.quantity, 0),
       emptyDeduction: sale.emptyDeduction,
       discount: round2(sale.discountAmount + sale.pointsValue),
+      discountAmount: sale.discountAmount,
+      pointsValue: sale.pointsValue,
       total: sale.totalAmount,
     };
   });
+
+  // ── Discounts & loyalty: every bill where money was taken off or points moved, with who did it ──
+  const memberName = (sale: (typeof sales)[number]) => (sale.customer ? [sale.customer.firstName, sale.customer.lastName].filter(Boolean).join(" ") : null);
+  const adjustments = sales
+    .filter((sale) => sale.discountAmount > 0 || sale.pointsRedeemed > 0 || sale.pointsEarned > 0)
+    .map((sale) => ({
+      billNo: sale.invoiceGroupCode,
+      time: sale.createdAt,
+      cashier: sale.cashier.name,
+      member: memberName(sale),
+      billBefore: round2(sale.totalAmount + sale.discountAmount + sale.pointsValue),
+      discountType: sale.discountType,
+      discountValue: sale.discountValue,
+      discountAmount: sale.discountAmount,
+      pointsRedeemed: sale.pointsRedeemed,
+      pointsValue: sale.pointsValue,
+      pointsEarned: sale.pointsEarned,
+      total: sale.totalAmount,
+    }));
+  const discountByStaff = new Map<string, { name: string; bills: number; amount: number }>();
+  sales.filter((sale) => sale.discountAmount > 0).forEach((sale) => {
+    const row = discountByStaff.get(sale.cashier.name) ?? { name: sale.cashier.name, bills: 0, amount: 0 };
+    row.bills += 1;
+    row.amount = round2(row.amount + sale.discountAmount);
+    discountByStaff.set(sale.cashier.name, row);
+  });
+  const loyalty = {
+    memberBills: sales.filter((sale) => sale.customerId != null).length,
+    discountBills: sales.filter((sale) => sale.discountAmount > 0).length,
+    discountByStaff: [...discountByStaff.values()].sort((a, b) => b.amount - a.amount),
+    pointsEarned: sales.reduce((sum, sale) => sum + sale.pointsEarned, 0),
+    redeemBills: sales.filter((sale) => sale.pointsRedeemed > 0).length,
+    rows: adjustments,
+  };
   const cashSales = round2(sales.filter((sale) => sale.paymentMethod === "CASH").reduce((sum, sale) => sum + sale.totalAmount, 0));
   const cardSales = round2(sales.filter((sale) => kindOf(sale.paymentMethod) === "card").reduce((sum, sale) => sum + sale.totalAmount, 0));
   const transferSales = round2(sales.filter((sale) => kindOf(sale.paymentMethod) === "transfer").reduce((sum, sale) => sum + sale.totalAmount, 0));
@@ -194,6 +230,7 @@ export async function summarizeShift(shiftId: number) {
       transferSales,
       cardPayments,
       transferPayments,
+      loyalty,
       byStaff: [...byStaffMap.values()].sort((a, b) => b.total - a.total),
       byProduct: [...byProductMap.values()].sort((a, b) => b.amount - a.amount),
       billList: bills,
@@ -433,7 +470,13 @@ export async function getShiftReport(shiftId: number, revealCash: boolean) {
         // Card and transfer figures stay visible: they don't reveal the cash in the drawer.
         byStaff: summary.sales.byStaff.map((row) => ({ name: row.name, bills: row.bills, cash: null, card: row.card, transfer: row.transfer, total: null })),
         byProduct: summary.sales.byProduct.map((row) => ({ name: row.name, units: row.units, amount: null })),
-        billList: summary.sales.billList.map((bill) => ({ ...bill, emptyDeduction: null, discount: null, total: null })),
+        billList: summary.sales.billList.map((bill) => ({ ...bill, emptyDeduction: null, discount: null, discountAmount: null, pointsValue: null, total: null })),
+        // Who gave discounts and which members used points stay visible; the rupee amounts wait for the count.
+        loyalty: {
+          ...summary.sales.loyalty,
+          discountByStaff: summary.sales.loyalty.discountByStaff.map((row) => ({ ...row, amount: null })),
+          rows: summary.sales.loyalty.rows.map((row) => ({ ...row, billBefore: null, discountAmount: null, pointsValue: null, total: null })),
+        },
       },
     },
   };

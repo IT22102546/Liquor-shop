@@ -26,6 +26,7 @@ const ROLE_PATHS: Record<PosAdminRole, string[]> = {
   ACCOUNTANT: [
     "/dashboard/accounts",
     "/dashboard/day-end",
+    "/dashboard/reports",
     "/dashboard/invoices",
     "/dashboard/sales",
   ],

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAdmin } from "../../components/AdminContext";
 import { CashEntryModal } from "../../components/book/CashEntryModal";
 import { API_URL } from "../../lib/constants";
-import { printZReport, type ShiftReport } from "../../lib/bookPrint";
+import { discountText, printZReport, type ShiftReport } from "../../lib/bookPrint";
 import { buildDayEndReportHtml, printDayEndReport } from "../../lib/dayEndReport";
 import { IconCash, IconCheck, IconClock, IconInvoice, IconPlus, IconPrinter, IconRefresh } from "../../lib/icons";
 
@@ -33,7 +33,7 @@ export default function DayEndPage() {
   const [floatInput, setFloatInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [entryModal, setEntryModal] = useState<"IN" | "OUT" | null>(null);
-  const [tab, setTab] = useState<"bills" | "staff" | "items" | "cash" | "stock">("bills");
+  const [tab, setTab] = useState<"bills" | "staff" | "items" | "offers" | "cash" | "stock">("bills");
   const [closing, setClosing] = useState(false);
   const [viewing, setViewing] = useState<ShiftReport | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -159,7 +159,7 @@ export default function DayEndPage() {
 
           <section className="lx-card lx-log-card">
             <div className="lx-seg-plain" role="tablist" style={{ margin: "0.4rem 0.4rem 0.6rem" }}>
-              {([["bills", `Sales (${report.sales.bills})`], ["staff", "By staff"], ["items", "Items sold"], ["cash", `Expenses & cash in (${entries.length})`], ["stock", "Stock book"]] as const).map(([key, label]) => (
+              {([["bills", `Sales (${report.sales.bills})`], ["staff", "By staff"], ["items", "Items sold"], ["offers", `Discounts & loyalty (${report.sales.loyalty?.rows.length ?? 0})`], ["cash", `Expenses & cash in (${entries.length})`], ["stock", "Stock book"]] as const).map(([key, label]) => (
                 <button key={key} type="button" className={tab === key ? "active" : ""} onClick={() => setTab(key)}>{label}</button>
               ))}
             </div>
@@ -234,7 +234,7 @@ export default function DayEndPage() {
   );
 }
 
-function ShiftTables({ report, tab }: { report: ShiftReport; tab: "bills" | "staff" | "items" | "cash" | "stock" }) {
+function ShiftTables({ report, tab }: { report: ShiftReport; tab: "bills" | "staff" | "items" | "offers" | "cash" | "stock" }) {
   if (tab === "bills") {
     return report.sales.billList.length === 0 ? <div className="lx-empty">No sales yet in this shift.</div> : (
       <div className="data-table-wrap"><table className="data-table">
@@ -271,6 +271,44 @@ function ShiftTables({ report, tab }: { report: ShiftReport; tab: "bills" | "sta
           <tr key={row.name}><td>{row.name}</td><td style={{ textAlign: "right" }}>{row.units}</td><td style={{ textAlign: "right" }}>{money(row.amount)}</td></tr>
         ))}{report.sales.byProduct.length === 0 && <tr><td colSpan={3} className="bm-table-empty">Nothing sold yet.</td></tr>}</tbody>
       </table></div>
+    );
+  }
+  if (tab === "offers") {
+    const loyalty = report.sales.loyalty;
+    if (!loyalty) return <div className="lx-empty">This shift's report has no discount and loyalty detail.</div>;
+    const discountTotal = loyalty.rows.reduce((sum, row) => sum + (row.discountAmount ?? 0), 0);
+    const pointsRedeemed = loyalty.rows.reduce((sum, row) => sum + row.pointsRedeemed, 0);
+    const pointsValue = loyalty.rows.reduce((sum, row) => sum + (row.pointsValue ?? 0), 0);
+    const hidden = loyalty.rows.some((row) => row.discountAmount == null);
+    return (
+      <>
+        <div className="lx-book-totals" style={{ padding: "0 0.4rem 0.75rem" }}>
+          <span>Discounted bills<b>{loyalty.discountBills}</b></span>
+          <span>Discounts given<b>{hidden ? "Hidden" : money(discountTotal)}</b></span>
+          <span>Member bills<b>{loyalty.memberBills}</b></span>
+          <span>Points used<b>{pointsRedeemed}{hidden || !pointsRedeemed ? "" : ` · ${money(pointsValue)}`}</b></span>
+          <span>Points earned<b>{loyalty.pointsEarned}</b></span>
+          {loyalty.discountByStaff.map((row) => <span key={row.name}>Discounts by {row.name} ({row.bills})<b>{row.amount == null ? "Hidden" : money(row.amount)}</b></span>)}
+        </div>
+        {loyalty.rows.length === 0 ? <div className="lx-empty">No discounts or loyalty points in this shift.</div> : (
+          <div className="data-table-wrap"><table className="data-table">
+            <thead><tr><th>Time</th><th>Bill</th><th>Sold by</th><th>Member</th><th style={{ textAlign: "right" }}>Bill before</th><th>Discount</th><th style={{ textAlign: "right" }}>Points used</th><th style={{ textAlign: "right" }}>Points earned</th><th style={{ textAlign: "right" }}>Paid</th></tr></thead>
+            <tbody>{[...loyalty.rows].reverse().map((row) => (
+              <tr key={row.billNo}>
+                <td className="td-muted">{new Date(row.time).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</td>
+                <td className="td-muted">{row.billNo}</td>
+                <td><strong>{row.cashier}</strong></td>
+                <td>{row.member ?? "Walk-in"}</td>
+                <td style={{ textAlign: "right" }}>{money(row.billBefore)}</td>
+                <td>{row.discountType ? <><span className="lx-amount-out">−{money(row.discountAmount)}</span><div className="td-muted">{discountText(row)}</div></> : "—"}</td>
+                <td style={{ textAlign: "right" }}>{row.pointsRedeemed ? <><span className="lx-amount-out">{row.pointsRedeemed}</span><div className="td-muted">−{money(row.pointsValue)}</div></> : "—"}</td>
+                <td style={{ textAlign: "right" }}>{row.pointsEarned ? <span className="lx-amount-in">+{row.pointsEarned}</span> : "—"}</td>
+                <td style={{ textAlign: "right" }}>{money(row.total)}</td>
+              </tr>
+            ))}</tbody>
+          </table></div>
+        )}
+      </>
     );
   }
   if (tab === "cash") {
@@ -324,6 +362,8 @@ function CloseShiftWizard({ api, shiftId, shiftNo, openingFloat, denominations, 
   const [floatLeft, setFloatLeft] = useState(String(openingFloat));
   const [notes, setNotes] = useState("");
   const [stockCounts, setStockCounts] = useState<Record<number, string>>({});
+  // Rows confirmed with the ✓ button (count equals the system); typed counts are kept separately.
+  const [ticked, setTicked] = useState<Set<number>>(new Set());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -526,17 +566,45 @@ function CloseShiftWizard({ api, shiftId, shiftNo, openingFloat, denominations, 
         {step === 4 && (
           <>
             <h3 className="bm-modal-title">Stock count <span className="lx-card-sub">(optional)</span></h3>
-            <p className="lx-card-sub">Count the bottles on the shelves if you want to check for breakage or missing stock. Leave boxes empty to skip.</p>
+            <p className="lx-card-sub">Check the bottles on the shelves. Tap <b>✓</b> when the count matches the system. If it doesn't, type the number you counted. Rows left empty are skipped.</p>
+            {(() => {
+              const checked = stockRows.filter((row) => (stockCounts[row.productId] ?? "").trim() !== "");
+              const differences = checked.filter((row) => Math.floor(Number(stockCounts[row.productId])) !== row.closing);
+              return (
+                <div className="lx-stockcount-bar">
+                  <span><b>{checked.length}</b> of {stockRows.length} checked{differences.length ? <> · <em className="bad">{differences.length} difference{differences.length === 1 ? "" : "s"}</em></> : checked.length ? <> · <em className="ok">all match</em></> : null}</span>
+                  <button type="button" className="btn-outline btn-sm" onClick={() => {
+                    const untouched = stockRows.filter((row) => !stockCounts[row.productId]?.trim());
+                    setStockCounts({ ...stockCounts, ...Object.fromEntries(untouched.map((row) => [row.productId, String(row.closing)])) });
+                    setTicked(new Set([...ticked, ...untouched.map((row) => row.productId)]));
+                  }} title="Tick every row not counted yet">✓ All match</button>
+                  {checked.length > 0 && <button type="button" className="btn-outline btn-sm" onClick={() => { setStockCounts({}); setTicked(new Set()); }}>Clear</button>}
+                </div>
+              );
+            })()}
             <div className="lx-stockcount">
               {stockRows.map((row) => {
                 const value = stockCounts[row.productId] ?? "";
                 const diff = value.trim() === "" ? null : Math.floor(Number(value)) - row.closing;
+                const matched = diff === 0;
+                const isTicked = ticked.has(row.productId);
+                const tick = () => {
+                  const next = new Set(ticked);
+                  if (isTicked) { next.delete(row.productId); setStockCounts({ ...stockCounts, [row.productId]: "" }); }
+                  else { next.add(row.productId); setStockCounts({ ...stockCounts, [row.productId]: String(row.closing) }); }
+                  setTicked(next);
+                };
+                const type = (next: string) => {
+                  if (isTicked) { const rest = new Set(ticked); rest.delete(row.productId); setTicked(rest); }
+                  setStockCounts({ ...stockCounts, [row.productId]: next });
+                };
                 return (
-                  <label key={row.productId}>
+                  <div key={row.productId} className={`lx-stockcount-row ${diff == null ? "" : matched ? "is-ok" : "is-bad"}`}>
                     <span><strong>{row.name}</strong><em>System: {row.closing}</em></span>
-                    <input className="bm-input" type="number" min={0} step="1" value={value} onChange={(event) => setStockCounts({ ...stockCounts, [row.productId]: event.target.value })} placeholder="—" />
-                    <b className={diff == null ? "" : diff === 0 ? "ok" : "bad"}>{diff == null ? "" : diff === 0 ? "✓" : diff > 0 ? `+${diff}` : diff}</b>
-                  </label>
+                    <button type="button" className={`lx-tick ${isTicked ? "on" : ""}`} aria-pressed={isTicked} aria-label={`${row.name} matches ${row.closing}`} title="Count matches the system" onClick={tick}>✓</button>
+                    <input className="bm-input" type="number" min={0} step="1" inputMode="numeric" aria-label={`${row.name} counted`} value={isTicked ? "" : value} onChange={(event) => type(event.target.value)} placeholder={isTicked ? String(row.closing) : "Count"} />
+                    <b className={diff == null ? "" : matched ? "ok" : "bad"}>{diff == null ? "" : matched ? "Match" : diff > 0 ? `+${diff}` : diff}</b>
+                  </div>
                 );
               })}
             </div>

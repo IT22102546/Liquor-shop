@@ -1,6 +1,20 @@
 import { SHOP } from "./shop";
 import { escapeHtml as esc, printThermal, THERMAL_BASE_CSS } from "./print";
 
+/** One bill with a discount, points spent or points earned. Rupee values are null in the cashier's blind view. */
+export type AdjustmentRow = {
+  billNo: string; time: string; cashier: string; member: string | null; billBefore: number | null;
+  discountType: string | null; discountValue: number; discountAmount: number | null;
+  pointsRedeemed: number; pointsValue: number | null; pointsEarned?: number; total: number | null;
+};
+export type ShiftLoyalty = {
+  memberBills: number; discountBills: number; discountByStaff: Array<{ name: string; bills: number; amount: number | null }>;
+  pointsEarned: number; redeemBills: number; rows: AdjustmentRow[];
+};
+/** How a discount was given, e.g. "10%" or "Rs. 200". */
+export const discountText = (row: Pick<AdjustmentRow, "discountType" | "discountValue">) =>
+  row.discountType === "PERCENT" ? `${row.discountValue}%` : row.discountType === "AMOUNT" ? `Rs. ${row.discountValue.toLocaleString("en-LK")}` : "";
+
 /** A card or transfer payment recorded at the till. */
 export type PaymentRow = { billNo: string; time: string; cashier: string; amount: number; reference: string | null; method: string };
 
@@ -14,6 +28,8 @@ export type ShiftReport = {
     transferSales?: number | null;
     cardPayments?: PaymentRow[];
     transferPayments?: PaymentRow[];
+    /** Discounts given and loyalty points moved in the shift (older reports don't have it). */
+    loyalty?: ShiftLoyalty;
     byStaff: Array<{ name: string; bills: number; cash: number | null; card: number | null; transfer?: number | null; total: number | null }>;
     byProduct: Array<{ name: string; units: number; amount: number | null }>;
     billList: Array<{ billNo: string; time: string; cashier: string; customer: string; payment: string; reference?: string | null; items: string; units: number; emptyDeduction: number | null; discount: number | null; total: number | null }>;
@@ -90,6 +106,18 @@ export function buildZReportHtml(report: ShiftReport) {
     <table><tr><th>Staff</th><th>Bills</th><th>Cash</th><th>Card</th></tr>
       ${sales.byStaff.map((row) => `<tr><td>${esc(row.name)}</td><td>${row.bills}</td><td>${amt(row.cash)}</td><td>${amt(row.card)}</td></tr>`).join("") || `<tr><td colspan="4">No sales</td></tr>`}
     </table>
+
+    ${sales.loyalty && (sales.loyalty.rows.length || sales.discounts || sales.pointsValue) ? `
+      <div class="head">Discounts &amp; loyalty</div>
+      <div class="row"><span>Discounted bills</span><span>${sales.loyalty.discountBills}</span></div>
+      <div class="row"><span>Discounts given</span><span>${amt(sales.discounts)}</span></div>
+      ${sales.loyalty.discountByStaff.map((row) => `<div class="row small"><span>&nbsp;· by ${esc(row.name)} (${row.bills})</span><span>${amt(row.amount)}</span></div>`).join("")}
+      <div class="row"><span>Points used (${sales.pointsRedeemed})</span><span>${amt(sales.pointsValue)}</span></div>
+      <div class="row"><span>Points earned</span><span>${sales.loyalty.pointsEarned}</span></div>
+      <div class="row"><span>Member bills</span><span>${sales.loyalty.memberBills}</span></div>
+      <table><tr><th>Bill · by</th><th>Off</th><th>Paid</th></tr>
+        ${sales.loyalty.rows.filter((row) => row.discountAmount || row.pointsRedeemed).map((row) => `<tr><td style="text-align:left">${esc(row.billNo.slice(-9))} · ${esc(row.cashier)}${row.member ? `<br>${esc(row.member)}` : ""}</td><td>${row.discountType ? `${esc(discountText(row))} ` : ""}${row.pointsRedeemed ? `${row.pointsRedeemed}pt` : ""}<br>−${amt((row.discountAmount ?? 0) + (row.pointsValue ?? 0))}</td><td>${amt(row.total)}</td></tr>`).join("")}
+      </table>` : ""}
 
     <div class="head">Cash drawer</div>
     <div class="row"><span>Opening float</span><span>${amt(cash.openingFloat)}</span></div>
