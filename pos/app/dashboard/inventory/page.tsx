@@ -347,6 +347,13 @@ export default function InventoryPage() {
     return counts;
   }, [products]);
   const cartItemCount = cart.reduce((sum, line) => sum + line.quantity, 0);
+  // Sri Lankan rule: only so many bottles of hard liquor on one bill (beer doesn't count).
+  const hardLiquorIds = useMemo(() => new Set(settings.hardLiquorCategoryIdsEffective ?? []), [settings.hardLiquorCategoryIdsEffective]);
+  const hardLimitOn = settings.hardLiquorLimitEnabled && settings.hardLiquorLimit > 0;
+  const isHardLiquor = (product: Product) => hardLiquorIds.has(product.category.id);
+  const hardLiquorCount = cart.reduce((sum, line) => sum + (isHardLiquor(line.product) ? line.quantity : 0), 0);
+  const hardLiquorFull = hardLimitOn && hardLiquorCount >= settings.hardLiquorLimit;
+  const hardLiquorOver = hardLimitOn && hardLiquorCount > settings.hardLiquorLimit;
   const cartSubtotal = roundCurrency(
     cart.reduce(
       (sum, line) => sum + (line.product.sellingPrice ?? 0) * line.quantity,
@@ -393,6 +400,11 @@ export default function InventoryPage() {
     if (!sellable(product)) return false;
     const inCart = cart.find((line) => line.product.id === product.id)?.quantity ?? 0;
     if (inCart >= product.quantity) return false;
+    if (hardLimitOn && isHardLiquor(product) && hardLiquorCount >= settings.hardLiquorLimit) {
+      beep("error");
+      showToast({ kind: "error", title: `Hard liquor limit reached: ${settings.hardLiquorLimit} bottles per bill`, detail: "Sri Lankan law. Beer can still be added. Start a new bill for more." });
+      return false;
+    }
     setCheckoutMessage(null);
     setCart((current) => {
       const existing = current.find((line) => line.product.id === product.id);
@@ -425,6 +437,7 @@ export default function InventoryPage() {
       return;
     }
     if (!addToCart(product)) {
+      if (hardLimitOn && isHardLiquor(product) && hardLiquorCount >= settings.hardLiquorLimit) return; // addToCart already explained
       beep("error");
       showToast({ kind: "error", title: `Only ${product.quantity} ${product.name} in stock` });
       return;
@@ -436,6 +449,12 @@ export default function InventoryPage() {
   useBarcodeScanner(sellByBarcode, !stockIn);
 
   const changeCartQuantity = (productId: number, delta: number) => {
+    const line = cart.find((row) => row.product.id === productId);
+    if (delta > 0 && line && hardLimitOn && isHardLiquor(line.product) && hardLiquorCount + delta > settings.hardLiquorLimit) {
+      beep("error");
+      showToast({ kind: "error", title: `Hard liquor limit reached: ${settings.hardLiquorLimit} bottles per bill`, detail: "Sri Lankan law. Start a new bill for more." });
+      return;
+    }
     setCart((current) => current
       .map((line) => line.product.id === productId
         ? { ...line, quantity: Math.min(line.product.quantity, line.quantity + delta) }
@@ -736,6 +755,13 @@ export default function InventoryPage() {
           </div>
         </div>
         <MemberPicker token={token} member={member} pointValue={pointValue} onChange={changeMember} onAuthExpired={logout} />
+        {hardLimitOn && hardLiquorCount > 0 && (
+          <div className={`pos-hard-limit${hardLiquorOver ? " over" : hardLiquorFull ? " full" : ""}`} role="status">
+            <span>Hard liquor <b>{hardLiquorCount} / {settings.hardLiquorLimit}</b></span>
+            <i style={{ width: `${Math.min(100, (hardLiquorCount / settings.hardLiquorLimit) * 100)}%` }} />
+            <em>{hardLiquorOver ? `Over the limit: remove ${hardLiquorCount - settings.hardLiquorLimit}` : hardLiquorFull ? "Limit reached (SL law)" : `${settings.hardLiquorLimit - hardLiquorCount} more allowed`}</em>
+          </div>
+        )}
         <div className="pos-cart-lines">
           {cart.length === 0 ? (
             <div className="pos-cart-empty"><span className="pos-cart-empty-icon"><IconCart size={44} /></span><strong>No items yet</strong><p>Scan a barcode or tap a product.</p></div>
@@ -755,7 +781,7 @@ export default function InventoryPage() {
               <div className="pos-cart-line-controls">
                 <button type="button" onClick={() => changeCartQuantity(line.product.id, -1)} aria-label={`Remove one ${line.product.name}`}>−</button>
                 <strong key={line.quantity}>{line.quantity}</strong>
-                <button type="button" onClick={() => changeCartQuantity(line.product.id, 1)} disabled={line.quantity >= line.product.quantity} aria-label={`Add one ${line.product.name}`}>+</button>
+                <button type="button" onClick={() => changeCartQuantity(line.product.id, 1)} disabled={line.quantity >= line.product.quantity || (hardLiquorFull && isHardLiquor(line.product))} aria-label={`Add one ${line.product.name}`}>+</button>
               </div>
               {emptyPriceOf(line.product) > 0 && (
                 <div className={`pos-empties${line.empties > 0 ? " active" : ""}`}>
@@ -878,8 +904,8 @@ export default function InventoryPage() {
               <div className="pos-change"><span>Change</span><strong>{formatCurrency(changeDue)}</strong></div>
             </div>
           )}
-          <button type="button" className="pos-complete-sale" disabled={cart.length === 0 || checkingOut || shift === null || discountOverLimit || (paymentMethod === "CASH" && tendered < cartTotal)} onClick={() => void checkout()}>
-            {checkingOut ? "Completing…" : shift === null ? "Start a shift to sell" : `Complete sale · ${formatCurrency(cartTotal)}`}
+          <button type="button" className="pos-complete-sale" disabled={cart.length === 0 || checkingOut || shift === null || discountOverLimit || hardLiquorOver || (paymentMethod === "CASH" && tendered < cartTotal)} onClick={() => void checkout()}>
+            {checkingOut ? "Completing…" : shift === null ? "Start a shift to sell" : hardLiquorOver ? `Too much hard liquor (max ${settings.hardLiquorLimit})` : `Complete sale · ${formatCurrency(cartTotal)}`}
           </button>
           <div className="pos-cart-shortcuts">
             <Link href="/dashboard/inventory/sold"><IconReceipt /> Recent sales</Link>

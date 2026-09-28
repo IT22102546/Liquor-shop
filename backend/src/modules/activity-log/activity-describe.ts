@@ -81,6 +81,42 @@ const RESOURCE_LABELS: Record<string, [string, ActivityCategory]> = {
   payments: ["invoice payment", "ACCOUNTS"],
   "contact-requests": ["contact request", "OTHER"],
 };
+const SETTING_LABELS: Record<string, string> = {
+  loyaltyRedemptionEnabled: "Loyalty points redemption",
+  loyaltyRupeesPerPoint: "Rupees to earn 1 point",
+  loyaltyPointValue: "Value of 1 point",
+  discountsEnabled: "Bill discounts",
+  maxCashierDiscountPercent: "Cashier discount limit",
+  businessName: "Business name",
+  businessAddress: "Business address",
+  businessPhone: "Business phone",
+  businessEmail: "Email for supplier replies",
+  hardLiquorLimitEnabled: "Hard liquor limit per bill",
+  hardLiquorLimit: "Most hard liquor bottles per bill",
+  hardLiquorCategoryIds: "Categories counted as hard liquor",
+};
+function showSetting(key: string, value: unknown) {
+  if (typeof value === "boolean") return value ? "On" : "Off";
+  if (key === "hardLiquorCategoryIds") return Array.isArray(value) ? `${value.length} chosen categor${value.length === 1 ? "y" : "ies"}` : "Automatic (by name)";
+  if (key === "hardLiquorLimit") return `${str(value)} bottles`;
+  if (key === "loyaltyRupeesPerPoint" || key === "loyaltyPointValue") return money(Number(value));
+  if (key === "maxCashierDiscountPercent") return `${str(value)}%`;
+  return str(value) || "None";
+}
+const SUPPLIER_FIELDS: Array<[string, string]> = [
+  ["name", "Name"], ["code", "Code"], ["contactPerson", "Contact person"], ["telephone", "Telephone"],
+  ["email", "Email"], ["address", "Address"], ["fax", "Fax"], ["vatRegistrationNo", "VAT number"],
+];
+/** Shelf count at shift close: how many products were checked and which ones didn't match. */
+function shelfCountFacts(value: unknown) {
+  const rows = Array.isArray(value) ? (value as Body[]) : [];
+  if (rows.length === 0) return [];
+  const off = rows.filter((row) => Number(row.difference) !== 0);
+  return [
+    fact("Shelf count", `${rows.length} product(s) checked · ${off.length ? `${off.length} difference(s)` : "all match"}`),
+    ...off.map((row) => fact(`  ${str(row.name)}`, `system ${str(row.system)}, counted ${str(row.counted)} (${Number(row.difference) > 0 ? "+" : ""}${str(row.difference)})`)),
+  ];
+}
 const VERBS: Record<string, string> = { POST: "Added", PATCH: "Updated", PUT: "Updated", DELETE: "Deleted" };
 const capitalise = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
@@ -170,6 +206,7 @@ export function describePosChange(method: string, path: string, body: Body, resp
             ...(Number(sales.cardSales) > 0 ? [fact("Card sales", money(sales.cardSales)), fact("Card machine slip", close.cardSlipTotal == null ? "Not settled yet" : money(close.cardSlipTotal))] : []),
             ...(close.cardDifferenceReason ? [fact("Card note", close.cardDifferenceReason)] : []),
             ...(Number(sales.transferSales) > 0 ? [fact("Transfer / QR sales", money(sales.transferSales))] : []),
+            ...shelfCountFacts(close.stockCount),
           ],
         },
       };
@@ -177,6 +214,58 @@ export function describePosChange(method: string, path: string, body: Body, resp
   }
 
   // ── Cash book: receipts (money in) & vouchers (money out) ────────────────
+  // ── Purchase orders ──────────────────────────────────────────────────────
+  if (module === "purchase-orders") {
+    const po = str(data.poNumber) || str(prior.poNumber) || "purchase order";
+    const supplier = str(obj(data.supplier).name) || str(obj(prior.supplier).name);
+    const items = Array.isArray(data.items) ? (data.items as Body[]) : [];
+    const itemFacts = items.map((item) => fact(str(item.description), `${str(item.quantity)} × ${money(item.unitCost)} = ${money(item.lineTotal)}`));
+    if (method === "POST" && !resource) {
+      return {
+        action: "purchase.create", category: "PURCHASE", entityType: "purchase order", entityId: po,
+        summary: `Created purchase order ${po} for ${supplier} · ${items.length} item(s) · ${money(data.total)}`,
+        details: { facts: [fact("Supplier", supplier), fact("Total", money(data.total)), ...(data.expectedDate ? [fact("Deliver by", str(data.expectedDate).slice(0, 10))] : []), ...itemFacts] },
+      };
+    }
+    if (method === "PATCH") {
+      return {
+        action: "purchase.update", category: "PURCHASE", entityType: "purchase order", entityId: po,
+        summary: `Changed draft purchase order ${po} (${supplier}) · now ${money(data.total)}`,
+        details: { changes: prior.total !== undefined && prior.total !== data.total ? [{ label: "Total", before: money(prior.total), after: money(data.total) }] : [], facts: itemFacts },
+      };
+    }
+    if (id === "send" && obj(response).success === false) {
+      return {
+        action: "purchase.email_failed", category: "PURCHASE", entityType: "purchase order", entityId: po,
+        summary: `Email of purchase order ${po} to ${supplier || "the supplier"} (${str(body.to)}) FAILED — ${str(obj(response).message)}`,
+        details: { facts: [fact("To", body.to), ...(body.cc ? [fact("Copy to", body.cc)] : []), fact("Subject", body.subject), fact("Result", "Not sent"), fact("Reason", obj(response).message)] },
+      };
+    }
+    if (id === "send") {
+      return {
+        action: "purchase.email", category: "PURCHASE", entityType: "purchase order", entityId: po,
+        summary: `Emailed purchase order ${po} to ${supplier} (${str(body.to)})`,
+        details: { facts: [fact("To", body.to), ...(body.cc ? [fact("Copy to", body.cc)] : []), fact("Subject", body.subject), fact("Total", money(data.total))] },
+      };
+    }
+    if (id === "receive") {
+      const lines = Array.isArray(body.lines) ? (body.lines as Body[]).filter((line) => Number(line.quantity) > 0) : [];
+      const byId = new Map(items.map((item) => [Number(item.id), item]));
+      return {
+        action: "purchase.receive", category: "PURCHASE", entityType: "purchase order", entityId: po,
+        summary: `Received stock for ${po} (${supplier}): ${lines.map((line) => `${str(line.quantity)} × ${str(byId.get(Number(line.itemId))?.description)}`).join(", ")} · ${str(data.statusLabel)}`,
+        details: { facts: lines.map((line) => fact(str(byId.get(Number(line.itemId))?.description), `${str(line.quantity)} received`)) },
+      };
+    }
+    if (id === "cancel") {
+      return {
+        action: "purchase.cancel", category: "PURCHASE", entityType: "purchase order", entityId: po,
+        summary: `Cancelled purchase order ${po} (${supplier}) — ${str(body.reason)}`,
+        details: { facts: [fact("Reason", body.reason), fact("Total", money(data.total))] },
+      };
+    }
+  }
+
   if (module === "cash-book") {
     const isOut = str(data.direction || body.direction) === "OUT";
     const label = (isOut ? EXPENSE_LABELS : INCOME_LABELS)[str(data.category || body.category)] ?? str(data.category || body.category);
@@ -220,6 +309,19 @@ export function describePosChange(method: string, path: string, body: Body, resp
           ...(data.reference || body.reference ? [fact("Bill / reference", data.reference || body.reference)] : []),
           ...(data.note || body.note ? [fact("Note", data.note || body.note)] : []),
         ],
+      },
+    };
+  }
+
+  // ── Bulk price change (e.g. government excise change) ─────────────────────
+  if (module === "inventory-management" && resource === "products" && id === "bulk-price") {
+    const changes = Array.isArray(data.changes) ? (data.changes as Body[]) : [];
+    return {
+      action: "product.bulk_price", category: "PRODUCT", entityType: "price change", entityId: null,
+      summary: `Changed the selling price of ${str(data.count) || changes.length} product(s) — ${str(data.reason || body.reason)}`,
+      details: {
+        facts: [fact("Reason", data.reason || body.reason), fact("Products changed", data.count)],
+        changes: changes.map((change) => ({ label: str(change.name), before: money(change.before), after: money(change.after) })),
       },
     };
   }
@@ -388,6 +490,43 @@ export function describePosChange(method: string, path: string, body: Body, resp
   }
 
   // ── Brands, categories, suppliers and anything else ──────────────────────
+  // ── Shop settings: exactly which values changed ─────────────────────────────
+  if (module === "settings" && method === "PATCH") {
+    const changes = Object.entries(SETTING_LABELS)
+      .filter(([key]) => key in body && showSetting(key, prior[key]) !== showSetting(key, data[key]))
+      .map(([key, label]) => ({ label, before: showSetting(key, prior[key]), after: showSetting(key, data[key]) }));
+    return {
+      action: "settings.update", category: "OTHER", entityType: "shop settings", entityId: null,
+      summary: changes.length ? `Changed shop settings: ${changes.map((change) => `${change.label} ${change.before} → ${change.after}`).join(" · ")}` : "Saved shop settings (no values changed)",
+      details: { changes },
+    };
+  }
+
+  // ── Suppliers: details on add, what changed on edit ─────────────────────────
+  if (module === "inventory-management" && resource === "suppliers") {
+    const name = str(data.name) || str(prior.name) || str(body.name) || "a supplier";
+    if (method === "POST") {
+      return {
+        action: "supplier.create", category: "STOCK", entityType: "supplier", entityId: data.id as number,
+        summary: `Added supplier ${name}${data.email ? ` (${str(data.email)})` : ""}`,
+        details: { facts: SUPPLIER_FIELDS.map(([key, label]) => fact(label, data[key])).filter((row) => row.value !== "—") },
+      };
+    }
+    if (method === "PATCH") {
+      const changes = SUPPLIER_FIELDS
+        .map(([key, label]) => ({ label, before: str(prior[key]) || "None", after: str(data[key]) || "None" }))
+        .filter((change) => change.before !== change.after);
+      return {
+        action: "supplier.update", category: "STOCK", entityType: "supplier", entityId: id,
+        summary: changes.length ? `Updated supplier ${name}: ${changes.map((change) => change.label.toLowerCase()).join(", ")}` : `Saved supplier ${name} (no changes)`,
+        details: { changes },
+      };
+    }
+    if (method === "DELETE") {
+      return { action: "supplier.delete", category: "STOCK", entityType: "supplier", entityId: id, summary: `Deleted supplier ${name}`, details: { facts: [fact("Supplier", name)] } };
+    }
+  }
+
   const [label, category] = RESOURCE_LABELS[resource] ?? RESOURCE_LABELS[module] ?? [resource ?? module, "OTHER" as ActivityCategory];
   const newName = str(data.name) || str(body.name);
   const oldName = str(prior.name);

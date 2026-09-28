@@ -522,6 +522,52 @@ exports.Prisma.InventoryMovementScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.PurchaseOrderScalarFieldEnum = {
+  id: 'id',
+  poNumber: 'poNumber',
+  supplierId: 'supplierId',
+  status: 'status',
+  orderDate: 'orderDate',
+  expectedDate: 'expectedDate',
+  notes: 'notes',
+  total: 'total',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  sentAt: 'sentAt',
+  sentById: 'sentById',
+  receivedAt: 'receivedAt',
+  receivedById: 'receivedById',
+  cancelledAt: 'cancelledAt',
+  cancelledById: 'cancelledById',
+  cancelReason: 'cancelReason'
+};
+
+exports.Prisma.PurchaseOrderItemScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  productId: 'productId',
+  description: 'description',
+  quantity: 'quantity',
+  unitCost: 'unitCost',
+  lineTotal: 'lineTotal',
+  receivedQty: 'receivedQty'
+};
+
+exports.Prisma.PurchaseOrderEmailScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  toEmail: 'toEmail',
+  ccEmail: 'ccEmail',
+  subject: 'subject',
+  message: 'message',
+  status: 'status',
+  error: 'error',
+  messageId: 'messageId',
+  sentById: 'sentById',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -674,7 +720,10 @@ exports.Prisma.ModelName = {
   PosSetting: 'PosSetting',
   PosShift: 'PosShift',
   PosCashEntry: 'PosCashEntry',
-  InventoryMovement: 'InventoryMovement'
+  InventoryMovement: 'InventoryMovement',
+  PurchaseOrder: 'PurchaseOrder',
+  PurchaseOrderItem: 'PurchaseOrderItem',
+  PurchaseOrderEmail: 'PurchaseOrderEmail'
 };
 
 /**

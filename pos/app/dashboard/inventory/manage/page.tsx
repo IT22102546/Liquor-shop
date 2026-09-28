@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAdmin } from "../../../components/AdminContext";
 import { API_URL } from "../../../lib/constants";
-import { IconActivity, IconBoxIn, IconInventory, IconInvoice } from "../../../lib/icons";
+import { IconActivity, IconBoxIn, IconCheck, IconInventory, IconInvoice, IconTrend } from "../../../lib/icons";
 import { canAccessPath } from "../../../lib/roles";
 import { AddLiquorModal } from "../../../components/products/AddLiquorModal";
+import { BulkPriceModal } from "../../../components/products/BulkPriceModal";
 import { ProductStockTable } from "../../../components/products/ProductStockTable";
 import type { Product } from "../../../components/products/ProductFormModal";
 import TablePagination, { paginateRows } from "../../../components/TablePagination";
@@ -17,6 +18,8 @@ type ProductCategory = { id: number; name: string; _count?: { products: number }
 export default function InventoryManagePage() {
   const { admin, token, logout } = useAdmin();
   const [showAddLiquor, setShowAddLiquor] = useState(false);
+  const [showBulkPrice, setShowBulkPrice] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
   // Cashiers can view Product Setup; only "Returned to supplier" works for them.
   const canEdit = admin.role === "ADMIN" || admin.role === "INVENTORY_MANAGER";
   const [brands, setBrands] = useState<ProductBrand[]>([]);
@@ -187,9 +190,14 @@ export default function InventoryManagePage() {
           </div>
         </div>
         {canEdit ? (
-          <button type="button" className="btn-accent pos-add-liquor" onClick={() => setShowAddLiquor(true)}>
-            <IconBoxIn /> Add liquor
-          </button>
+          <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
+            <button type="button" className="btn-outline" onClick={() => setShowBulkPrice(true)} title="Change many selling prices at once, e.g. after a government price change">
+              <IconTrend /> Bulk price update
+            </button>
+            <button type="button" className="btn-accent pos-add-liquor" onClick={() => setShowAddLiquor(true)}>
+              <IconBoxIn /> Add liquor
+            </button>
+          </div>
         ) : (
           <span className="lx-readonly-pill">View only</span>
         )}
@@ -291,6 +299,17 @@ export default function InventoryManagePage() {
           <TablePagination page={categoryPage} pageSize={pageSize} total={categories.length} onPageChange={setCategoryPage} onPageSizeChange={setPageSize} />
         </div>
       </div>
+      {notice && (
+        <div className="lx-toasts"><div className="lx-toast ok"><span className="lx-toast-icon"><IconCheck size={16} /></span><div><strong>{notice}</strong><span>Recorded in the Activity Log with the old and new prices.</span></div></div></div>
+      )}
+      {canEdit && showBulkPrice && (
+        <BulkPriceModal
+          token={token}
+          products={products}
+          onClose={() => setShowBulkPrice(false)}
+          onDone={(message) => { setShowBulkPrice(false); setNotice(message); window.setTimeout(() => setNotice(null), 4000); void loadData(); }}
+        />
+      )}
       {canEdit && showAddLiquor && (
         <AddLiquorModal
           token={token}

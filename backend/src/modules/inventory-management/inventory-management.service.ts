@@ -5,6 +5,7 @@ import { prisma } from "../../database/prisma.client";
 import { AppError } from "../../common/utils/errors";
 import type { CreateSupplierDto, UpdateSupplierDto } from "./dto/supplier.dto";
 import { recordMovements } from "../book/stock-movements";
+import { assertHardLiquorLimit } from "../settings/settings.service";
 import type {
   CreateProductBrandDto,
   UpdateProductBrandDto,
@@ -14,6 +15,7 @@ import type {
   UpdateProductDto,
   RecordProductSaleDto,
   RestockProductDto,
+  BulkPriceDto,
   ReturnEmptiesDto,
   ProductQueryDto,
 } from "./dto/product.dto";
@@ -150,6 +152,8 @@ export async function updateSupplier(id: number, dto: UpdateSupplierDto) {
 
 export async function deleteSupplier(id: number) {
   await getSupplier(id);
+  const orders = await prisma.purchaseOrder.count({ where: { supplierId: id } });
+  if (orders > 0) throw new AppError(`This supplier has ${orders} purchase order(s) on record, so it can't be deleted`, 409);
   await prisma.supplier.delete({ where: { id } });
 }
 
@@ -608,7 +612,7 @@ export async function updateProduct(id: number, dto: UpdateProductDto, actorId?:
  * cost as a weighted average over the units currently in stock; when it's left out, the new units are
  * assumed to cost the current per-unit price. It's required only for a product with no cost price yet.
  */
-export async function restockProduct(id: number, dto: RestockProductDto, actorId?: number) {
+export async function restockProduct(id: number, dto: RestockProductDto, actorId?: number, reference = "Stock added") {
   const product = await getProduct(id);
   // Without a cost price the new bottles would count as free, and every sale of them as pure profit.
   if (!(product.purchasePrice && product.purchasePrice > 0) && dto.purchasePrice === undefined) {
@@ -639,8 +643,34 @@ export async function restockProduct(id: number, dto: RestockProductDto, actorId
     },
     include: productInclude,
   });
-  await recordMovements(prisma, [{ productId: id, kind: "STOCK", type: "RECEIVED", quantity: dto.quantity, reference: "Stock added", createdById: actorId }]);
+  await recordMovements(prisma, [{ productId: id, kind: "STOCK", type: "RECEIVED", quantity: dto.quantity, reference, createdById: actorId }]);
   return updated;
+}
+
+/**
+ * Changes many selling prices at once (e.g. a government excise change), all or nothing.
+ * Returns each product's old and new price so the Activity Log can show exactly what changed.
+ */
+export async function bulkUpdatePrices(dto: BulkPriceDto) {
+  const ids = [...new Set(dto.changes.map((change) => change.productId))];
+  if (ids.length !== dto.changes.length) throw AppError.validation({ changes: ["A product is listed twice"] });
+  const products = await prisma.inventoryProduct.findMany({ where: { id: { in: ids } }, select: { id: true, name: true, compatibleWith: true, sellingPrice: true } });
+  if (products.length !== ids.length) throw AppError.validation({ changes: ["Some products no longer exist — reload and try again"] });
+  const byId = new Map(products.map((product) => [product.id, product]));
+  const round2 = (value: number) => Math.round(value * 100) / 100;
+  const changes = dto.changes
+    .map((change) => ({ ...change, sellingPrice: round2(change.sellingPrice), before: byId.get(change.productId)!.sellingPrice ?? 0 }))
+    .filter((change) => change.sellingPrice !== change.before);
+  if (changes.length === 0) throw AppError.validation({ changes: ["None of the prices are different from now"] });
+  await prisma.$transaction(changes.map((change) => prisma.inventoryProduct.update({ where: { id: change.productId }, data: { sellingPrice: change.sellingPrice } })));
+  return {
+    reason: dto.reason,
+    count: changes.length,
+    changes: changes.map((change) => {
+      const product = byId.get(change.productId)!;
+      return { productId: product.id, name: [product.name, product.compatibleWith].filter(Boolean).join(" · "), before: change.before, after: change.sellingPrice };
+    }),
+  };
 }
 
 /** Empties handed back to the supplier/distributor: takes them off the on-hand count. */
@@ -668,6 +698,7 @@ export async function recordProductSale(id: number, dto: RecordProductSaleDto, a
       400,
     );
   }
+  await assertHardLiquorLimit([{ categoryId: product.categoryId, quantity: dto.quantity }]);
 
   const updated = await prisma.inventoryProduct.update({
     where: { id },

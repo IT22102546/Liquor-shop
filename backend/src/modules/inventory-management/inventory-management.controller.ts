@@ -15,6 +15,7 @@ import {
   updateProductSchema,
   recordProductSaleSchema,
   restockProductSchema,
+  bulkPriceSchema,
   returnEmptiesSchema,
   productQuerySchema,
 } from "./dto/product.dto";
@@ -112,6 +113,9 @@ export async function updateProduct(req: Request, res: Response, next: NextFunct
 }
 export async function restockProduct(req: Request, res: Response, next: NextFunction) {
   try { return sendSuccess(res, await service.restockProduct(Number(req.params.id), validate(restockProductSchema, req.body), actorId(req))); } catch (err) { return next(err); }
+}
+export async function bulkUpdatePrices(req: Request, res: Response, next: NextFunction) {
+  try { return sendSuccess(res, await service.bulkUpdatePrices(validate(bulkPriceSchema, req.body))); } catch (err) { return next(err); }
 }
 export async function returnEmptiesToSupplier(req: Request, res: Response, next: NextFunction) {
   try { return sendSuccess(res, await service.returnEmptiesToSupplier(Number(req.params.id), validate(returnEmptiesSchema, req.body), actorId(req))); } catch (err) { return next(err); }

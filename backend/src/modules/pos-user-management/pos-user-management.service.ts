@@ -2,7 +2,7 @@ import { Prisma } from "../../generated/prisma";
 import { prisma } from "../../database/prisma.client";
 import { AppError } from "../../common/utils/errors";
 import { loyaltyPointsFor } from "../../config/loyalty";
-import { getSettings } from "../settings/settings.service";
+import { assertHardLiquorLimit, getSettings } from "../settings/settings.service";
 import { findOpenShift, recordMovements } from "../book/stock-movements";
 import type {
   CreateInvoiceAccountDto,
@@ -529,11 +529,16 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
 
   const products = await prisma.inventoryProduct.findMany({
     where: { id: { in: mergedItems.map((item) => item.productId) } },
-    select: { id: true, name: true, displayId: true, quantity: true, emptyBottlePrice: true },
+    select: { id: true, name: true, displayId: true, quantity: true, emptyBottlePrice: true, categoryId: true },
   });
   if (products.length !== mergedItems.length) {
     throw AppError.validation({ items: ["One or more products no longer exist"] });
   }
+  // Sri Lankan rule: only so many bottles of hard liquor on one bill (beer doesn't count).
+  await assertHardLiquorLimit(mergedItems.map((item) => ({
+    categoryId: products.find((product) => product.id === item.productId)!.categoryId,
+    quantity: item.quantity,
+  })));
   const productById = new Map(products.map((product) => [product.id, product]));
   for (const item of mergedItems) {
     const product = productById.get(item.productId)!;

@@ -178,6 +178,7 @@ model Supplier {
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   products          InventoryProduct[]
+  purchaseOrders    PurchaseOrder[]
 
   @@map("suppliers")
 }
@@ -231,6 +232,7 @@ model InventoryProduct {
   updatedAt          DateTime                  @updatedAt
   expenses           InventoryProductExpense[]
   images             InventoryProductImage[]
+  purchaseOrderItems PurchaseOrderItem[]
   customerPurchases  PosCustomerPurchase[]
 
   @@index([brandId])
@@ -704,4 +706,69 @@ model InventoryMovement {
   @@index([productId, createdAt])
   @@index([shiftId])
   @@map("inventory_movements")
+}
+
+/// Purchase order to a supplier: DRAFT → SENT (emailed) → PARTIAL / RECEIVED, or CANCELLED.
+model PurchaseOrder {
+  id            Int                  @id @default(autoincrement())
+  poNumber      String               @unique
+  supplierId    Int
+  supplier      Supplier             @relation(fields: [supplierId], references: [id])
+  status        String               @default("DRAFT")
+  orderDate     DateTime             @default(now())
+  expectedDate  DateTime?
+  notes         String?
+  total         Float                @default(0)
+  createdById   Int
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  sentAt        DateTime?
+  sentById      Int?
+  receivedAt    DateTime?
+  receivedById  Int?
+  cancelledAt   DateTime?
+  cancelledById Int?
+  cancelReason  String?
+  items         PurchaseOrderItem[]
+  emails        PurchaseOrderEmail[]
+
+  @@index([supplierId])
+  @@index([status])
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id          Int               @id @default(autoincrement())
+  orderId     Int
+  order       PurchaseOrder     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   Int?
+  product     InventoryProduct? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  /// Product name and size as ordered (kept even if the product is renamed or removed).
+  description String
+  quantity    Int
+  unitCost    Float
+  lineTotal   Float
+  receivedQty Int               @default(0)
+
+  @@index([orderId])
+  @@map("purchase_order_items")
+}
+
+/// Every email attempt for a purchase order, sent or failed, with who sent it.
+model PurchaseOrderEmail {
+  id        Int           @id @default(autoincrement())
+  orderId   Int
+  order     PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  toEmail   String
+  ccEmail   String?
+  subject   String
+  message   String?
+  status    String // SENT | FAILED
+  error     String?
+  messageId String?
+  sentById  Int
+  createdAt DateTime      @default(now())
+
+  @@index([orderId])
+  @@map("purchase_order_emails")
 }

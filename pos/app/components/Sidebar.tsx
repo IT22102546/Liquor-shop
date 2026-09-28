@@ -49,6 +49,7 @@ const NAV_SECTIONS: { title: string; links: NavLink[] }[] = [
     links: [
       { label: "Product Setup", href: "/dashboard/inventory/manage", Icon: IconInventory },
       { label: "Suppliers", href: "/dashboard/suppliers", Icon: IconSupplier },
+      { label: "Purchase Orders", href: "/dashboard/purchase-orders", Icon: IconInvoice },
       // Hidden from the sidebar for now; the page still exists.
       // { label: "Supplier Requests", href: "/dashboard/purchasing-requests", Icon: IconContactRequests },
     ],

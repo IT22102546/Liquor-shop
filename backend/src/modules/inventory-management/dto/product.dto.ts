@@ -49,6 +49,16 @@ export const updateProductSchema = createProductSchema.partial().extend({
   supplierId: z.union([z.number().int().positive(), z.null()]).optional(),
 });
 
+/** Government price change: new selling prices for many products at once, with the reason. */
+export const bulkPriceSchema = z.object({
+  reason: z.string().trim().min(3, "Say why the prices are changing, e.g. excise increase").max(300),
+  changes: z.array(z.object({
+    productId: z.number().int().positive(),
+    sellingPrice: z.number().positive("A price must be more than Rs. 0").max(100_000_000),
+  })).min(1, "Choose at least one product").max(2000),
+});
+export type BulkPriceDto = z.infer<typeof bulkPriceSchema>;
+
 export const restockProductSchema = z.object({
   quantity: z.number().int().min(1, "Add at least 1 unit").max(100000),
   // Batch totals for the units being added; blended into the per-unit cost.

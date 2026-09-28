@@ -72,6 +72,7 @@ router.get(   "/products",               productCatalog, ctrl.getProducts);
 router.get(   "/products/health",        inventoryAndAccounts, ctrl.getInventoryHealth);
 router.get(   "/products/:id",           inventoryAndAccounts, ctrl.getProduct);
 router.post(  "/products",               inventory, ctrl.createProduct);
+router.post(  "/products/bulk-price",    inventory, ctrl.bulkUpdatePrices);
 router.patch( "/products/:id",           inventory, ctrl.updateProduct);
 router.post(  "/products/:id/restock",   inventory, ctrl.restockProduct);
 // Cashiers may record empties going back to the supplier (their only change in Product Setup).

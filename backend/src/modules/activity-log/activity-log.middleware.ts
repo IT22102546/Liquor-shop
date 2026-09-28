@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import { getSettings } from "../settings/settings.service";
 import { prisma } from "../../database/prisma.client";
 import { describePosChange } from "./activity-describe";
 import { logActivity, requestMeta } from "./activity-log.service";
@@ -8,6 +9,11 @@ const SKIP_PATHS = new Set(["/auth/login", "/auth/logout"]);
 
 /** Loads the record a request is about to change, so the log can show Before → After. */
 async function snapshotBefore(method: string, path: string): Promise<Record<string, unknown> | undefined> {
+  // Purchase orders: the order as it was (so failed emails and edits can name it).
+  const po = /^\/purchase-orders\/(\d+)(?:\/(?:send|receive|cancel))?$/.exec(path);
+  if (po && method !== "GET") return (await prisma.purchaseOrder.findUnique({ where: { id: Number(po[1]) }, include: { supplier: { select: { name: true } } } })) ?? undefined;
+  // Shop settings: the values before the change, for an old → new list.
+  if (path === "/settings" && method === "PATCH") return (await getSettings()) as unknown as Record<string, unknown>;
   if (method === "POST" && !/\/(images|restock|empties|sell)/.test(path)) return undefined;
   let match = /^\/inventory-management\/products\/(\d+)/.exec(path);
   if (match) {
@@ -23,6 +29,8 @@ async function snapshotBefore(method: string, path: string): Promise<Record<stri
   if (match) return (await prisma.inventoryCategory.findUnique({ where: { id: Number(match[1]) } })) ?? undefined;
   match = /^\/inventory-management\/suppliers\/(\d+)$/.exec(path);
   if (match) return (await prisma.supplier.findUnique({ where: { id: Number(match[1]) } })) ?? undefined;
+  match = /^\/purchase-orders\/(\d+)$/.exec(path);
+  if (match) return (await prisma.purchaseOrder.findUnique({ where: { id: Number(match[1]) }, include: { supplier: { select: { name: true } } } })) ?? undefined;
   match = /^\/auth\/staff\/(\d+)$/.exec(path);
   if (match) {
     return (await prisma.posAdmin.findUnique({
@@ -56,7 +64,9 @@ export async function recordPosActivity(req: Request, res: Response, next: NextF
     const user = (req as unknown as { user?: { id?: number; email?: string; role?: string } }).user;
     // Successful changes are logged; so are signed-in users trying something their role may not do.
     const denied = res.statusCode === 403 && Boolean(user);
-    if (res.statusCode >= 400 && !denied) return;
+    // A failed purchase order email is recorded too (the attempt matters, not only successes).
+    const failedEmail = res.statusCode >= 500 && /^\/purchase-orders\/\d+\/send$/.test(path);
+    if (res.statusCode >= 400 && !denied && !failedEmail) return;
     const body = (req.body && typeof req.body === "object" ? req.body : {}) as Record<string, unknown>;
     let described;
     try {

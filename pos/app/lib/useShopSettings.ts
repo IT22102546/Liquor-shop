@@ -13,6 +13,18 @@ export type ShopSettings = {
   loyaltyPointValue: number;
   discountsEnabled: boolean;
   maxCashierDiscountPercent: number;
+  /** Business details printed on purchase orders and used in supplier emails. */
+  businessName: string;
+  businessAddress: string;
+  businessPhone: string;
+  businessEmail: string;
+  /** Sri Lankan rule: at most this many bottles of hard liquor on one bill (beer is not counted). */
+  hardLiquorLimitEnabled: boolean;
+  hardLiquorLimit: number;
+  /** Chosen categories; null = worked out from category names on the server. */
+  hardLiquorCategoryIds: number[] | null;
+  /** The categories that actually count (sent by the server). */
+  hardLiquorCategoryIdsEffective?: number[];
 };
 
 export const DEFAULT_SHOP_SETTINGS: ShopSettings = {
@@ -21,6 +33,14 @@ export const DEFAULT_SHOP_SETTINGS: ShopSettings = {
   loyaltyPointValue: 1,
   discountsEnabled: false,
   maxCashierDiscountPercent: 10,
+  businessName: "BAR SHOP",
+  businessAddress: "No:154, Puttalam Road, Kurunegala",
+  businessPhone: "",
+  businessEmail: "",
+  hardLiquorLimitEnabled: true,
+  hardLiquorLimit: 12,
+  hardLiquorCategoryIds: null,
+  hardLiquorCategoryIdsEffective: [],
 };
 
 const settingsKey = (token: string) => ["pos", "shop-settings", token];
