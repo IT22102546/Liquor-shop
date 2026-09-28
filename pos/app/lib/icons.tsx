@@ -596,3 +596,17 @@ export const IconSodaCan = ({ size = 18 }: { size?: number }) => lineIcon(size, 
 export const IconSnack = ({ size = 18 }: { size?: number }) => lineIcon(size, <>
   <path d="M6 3h12l-1 3 1 3-1 3 1 3-1 3 1 3H6l1-3-1-3 1-3-1-3 1-3z" /><path d="M10 9.5c1-1 3-1 4 0" /><path d="M10 14.5c1 1 3 1 4 0" />
 </>);
+
+export const IconHeart = ({ size = 18 }: { size?: number }) => lineIcon(size, <path d="M12 20s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 5.65-7 10-7 10z" />);
+
+export const IconGrid = ({ size = 18 }: { size?: number }) => lineIcon(size, <>
+  <rect x="4" y="4" width="7" height="7" rx="1.5" /><rect x="13" y="4" width="7" height="7" rx="1.5" /><rect x="4" y="13" width="7" height="7" rx="1.5" /><rect x="13" y="13" width="7" height="7" rx="1.5" />
+</>);
+
+export const IconList = ({ size = 18 }: { size?: number }) => lineIcon(size, <>
+  <path d="M9 6h11M9 12h11M9 18h11" /><circle cx="4.5" cy="6" r="1" /><circle cx="4.5" cy="12" r="1" /><circle cx="4.5" cy="18" r="1" />
+</>);
+
+export const IconMore = ({ size = 18 }: { size?: number }) => lineIcon(size, <>
+  <circle cx="12" cy="5" r="1.2" fill="currentColor" /><circle cx="12" cy="12" r="1.2" fill="currentColor" /><circle cx="12" cy="19" r="1.2" fill="currentColor" />
+</>);

@@ -141,7 +141,7 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {!collapsed && <div className="sidebar-footer"><span>BAR SHOP POS</span><span>Operations</span></div>}
+      {!collapsed && <div className="sidebar-footer"><span>BAR SHOP POS</span><span>v1.0.0</span></div>}
     </aside>
   );
 }

@@ -30,7 +30,13 @@ import {
   IconCash,
   IconCheck,
   IconClock,
+  IconEdit,
+  IconGrid,
+  IconHeart,
+  IconList,
+  IconMore,
   IconQr,
+  IconReceipt,
   IconInventory,
   IconPlus,
   IconPrinter,
@@ -98,7 +104,41 @@ export default function InventoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<number | "all">("all");
+  const [categoryFilter, setCategoryFilter] = useState<number | "all" | "fav">("all");
+  // Per-till conveniences, kept in this browser only.
+  const [view, setView] = useState<"grid" | "list">("grid");
+  const [favourites, setFavourites] = useState<Set<number>>(new Set());
+  const [orderMenu, setOrderMenu] = useState(false);
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("pos_counter_view");
+      if (saved === "grid" || saved === "list") setView(saved);
+      const favs = JSON.parse(window.localStorage.getItem("pos_counter_favourites") ?? "[]") as unknown;
+      if (Array.isArray(favs)) setFavourites(new Set(favs.filter((id): id is number => typeof id === "number")));
+    } catch {
+      /* storage unavailable: defaults are fine */
+    }
+  }, []);
+  const chooseView = (next: "grid" | "list") => {
+    setView(next);
+    try { window.localStorage.setItem("pos_counter_view", next); } catch { /* ignore */ }
+  };
+  const toggleFavourite = (id: number) => {
+    setFavourites((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      try { window.localStorage.setItem("pos_counter_favourites", JSON.stringify([...next])); } catch { /* ignore */ }
+      return next;
+    });
+  };
+  useEffect(() => {
+    if (!orderMenu) return;
+    const close = (event: MouseEvent) => { if (!(event.target as HTMLElement).closest(".pos-order-menu")) setOrderMenu(false); };
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setOrderMenu(false); };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", onKey); };
+  }, [orderMenu]);
   const [cart, setCart] = useState<CartLine[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<"CASH" | "CARD" | "BANK_TRANSFER">("CASH");
   // Card approval code (printed on the card machine slip) or transfer / QR reference — optional.
@@ -196,6 +236,13 @@ export default function InventoryPage() {
         const fullHeight = Math.max(420, window.innerHeight - fullTop - 18);
         register.style.height = `${height}px`;
         register.style.setProperty("--till-extra", `${Math.max(0, fullHeight - height)}px`);
+        // Three rows of product cards when the screen is tall enough for readable cards, otherwise two.
+        // Worked out from the full (no-banner) height so the card size never changes when a banner shows.
+        const catalog = register.querySelector<HTMLElement>(".pos-catalog");
+        const grid = register.querySelector<HTMLElement>(".pos-product-grid");
+        const chrome = catalog && grid ? grid.getBoundingClientRect().top - catalog.getBoundingClientRect().top : 150;
+        const gridSpace = fullHeight - chrome - 28;
+        register.style.setProperty("--till-rows", (gridSpace - 2 * 13.6) / 3 >= 178 ? "3" : "2");
       });
     };
     fit();
@@ -280,7 +327,7 @@ export default function InventoryPage() {
       .filter(
         (product) =>
           sellable(product) &&
-          (categoryFilter === "all" || product.category.id === categoryFilter) &&
+          (categoryFilter === "all" || (categoryFilter === "fav" ? favourites.has(product.id) : product.category.id === categoryFilter)) &&
           (!needle || [
             product.name,
             product.brand.name,
@@ -293,7 +340,7 @@ export default function InventoryPage() {
         const categoryOrder = left.category.name.localeCompare(right.category.name);
         return categoryOrder || left.name.localeCompare(right.name);
       });
-  }, [categoryFilter, products, search]);
+  }, [categoryFilter, favourites, products, search]);
   const categoryCounts = useMemo(() => {
     const counts = new Map<number, number>();
     products.filter(sellable).forEach((product) => counts.set(product.category.id, (counts.get(product.category.id) ?? 0) + 1));
@@ -490,7 +537,8 @@ export default function InventoryPage() {
 
   return (
     <div className="bm-page">
-      <div className="bm-page-header">
+      <div className="bm-page-header pos-hero">
+        <div className="pos-hero-photo" aria-hidden="true" />
         <div className="page-title-row">
           <div className="page-title-icon">
             <IconInventory />
@@ -583,11 +631,20 @@ export default function InventoryPage() {
           <button type="button" className={categoryFilter === "all" ? "active" : ""} onClick={() => setCategoryFilter("all")}>
             All <span className="count">{products.filter(sellable).length}</span>
           </button>
+          {favourites.size > 0 && (
+            <button type="button" className={`fav${categoryFilter === "fav" ? " active" : ""}`} onClick={() => setCategoryFilter("fav")}>
+              <IconHeart size={14} /> Favourites <span className="count">{products.filter((product) => sellable(product) && favourites.has(product.id)).length}</span>
+            </button>
+          )}
           {categories.map((category) => (
             <button key={category.id} type="button" className={categoryFilter === category.id ? "active" : ""} onClick={() => setCategoryFilter(category.id)}>
               {category.name} <span className="count">{categoryCounts.get(category.id) ?? 0}</span>
             </button>
           ))}
+          <div className="pos-view-toggle" role="group" aria-label="Product view">
+            <button type="button" className={view === "grid" ? "active" : ""} aria-pressed={view === "grid"} onClick={() => chooseView("grid")} title="Cards"><IconGrid /></button>
+            <button type="button" className={view === "list" ? "active" : ""} aria-pressed={view === "list"} onClick={() => chooseView("list")} title="List"><IconList /></button>
+          </div>
         </div>
 
         {loading && (
@@ -606,32 +663,44 @@ export default function InventoryPage() {
               </>
             ) : (
               <>
-                <strong>No products match this selection</strong>
-                <p>Try another category or search, or scan the bottle&apos;s barcode.</p>
+                <strong>{categoryFilter === "fav" ? "No favourites in stock" : "No products match this selection"}</strong>
+                <p>{categoryFilter === "fav" ? "Tap the heart on a product to keep it here for quick selling." : "Try another category or search, or scan the bottle's barcode."}</p>
               </>
             )}
           </div>
         )}
         {!loading && visibleProducts.length > 0 && (
-          <div className="pos-product-grid">
+          <div className={`pos-product-grid${view === "list" ? " is-list" : ""}`}>
             {visibleProducts.map((product, index) => {
               const primaryImage = (product.images ?? []).find((image) => image.isPrimary) ?? product.images?.[0];
               const lowStock = (product.lowStockThreshold ?? 0) > 0 && product.quantity <= (product.lowStockThreshold ?? 0);
               const inCart = cart.find((line) => line.product.id === product.id)?.quantity ?? 0;
               return (
-                <button
+                <div
                   key={product.id}
-                  type="button"
-                  className={`pos-product-card${inCart > 0 ? " in-cart" : ""}${bumpedId === product.id ? " bump" : ""}`}
+                  className={`pos-product-card${inCart > 0 ? " in-cart" : ""}${bumpedId === product.id ? " bump" : ""}${inCart >= product.quantity ? " is-disabled" : ""}`}
                   style={{ ["--i" as string]: index }}
-                  onClick={() => { if (addToCart(product)) beep("ok"); }}
-                  disabled={inCart >= product.quantity}
-                  aria-label={`Add ${product.name} to order`}
                 >
-                  <ProductArt categoryName={product.category.name} imageUrl={primaryImage?.url} alt={product.name}>
+                  <button
+                    type="button"
+                    className="pos-product-hit"
+                    onClick={() => { if (addToCart(product)) beep("ok"); }}
+                    disabled={inCart >= product.quantity}
+                    aria-label={`Add ${product.name} to order`}
+                  />
+                  <ProductArt categoryName={product.category.name} imageUrl={primaryImage?.url} alt="">
                     <span className="pos-product-category">{product.category.name}</span>
                     {inCart > 0 && <span key={inCart} className="pos-product-qty-badge">{inCart}</span>}
                   </ProductArt>
+                  <button
+                    type="button"
+                    className={`pos-fav${favourites.has(product.id) ? " on" : ""}`}
+                    aria-pressed={favourites.has(product.id)}
+                    aria-label={`${favourites.has(product.id) ? "Remove" : "Add"} ${product.name} ${favourites.has(product.id) ? "from" : "to"} favourites`}
+                    onClick={() => toggleFavourite(product.id)}
+                  >
+                    <IconHeart size={17} />
+                  </button>
                   <div className="pos-product-body">
                     <div className="pos-product-meta">{product.brand.name}{product.compatibleWith ? ` · ${product.compatibleWith}` : ""}</div>
                     <div className="pos-product-name">{product.name}</div>
@@ -644,7 +713,7 @@ export default function InventoryPage() {
                       <span className="pos-product-add" aria-hidden="true"><IconPlus /></span>
                     </div>
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
@@ -654,12 +723,22 @@ export default function InventoryPage() {
       <aside className="pos-cart" aria-label="Current order">
         <div className="pos-cart-header">
           <div><span>Current order</span><strong>{cartItemCount} item{cartItemCount === 1 ? "" : "s"}</strong></div>
-          {cart.length > 0 && <button type="button" onClick={() => { setCart([]); setAmountTendered(""); setMember(null); resetAdjustments(); }}>Clear</button>}
+          <div className="pos-order-menu">
+            <button type="button" className="pos-order-menu-btn" aria-haspopup="menu" aria-expanded={orderMenu} aria-label="Order options" onClick={() => setOrderMenu(!orderMenu)}><IconMore /></button>
+            {orderMenu && (
+              <div className="pos-order-menu-list" role="menu">
+                <button type="button" role="menuitem" className="danger" disabled={cart.length === 0 && !member} onClick={() => { setCart([]); setAmountTendered(""); setMember(null); resetAdjustments(); setOrderMenu(false); }}>Clear order</button>
+                <button type="button" role="menuitem" disabled={!completedReceipt} onClick={() => { if (completedReceipt) printReceipt(completedReceipt); setOrderMenu(false); }}>Reprint last receipt</button>
+                <Link href="/dashboard/inventory/sold" role="menuitem" onClick={() => setOrderMenu(false)}>Recent sales</Link>
+                {canManageStock && <Link href="/dashboard/inventory/manage" role="menuitem" onClick={() => setOrderMenu(false)}>Product setup</Link>}
+              </div>
+            )}
+          </div>
         </div>
         <MemberPicker token={token} member={member} pointValue={pointValue} onChange={changeMember} onAuthExpired={logout} />
         <div className="pos-cart-lines">
           {cart.length === 0 ? (
-            <div className="pos-cart-empty"><IconCart size={38} /><strong>No items yet</strong><p>Scan a barcode or tap a product.</p></div>
+            <div className="pos-cart-empty"><span className="pos-cart-empty-icon"><IconCart size={44} /></span><strong>No items yet</strong><p>Scan a barcode or tap a product.</p></div>
           ) : cart.map((line) => (
             <div key={line.product.id} className="pos-cart-line">
               <ProductArt
@@ -803,8 +882,8 @@ export default function InventoryPage() {
             {checkingOut ? "Completing…" : shift === null ? "Start a shift to sell" : `Complete sale · ${formatCurrency(cartTotal)}`}
           </button>
           <div className="pos-cart-shortcuts">
-            <Link href="/dashboard/inventory/sold">Recent sales</Link>
-            {canManageStock && <Link href="/dashboard/inventory/manage">Product setup</Link>}
+            <Link href="/dashboard/inventory/sold"><IconReceipt /> Recent sales</Link>
+            {canManageStock && <Link href="/dashboard/inventory/manage"><IconEdit /> Product setup</Link>}
           </div>
         </div>
       </aside>
