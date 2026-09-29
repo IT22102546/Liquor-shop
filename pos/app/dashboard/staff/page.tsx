@@ -113,7 +113,7 @@ export default function StaffPage() {
       {error && <div className="bm-alert bm-alert-error">{error}</div>}
       {message && <div className="bm-alert bm-alert-success">{message}</div>}
 
-      <div className="bm-manage-grid">
+      <div className="bm-manage-grid staff-grid">
         <form className="bm-manage-col" onSubmit={createStaff}>
           <div className="bm-col-header"><span className="bm-col-title">Add staff account</span></div>
           <div className="bm-field-group"><label>Full name</label><input className="bm-input" value={name} onChange={(event) => setName(event.target.value)} required /></div>
@@ -134,7 +134,7 @@ export default function StaffPage() {
         <div className="bm-manage-col">
           <div className="bm-col-header"><span className="bm-col-title">Current staff</span><span className="bm-col-count">{staff.length}</span></div>
           <div className="data-table-wrap">
-            <table className="data-table">
+            <table className="data-table staff-table">
               <thead><tr><th>Staff member</th><th>Role</th><th>Branch</th><th>Status</th><th>Access</th></tr></thead>
               <tbody>{staff.map((account) => (
                 <tr key={account.id}>

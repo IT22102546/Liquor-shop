@@ -1671,3 +1671,10 @@ html:not([data-theme="dark"]) .sidebar .nav-section-divider { background: #efe4c
 .gd-free { border-color: color-mix(in srgb, var(--success) 45%, var(--panel-border)) !important; }
 .gd-free-note { display: block; font-size: 0.68rem; font-weight: 700; color: var(--success); white-space: nowrap; }
 .po-qty-free { display: grid; gap: 0.3rem; }
+
+/* Staff page: the staff list needs room for its role / branch dropdowns */
+.staff-grid { grid-template-columns: minmax(280px, 360px) minmax(0, 1fr); }
+.staff-table th, .staff-table td { padding-left: 0.75rem; padding-right: 0.75rem; vertical-align: middle; }
+.staff-table td:first-child { min-width: 11rem; }
+.staff-table .bm-select { min-width: 9.5rem; }
+@media (max-width: 1320px) { .staff-grid { grid-template-columns: 1fr; } .staff-grid > form { min-height: 0; } }
