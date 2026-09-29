@@ -4,7 +4,7 @@ A complete point-of-sale and back-office system for liquor shops and bars in Sri
 
 Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and every stock and money movement is recorded with who did it, when, where, and why.
 
-- **`pos/`** — the web app staff use (Next.js 15 / React 19), in dark and light themes.
+- **`pos/`** — the web app staff use (Next.js 14 / React 18), in dark and light themes.
 - **`backend/`** — the API (Node.js, Express, Prisma ORM, PostgreSQL). It handles email (Nodemailer / SMTP) and PDF-ready prints, and keeps a full activity log.
 
 ---
@@ -34,6 +34,7 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
 21. [Configuration (.env)](#configuration)
 22. [Database, migrations and backups](#database-migrations-and-backups)
 23. [Production deployment](#production-deployment)
+    - [Live server & CI/CD pipeline](#live-server--cicd-pipeline)
 24. [Project structure](#project-structure)
 25. [Troubleshooting](#troubleshooting)
 
@@ -535,6 +536,55 @@ cd ../pos && npm ci && npm run build && pm2 restart bar-shop-web
 **Moving data from a local install:** `pg_dump -Fc` locally, copy the file to the server, then `pg_restore` into the empty database instead of seeding. Copy `backend/uploads/` too.
 
 All branches use the same web address. Staff sign in from any browser. The counter works on a PC, laptop or tablet with a USB/Bluetooth barcode scanner and an 80mm receipt printer.
+
+### Live server & CI/CD pipeline
+
+The shop runs on a Hostinger VPS (Ubuntu 24.04), and every push to `main` is checked and deployed automatically.
+
+| | |
+|---|---|
+| Web app | **https://pos.kodearcs.tech** |
+| API | **https://api.pos.kodearcs.tech** (health check: `/health`) |
+| Server user | `deploy` (the app runs under this user, with its own Node 20 and PM2) |
+| Code on the server | `/home/deploy/bar-shop` (a clone of this repository, branch `main`) |
+| PM2 processes | `bar-shop-api` (127.0.0.1:5010), `bar-shop-web` (127.0.0.1:3001), from [`ecosystem.config.cjs`](ecosystem.config.cjs); started on boot (`pm2-deploy` service) |
+| Nginx | `/etc/nginx/sites-available/pos.kodearcs.tech.conf` and `api.pos.kodearcs.tech.conf`; HTTPS by Let's Encrypt (renews automatically), HTTP redirects to HTTPS |
+| Database | PostgreSQL 16 on the server, database `bar_shop`, user `bar_shop` (its password is only in the server's `backend/.env`) |
+| Backups | Taken before every deploy into `/home/deploy/backups`; the last 14 are kept |
+| Firewall | Only SSH, HTTP and HTTPS are open; the app ports are private behind Nginx |
+
+**Pipeline** ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)):
+
+1. **Check.** On every push and pull request to `main`, both apps are installed, type-checked and built. A broken build never reaches the server.
+2. **Deploy.** On pushes to `main` (or "Run workflow" in the Actions tab), GitHub connects to the server over SSH and runs [`scripts/deploy.sh`](scripts/deploy.sh). The script:
+   1. backs up the database
+   2. updates the code to `origin/main`
+   3. brings the database schema up to date with `prisma db push`, which refuses changes that would lose data
+   4. builds the API and the web app
+   5. reloads PM2
+   6. waits until both answer
+3. **Live check.** It opens the two public addresses.
+
+**GitHub secrets** (Settings → Secrets and variables → Actions):
+
+| Secret | Value |
+|---|---|
+| `VPS_HOST` | the server's IP address |
+| `VPS_USER` | `deploy` |
+| `VPS_SSH_KEY` | the private SSH key whose public key is in `/home/deploy/.ssh/authorized_keys` |
+
+**Everyday use**
+
+- **Deploy:** merge or push to `main`, then watch progress in the repository's **Actions** tab.
+- **Deploy by hand:** `ssh deploy@<server> 'bash ~/bar-shop/scripts/deploy.sh main'`
+- **Logs:** `ssh deploy@<server>` then `pm2 logs` (or `pm2 logs bar-shop-api --lines 200`); `pm2 ls` shows status.
+- **Undo a bad release:** `git revert <commit>` and push to `main`. If data must go back too:
+
+  ```bash
+  pg_restore --clean -d "<DATABASE_URL without ?schema>" ~/backups/<file>.dump
+  ```
+
+- **Settings on the server:** `~/bar-shop/backend/.env` (then `pm2 reload bar-shop-api --update-env`) and `~/bar-shop/pos/.env.production` (then deploy again, because it's built in).
 
 ---
 
