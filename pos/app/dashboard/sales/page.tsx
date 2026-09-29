@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAdmin } from "../../components/AdminContext";
 import { ReceiptModal } from "../../components/receipt/ReceiptModal";
 import { API_URL } from "../../lib/constants";
+import { useShopSettings } from "../../lib/useShopSettings";
 import { ROLE_LABELS } from "../../lib/roles";
 import type { PosAdminRole } from "../../lib/types";
 import type { SaleReceipt } from "../../lib/receipt";
@@ -12,6 +13,7 @@ import { IconBottle, IconCard, IconCash, IconInvoice, IconPrinter, IconRefresh, 
 type SaleItem = {
   productId: number | null;
   name: string;
+  hardLiquor?: boolean;
   brand: string | null;
   size: string | null;
   imageUrl: string | null;
@@ -25,6 +27,7 @@ type SaleItem = {
 type Sale = {
   id: number;
   billNo: string;
+  branch?: { name: string; address: string | null; phone: string | null } | null;
   soldAt: string;
   paymentMethod: SaleReceipt["paymentMethod"];
   paymentReference?: string | null;
@@ -56,6 +59,7 @@ const toInputDate = (date: Date) => `${date.getFullYear()}-${String(date.getMont
 function saleToReceipt(sale: Sale): SaleReceipt {
   return {
     billNo: sale.billNo,
+    branch: sale.branch ?? null,
     soldAt: sale.soldAt,
     cashierName: sale.cashier.name,
     cashierRole: ROLE_LABELS[sale.cashier.role] ?? sale.cashier.role,
@@ -74,6 +78,7 @@ function saleToReceipt(sale: Sale): SaleReceipt {
     walletCredit: sale.walletCredit,
     lines: sale.items.map((item) => ({
       name: item.name,
+      hardLiquor: item.hardLiquor === true,
       detail: [item.brand, item.size].filter(Boolean).join(" · ") || undefined,
       quantity: item.quantity,
       unitPrice: item.unitPrice,
@@ -101,6 +106,7 @@ const PRESETS: Array<{ key: string; label: string; range: () => [string, string]
 
 export default function SalesBillsPage() {
   const { token, logout } = useAdmin();
+  const { settings } = useShopSettings(token);
   const [sales, setSales] = useState<Sale[]>([]);
   const [summary, setSummary] = useState({ bills: 0, revenue: 0, emptiesReturned: 0, discounts: 0 });
   const [total, setTotal] = useState(0);
@@ -224,7 +230,7 @@ export default function SalesBillsPage() {
 
       {viewing && (
         <ReceiptModal
-          receipt={saleToReceipt(viewing)}
+          receipt={{ ...saleToReceipt(viewing), hardLiquorLimit: settings.hardLiquorLimitEnabled ? settings.hardLiquorLimit : undefined }}
           title={`Bill ${viewing.billNo}`}
           subtitle={`${money(viewing.total)} · served by ${viewing.cashier.name} (${ROLE_LABELS[viewing.cashier.role] ?? viewing.cashier.role})`}
           closeLabel="Close"

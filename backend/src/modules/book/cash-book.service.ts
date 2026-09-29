@@ -79,7 +79,7 @@ export type CreateCashEntryDto = {
   entryDate?: string;
 };
 
-export async function createCashEntry(dto: CreateCashEntryDto, actorId: number) {
+export async function createCashEntry(dto: CreateCashEntryDto, actorId: number, branchId: number) {
   const categories = dto.direction === "OUT" ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
   if (!categories[dto.category] || AUTOMATIC_ONLY.has(dto.category)) {
     throw AppError.validation({ category: ["Choose a category from the list"] });
@@ -91,8 +91,8 @@ export async function createCashEntry(dto: CreateCashEntryDto, actorId: number) 
   const created = await prisma.$transaction(async (tx) => {
     let shiftId: number | null = null;
     if (dto.source === "DRAWER") {
-      const shift = await findOpenShift(tx);
-      if (!shift) throw AppError.validation({ source: ["No shift is open — start a shift to pay from or into the cash drawer"] });
+      const shift = await findOpenShift(tx, branchId);
+      if (!shift) throw AppError.validation({ source: ["No shift is open at this branch — start a shift to pay from or into the cash drawer"] });
       shiftId = shift.id;
       if (dto.direction === "OUT") {
         const available = await drawerCash(shift.id, tx);
@@ -115,6 +115,7 @@ export async function createCashEntry(dto: CreateCashEntryDto, actorId: number) 
             note: dto.note?.trim() || null,
             entryDate: dto.entryDate ? new Date(`${dto.entryDate}T12:00:00`) : new Date(),
             shiftId,
+            branchId,
             createdById: actorId,
           },
         });
@@ -202,12 +203,15 @@ export type CashEntryQuery = {
   search?: string;
   shiftId?: number;
   bankStatus?: "PENDING" | "BANKED";
+  /** null = every branch. */
+  branchId?: number | null;
 };
 
 export async function listCashEntries(query: CashEntryQuery) {
   const search = query.search?.trim();
   const where: Prisma.PosCashEntryWhereInput = {
     direction: query.direction,
+    ...(query.branchId ? { branchId: query.branchId } : {}),
     ...(query.category ? { category: query.category } : {}),
     ...(query.source ? { source: query.source } : {}),
     ...(query.shiftId ? { shiftId: query.shiftId } : {}),
@@ -235,7 +239,7 @@ export async function listCashEntries(query: CashEntryQuery) {
     prisma.posCashEntry.count({ where }),
     prisma.posCashEntry.groupBy({ by: ["category"], where: { ...where, voided: false }, _sum: { amount: true }, _count: true }),
     // Everything still waiting to be banked, whatever the filters (it's a to-do list).
-    prisma.posCashEntry.groupBy({ by: ["category"], where: { direction: query.direction, bankStatus: "PENDING", voided: false }, _sum: { amount: true }, _count: true }),
+    prisma.posCashEntry.groupBy({ by: ["category"], where: { direction: query.direction, bankStatus: "PENDING", voided: false, ...(query.branchId ? { branchId: query.branchId } : {}) }, _sum: { amount: true }, _count: true }),
   ]);
 
   const staffIds = [...new Set(entries.flatMap((entry) => [entry.createdById, entry.voidedById, entry.bankedById]).filter((id): id is number => Boolean(id)))];

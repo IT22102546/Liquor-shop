@@ -1,6 +1,7 @@
 import { prisma } from "../../database/prisma.client";
 import { AppError } from "../../common/utils/errors";
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "./cash-book.service";
+import { forBranch } from "../branches/branch-stock";
 import { getSettings } from "../settings/settings.service";
 
 /**
@@ -33,7 +34,9 @@ function bucketKeys(from: Date, to: Date, mode: Bucketing) {
   return keys;
 }
 
-export async function getPeriodReport(fromText: string, toText: string) {
+export async function getPeriodReport(fromText: string, toText: string, branchId: number | null) {
+  // One branch, or every branch together (branchId null).
+  const inBranch = branchId ? { branchId } : {};
   const from = new Date(`${fromText}T00:00:00`);
   const to = new Date(`${toText}T23:59:59.999`);
   if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()) || from > to) throw AppError.validation({ from: ["Choose a valid date range"] });
@@ -41,9 +44,9 @@ export async function getPeriodReport(fromText: string, toText: string) {
   if (days > 1_100) throw AppError.validation({ to: ["Choose a range of up to 3 years"] });
   const mode: Bucketing = days <= 1 ? "HOUR" : days <= 62 ? "DAY" : "MONTH";
 
-  const [sales, entries, shifts, movements, products, newMembers, owed, settings, walletHeld] = await Promise.all([
+  const [sales, entries, shifts, movements, allProducts, newMembers, owed, settings, walletHeld, branch] = await Promise.all([
     prisma.posCounterSale.findMany({
-      where: { createdAt: { gte: from, lte: to } },
+      where: { createdAt: { gte: from, lte: to }, ...inBranch },
       orderBy: { createdAt: "asc" },
       select: {
         invoiceGroupCode: true, totalAmount: true, paymentMethod: true, cashPaid: true, cardPaid: true, transferPaid: true, walletUsed: true, walletCredit: true, createdAt: true, customerId: true,
@@ -52,12 +55,12 @@ export async function getPeriodReport(fromText: string, toText: string) {
         customer: { select: { id: true, firstName: true, lastName: true } },
       },
     }),
-    prisma.posCashEntry.findMany({ where: { entryDate: { gte: from, lte: to }, voided: false } }),
-    prisma.posShift.findMany({ where: { status: "CLOSED", closedAt: { gte: from, lte: to } }, orderBy: { closedAt: "asc" } }),
-    prisma.inventoryMovement.findMany({ where: { createdAt: { gte: from, lte: to } }, select: { productId: true, kind: true, type: true, quantity: true } }),
+    prisma.posCashEntry.findMany({ where: { entryDate: { gte: from, lte: to }, voided: false, ...inBranch } }),
+    prisma.posShift.findMany({ where: { status: "CLOSED", closedAt: { gte: from, lte: to }, ...inBranch }, orderBy: { closedAt: "asc" } }),
+    prisma.inventoryMovement.findMany({ where: { createdAt: { gte: from, lte: to }, ...inBranch }, select: { productId: true, kind: true, type: true, quantity: true } }),
     prisma.inventoryProduct.findMany({
       select: {
-        id: true, name: true, compatibleWith: true, quantity: true, damagedQuantity: true, purchasePrice: true, taxPaid: true, additionalExpenses: true,
+        id: true, name: true, compatibleWith: true, quantity: true, damagedQuantity: true, emptyBottlesOnHand: true, isHardLiquor: true, purchasePrice: true, taxPaid: true, additionalExpenses: true,
         brand: { select: { name: true } }, category: { select: { name: true } },
       },
     }),
@@ -67,11 +70,14 @@ export async function getPeriodReport(fromText: string, toText: string) {
     getSettings(),
     // Money members hold in wallets right now: the shop owes it to them as future payments.
     prisma.posCustomer.aggregate({ where: { walletBalance: { gt: 0 } }, _sum: { walletBalance: true }, _count: true }),
+    branchId ? prisma.branch.findUnique({ where: { id: branchId }, select: { id: true, name: true, code: true } }) : null,
   ]);
+  // Stock on hand: that branch's counts, or company totals for all branches.
+  const products = branchId ? await forBranch(branchId, allProducts) : allProducts;
   const lines = sales.length
     ? await prisma.posCustomerPurchase.findMany({
         where: { invoiceGroupCode: { in: sales.map((sale) => sale.invoiceGroupCode) } },
-        select: { invoiceGroupCode: true, quantity: true, finalSellingPrice: true, inventoryProductId: true },
+        select: { invoiceGroupCode: true, quantity: true, finalSellingPrice: true, inventoryProductId: true, isHardLiquor: true },
       })
     : [];
 
@@ -154,7 +160,7 @@ export async function getPeriodReport(fromText: string, toText: string) {
   const pointsValue = round2(sales.reduce((sum, sale) => sum + sale.pointsValue, 0));
 
   // ── Returns & damages in the period ──
-  const returnRows = await prisma.posReturn.findMany({ where: { createdAt: { gte: from, lte: to } } });
+  const returnRows = await prisma.posReturn.findMany({ where: { createdAt: { gte: from, lte: to }, ...inBranch } });
   const costOf = (row: { unitCost: number | null; quantity: number }) => (row.unitCost ?? 0) * row.quantity;
   const refundRows = returnRows.filter((row) => row.type === "REFUND");
   const refunds = round2(refundRows.reduce((sum, row) => sum + row.refundAmount, 0));
@@ -233,16 +239,18 @@ export async function getPeriodReport(fromText: string, toText: string) {
   const short = round2(shiftRows.filter((row) => row.cashDifference < -0.004).reduce((sum, row) => sum + row.cashDifference, 0));
 
   // ── Stock movements ──
-  const stock = new Map<number, { received: number; sold: number; customerReturns: number; damaged: number; adjusted: number; collected: number; returned: number }>();
+  const stock = new Map<number, { received: number; sold: number; customerReturns: number; damaged: number; transferIn: number; transferOut: number; adjusted: number; collected: number; returned: number }>();
   movements.forEach((movement) => {
     // Damaged stock kept aside is reported under Returns & damages.
     if (movement.kind === "DAMAGED") return;
-    const row = stock.get(movement.productId) ?? { received: 0, sold: 0, customerReturns: 0, damaged: 0, adjusted: 0, collected: 0, returned: 0 };
+    const row = stock.get(movement.productId) ?? { received: 0, sold: 0, customerReturns: 0, damaged: 0, transferIn: 0, transferOut: 0, adjusted: 0, collected: 0, returned: 0 };
     if (movement.kind === "STOCK") {
       if (movement.type === "RECEIVED" || movement.type === "OPENING") row.received += movement.quantity;
       else if (movement.type === "SOLD") row.sold += -movement.quantity;
       else if (movement.type === "CUSTOMER_RETURN" || movement.type === "RESTORED") row.customerReturns += movement.quantity;
       else if (movement.type === "EXCHANGED" || movement.type === "DAMAGED") row.damaged += -movement.quantity;
+      else if (movement.type === "TRANSFER_IN") row.transferIn += movement.quantity;
+      else if (movement.type === "TRANSFER_OUT") row.transferOut += -movement.quantity;
       else row.adjusted += movement.quantity;
     } else if (movement.type === "COLLECTED") row.collected += movement.quantity;
     else if (movement.type === "RETURNED") row.returned += -movement.quantity;
@@ -262,6 +270,8 @@ export async function getPeriodReport(fromText: string, toText: string) {
 
   return {
     period: { from: fromText, to: toText, days, grouping: mode },
+    /** null = all branches together. */
+    branch: branch ?? null,
     sales: {
       bills: sales.length,
       units,
@@ -274,6 +284,13 @@ export async function getPeriodReport(fromText: string, toText: string) {
       /** Paid back for returned bottles, and net sales after that. */
       refunds,
       netAfterReturns: round2(netSales - refunds),
+      /** Hard liquor (ticked on the product) vs everything else. */
+      byType: (() => {
+        const hard = lines.filter((line) => line.isHardLiquor);
+        const other = lines.filter((line) => !line.isHardLiquor);
+        const sum = (rows: typeof lines) => ({ units: rows.reduce((total, line) => total + line.quantity, 0), amount: round2(rows.reduce((total, line) => total + line.finalSellingPrice, 0)) });
+        return { hardLiquor: sum(hard), other: sum(other) };
+      })(),
       averageBill: sales.length ? round2(netSales / sales.length) : 0,
       cash: round2(pay.cash), card: round2(pay.card), transfer: round2(pay.transfer),
       cashBills: payCount.cash, cardBills: payCount.card, transferBills: payCount.transfer, splitBills,

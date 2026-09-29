@@ -18,6 +18,9 @@ import {
   IconInvoice,
   IconReceipt,
   IconReturns,
+  IconBoxInNav,
+  IconTransfer,
+  IconBranch,
   IconSupplier,
   IconTrend,
   IconUsers,
@@ -44,6 +47,7 @@ const NAV_SECTIONS: { title: string; links: NavLink[] }[] = [
       { label: "Dashboard", href: "/dashboard", Icon: IconDashboard },
       { label: "Activity Log", href: "/dashboard/logs", Icon: IconActivity },
       { label: "Shop Settings", href: "/dashboard/settings", Icon: IconAccess },
+      { label: "Branches", href: "/dashboard/branches", Icon: IconBranch },
     ],
   },
   {
@@ -52,6 +56,8 @@ const NAV_SECTIONS: { title: string; links: NavLink[] }[] = [
       { label: "Product Setup", href: "/dashboard/inventory/manage", Icon: IconInventory },
       { label: "Suppliers", href: "/dashboard/suppliers", Icon: IconSupplier },
       { label: "Purchase Orders", href: "/dashboard/purchase-orders", Icon: IconInvoice },
+      { label: "Goods Received (GRN)", href: "/dashboard/grn", Icon: IconBoxInNav },
+      { label: "Branch Transfers (GTN)", href: "/dashboard/transfers", Icon: IconTransfer },
       // Hidden from the sidebar for now; the page still exists.
       // { label: "Supplier Requests", href: "/dashboard/purchasing-requests", Icon: IconContactRequests },
     ],

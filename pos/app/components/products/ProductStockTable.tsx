@@ -42,6 +42,14 @@ export function ProductStockTable({ token, products, brands, categories, loading
   const [stocking, setStocking] = useState<{ id: number; qty: string; cost: string } | null>(null);
   const [flashId, setFlashId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Stock in every branch, shown under this branch's count when there is more than one branch.
+  const [branchStock, setBranchStock] = useState<{ branches: Array<{ id: number; code: string; name: string }>; stock: Array<{ branchId: number; productId: number; quantity: number }> } | null>(null);
+  useEffect(() => {
+    void fetch(`${API_URL}/api/pos/branches/stock`, { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" })
+      .then((response) => response.json())
+      .then((payload: { data?: typeof branchStock }) => setBranchStock(payload.data ?? null))
+      .catch(() => setBranchStock(null));
+  }, [token, products]);
 
   useEffect(() => {
     if (!editing) return;
@@ -51,13 +59,21 @@ export function ProductStockTable({ token, products, brands, categories, loading
       .catch(() => setSuppliers([]));
   }, [base, editing, token]);
 
+  // Supplier filter: pick a supplier to see only their products.
+  const [supplierFilter, setSupplierFilter] = useState("");
+  const supplierOptions = useMemo(() => {
+    const map = new Map<number, string>();
+    products.forEach((product) => { if (product.supplier) map.set(product.supplier.id, product.supplier.name); });
+    return [...map.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  }, [products]);
   const rows = useMemo(() => {
     const needle = search.trim().toLowerCase();
     return products
+      .filter((product) => !supplierFilter || (supplierFilter === "none" ? !product.supplier : String(product.supplier?.id) === supplierFilter))
       .filter((product) => !needle || [product.name, product.brand.name, product.category.name, product.partNumber]
         .some((value) => value?.toLowerCase().includes(needle)))
       .sort((a, b) => a.category.name.localeCompare(b.category.name) || a.name.localeCompare(b.name));
-  }, [products, search]);
+  }, [products, search, supplierFilter]);
 
   const emptiesOnHand = products.reduce((sum, product) => sum + (product.emptyBottlesOnHand ?? 0), 0);
   const emptiesValue = products.reduce((sum, product) => sum + (product.emptyBottlesOnHand ?? 0) * (product.emptyBottlePrice ?? 0), 0);
@@ -131,9 +147,18 @@ export function ProductStockTable({ token, products, brands, categories, loading
             {emptiesValue > 0 ? ` (worth ${formatCurrency(emptiesValue)})` : ""}
           </p>
         </div>
-        <div className="pos-search-field">
-          <IconSearch />
-          <input className="bm-input" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search products or barcode" aria-label="Search products" />
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
+          {supplierOptions.length > 0 && (
+            <select className="bm-input" style={{ maxWidth: 220 }} value={supplierFilter} onChange={(event) => setSupplierFilter(event.target.value)} aria-label="Supplier">
+              <option value="">All suppliers</option>
+              {supplierOptions.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
+              <option value="none">No supplier set</option>
+            </select>
+          )}
+          <div className="pos-search-field">
+            <IconSearch />
+            <input className="bm-input" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search products or barcode" aria-label="Search products" />
+          </div>
         </div>
       </div>
 
@@ -162,13 +187,21 @@ export function ProductStockTable({ token, products, brands, categories, loading
                   <div className="lx-product-cell">
                     <ProductArt className="lx-mini-art" categoryName={product.category.name} imageUrl={product.images?.[0]?.url} alt={product.name} iconSize={18} />
                     <div>
-                      <strong>{product.name}</strong>
+                      <strong>{product.name}{product.isHardLiquor && <span className="hl-badge" title="Counts toward the hard liquor limit per bill">Hard liquor</span>}</strong>
                       <span>{product.brand.name} · {product.category.name}</span>
                     </div>
                   </div>
                 </td>
                 <td className="td-muted">{product.partNumber || "—"}</td>
-                <td style={{ textAlign: "right" }}><span className={flashId === product.id ? "lx-stock-flash" : undefined}>{product.quantity}</span></td>
+                <td style={{ textAlign: "right" }}>
+                  <span className={flashId === product.id ? "lx-stock-flash" : undefined}>{product.quantity}</span>
+                  {branchStock && branchStock.branches.length > 1 && (
+                    <div className="stock-branches" title="Stock in each branch">
+                      {branchStock.branches.map((branch) => <span key={branch.id}>{branch.code} {branchStock.stock.find((row) => row.branchId === branch.id && row.productId === product.id)?.quantity ?? 0}</span>)}
+                    </div>
+                  )}
+                  {(product.damagedQuantity ?? 0) > 0 && <div className="rt-damaged" style={{ fontSize: "0.72rem" }} title="Kept aside, not for sale — see Returns & Damages">+{product.damagedQuantity} damaged</div>}
+                </td>
                 <td style={{ textAlign: "right" }}>{product.sellingPrice != null ? formatCurrency(product.sellingPrice) : "—"}</td>
                 <td style={{ textAlign: "right" }}>
                   {product.emptyBottlePrice ? formatCurrency(product.emptyBottlePrice) : <span className="td-muted">Not returnable</span>}

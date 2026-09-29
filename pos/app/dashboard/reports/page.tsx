@@ -29,6 +29,15 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState(false);
+  // "" = the branch I'm working in, "all" = every branch together, or a branch id.
+  const [scope, setScope] = useState("");
+  const [branches, setBranches] = useState<Array<{ id: number; name: string }>>([]);
+  useEffect(() => {
+    void fetch(`${API_URL}/api/pos/branches`, { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" })
+      .then((response) => response.json())
+      .then((payload: { data?: Array<{ id: number; name: string }> }) => setBranches(payload.data ?? []))
+      .catch(() => setBranches([]));
+  }, [token]);
 
   const range = useMemo(() => (kind === "custom" ? custom : periodRange(kind, anchor)), [kind, anchor, custom]);
   const isCurrent = kind !== "custom" && periodRange(kind, new Date()).from === range.from;
@@ -38,7 +47,8 @@ export default function ReportsPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_URL}/api/pos/reports/period?from=${range.from}&to=${range.to}`, { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
+      const where = scope === "all" ? "&branch=all" : scope ? `&branchId=${scope}` : "";
+      const response = await fetch(`${API_URL}/api/pos/reports/period?from=${range.from}&to=${range.to}${where}`, { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
       if (response.status === 401) { logout(); return; }
       const payload = (await response.json()) as { data?: PeriodReport; message?: string; errors?: Record<string, string[]> };
       if (!response.ok || !payload.data) throw new Error((payload.errors && Object.values(payload.errors)[0]?.[0]) ?? payload.message ?? "Could not load the report");
@@ -48,7 +58,7 @@ export default function ReportsPage() {
     } finally {
       setLoading(false);
     }
-  }, [range.from, range.to, token, logout]);
+  }, [range.from, range.to, scope, token, logout]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -73,6 +83,16 @@ export default function ReportsPage() {
       </div>
 
       <section className="lx-card lx-period-bar">
+        {branches.length > 1 && (
+          <label className="topbar-branch" style={{ alignSelf: "center" }}>
+            <span>Branch</span>
+            <select value={scope} onChange={(event) => setScope(event.target.value)} aria-label="Report branch">
+              <option value="">This branch</option>
+              <option value="all">All branches together</option>
+              {branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}
+            </select>
+          </label>
+        )}
         <div className="lx-seg-plain" role="tablist" aria-label="Report period">
           {KINDS.map((item) => (
             <button key={item.value} type="button" role="tab" aria-selected={kind === item.value} className={kind === item.value ? "active" : ""} onClick={() => { setKind(item.value); setAnchor(new Date()); }}>{item.label}</button>
@@ -224,6 +244,19 @@ export default function ReportsPage() {
                 </table></div>
               )}
             </section>
+
+            {report.returns && (
+              <section className="lx-card">
+                <div className="lx-card-head"><div><div className="lx-card-title">Returns &amp; damages</div><div className="lx-card-sub">{report.returns.refundBills} refund(s) · {report.returns.exchanged} exchanged · {report.returns.storeDamaged} damaged in store</div></div></div>
+                <div className="lx-book-totals">
+                  <span>Refunds ({report.returns.refundUnits} btl)<b>{money(report.returns.refunds)}</b></span>
+                  <span>Cash · wallet<b>{money(report.returns.refundsCash)} · {money(report.returns.refundsWallet)}</b></span>
+                  <span>Damage loss at cost<b>{money(report.returns.damageLoss)}</b></span>
+                  <span>Sent to supplier · thrown away<b>{report.returns.toSupplier} · {report.returns.writtenOff}</b></span>
+                  <span>Damaged kept aside now<b>{report.returns.damagedNow} · {money(report.returns.damagedValueNow)}</b></span>
+                </div>
+              </section>
+            )}
           </div>
         </div>
       )}
@@ -233,7 +266,7 @@ export default function ReportsPage() {
         <div className="bm-modal-backdrop" onClick={() => setPreview(false)}>
           <div className="lx-report-modal" onClick={(event) => event.stopPropagation()} role="dialog" aria-label="Report preview">
             <div className="lx-report-head">
-              <div><strong>{PERIOD_TITLES[kind]} · {label}</strong><span>{money(report.sales.netSales)} net sales · {money(report.profit.netProfit)} net profit</span></div>
+              <div><strong>{PERIOD_TITLES[kind]} · {label}{report.branch !== undefined ? ` · ${report.branch?.name ?? "All branches"}` : ""}</strong><span>{money(report.sales.netSales)} net sales · {money(report.profit.netProfit)} net profit</span></div>
               <div className="lx-report-actions">
                 <button type="button" className="btn-accent" onClick={() => printPeriodReport(report, kind)}><IconPrinter size={16} /> Print A4 / Save PDF</button>
                 <button type="button" className="btn-outline" onClick={() => setPreview(false)}>Close</button>

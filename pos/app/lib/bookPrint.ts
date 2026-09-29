@@ -20,7 +20,7 @@ export type PaymentRow = { billNo: string; time: string; cashier: string; amount
 
 /** Z report data as returned by /api/pos/shifts/:id/report (closed shifts include `close`). */
 export type ShiftReport = {
-  shift: { id: number; shiftNo: string; status: string; openedAt: string; openedBy: string; openingFloat: number; countedAt: string | null; countedBy: string | null; closedAt: string | null; closedBy: string | null };
+  shift: { id: number; shiftNo: string; status: string; branch?: { id: number; code: string; name: string; address: string | null; phone: string | null }; openedAt: string; openedBy: string; openingFloat: number; countedAt: string | null; countedBy: string | null; closedAt: string | null; closedBy: string | null };
   sales: {
     bills: number; units: number; grossSales: number | null; emptyDeduction: number | null; emptiesReturned: number; discounts: number | null;
     pointsRedeemed: number; pointsValue: number | null; netSales: number | null; cashSales: number | null; cardSales: number | null;
@@ -38,6 +38,8 @@ export type ShiftReport = {
     loyalty?: ShiftLoyalty;
     byStaff: Array<{ name: string; bills: number; cash: number | null; card: number | null; transfer?: number | null; wallet?: number | null; total: number | null }>;
     byProduct: Array<{ name: string; units: number; amount: number | null }>;
+    /** Hard liquor (ticked on the product) vs beer, wine and other drinks (older reports don't have it). */
+    byType?: { hardLiquor: { units: number; amount: number | null }; other: { units: number; amount: number | null } };
     billList: Array<{ billNo: string; time: string; cashier: string; customer: string; payment: string; reference?: string | null; items: string; units: number; emptyDeduction: number | null; discount: number | null; total: number | null }>;
   };
   cash: {
@@ -48,7 +50,7 @@ export type ShiftReport = {
     entries: Array<{ entryNo: string; direction: "IN" | "OUT"; category: string; source: string; fromDrawer: boolean; amount: number; party: string | null; note: string | null; reference: string | null; time: string; recordedBy: string; voided: boolean; voidReason: string | null; voidedBy: string | null; automatic: boolean }>;
   };
   /** returned = back on the shelf from customers; damaged = off the shelf into damaged stock (older reports have neither). */
-  stockBook: Array<{ productId: number; name: string; size: string | null; brand: string; category: string; opening: number; received: number; sold: number; returned?: number; damaged?: number; adjusted: number; closing: number }>;
+  stockBook: Array<{ productId: number; name: string; size: string | null; brand: string; category: string; opening: number; received: number; sold: number; returned?: number; damaged?: number; transferIn?: number; transferOut?: number; adjusted: number; closing: number }>;
   empties: Array<{ name: string; collected: number; returned: number; onHand: number }>;
   /** How takings came in, with every split bill (older reports don't have these). Amounts are null in the cashier's blind view. */
   payments?: {
@@ -71,6 +73,12 @@ export type ShiftReport = {
       condition: "SHELF" | "DAMAGED" | null; disposal: string | null; billNo: string | null; customer: string | null;
       refund: number | null; refundMethod: "CASH" | "WALLET" | null; pointsReversed: number; reason: string; note: string | null; reference: string | null; by: string;
     }>;
+  };
+  /** Supplier deliveries (GRN) and branch transfers (GTN) during the shift. */
+  goods?: {
+    grns: Array<{ grnNo: string; time: string; supplier: string; poNumber: string | null; invoiceNo: string | null; invoiceTotal: number | null; totalCost: number; accepted: number; rejected: number; items: string; by: string }>;
+    sent: Array<{ gtnNo: string; time: string; branch: string; status: string; units: number; items: string; by: string }>;
+    received: Array<{ gtnNo: string; time: string; branch: string; units: number; damaged: number; missing: number; items: string; note: string | null; by: string }>;
   };
   /** Damaged bottles kept aside: added and cleared this shift, and on hand. */
   damagedStock?: Array<{ name: string; added: number; cleared: number; onHand: number }>;
@@ -108,7 +116,7 @@ export function zReportFileName(report: ShiftReport) {
 export function buildZReportHtml(report: ShiftReport) {
   const { shift, sales, cash, close } = report;
   const entries = cash.entries.filter((entry) => !entry.automatic);
-  const stockRows = report.stockBook.filter((row) => row.opening || row.received || row.sold || row.adjusted || row.returned || row.damaged || row.closing);
+  const stockRows = report.stockBook.filter((row) => row.opening || row.received || row.sold || row.adjusted || row.returned || row.damaged || row.transferIn || row.transferOut || row.closing);
   const counted = new Map((close?.stockCount ?? []).map((row) => [row.name, row]));
 
   return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(zReportFileName(report))}</title><style>${THERMAL_BASE_CSS}
@@ -122,6 +130,7 @@ export function buildZReportHtml(report: ShiftReport) {
   </style></head><body>
     ${header(shift.status === "CLOSED" ? "Z REPORT · SHIFT CLOSE" : "X REPORT · SHIFT SO FAR")}
     <div class="meta">
+      ${shift.branch ? `<div class="row"><span>Branch</span><span>${esc(shift.branch.name)}</span></div>` : ""}
       <div class="row"><span>Shift</span><span>${esc(shift.shiftNo)}</span></div>
       <div class="row"><span>Opened</span><span>${when(shift.openedAt)}</span></div>
       <div class="row"><span>Opened by</span><span>${esc(shift.openedBy)}</span></div>
@@ -175,6 +184,11 @@ export function buildZReportHtml(report: ShiftReport) {
       ${report.payments.rows.filter((row) => row.bills > 0).map((row) => `<div class="row"><span>${esc(row.method)} (${row.bills})</span><span>${amt(row.amount)}</span></div>`).join("")}
       ${report.payments.splitBills.map((row) => `<div class="row small"><span>&nbsp;· ${esc(row.billNo.slice(-9))}: cash ${amt(row.cash)}${row.card ? ` + card ${amt(row.card)}` : ""}${row.transfer ? ` + QR ${amt(row.transfer)}` : ""}</span><span></span></div>`).join("")}
       <div class="row small"><span>Change given back</span><span>${amt(report.payments.changeGiven)}</span></div>` : ""}
+    ${report.goods && (report.goods.grns.length || report.goods.sent.length || report.goods.received.length) ? `
+      <div class="head">Goods in &amp; out</div>
+      ${report.goods.grns.map((row) => `<div class="row small"><span>${esc(row.grnNo)} ${esc(row.supplier)}${row.invoiceNo ? ` inv ${esc(row.invoiceNo)}` : ""}${row.rejected ? ` (${row.rejected} rej)` : ""}</span><span>+${row.accepted}</span></div>`).join("")}
+      ${report.goods.sent.map((row) => `<div class="row small"><span>${esc(row.gtnNo)} to ${esc(row.branch)}</span><span>−${row.units}</span></div>`).join("")}
+      ${report.goods.received.map((row) => `<div class="row small"><span>${esc(row.gtnNo)} from ${esc(row.branch)}${row.missing ? ` · ${row.missing} MISSING` : ""}</span><span>+${row.units}</span></div>`).join("")}` : ""}
     ${report.stockLog?.length || report.journal?.length ? `
       <div class="head">Also during the shift</div>
       ${report.stockLog?.length ? `<div class="row"><span>Stock in &amp; changes</span><span>${report.stockLog.length}</span></div>` : ""}
@@ -221,6 +235,8 @@ export function buildZReportHtml(report: ShiftReport) {
           row.adjusted ? `adj ${row.adjusted > 0 ? "+" : ""}${row.adjusted}` : "",
           row.returned ? `ret +${row.returned}` : "",
           row.damaged ? `dmg −${row.damaged}` : "",
+          row.transferIn ? `from branch +${row.transferIn}` : "",
+          row.transferOut ? `to branch −${row.transferOut}` : "",
         ].filter(Boolean).join(", ");
         return `<tr><td>${esc(row.name)}${notes ? ` <span class="small">(${notes})</span>` : ""}</td><td>${row.opening}</td><td>${row.received}</td><td>${row.sold}</td><td>${row.closing}</td>${close?.stockCount.length ? `<td class="${count && count.difference ? "flag" : ""}">${count ? `${count.counted}${count.difference ? ` (${count.difference > 0 ? "+" : ""}${count.difference})` : ""}` : "—"}</td>` : ""}</tr>`;
       }).join("")}

@@ -1,3 +1,4 @@
+import { forBranch } from "../branches/branch-stock";
 import { Prisma } from "../../generated/prisma";
 import { prisma } from "../../database/prisma.client";
 import type { DashboardQueryDto, SalesQueryDto } from "./dto/pos-user.dto";
@@ -15,6 +16,7 @@ const lineInclude = {
       name: true,
       compatibleWith: true,
       emptyBottlePrice: true,
+      isHardLiquor: true,
       brand: { select: { name: true } },
       category: { select: { name: true } },
       images: { where: { isPrimary: true }, select: { url: true }, take: 1 },
@@ -25,9 +27,10 @@ const lineInclude = {
 // ── Sales bills ──────────────────────────────────────────────────────────────
 
 /** Counter sales (bills) with their items, cashier and loyalty member, newest first. */
-export async function listSales(query: SalesQueryDto) {
+export async function listSales(query: SalesQueryDto, branchId: number | null) {
   const search = query.search?.trim();
   const where: Prisma.PosCounterSaleWhereInput = {
+    ...(branchId ? { branchId } : {}),
     ...(query.customerId ? { customerId: query.customerId } : {}),
     ...(query.from || query.to
       ? { createdAt: { ...(query.from ? { gte: startOfDay(query.from) } : {}), ...(query.to ? { lte: endOfDay(query.to) } : {}) } }
@@ -71,11 +74,13 @@ export async function listSales(query: SalesQueryDto) {
     linesByBill.set(key, [...(linesByBill.get(key) ?? []), line]);
   });
 
+  const branchById = new Map((await prisma.branch.findMany({ select: { id: true, name: true, address: true, phone: true } })).map((branch) => [branch.id, branch]));
   return {
     sales: sales.map((sale) => {
       const items = (linesByBill.get(sale.invoiceGroupCode) ?? []).map((line) => ({
         productId: line.inventoryProductId,
         name: line.inventoryProduct?.name ?? line.customDescription ?? "Item",
+        hardLiquor: line.isHardLiquor,
         brand: line.inventoryProduct?.brand.name ?? null,
         size: line.inventoryProduct?.compatibleWith ?? null,
         category: line.inventoryProduct?.category.name ?? null,
@@ -92,6 +97,8 @@ export async function listSales(query: SalesQueryDto) {
         id: sale.id,
         billNo: sale.invoiceGroupCode,
         soldAt: sale.createdAt,
+        // Branch it was sold at (printed on the bill).
+        branch: sale.branchId ? branchById.get(sale.branchId) ?? null : null,
         paymentMethod: sale.paymentMethod,
         paymentReference: sale.paymentReference,
         cashPaid: sale.cashPaid,
@@ -154,10 +161,14 @@ function bucketKeys(from: Date, to: Date, mode: Bucketing) {
   return keys;
 }
 
-async function periodFigures(from: Date, to: Date) {
+async function periodFigures(from: Date, to: Date, branchId: number | null) {
+  // Bill lines don't carry a branch; take them through the branch's bills.
+  const codes = branchId
+    ? (await prisma.posCounterSale.findMany({ where: { createdAt: { gte: from, lte: to }, branchId }, select: { invoiceGroupCode: true } })).map((sale) => sale.invoiceGroupCode)
+    : null;
   const [lines, bills] = await Promise.all([
     prisma.posCustomerPurchase.findMany({
-      where: { purchasedAt: { gte: from, lte: to } },
+      where: { purchasedAt: { gte: from, lte: to }, ...(codes ? { invoiceGroupCode: { in: codes } } : {}) },
       select: {
         invoiceGroupCode: true,
         id: true,
@@ -181,7 +192,7 @@ async function periodFigures(from: Date, to: Date) {
       },
     }),
     prisma.posCounterSale.findMany({
-      where: { createdAt: { gte: from, lte: to } },
+      where: { createdAt: { gte: from, lte: to }, ...(branchId ? { branchId } : {}) },
       select: { totalAmount: true, paymentMethod: true, cashPaid: true, cardPaid: true, transferPaid: true, customerId: true, createdAt: true, discountAmount: true, pointsValue: true, pointsRedeemed: true, cashier: { select: { id: true, name: true } } },
     }),
   ]);
@@ -228,7 +239,7 @@ async function periodFigures(from: Date, to: Date) {
  * Everything the dashboard shows for a date range, calculated on the server from all sales
  * (no row limits), plus the previous period of the same length for comparison.
  */
-export async function getDashboardSummary(query: DashboardQueryDto) {
+export async function getDashboardSummary(query: DashboardQueryDto, branchId: number | null) {
   const from = startOfDay(query.from);
   const to = endOfDay(query.to);
   const lengthMs = to.getTime() - from.getTime() + 1;
@@ -237,12 +248,12 @@ export async function getDashboardSummary(query: DashboardQueryDto) {
   const days = Math.round(lengthMs / 86_400_000);
   const mode: Bucketing = days <= 1 ? "HOUR" : days <= 62 ? "DAY" : "MONTH";
 
-  const [current, previous, products, newMembers, members, recent] = await Promise.all([
-    periodFigures(from, to),
-    periodFigures(previousFrom, previousTo),
+  const [current, previous, allProducts, newMembers, members, recent] = await Promise.all([
+    periodFigures(from, to, branchId),
+    periodFigures(previousFrom, previousTo, branchId),
     prisma.inventoryProduct.findMany({
       select: {
-        id: true, name: true, compatibleWith: true, quantity: true, lowStockThreshold: true, emptyBottlesOnHand: true,
+        id: true, name: true, compatibleWith: true, quantity: true, damagedQuantity: true, lowStockThreshold: true, emptyBottlesOnHand: true,
         category: { select: { name: true } },
         images: { where: { isPrimary: true }, select: { url: true }, take: 1 },
       },
@@ -250,6 +261,7 @@ export async function getDashboardSummary(query: DashboardQueryDto) {
     prisma.posCustomer.count({ where: { createdAt: { gte: from, lte: to }, mobileNumber: { not: "WALK-IN" } } }),
     prisma.posCustomer.count({ where: { mobileNumber: { not: "WALK-IN" } } }),
     prisma.posCounterSale.findMany({
+      where: branchId ? { branchId } : {},
       orderBy: { createdAt: "desc" },
       take: 8,
       select: {
@@ -259,6 +271,9 @@ export async function getDashboardSummary(query: DashboardQueryDto) {
       },
     }),
   ]);
+
+  // Stock: that branch's shelf, or all branches together.
+  const products = branchId ? await forBranch(branchId, allProducts) : allProducts;
 
   // Trend: current period vs the previous one, bucket by bucket.
   const keys = bucketKeys(from, to, mode);

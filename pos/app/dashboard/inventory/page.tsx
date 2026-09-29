@@ -12,6 +12,7 @@ import {
 import { useAdmin } from "../../components/AdminContext";
 import { AddLiquorModal } from "../../components/products/AddLiquorModal";
 import { MemberPicker, type LoyaltyMember } from "../../components/customers/MemberPicker";
+import { useBranch } from "../../lib/useBranch";
 import { useShopSettings } from "../../lib/useShopSettings";
 import { ProductArt } from "../../components/products/ProductArt";
 import type { Product, ProductCategory } from "../../components/products/ProductFormModal";
@@ -102,6 +103,7 @@ function AnimatedMoney({ value }: { value: number }) {
 
 export default function InventoryPage() {
   const { admin, token, logout } = useAdmin();
+  const { branch } = useBranch(token);
   const canManageStock = admin.role === "ADMIN" || admin.role === "INVENTORY_MANAGER";
   const canStartShift = admin.role === "ADMIN" || admin.role === "CASHIER";
   const [categories, setCategories] = useState<ProductCategory[]>([]);
@@ -370,10 +372,10 @@ export default function InventoryPage() {
     return counts;
   }, [products]);
   const cartItemCount = cart.reduce((sum, line) => sum + line.quantity, 0);
-  // Sri Lankan rule: only so many bottles of hard liquor on one bill (beer doesn't count).
-  const hardLiquorIds = useMemo(() => new Set(settings.hardLiquorCategoryIdsEffective ?? []), [settings.hardLiquorCategoryIdsEffective]);
+  // Sri Lankan rule: only so many bottles of hard liquor on one bill. Each product is ticked hard liquor
+  // or not in Product Setup (beer, wine, champagne… don't count).
   const hardLimitOn = settings.hardLiquorLimitEnabled && settings.hardLiquorLimit > 0;
-  const isHardLiquor = (product: Product) => hardLiquorIds.has(product.category.id);
+  const isHardLiquor = (product: Product) => product.isHardLiquor === true;
   const hardLiquorCount = cart.reduce((sum, line) => sum + (isHardLiquor(line.product) ? line.quantity : 0), 0);
   const hardLiquorFull = hardLimitOn && hardLiquorCount >= settings.hardLiquorLimit;
   const hardLiquorOver = hardLimitOn && hardLiquorCount > settings.hardLiquorLimit;
@@ -449,7 +451,7 @@ export default function InventoryPage() {
     if (inCart >= product.quantity) return false;
     if (hardLimitOn && isHardLiquor(product) && hardLiquorCount >= settings.hardLiquorLimit) {
       beep("error");
-      showToast({ kind: "error", title: `Hard liquor limit reached: ${settings.hardLiquorLimit} bottles per bill`, detail: "Sri Lankan law. Beer can still be added. Start a new bill for more." });
+      showToast({ kind: "error", title: `Hard liquor limit reached: ${settings.hardLiquorLimit} bottles per bill`, detail: "Sri Lankan law. Beer, wine and other drinks can still be added. Start a new bill for more." });
       return false;
     }
     setCheckoutMessage(null);
@@ -561,6 +563,7 @@ export default function InventoryPage() {
       const productById = new Map(cart.map((line) => [line.product.id, line.product]));
       const receipt: SaleReceipt = {
         billNo: sale.invoiceGroupCode,
+        branch: branch ? { name: branch.name, address: branch.address, phone: branch.phone } : null,
         soldAt: sale.counterSale?.createdAt ?? new Date().toISOString(),
         cashierName: admin.name,
         cashierRole: ROLE_LABELS[admin.role] ?? admin.role,
@@ -579,6 +582,7 @@ export default function InventoryPage() {
           const product = productById.get(line.productId);
           return {
             name: line.name,
+            hardLiquor: product?.isHardLiquor === true,
             detail: [product?.brand.name, product?.compatibleWith].filter(Boolean).join(" · ") || undefined,
             quantity: line.quantity,
             unitPrice: line.unitPrice,
@@ -588,6 +592,7 @@ export default function InventoryPage() {
             total: line.lineTotal,
           };
         }),
+        hardLiquorLimit: hardLimitOn ? settings.hardLiquorLimit : undefined,
         subtotal: sale.subtotal ?? sale.total,
         emptyDeduction: sale.emptyDeduction ?? 0,
         emptiesReturned: sale.emptiesReturned ?? 0,

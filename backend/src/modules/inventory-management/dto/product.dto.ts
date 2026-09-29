@@ -37,6 +37,8 @@ export const createProductSchema = z.object({
   sellingPrice: z.number().min(0).optional(),
   // Amount taken off the bill per empty bottle handed back; null/0 = not returnable.
   emptyBottlePrice: z.union([z.number().min(0), z.null()]).optional(),
+  /** Counts toward the hard liquor limit per bill; left out = decided by the category (Shop Settings). */
+  isHardLiquor: z.boolean().optional(),
   description: z.string().trim().max(3000).optional(),
   descriptionPoints: z
     .array(z.string().trim().min(1).max(500))

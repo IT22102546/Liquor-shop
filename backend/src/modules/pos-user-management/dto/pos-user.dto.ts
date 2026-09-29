@@ -161,12 +161,17 @@ export const salesQuerySchema = z.object({
   from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   customerId: z.coerce.number().int().positive().optional(),
+  /** "all" = every branch (for people who can switch branches). */
+  branch: z.string().optional(),
+  branchId: z.string().optional(),
 });
 
 /** Dashboard summary for a date range (inclusive, local dates). */
 export const dashboardQuerySchema = z.object({
   from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  branch: z.string().optional(),
+  branchId: z.string().optional(),
 });
 
 export const purchaseQuerySchema = z.object({

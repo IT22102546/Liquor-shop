@@ -3,6 +3,8 @@ import { printThermal } from "./print";
 
 export type ReceiptLine = {
   name: string;
+  /** Counts toward the hard liquor limit per bill. */
+  hardLiquor?: boolean;
   /** Brand and size, e.g. "Lion · 700ml". */
   detail?: string;
   quantity: number;
@@ -16,6 +18,8 @@ export type ReceiptLine = {
 
 export type SaleReceipt = {
   billNo: string;
+  /** Branch the bill was made at (its address and phone go on the header). */
+  branch?: { name: string; address: string | null; phone: string | null } | null;
   soldAt: string;
   cashierName: string;
   cashierRole: string;
@@ -37,6 +41,8 @@ export type SaleReceipt = {
   walletUsed?: number;
   walletCredit?: number;
   lines: ReceiptLine[];
+  /** The per-bill hard liquor limit at the time (printed next to the count). */
+  hardLiquorLimit?: number;
   subtotal: number;
   emptyDeduction: number;
   emptiesReturned: number;
@@ -79,6 +85,7 @@ export function buildReceiptHtml(receipt: SaleReceipt) {
   const date = soldAt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
   const time = soldAt.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
   const units = receipt.lines.reduce((sum, line) => sum + line.quantity, 0);
+  const hardUnits = receipt.lines.reduce((sum, line) => sum + (line.hardLiquor ? line.quantity : 0), 0);
   const isCash = receipt.paymentMethod === "CASH";
   const totalSaved = receipt.emptyDeduction + (receipt.discount?.amount ?? 0) + (receipt.pointsValue ?? 0);
 
@@ -135,8 +142,9 @@ export function buildReceiptHtml(receipt: SaleReceipt) {
     <div class="center">
       <div class="shop">${escape(SHOP.name)}</div>
       ${SHOP.tagline ? `<div class="tagline">${escape(SHOP.tagline)}</div>` : ""}
-      <div class="addr">${escape(SHOP.address)}</div>
-      ${SHOP.phone ? `<div class="addr">Tel: ${escape(SHOP.phone)}</div>` : ""}
+      ${receipt.branch ? `<div class="addr"><b>${escape(receipt.branch.name)}</b></div>` : ""}
+      <div class="addr">${escape(receipt.branch?.address || SHOP.address)}</div>
+      ${(receipt.branch?.phone || SHOP.phone) ? `<div class="addr">Tel: ${escape(receipt.branch?.phone || SHOP.phone)}</div>` : ""}
     </div>
 
     <div class="band">SALES RECEIPT</div>
@@ -161,6 +169,7 @@ export function buildReceiptHtml(receipt: SaleReceipt) {
 
     <div class="sums">
       <div class="row"><span>Items</span><span>${units} unit${units === 1 ? "" : "s"} · ${receipt.lines.length} product${receipt.lines.length === 1 ? "" : "s"}</span></div>
+      ${hardUnits > 0 ? `<div class="row"><span>Hard liquor</span><span>${hardUnits} bottle${hardUnits === 1 ? "" : "s"}${receipt.hardLiquorLimit ? ` (limit ${receipt.hardLiquorLimit})` : ""}</span></div>` : ""}
       <div class="row"><span>Subtotal</span><span>${amount(receipt.subtotal)}</span></div>
       ${receipt.emptyDeduction > 0 ? `<div class="row"><span>Empty bottles returned (${receipt.emptiesReturned})</span><span>−${amount(receipt.emptyDeduction)}</span></div>` : ""}
       ${receipt.discount && receipt.discount.amount > 0 ? `<div class="row"><span>Discount${receipt.discount.type === "PERCENT" ? ` (${receipt.discount.value}%)` : ""}</span><span>−${amount(receipt.discount.amount)}</span></div>` : ""}

@@ -41,6 +41,30 @@ export const IconReceipt = () => (
   </svg>
 );
 
+/** Goods received: a box with an arrow going in. */
+export const IconBoxInNav = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 8l9-5 9 5v8l-9 5-9-5V8Z" />
+    <path d="M12 21V12M3 8l9 4 9-4" />
+  </svg>
+);
+
+/** Branch transfers: two arrows between places. */
+export const IconTransfer = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 8h13l-3-3M20 16H7l3 3" />
+  </svg>
+);
+
+/** Branches: a shop front. */
+export const IconBranch = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 10v10h16V10" />
+    <path d="M3 10l2-6h14l2 6H3Z" />
+    <path d="M10 20v-5h4v5" />
+  </svg>
+);
+
 /** Returns & damages: a bottle with a return arrow. */
 export const IconReturns = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

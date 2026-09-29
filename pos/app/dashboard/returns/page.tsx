@@ -6,6 +6,7 @@ import TablePagination from "../../components/TablePagination";
 import { API_URL } from "../../lib/constants";
 import { useShopSettings } from "../../lib/useShopSettings";
 import { printReturnSlip, type ReturnRecord } from "../../lib/returnSlip";
+import { looksLikeBarcode, normalizeBarcode, useBarcodeScanner } from "../../lib/useBarcodeScanner";
 import { IconCheck, IconClose, IconPrinter, IconReturns, IconSearch } from "../../lib/icons";
 
 type ReturnType = ReturnRecord["type"];
@@ -237,33 +238,53 @@ function ModalShell({ title, sub, onClose, onSubmit, busy, error, submitLabel, c
   );
 }
 
-/** Search by name, size or barcode (a scanner types the barcode and Enter). */
-function ProductPicker({ products, value, onChange, stockOf }: { products: Product[]; value: Product | null; onChange: (product: Product | null) => void; stockOf: (product: Product) => string }) {
+/**
+ * Search by name, size or barcode. A barcode reader types the code and Enter into the search box;
+ * once a product is picked, scanning again anywhere in the window picks that bottle (same bottle = one more).
+ */
+function ProductPicker({ products, value, onChange, stockOf, onScanAgain }: {
+  products: Product[]; value: Product | null; onChange: (product: Product | null) => void; stockOf: (product: Product) => string; onScanAgain?: () => void;
+}) {
   const [query, setQuery] = useState("");
+  const [notFound, setNotFound] = useState<string | null>(null);
   const q = query.trim().toLowerCase();
   const matches = q ? products.filter((product) => `${productText(product)} ${product.brand.name} ${product.partNumber ?? ""}`.toLowerCase().includes(q)).slice(0, 8) : [];
+  const byBarcode = (code: string) => products.find((product) => product.partNumber && normalizeBarcode(product.partNumber) === normalizeBarcode(code));
+  // Scans while no field is focused (after a product is picked).
+  useBarcodeScanner((code) => {
+    const product = byBarcode(code);
+    if (!product) { setNotFound(code); return; }
+    setNotFound(null);
+    if (value && product.id === value.id) onScanAgain?.();
+    else onChange(product);
+  }, Boolean(value));
+  const pick = (product: Product) => { setNotFound(null); setQuery(""); onChange(product); };
   if (value) {
     return (
       <div className="rt-picked">
         <div><strong>{productText(value)}</strong><span>{value.brand.name} · {stockOf(value)}</span></div>
         <button type="button" className="btn-outline lx-row-btn" onClick={() => onChange(null)}>Change</button>
+        {notFound && <small className="lx-warn-text rt-scan-miss">No product has barcode “{notFound}”</small>}
       </div>
     );
   }
   return (
     <div className="rt-picker">
       <div className="rt-search"><IconSearch /><input className="bm-input" autoFocus placeholder="Type a product name or scan the barcode" value={query}
-        onChange={(event) => setQuery(event.target.value)}
+        onChange={(event) => { setQuery(event.target.value); setNotFound(null); }}
         onKeyDown={(event) => {
           if (event.key !== "Enter") return;
           event.preventDefault();
-          const exact = products.find((product) => product.partNumber && product.partNumber.toLowerCase() === q);
-          if (exact || matches.length === 1) onChange(exact ?? matches[0]);
+          const exact = byBarcode(query);
+          if (exact) pick(exact);
+          else if (looksLikeBarcode(query)) { setNotFound(query.trim()); setQuery(""); }
+          else if (matches.length === 1) pick(matches[0]);
         }} /></div>
+      {notFound && <small className="lx-warn-text">No product has barcode “{notFound}”. Scan again, or type the name. Barcodes are added in Product Setup.</small>}
       {matches.length > 0 && (
         <div className="rt-matches">
           {matches.map((product) => (
-            <button key={product.id} type="button" onClick={() => onChange(product)}>
+            <button key={product.id} type="button" onClick={() => pick(product)}>
               <strong>{productText(product)}</strong><span>{product.brand.name} · {stockOf(product)}</span>
             </button>
           ))}
@@ -309,7 +330,7 @@ function ExchangeModal({ api, products, onClose, onDone }: { api: Api; products:
   });
   return (
     <ModalShell title="Damaged bottle exchange" sub="The customer hands back a damaged bottle and gets a new one. The new bottle comes off the shelf; the damaged one is kept aside." onClose={onClose} onSubmit={() => void submit.run()} busy={submit.busy} error={submit.error} submitLabel="Record exchange & print slip">
-      <ProductPicker products={products} value={product} onChange={setProduct} stockOf={(item) => `${item.quantity} on shelf`} />
+      <ProductPicker products={products} value={product} onChange={(next) => { setProduct(next); setQuantity("1"); }} onScanAgain={() => setQuantity((current) => String((Number(current) || 0) + 1))} stockOf={(item) => `${item.quantity} on shelf`} />
       <div className="lx-member-grid">
         <label>Bottles exchanged *<input className="bm-input" type="number" min={1} max={product?.quantity ?? undefined} value={quantity} onChange={(event) => setQuantity(event.target.value)} required /></label>
         <label>Bill number (if they have it)<input className="bm-input" value={billNo} onChange={(event) => setBillNo(event.target.value)} placeholder="POS-…" /></label>
@@ -333,7 +354,7 @@ function DamageModal({ api, products, onClose, onDone }: { api: Api; products: P
   });
   return (
     <ModalShell title="Mark store damage" sub="Bottles found damaged in the store come off the shelf and are kept aside as damaged stock, until sent back to the supplier or thrown away." onClose={onClose} onSubmit={() => void submit.run()} busy={submit.busy} error={submit.error} submitLabel="Move to damaged stock">
-      <ProductPicker products={products} value={product} onChange={setProduct} stockOf={(item) => `${item.quantity} on shelf${item.damagedQuantity ? ` · ${item.damagedQuantity} damaged` : ""}`} />
+      <ProductPicker products={products} value={product} onChange={(next) => { setProduct(next); setQuantity("1"); }} onScanAgain={() => setQuantity((current) => String((Number(current) || 0) + 1))} stockOf={(item) => `${item.quantity} on shelf${item.damagedQuantity ? ` · ${item.damagedQuantity} damaged` : ""}`} />
       <div className="lx-member-grid">
         <label>Damaged bottles *<input className="bm-input" type="number" min={1} max={product?.quantity ?? undefined} value={quantity} onChange={(event) => setQuantity(event.target.value)} required /></label>
         <span />
@@ -457,8 +478,8 @@ function RefundModal({ api, onClose, onDone }: { api: Api; onClose: () => void; 
                     <td><input className="bm-input rt-qty" type="number" min={0} max={line.returnable} disabled={line.returnable === 0} value={counts[line.productId] ?? ""} placeholder="0" onChange={(event) => setCounts({ ...counts, [line.productId]: event.target.value })} aria-label={`${line.name} bottles back`} /></td>
                     <td>
                       <select className="bm-input" value={conditions[line.productId] ?? "SHELF"} onChange={(event) => setConditions({ ...conditions, [line.productId]: event.target.value as "SHELF" | "DAMAGED" })} aria-label={`${line.name} condition`}>
-                        <option value="SHELF">Unopened — back on shelf</option>
-                        <option value="DAMAGED">Damaged — keep aside</option>
+                        <option value="SHELF">Back on shelf</option>
+                        <option value="DAMAGED">Damaged, keep aside</option>
                       </select>
                     </td>
                     <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>{line.quantity ? money(line.amount) : "—"}</td>

@@ -3,7 +3,7 @@ import { prisma } from "../../database/prisma.client";
 import { AppError } from "../../common/utils/errors";
 import { emailConfigured, sendEmail, senderAddress } from "../../common/utils/mailer";
 import { getSettings, type ShopSettings } from "../settings/settings.service";
-import { restockProduct } from "../inventory-management/inventory-management.service";
+import { createGrn } from "../goods/grn.service";
 
 /**
  * Purchase orders to suppliers. DRAFT → SENT (emailed) → PARTIAL / RECEIVED, or CANCELLED.
@@ -60,7 +60,7 @@ async function assertSupplier(supplierId: number) {
   return supplier;
 }
 
-export async function createOrder(dto: OrderInput, actorId: number) {
+export async function createOrder(dto: OrderInput, actorId: number, branchId: number) {
   await assertSupplier(dto.supplierId);
   const items = await buildItems(dto.items);
   const total = round2(items.reduce((sum, item) => sum + item.lineTotal, 0));
@@ -75,6 +75,8 @@ export async function createOrder(dto: OrderInput, actorId: number) {
           notes: dto.notes?.trim() || null,
           total,
           createdById: actorId,
+          // Delivered to the branch it was ordered for; received there on a GRN.
+          branchId,
           items: { create: items },
         },
       });
@@ -122,8 +124,14 @@ export async function getOrder(id: number) {
   if (!order) throw AppError.notFound("Purchase order not found");
   const names = await staffNames([order.createdById, order.sentById, order.receivedById, order.cancelledById, ...order.emails.map((email) => email.sentById)]);
   const settings = await getSettings();
+  const [deliverTo, grns] = await Promise.all([
+    order.branchId ? prisma.branch.findUnique({ where: { id: order.branchId }, select: { id: true, name: true, code: true, address: true } }) : null,
+    prisma.grn.findMany({ where: { purchaseOrderId: order.id }, orderBy: { createdAt: "asc" }, select: { id: true, grnNo: true, createdAt: true, supplierInvoiceNo: true, acceptedUnits: true, rejectedUnits: true, totalCost: true } }),
+  ]);
   return {
     ...order,
+    deliverTo,
+    grns,
     statusLabel: STATUS_LABELS[order.status as PurchaseOrderStatus] ?? order.status,
     createdBy: names.get(order.createdById) ?? "—",
     sentBy: order.sentById ? names.get(order.sentById) ?? "—" : null,
@@ -319,38 +327,39 @@ export async function sendOrder(id: number, dto: SendDto, actorId: number) {
   return getOrder(id);
 }
 
-export type ReceiveDto = { lines: Array<{ itemId: number; quantity: number; unitCost?: number }> };
+export type ReceiveDto = {
+  lines: Array<{ itemId: number; quantity: number; rejected?: number; rejectReason?: string | null; unitCost?: number }>;
+  supplierInvoiceNo?: string | null;
+  invoiceDate?: string | null;
+  invoiceTotal?: number | null;
+  notes?: string | null;
+};
 
 /**
- * Books a delivery against the order. Product lines go into stock (the stock book shows them as received
- * against the PO number); other lines (ice, supplies) are just marked as delivered.
+ * Books a delivery against the order as a GRN (Goods Received Note) at the order's branch. Product lines
+ * go into that branch's stock; other lines (ice, supplies) are just marked as delivered.
  */
-export async function receiveOrder(id: number, dto: ReceiveDto, actorId: number) {
+export async function receiveOrder(id: number, dto: ReceiveDto, actorId: number, branchId: number) {
   const order = await getOrder(id);
   if (order.status === "CANCELLED" || order.status === "RECEIVED") {
     throw new AppError(`${order.poNumber} is ${STATUS_LABELS[order.status as PurchaseOrderStatus].toLowerCase()}`, 400);
   }
-  const lines = dto.lines.filter((line) => line.quantity > 0);
-  if (lines.length === 0) throw AppError.validation({ lines: ["Enter how many units arrived"] });
   const itemById = new Map(order.items.map((item) => [item.id, item]));
-  for (const line of lines) {
-    const item = itemById.get(line.itemId);
-    if (!item) throw AppError.validation({ lines: ["That item is not on this order"] });
-    if (line.quantity > item.remaining) throw AppError.validation({ lines: [`${item.description}: only ${item.remaining} still to receive`] });
-  }
-  for (const line of lines) {
-    const item = itemById.get(line.itemId)!;
-    const unitCost = line.unitCost ?? item.unitCost;
-    // Lines that aren't stock products (ice, supplies) are only marked as delivered.
-    if (item.productId) await restockProduct(item.productId, { quantity: line.quantity, purchasePrice: round2(unitCost * line.quantity) }, actorId, `${order.poNumber} · ${order.supplier.name}`);
-    await prisma.purchaseOrderItem.update({ where: { id: item.id }, data: { receivedQty: { increment: line.quantity } } });
-  }
-  const items = await prisma.purchaseOrderItem.findMany({ where: { orderId: id } });
-  const complete = items.every((item) => item.receivedQty >= item.quantity);
-  await prisma.purchaseOrder.update({
-    where: { id },
-    data: complete ? { status: "RECEIVED", receivedAt: new Date(), receivedById: actorId } : { status: "PARTIAL" },
-  });
+  await createGrn({
+    supplierId: order.supplierId,
+    purchaseOrderId: order.id,
+    supplierInvoiceNo: dto.supplierInvoiceNo,
+    invoiceDate: dto.invoiceDate,
+    invoiceTotal: dto.invoiceTotal,
+    notes: dto.notes,
+    lines: dto.lines.filter((line) => line.quantity > 0 || (line.rejected ?? 0) > 0).map((line) => ({
+      purchaseOrderItemId: line.itemId,
+      delivered: line.quantity + (line.rejected ?? 0),
+      rejected: line.rejected ?? 0,
+      rejectReason: line.rejectReason ?? null,
+      unitCost: line.unitCost ?? itemById.get(line.itemId)?.unitCost ?? 0,
+    })),
+  }, actorId, branchId);
   return getOrder(id);
 }
 

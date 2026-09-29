@@ -24,6 +24,9 @@ export type PurchaseOrder = {
   cancelledAt: string | null;
   cancelledBy: string | null;
   cancelReason: string | null;
+  /** Branch the goods are delivered to, and the GRNs that received them. */
+  deliverTo?: { id: number; name: string; code: string; address: string | null } | null;
+  grns?: Array<{ id: number; grnNo: string; createdAt: string; supplierInvoiceNo: string | null; acceptedUnits: number; rejectedUnits: number; totalCost: number }>;
   emailDefaults: { to: string; subject: string; message: string };
 };
 

@@ -9,8 +9,8 @@ type Group = "beer" | "hard" | "custom";
 type Direction = "up" | "down";
 type Mode = "amount" | "percent";
 
-/** Beer-type categories; every other category counts as hard liquor. */
-const isBeerCategory = (name: string) => /beer|lager|stout|ale|cider|shandy|pilsner/i.test(name);
+/** Group by the product's own "Hard liquor" tick (beer, wine, champagne… are not hard liquor). */
+const inGroup = (product: Product, group: "beer" | "hard") => (group === "hard" ? product.isHardLiquor === true : product.isHardLiquor !== true);
 const money = (value: number) => `Rs. ${value.toLocaleString("en-LK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 /**
@@ -34,7 +34,7 @@ export function BulkPriceModal({ token, products, onClose, onDone }: {
     });
     return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
   }, [priced]);
-  const groupCategories = (group: Group) => new Set(categories.filter((category) => (group === "beer" ? isBeerCategory(category.name) : !isBeerCategory(category.name))).map((category) => category.id));
+  const groupCategories = (group: Group) => new Set(priced.filter((product) => group !== "custom" && inGroup(product, group)).map((product) => product.category.id));
 
   const [group, setGroup] = useState<Group>("beer");
   const [chosenCategories, setChosenCategories] = useState<Set<number>>(() => groupCategories("beer"));
@@ -59,7 +59,7 @@ export function BulkPriceModal({ token, products, onClose, onDone }: {
   };
 
   const rows = priced
-    .filter((product) => chosenCategories.has(product.category.id))
+    .filter((product) => (group === "custom" ? chosenCategories.has(product.category.id) : inGroup(product, group)))
     .sort((a, b) => a.category.name.localeCompare(b.category.name) || a.name.localeCompare(b.name));
   const amount = Number(value) || 0;
   const computed = (price: number) => {
@@ -111,7 +111,7 @@ export function BulkPriceModal({ token, products, onClose, onDone }: {
         <div className="bulk-step">
           <span className="bulk-label">Products</span>
           <div className="lx-seg-plain" role="radiogroup" aria-label="Product group">
-            <button type="button" role="radio" aria-checked={group === "beer"} className={group === "beer" ? "active" : ""} onClick={() => chooseGroup("beer")}>Beer</button>
+            <button type="button" role="radio" aria-checked={group === "beer"} className={group === "beer" ? "active" : ""} onClick={() => chooseGroup("beer")}>Beer, wine &amp; others</button>
             <button type="button" role="radio" aria-checked={group === "hard"} className={group === "hard" ? "active" : ""} onClick={() => chooseGroup("hard")}>Hard liquor</button>
             <button type="button" role="radio" aria-checked={group === "custom"} className={group === "custom" ? "active" : ""} onClick={() => chooseGroup("custom")}>Choose categories</button>
           </div>

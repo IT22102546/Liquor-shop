@@ -20,6 +20,8 @@ import settingsRouter from "./modules/settings/settings.routes";
 import { cashBookRouter, reportRouter, shiftRouter } from "./modules/book/book.routes";
 import purchaseOrderRouter from "./modules/purchase-orders/purchase-orders.routes";
 import returnsRouter from "./modules/returns/returns.routes";
+import branchesRouter from "./modules/branches/branches.routes";
+import { grnRouter, gtnRouter } from "./modules/goods/goods.routes";
 import { recordPosActivity } from "./modules/activity-log/activity-log.middleware";
 
 const app = express();
@@ -67,6 +69,9 @@ app.use("/api/pos/cash-book", cashBookRouter);
 app.use("/api/pos/reports", reportRouter);
 app.use("/api/pos/purchase-orders", purchaseOrderRouter);
 app.use("/api/pos/returns", returnsRouter);
+app.use("/api/pos/branches", branchesRouter);
+app.use("/api/pos/grns", grnRouter);
+app.use("/api/pos/gtns", gtnRouter);
 
 /* ──────────────────── Error handling ────────────────────── */
 app.use(notFoundHandler);

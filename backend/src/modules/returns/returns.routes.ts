@@ -1,3 +1,4 @@
+import { requestBranch, requestBranchScope } from "../branches/branch-context";
 import { Router, type Request } from "express";
 import { z } from "zod";
 import { authenticatePosAdmin, authorizePosRoles } from "../../common/middleware/pos-auth.middleware";
@@ -26,12 +27,12 @@ router.get("/", async (req, res, next) => {
       to: date.optional(),
       search: z.string().trim().max(100).optional(),
     }), req.query);
-    return sendSuccess(res, await listReturns(q));
+    return sendSuccess(res, await listReturns(q, await requestBranchScope(req)));
   } catch (error) { return next(error); }
 });
 
-router.get("/overview", async (_req, res, next) => {
-  try { return sendSuccess(res, await getOverview()); } catch (error) { return next(error); }
+router.get("/overview", async (req, res, next) => {
+  try { return sendSuccess(res, await getOverview((await requestBranch(req)).id)); } catch (error) { return next(error); }
 });
 
 router.get("/bills", async (req, res, next) => {
@@ -60,7 +61,7 @@ router.post("/exchange", async (req, res, next) => {
       reason,
       note,
     }), req.body);
-    return sendCreated(res, await createExchange(dto, user(req).id));
+    return sendCreated(res, await createExchange(dto, user(req).id, (await requestBranch(req)).id));
   } catch (error) { return next(error); }
 });
 
@@ -73,14 +74,14 @@ router.post("/refund", async (req, res, next) => {
       reason,
       note,
     }), req.body);
-    return sendCreated(res, await createRefund(dto, user(req).id));
+    return sendCreated(res, await createRefund(dto, user(req).id, (await requestBranch(req)).id));
   } catch (error) { return next(error); }
 });
 
 router.post("/damage", async (req, res, next) => {
   try {
     const dto = validate(z.object({ productId: z.number().int().positive("Choose a product"), quantity, reason, note }), req.body);
-    return sendCreated(res, await createStoreDamage(dto, user(req).id));
+    return sendCreated(res, await createStoreDamage(dto, user(req).id, (await requestBranch(req)).id));
   } catch (error) { return next(error); }
 });
 
@@ -94,7 +95,7 @@ router.post("/clear", authorizePosRoles("ADMIN"), async (req, res, next) => {
       reference: z.string().trim().max(100).nullable().optional(),
       note,
     }), req.body);
-    return sendCreated(res, await clearDamaged(dto, user(req).id));
+    return sendCreated(res, await clearDamaged(dto, user(req).id, (await requestBranch(req)).id));
   } catch (error) { return next(error); }
 });
 

@@ -7,6 +7,7 @@ import { useTheme } from "./ThemeProvider";
 import { useAdmin } from "./AdminContext";
 import { API_URL } from "../lib/constants";
 import { ROLE_LABELS } from "../lib/roles";
+import { switchBranch, useBranch } from "../lib/useBranch";
 import {
   IconSun,
   IconMoon,
@@ -42,6 +43,9 @@ const BREADCRUMBS: Record<string, string> = {
   "/dashboard/reports":    "Book Keeping - Reports",
   "/dashboard/purchase-orders": "Stock - Purchase Orders",
   "/dashboard/returns": "Sales - Returns & Damages",
+  "/dashboard/grn": "Stock - Goods Received (GRN)",
+  "/dashboard/transfers": "Stock - Branch Transfers (GTN)",
+  "/dashboard/branches": "Branches",
   "/dashboard/accounts/vouchers": "Book Keeping - Expenses (Vouchers)",
   "/dashboard/accounts/receipts": "Book Keeping - Money In (Receipts)",
   "/dashboard/users":     "Loyalty Customers",
@@ -73,6 +77,8 @@ export function Topbar() {
   const [deletedNotificationIds, setDeletedNotificationIds] = useState<string[]>([]);
   const [notificationStateReady, setNotificationStateReady] = useState(false);
   const notificationPanelRef = useRef<HTMLDivElement | null>(null);
+  const { state: branchState } = useBranch(token);
+  const [switching, setSwitching] = useState(false);
 
   useEffect(() => {
     const tick = () => {
@@ -214,6 +220,18 @@ export function Topbar() {
       )}
 
       <div className="topbar-right">
+        {branchState && (
+          branchState.canSwitch ? (
+            <label className="topbar-branch" title="The branch you are working in — stock, tills and Day End follow it">
+              <span>Branch</span>
+              <select value={branchState.branch.id} disabled={switching} onChange={(event) => { setSwitching(true); void switchBranch(token, Number(event.target.value)).catch(() => setSwitching(false)); }} aria-label="Branch">
+                {branchState.branches.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
+              </select>
+            </label>
+          ) : (
+            <div className="topbar-branch fixed" title="Your branch"><span>Branch</span><strong>{branchState.branch.name}</strong></div>
+          )
+        )}
         <button type="button" className="icon-btn theme-btn" onClick={toggleTheme} aria-label="Toggle theme">
           {theme === "light" ? <IconMoon /> : <IconSun />}
         </button>

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { API_URL } from "../../lib/constants";
 import { IconScan } from "../../lib/icons";
+import { useShopSettings } from "../../lib/useShopSettings";
 
 export type ProductBrand = { id: number; name: string; _count?: { products: number } };
 export type ProductCategory = {
@@ -58,6 +59,10 @@ export type Product = {
   emptyBottlePrice?: number | null;
   /** Empties collected at the counter and not yet returned to the supplier. */
   emptyBottlesOnHand?: number;
+  /** Counts toward the hard liquor limit per bill (beer, wine, champagne… don't). */
+  isHardLiquor?: boolean;
+  /** Damaged bottles kept aside (not for sale) — managed in Returns & Damages. */
+  damagedQuantity?: number;
   description?: string;
   expenses?: ProductExpense[];
   images?: ProductImage[];
@@ -555,6 +560,14 @@ export function ProductModal({
   const [descriptionPoints, setDescriptionPoints] = useState<string[]>(() =>
     parseDescriptionPoints(product?.description),
   );
+  // Hard liquor tick: new products start from their category (Shop Settings); staff can change it.
+  const { settings: shopSettings } = useShopSettings(token);
+  const [hardLiquor, setHardLiquor] = useState<boolean>(product?.isHardLiquor ?? false);
+  const [hardLiquorTouched, setHardLiquorTouched] = useState(isEdit);
+  useEffect(() => {
+    if (hardLiquorTouched || !form.categoryId) return;
+    setHardLiquor((shopSettings.hardLiquorCategoryIdsEffective ?? []).includes(Number(form.categoryId)));
+  }, [form.categoryId, hardLiquorTouched, shopSettings.hardLiquorCategoryIdsEffective]);
   const [lowStockEnabled, setLowStockEnabled] = useState(
     (product?.lowStockThreshold ?? 0) > 0,
   );
@@ -734,6 +747,7 @@ export function ProductModal({
               : isEdit
                 ? null
                 : undefined,
+            isHardLiquor: hardLiquor,
             sellingPrice: form.sellingPrice
               ? Number(form.sellingPrice)
               : undefined,
@@ -938,6 +952,19 @@ export function ProductModal({
                   </button>
                 </div>
               )}
+            </div>
+
+            <div className="bm-field-group pf-hard">
+              <label>Type for the bill limit</label>
+              <div className="pf-hard-options" role="radiogroup" aria-label="Hard liquor or not">
+                <button type="button" role="radio" aria-checked={hardLiquor} className={hardLiquor ? "active hard" : ""} onClick={() => { setHardLiquor(true); setHardLiquorTouched(true); }}>
+                  <strong>Hard liquor</strong><span>Arrack, whisky, rum, gin, vodka, brandy…</span>
+                </button>
+                <button type="button" role="radio" aria-checked={!hardLiquor} className={!hardLiquor ? "active" : ""} onClick={() => { setHardLiquor(false); setHardLiquorTouched(true); }}>
+                  <strong>Not hard liquor</strong><span>Beer, wine, champagne, cider, soft drinks…</span>
+                </button>
+              </div>
+              <small className="td-muted">{hardLiquor ? `Counts toward the ${shopSettings.hardLiquorLimit}-bottle limit per bill.` : "Never counts toward the hard liquor limit."}</small>
             </div>
 
             <div className="bm-field-group">

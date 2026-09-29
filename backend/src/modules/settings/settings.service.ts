@@ -52,18 +52,22 @@ export async function hardLiquorCategoryIds(settings?: ShopSettings) {
   return categories.filter((category) => SPIRIT_NAMES.test(category.name)).map((category) => category.id);
 }
 
+/** Whether a new product in this category starts ticked as hard liquor (it can be changed on the product). */
+export async function isHardLiquorCategory(categoryId: number) {
+  return (await hardLiquorCategoryIds()).includes(categoryId);
+}
+
 /**
  * Refuses a bill with more hard liquor bottles than the limit. `lines` are the bill's products with
- * their category and quantity.
+ * whether each is hard liquor (ticked on the product) and the quantity.
  */
-export async function assertHardLiquorLimit(lines: Array<{ categoryId: number; quantity: number }>) {
+export async function assertHardLiquorLimit(lines: Array<{ isHardLiquor: boolean; quantity: number }>) {
   const settings = await getSettings();
   if (!settings.hardLiquorLimitEnabled) return;
-  const hardIds = new Set(await hardLiquorCategoryIds(settings));
-  const bottles = lines.filter((line) => hardIds.has(line.categoryId)).reduce((sum, line) => sum + line.quantity, 0);
+  const bottles = lines.filter((line) => line.isHardLiquor).reduce((sum, line) => sum + line.quantity, 0);
   if (bottles > settings.hardLiquorLimit) {
     throw new AppError(
-      `Hard liquor limit: at most ${settings.hardLiquorLimit} bottles on one bill (Sri Lankan law). This bill has ${bottles}. Beer doesn't count toward the limit.`,
+      `Hard liquor limit: at most ${settings.hardLiquorLimit} bottles on one bill (Sri Lankan law). This bill has ${bottles}. Beer, wine and other drinks that aren't hard liquor don't count.`,
       422,
     );
   }

@@ -24,6 +24,13 @@ async function main() {
     },
   });
 
+  // Every till and stock count belongs to a branch; a new shop starts with its main branch.
+  const mainBranch = await prisma.branch.upsert({
+    where: { code: "MAIN" },
+    update: {},
+    create: { code: "MAIN", name: "Main branch", isMain: true },
+  });
+
   const posAdmin = await prisma.posAdmin.upsert({
     where: { email: "manager@barshop.local" },
     update: {
@@ -38,6 +45,7 @@ async function main() {
       passwordHash: posAdminPasswordHash,
       role: PosAdminRole.ADMIN,
       isActive: true,
+      activeBranchId: mainBranch.id,
     },
   });
 

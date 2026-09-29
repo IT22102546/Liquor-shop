@@ -2,7 +2,7 @@ import type { Request } from "express";
 import { Prisma } from "../../generated/prisma";
 import { prisma } from "../../database/prisma.client";
 
-export type ActivityCategory = "AUTH" | "SALE" | "STOCK" | "PRODUCT" | "STAFF" | "ACCOUNTS" | "CASHBOOK" | "PURCHASE" | "RETURN" | "CUSTOMER" | "OTHER";
+export type ActivityCategory = "AUTH" | "SALE" | "STOCK" | "PRODUCT" | "STAFF" | "ACCOUNTS" | "CASHBOOK" | "PURCHASE" | "RETURN" | "GOODS" | "BRANCH" | "CUSTOMER" | "OTHER";
 
 export type ActivityEntry = {
   actorId?: number | null;
@@ -17,6 +17,8 @@ export type ActivityEntry = {
   details?: object;
   ipAddress?: string | null;
   userAgent?: string | null;
+  /** Branch the person was working in (null = not tied to a branch, e.g. price changes). */
+  branchId?: number | null;
 };
 
 const SENSITIVE_KEY = /pass(word)?|token|secret|hash/i;
@@ -73,6 +75,7 @@ export async function logActivity(entry: ActivityEntry) {
         details: boundedDetails(entry.details),
         ipAddress: entry.ipAddress ?? null,
         userAgent: entry.userAgent ?? null,
+        branchId: entry.branchId ?? null,
       },
     });
   } catch (error) {
@@ -88,6 +91,7 @@ export type ActivityLogQuery = {
   actorId?: number;
   from?: string;
   to?: string;
+  branchId?: number;
 };
 
 export async function listActivityLogs(query: ActivityLogQuery) {
@@ -95,6 +99,7 @@ export async function listActivityLogs(query: ActivityLogQuery) {
   const where: Prisma.ActivityLogWhereInput = {
     ...(query.category ? { category: query.category } : {}),
     ...(query.actorId ? { actorId: query.actorId } : {}),
+    ...(query.branchId ? { branchId: query.branchId } : {}),
     ...(query.from || query.to
       ? {
           createdAt: {
@@ -125,9 +130,10 @@ export async function listActivityLogs(query: ActivityLogQuery) {
     }),
     prisma.activityLog.count({ where }),
   ]);
+  const branchNames = new Map((await prisma.branch.findMany({ select: { id: true, name: true } })).map((branch) => [branch.id, branch.name]));
 
   return {
-    logs,
+    logs: logs.map((log) => ({ ...log, branch: log.branchId ? branchNames.get(log.branchId) ?? null : null })),
     pagination: { page: query.page, limit: query.limit, total, pages: Math.ceil(total / query.limit) },
   };
 }

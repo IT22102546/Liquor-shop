@@ -1563,7 +1563,20 @@ html:not([data-theme="dark"]) .sidebar .nav-section-divider { background: #efe4c
 .pos-wallet-full { margin-bottom: 0.75rem; padding: 0.65rem 0.8rem; border-radius: 12px; background: var(--success-bg); color: var(--success); font-weight: 700; font-size: 0.84rem; text-align: center; }
 .pos-keep-change { margin-top: 0.5rem; padding: 0.5rem 0.6rem; border-radius: 10px; border: 1px dashed var(--panel-border); }
 .pos-keep-change.on { border-style: solid; border-color: color-mix(in srgb, var(--success) 45%, transparent); background: color-mix(in srgb, var(--success) 7%, transparent); }
-.pos-keep-change .lx-check { font-size: 0.8rem; }
+.pos-keep-change .lx-check { display: flex; align-items: center; gap: 0.6rem; width: 100%; font-size: 0.82rem; line-height: 1.2; white-space: normal; }
+/* The counter styles inputs as big fields; keep this one a plain checkbox, centred with its text. */
+.pos-keep-change .lx-check input[type="checkbox"] {
+  flex: none; width: 18px; height: 18px; min-height: 0; margin: 0; padding: 0; border-radius: 4px;
+  border: 0; background: none; box-shadow: none;
+  appearance: auto; -webkit-appearance: checkbox; accent-color: var(--success); cursor: pointer;
+}
+.pos-keep-change .pos-keep-change-row input { height: 34px; }
+/* Space before the Complete sale button, and a focus ring that stays inside the box. */
+.pos-keep-change { margin-bottom: 0.85rem; padding: 0.6rem 0.7rem 0.7rem; }
+.pos-keep-change .pos-keep-change-row input:focus { box-shadow: 0 0 0 2px var(--accent-bg); }
+.pos-keep-change .pos-keep-change-row input::-webkit-outer-spin-button,
+.pos-keep-change .pos-keep-change-row input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.pos-keep-change .pos-keep-change-row input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 .pos-keep-change-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.45rem; font-size: 0.78rem; color: var(--text-soft); }
 .pos-keep-change-row input { width: 7rem; min-height: 34px; padding: 0 0.55rem; border-radius: 8px; border: 1px solid var(--panel-border); background: var(--panel-2); color: var(--text); font: inherit; font-weight: 700; text-align: right; }
 .pos-keep-change-row b { color: var(--text); }
@@ -1584,3 +1597,70 @@ html:not([data-theme="dark"]) .sidebar .nav-section-divider { background: #efe4c
 .points-rule b { color: var(--text); }
 .bm-modal.wallet-modal { width: min(1000px, 96vw); }
 @media (max-width: 640px) { .wallet-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ── Branches: switcher in the top bar ── */
+.topbar-branch { display: flex; align-items: center; gap: 0.45rem; padding: 0.3rem 0.35rem 0.3rem 0.75rem; border-radius: 12px; border: 1px solid var(--soft-gold-border); background: var(--soft-gold); }
+.topbar-branch span { font-size: 0.64rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--soft-gold-text); }
+.topbar-branch select { border: 0; background: transparent; color: var(--text); font: inherit; font-weight: 700; font-size: 0.84rem; padding: 0.2rem 0.3rem; cursor: pointer; max-width: 12rem; }
+.topbar-branch select:focus { outline: none; }
+.topbar-branch.fixed { padding-right: 0.8rem; }
+.topbar-branch.fixed strong { font-size: 0.84rem; color: var(--text); }
+
+/* ── GRN / GTN / Branches pages ── */
+.gd-status { display: inline-block; padding: 0.16rem 0.6rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+.gd-status.SENT { color: var(--warning); background: var(--warning-bg); }
+.gd-status.RECEIVED { color: var(--success); background: var(--success-bg); }
+.gd-status.CANCELLED { color: var(--text-soft); background: var(--panel-2); border: 1px solid var(--panel-border); }
+.gd-lines { display: grid; gap: 0.4rem; }
+.gd-line { display: grid; gap: 0.5rem; align-items: center; padding: 0.55rem 0.7rem; border-radius: 12px; background: var(--panel-2); border: 1px solid var(--panel-border); }
+.gd-line.grn { grid-template-columns: minmax(0, 1fr) 5.5rem 5.5rem 5.5rem minmax(0, 0.8fr) 7.5rem 2.2rem; }
+.gd-line.gtn { grid-template-columns: minmax(0, 1fr) 7rem 6rem 2.2rem; }
+.gd-line.rcv { grid-template-columns: minmax(0, 1fr) 5rem 6rem 6rem 5rem; }
+.gd-line.head { background: transparent; border-color: transparent; padding-top: 0; padding-bottom: 0; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-xsoft); }
+.gd-line .bm-input { min-height: 36px; padding: 0 0.55rem; }
+.gd-line input[type="number"] { text-align: right; }
+.gd-line strong { color: var(--text); font-size: 0.86rem; }
+.gd-line small { display: block; color: var(--text-soft); font-size: 0.72rem; }
+.gd-line .num { text-align: right; font-variant-numeric: tabular-nums; }
+.gd-line .missing { color: var(--danger); font-weight: 800; }
+.gd-foot { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; padding-top: 0.5rem; border-top: 1px dashed var(--panel-border); }
+.gd-foot b { font-size: 1.15rem; color: var(--text); font-variant-numeric: tabular-nums; }
+.gd-warn { padding: 0.6rem 0.8rem; border-radius: 12px; background: var(--warning-bg); color: var(--warning); font-size: 0.82rem; font-weight: 600; border: 1px solid color-mix(in srgb, var(--warning) 35%, transparent); }
+.gd-ok { padding: 0.6rem 0.8rem; border-radius: 12px; background: var(--success-bg); color: var(--success); font-size: 0.82rem; font-weight: 600; }
+.gd-arrow { display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 700; color: var(--text); }
+.gd-arrow i { font-style: normal; color: var(--soft-gold-text); }
+.br-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.9rem; }
+.br-card { padding: 1rem 1.1rem; border-radius: 18px; background: var(--panel); border: 1px solid var(--panel-border); display: grid; gap: 0.6rem; }
+.br-card.current { border-color: var(--soft-gold-border); box-shadow: 0 0 0 1px var(--soft-gold-border) inset; }
+.br-card.closed { opacity: 0.6; }
+.br-card h3 { margin: 0; font-size: 1.05rem; color: var(--text); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.br-card .code { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.1em; padding: 0.12rem 0.45rem; border-radius: 6px; background: var(--panel-2); border: 1px solid var(--panel-border); color: var(--text-soft); }
+.br-card p { margin: 0; font-size: 0.8rem; color: var(--text-soft); }
+.br-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.4rem; }
+.br-stats div { padding: 0.5rem 0.6rem; border-radius: 10px; background: var(--panel-2); }
+.br-stats span { display: block; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-xsoft); }
+.br-stats b { font-size: 0.95rem; color: var(--text); font-variant-numeric: tabular-nums; }
+.br-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.br-tags span { font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 999px; background: var(--panel-2); color: var(--text-soft); }
+.br-tags span.live { background: var(--success-bg); color: var(--success); }
+.br-tags span.warn { background: var(--warning-bg); color: var(--warning); }
+.stock-branches { display: flex; flex-wrap: wrap; gap: 0.3rem; justify-content: flex-end; margin-top: 0.2rem; }
+.stock-branches span { font-size: 0.66rem; padding: 0.08rem 0.4rem; border-radius: 6px; background: var(--panel-2); color: var(--text-soft); white-space: nowrap; }
+@media (max-width: 900px) {
+  .gd-line.grn, .gd-line.gtn, .gd-line.rcv { grid-template-columns: 1fr 1fr; }
+  .gd-line.head { display: none; }
+}
+/* Rejected bottles on a purchase-order delivery (spans the whole line). */
+.po-reject { grid-column: 1 / -1; display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: 0.5rem; align-items: end; padding-left: 1rem; }
+.po-reject label { display: grid; gap: 0.2rem; font-size: 0.7rem; font-weight: 700; color: var(--text-soft); }
+/* Product form: hard liquor or not (drives the bill limit) */
+.pf-hard { grid-column: 1 / -1; }
+.pf-hard-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+.pf-hard-options button { display: grid; gap: 0.15rem; text-align: left; padding: 0.6rem 0.8rem; border-radius: 12px; background: var(--panel-2); border: 1px solid var(--panel-border); color: var(--text); cursor: pointer; }
+.pf-hard-options button span { font-size: 0.74rem; color: var(--text-soft); }
+.pf-hard-options button.active { background: var(--success-bg); border-color: color-mix(in srgb, var(--success) 45%, transparent); }
+.pf-hard-options button.active.hard { background: var(--soft-gold); border-color: var(--soft-gold-border); }
+.pf-hard-options button.active strong { color: var(--text); }
+.hl-badge { display: inline-block; margin-left: 0.35rem; padding: 0.05rem 0.4rem; border-radius: 6px; font-size: 0.64rem; font-weight: 800; letter-spacing: 0.04em; background: var(--soft-gold); color: var(--soft-gold-text); border: 1px solid var(--soft-gold-border); vertical-align: middle; }
+/* "Showing <supplier>'s products" line on purchase order / GRN forms */
+.po-supplier-note { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; font-size: 0.78rem; color: var(--text-soft); padding: 0.1rem 0.2rem; }

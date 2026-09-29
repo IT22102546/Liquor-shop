@@ -1,3 +1,4 @@
+import { requestBranch } from "../branches/branch-context";
 import { Router, type Request } from "express";
 import { z } from "zod";
 import { authenticatePosAdmin, authorizePosRoles } from "../../common/middleware/pos-auth.middleware";
@@ -48,7 +49,7 @@ router.get("/:id", async (req, res, next) => {
   try { return sendSuccess(res, await getOrder(Number(req.params.id))); } catch (error) { return next(error); }
 });
 router.post("/", async (req, res, next) => {
-  try { return sendCreated(res, await createOrder(validate(orderSchema, req.body), user(req).id)); } catch (error) { return next(error); }
+  try { return sendCreated(res, await createOrder(validate(orderSchema, req.body), user(req).id, (await requestBranch(req)).id)); } catch (error) { return next(error); }
 });
 router.patch("/:id", async (req, res, next) => {
   try { return sendSuccess(res, await updateOrder(Number(req.params.id), validate(orderSchema, req.body))); } catch (error) { return next(error); }
@@ -70,10 +71,16 @@ router.post("/:id/receive", async (req, res, next) => {
       lines: z.array(z.object({
         itemId: z.number().int().positive(),
         quantity: z.number().int().min(0).max(1_000_000),
+        rejected: z.number().int().min(0).max(1_000_000).optional(),
+        rejectReason: z.string().trim().max(200).nullable().optional(),
         unitCost: z.number().min(0).max(100_000_000).optional(),
       })).min(1),
+      supplierInvoiceNo: z.string().trim().max(60).nullable().optional(),
+      invoiceDate: date.nullable().optional(),
+      invoiceTotal: z.number().min(0).max(1_000_000_000).nullable().optional(),
+      notes: z.string().trim().max(1000).nullable().optional(),
     }), req.body);
-    return sendSuccess(res, await receiveOrder(Number(req.params.id), dto, user(req).id));
+    return sendSuccess(res, await receiveOrder(Number(req.params.id), dto, user(req).id, (await requestBranch(req)).id));
   } catch (error) { return next(error); }
 });
 router.post("/:id/cancel", async (req, res, next) => {

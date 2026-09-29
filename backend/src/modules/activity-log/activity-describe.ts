@@ -48,6 +48,7 @@ const PRODUCT_FIELDS: Array<[string, string, (product: Body) => string]> = [
   ["lowStockThreshold", "Low-stock alert", (p) => (Number(p.lowStockThreshold) > 0 ? `At ${str(p.lowStockThreshold)} units` : "Off")],
   ["sellingPrice", "Selling price", (p) => money(p.sellingPrice)],
   ["emptyBottlePrice", "Empty bottle price", (p) => (Number(p.emptyBottlePrice) > 0 ? money(p.emptyBottlePrice) : "Not returnable")],
+  ["isHardLiquor", "Hard liquor (bill limit)", (p) => (p.isHardLiquor === true ? "Yes" : p.isHardLiquor === false ? "No" : "")],
   ["purchasePrice", "Cost per unit", (p) => money(p.purchasePrice)],
   ["taxPaid", "Tax per unit", (p) => money(p.taxPaid)],
   ["additionalExpenses", "Other costs per unit", (p) => money(p.additionalExpenses)],
@@ -219,6 +220,78 @@ export function describePosChange(method: string, path: string, body: Body, resp
             ...shelfCountFacts(close.stockCount),
           ],
         },
+      };
+    }
+  }
+
+  // ── Goods received (GRN) ─────────────────────────────────────────────────
+  if (module === "grns" && method === "POST") {
+    const items = Array.isArray(data.items) ? (data.items as Body[]) : [];
+    const no = str(data.grnNo);
+    if (!no) return { action: "grn.create", category: "GOODS", entityType: "GRN", summary: "Tried to record goods received" };
+    const rejected = Number(data.rejectedUnits ?? 0);
+    return {
+      action: "grn.create", category: "GOODS", entityType: "GRN", entityId: no,
+      summary: `Received goods ${no} from ${str(data.supplierName)} at ${str(obj(data.branch).name)}: ${str(data.acceptedUnits)} unit(s) · ${money(data.totalCost)}${data.poNumber ? ` · ${str(data.poNumber)}` : ""}${data.supplierInvoiceNo ? ` · invoice ${str(data.supplierInvoiceNo)}` : ""}${rejected ? ` · ${rejected} rejected` : ""}`,
+      details: {
+        facts: [
+          fact("Supplier", data.supplierName), fact("Branch", obj(data.branch).name),
+          ...(data.poNumber ? [fact("Purchase order", data.poNumber)] : []),
+          ...(data.supplierInvoiceNo ? [fact("Supplier invoice", data.supplierInvoiceNo)] : []),
+          ...(data.invoiceTotal != null ? [fact("Invoice total", money(data.invoiceTotal))] : []),
+          fact("Accepted value", money(data.totalCost)),
+          ...items.map((item) => fact(str(item.description), `${str(item.acceptedQty)} accepted${Number(item.rejectedQty) ? ` · ${str(item.rejectedQty)} rejected (${str(item.rejectReason)})` : ""} × ${money(item.unitCost)}`)),
+        ],
+      },
+    };
+  }
+
+  // ── Branch transfers (GTN) ───────────────────────────────────────────────
+  if (module === "gtns" && method === "POST") {
+    const items = Array.isArray(data.items) ? (data.items as Body[]) : [];
+    const no = str(data.gtnNo) || str(prior.gtnNo);
+    const from = str(obj(data.fromBranch).name);
+    const to = str(obj(data.toBranch).name);
+    const what = items.map((item) => `${str(item.sentQty)} × ${str(item.productName)}`).join(", ");
+    if (!no) return { action: `gtn.${id ?? "send"}`, category: "GOODS", entityType: "GTN", summary: "Tried to record a branch transfer" };
+    if (id === "receive") {
+      const totals = obj(data.totals);
+      return {
+        action: "gtn.receive", category: "GOODS", entityType: "GTN", entityId: no,
+        summary: `Received transfer ${no} from ${from} at ${to}: ${str(totals.received)} good${Number(totals.damaged) ? ` · ${str(totals.damaged)} damaged` : ""}${Number(totals.missing) ? ` · ${str(totals.missing)} MISSING` : ""} of ${str(totals.sent)} sent`,
+        details: { facts: [...items.map((item) => fact(str(item.productName), `${str(item.receivedQty)} good · ${str(item.damagedQty)} damaged · ${str(item.missingQty)} missing (of ${str(item.sentQty)})`)), ...(data.receiveNote ? [fact("Note", data.receiveNote)] : [])] },
+      };
+    }
+    if (id === "cancel") {
+      return {
+        action: "gtn.cancel", category: "GOODS", entityType: "GTN", entityId: no,
+        summary: `Cancelled transfer ${no} (${from} → ${to}): stock back at ${from} — ${str(data.cancelReason)}`,
+        details: { facts: [fact("Reason", data.cancelReason), ...items.map((item) => fact(str(item.productName), `${str(item.sentQty)} back on the shelf`))] },
+      };
+    }
+    return {
+      action: "gtn.send", category: "GOODS", entityType: "GTN", entityId: no,
+      summary: `Sent ${what} from ${from} to ${to} on ${no}${data.carriedBy ? ` (carried by ${str(data.carriedBy)})` : ""}`,
+      details: { facts: [fact("From", from), fact("To", to), ...(data.carriedBy ? [fact("Carried by", data.carriedBy)] : []), ...items.map((item) => fact(str(item.productName), `${str(item.sentQty)} sent`)), ...(data.notes ? [fact("Note", data.notes)] : [])] },
+    };
+  }
+
+  // ── Branches ─────────────────────────────────────────────────────────────
+  if (module === "branches") {
+    if (resource === "switch") {
+      const branch = obj(obj(data).branch);
+      return { action: "branch.switch", category: "BRANCH", entityType: "branch", entityId: str(branch.code), summary: `Switched to working at ${str(branch.name) || "another branch"}` };
+    }
+    const name = str(data.name) || str(body.name) || "a branch";
+    if (method === "POST") {
+      return { action: "branch.create", category: "BRANCH", entityType: "branch", entityId: str(data.code), summary: `Added branch ${name} (${str(data.code)})`, details: { facts: [fact("Code", data.code), ...(data.address ? [fact("Address", data.address)] : []), ...(data.phone ? [fact("Phone", data.phone)] : [])] } };
+    }
+    if (method === "PATCH") {
+      return {
+        action: body.isActive === false ? "branch.close" : body.isActive === true ? "branch.reopen" : "branch.update",
+        category: "BRANCH", entityType: "branch", entityId: str(data.code),
+        summary: body.isActive === false ? `Closed branch ${name}` : body.isActive === true ? `Reopened branch ${name}` : `Updated branch ${name}`,
+        details: { facts: Object.keys(body).map((key) => fact(key, body[key])) },
       };
     }
   }

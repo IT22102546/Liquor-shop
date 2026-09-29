@@ -23,9 +23,11 @@ type Member = {
 };
 type MemberBill = { id: number; billNo: string; soldAt: string; total: number; pointsEarned: number; units: number; items: Array<{ name: string; quantity: number }> };
 type MemberHistory = {
-  wallet: { balance: number; added: number; addedBills: number; spent: number; spentBills: number };
-  points: { balance: number; balanceValue: number; earned: number; earnedBills: number; used: number; usedValue: number; rupeesPerPoint: number; pointValue: number };
+  wallet: { balance: number; added: number; addedBills: number; refunded?: number; spent: number; spentBills: number };
+  points: { balance: number; balanceValue: number; earned: number; earnedBills: number; used: number; usedValue: number; takenBack?: number; rupeesPerPoint: number; pointValue: number };
+  /** Bills, and refunds for bottles the member brought back (kind RETURN). */
   bills: Array<{
+    kind?: "BILL" | "RETURN"; returnNo?: string | null; returnedItems?: string | null; refundAmount?: number; refundMethod?: "CASH" | "WALLET" | null; reason?: string | null; pointsTakenBack?: number;
     id: number; time: string; billNo: string; shiftNo: string | null; by: string; billTotal: number; discount: number;
     paid: { cash: number; card: number; transfer: number; wallet: number };
     cashReceived: number; changeGiven: number; walletAdded: number; walletSpent: number; walletAfter: number;
@@ -299,7 +301,7 @@ export default function LoyaltyCustomersPage() {
               <div><span>Wallet spent ({history?.wallet.spentBills ?? 0})</span><strong>{history ? `−${money(history.wallet.spent)}` : "…"}</strong></div>
               <div className="points"><span>Points now</span><strong>{history ? `${history.points.balance.toLocaleString()} pts` : "…"}</strong>{history && <em>worth {money(history.points.balanceValue)}</em>}</div>
               <div><span>Points rewarded ({history?.points.earnedBills ?? 0})</span><strong>{history ? `+${history.points.earned.toLocaleString()}` : "…"}</strong></div>
-              <div><span>Points used</span><strong>{history ? `−${history.points.used.toLocaleString()}` : "…"}</strong>{history && history.points.used > 0 && <em>{money(history.points.usedValue)} off bills</em>}</div>
+              <div><span>Points used</span><strong>{history ? `−${history.points.used.toLocaleString()}` : "…"}</strong>{history && history.points.used > 0 && <em>{money(history.points.usedValue)} off bills</em>}{history?.points.takenBack ? <em>{history.points.takenBack} taken back for returns</em> : null}</div>
             </div>
             {history && (
               <div className="points-rule">
@@ -322,8 +324,9 @@ export default function LoyaltyCustomersPage() {
                         <td className="td-muted" style={{ whiteSpace: "nowrap" }}>{new Date(bill.time).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</td>
                         <td className="td-muted">{bill.billNo}{bill.shiftNo ? ` · ${bill.shiftNo}` : ""}</td>
                         <td>
+                          {bill.kind === "RETURN" && <div>Refund {bill.returnNo} for bottles returned: {bill.returnedItems}</div>}
                           {bill.walletSpent > 0 && <div>Paid {money(bill.walletSpent)} of a {money(bill.billTotal)} bill</div>}
-                          {bill.walletAdded > 0 && <div>Change kept: gave {money(bill.cashReceived)} cash for {money(bill.paid.cash)}{bill.changeGiven > 0 ? `, took ${money(bill.changeGiven)} back` : ""}</div>}
+                          {bill.walletAdded > 0 && bill.kind !== "RETURN" && <div>Change kept: gave {money(bill.cashReceived)} cash for {money(bill.paid.cash)}{bill.changeGiven > 0 ? `, took ${money(bill.changeGiven)} back` : ""}</div>}
                         </td>
                         <td>{bill.by}</td>
                         <td style={{ textAlign: "right", whiteSpace: "nowrap" }} className="lx-amount-in">{bill.walletAdded ? `+${money(bill.walletAdded)}` : "—"}</td>
@@ -344,13 +347,15 @@ export default function LoyaltyCustomersPage() {
                         <td className="td-muted" style={{ whiteSpace: "nowrap" }}>{new Date(bill.time).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</td>
                         <td className="td-muted">{bill.billNo}{bill.shiftNo ? ` · ${bill.shiftNo}` : ""}</td>
                         <td>
-                          <div>{pointsWorking(bill)}</div>
+                          {bill.kind === "RETURN"
+                            ? <div>Refund {bill.returnNo}: {bill.returnedItems} brought back, {money(bill.refundAmount ?? 0)} paid back {bill.refundMethod === "WALLET" ? "into the wallet" : "in cash"}{bill.pointsTakenBack ? ` — the ${bill.pointsTakenBack} point(s) earned on them were taken back` : ""}</div>
+                            : <div>{pointsWorking(bill)}</div>}
                           {bill.pointsUsed > 0 && <div className="td-muted">Used {bill.pointsUsed.toLocaleString()} pts = {money(bill.pointsUsedValue)} off this bill</div>}
                           {bill.discount > 0 && <div className="td-muted">Bill discount {money(bill.discount)} (before points)</div>}
                         </td>
                         <td>{bill.by}</td>
                         <td style={{ textAlign: "right", whiteSpace: "nowrap" }} className="lx-amount-in">{bill.pointsEarned ? `+${bill.pointsEarned.toLocaleString()}` : "0"}</td>
-                        <td style={{ textAlign: "right", whiteSpace: "nowrap" }} className="lx-amount-out">{bill.pointsUsed ? `−${bill.pointsUsed.toLocaleString()}` : "—"}</td>
+                        <td style={{ textAlign: "right", whiteSpace: "nowrap" }} className="lx-amount-out">{bill.pointsUsed ? `−${bill.pointsUsed.toLocaleString()}` : bill.pointsTakenBack ? `−${bill.pointsTakenBack.toLocaleString()}` : "—"}</td>
                         <td style={{ textAlign: "right", whiteSpace: "nowrap" }}><strong>{bill.pointsAfter.toLocaleString()}</strong></td>
                       </tr>
                     ))}

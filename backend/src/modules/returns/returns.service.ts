@@ -3,6 +3,7 @@ import { prisma } from "../../database/prisma.client";
 import { AppError } from "../../common/utils/errors";
 import { drawerCash } from "../book/cash-book.service";
 import { findOpenShift, recordMovements } from "../book/stock-movements";
+import { changeStock, forBranch } from "../branches/branch-stock";
 import { getSettings } from "../settings/settings.service";
 
 type Tx = Prisma.TransactionClient;
@@ -42,22 +43,16 @@ async function productOrFail(tx: Tx, productId: number) {
   return product;
 }
 
-/** Takes bottles off the shelf; fails if another till sold them a moment ago. */
-async function takeFromShelf(tx: Tx, product: { id: number; name: string }, quantity: number, toDamaged: boolean) {
-  const updated = await tx.inventoryProduct.updateMany({
-    where: { id: product.id, quantity: { gte: quantity } },
-    data: { quantity: { decrement: quantity }, ...(toDamaged ? { damagedQuantity: { increment: quantity } } : {}) },
-  });
-  if (updated.count === 0) {
-    const now = await tx.inventoryProduct.findUnique({ where: { id: product.id }, select: { quantity: true } });
-    throw AppError.validation({ quantity: [`Only ${now?.quantity ?? 0} ${product.name} in stock`] });
-  }
+/** Moves bottles off this branch's shelf into its damaged stock; fails if another till sold them a moment ago. */
+async function shelfToDamaged(tx: Tx, branchId: number, productId: number, quantity: number) {
+  await changeStock(tx, branchId, productId, { quantity: -quantity, damaged: quantity });
 }
 
 // ── Damaged bottle exchange: customer brings back a damaged bottle and gets a new one ──
 export async function createExchange(
   dto: { productId: number; quantity: number; billNo?: string | null; customerName?: string | null; customerMobile?: string | null; reason: string; note?: string | null },
   actorId: number,
+  branchId: number,
 ) {
   return prisma.$transaction(async (tx) => {
     const product = await productOrFail(tx, dto.productId);
@@ -68,43 +63,43 @@ export async function createExchange(
       if (!sale) throw AppError.validation({ billNo: [`No bill ${billNo} — leave it empty if the customer has no bill`] });
       customerId = sale.customerId;
     }
-    await takeFromShelf(tx, product, dto.quantity, true);
-    const shift = await findOpenShift(tx);
+    await shelfToDamaged(tx, branchId, product.id, dto.quantity);
+    const shift = await findOpenShift(tx, branchId);
     const returnNo = await nextReturnNo(tx);
     const row = await tx.posReturn.create({
       data: {
         returnNo, type: "EXCHANGE", productId: product.id, productName: productLabel(product), quantity: dto.quantity,
         invoiceGroupCode: billNo, customerId, customerName: dto.customerName?.trim() || null, customerMobile: dto.customerMobile?.trim() || null,
         unitPrice: product.sellingPrice ?? 0, unitCost: unitCostOf(product), reason: dto.reason, note: dto.note?.trim() || null,
-        shiftId: shift?.id ?? null, createdById: actorId,
+        shiftId: shift?.id ?? null, branchId, createdById: actorId,
       },
     });
     await recordMovements(tx, [
       { productId: product.id, kind: "STOCK", type: "EXCHANGED", quantity: -dto.quantity, reference: returnNo, createdById: actorId },
       { productId: product.id, kind: "DAMAGED", type: "IN", quantity: dto.quantity, reference: returnNo, createdById: actorId },
-    ], shift?.id ?? null);
+    ], { branchId, shiftId: shift?.id ?? null });
     return getReturn(row.returnNo, tx);
   });
 }
 
 // ── Damage found in the store: moved off the shelf and kept aside ──
-export async function createStoreDamage(dto: { productId: number; quantity: number; reason: string; note?: string | null }, actorId: number) {
+export async function createStoreDamage(dto: { productId: number; quantity: number; reason: string; note?: string | null }, actorId: number, branchId: number) {
   return prisma.$transaction(async (tx) => {
     const product = await productOrFail(tx, dto.productId);
-    await takeFromShelf(tx, product, dto.quantity, true);
-    const shift = await findOpenShift(tx);
+    await shelfToDamaged(tx, branchId, product.id, dto.quantity);
+    const shift = await findOpenShift(tx, branchId);
     const returnNo = await nextReturnNo(tx);
     await tx.posReturn.create({
       data: {
         returnNo, type: "STORE_DAMAGE", productId: product.id, productName: productLabel(product), quantity: dto.quantity,
         unitPrice: product.sellingPrice ?? 0, unitCost: unitCostOf(product), reason: dto.reason, note: dto.note?.trim() || null,
-        shiftId: shift?.id ?? null, createdById: actorId,
+        shiftId: shift?.id ?? null, branchId, createdById: actorId,
       },
     });
     await recordMovements(tx, [
       { productId: product.id, kind: "STOCK", type: "DAMAGED", quantity: -dto.quantity, reference: returnNo, createdById: actorId },
       { productId: product.id, kind: "DAMAGED", type: "IN", quantity: dto.quantity, reference: returnNo, createdById: actorId },
-    ], shift?.id ?? null);
+    ], { branchId, shiftId: shift?.id ?? null });
     return getReturn(returnNo, tx);
   });
 }
@@ -113,27 +108,24 @@ export async function createStoreDamage(dto: { productId: number; quantity: numb
 export async function clearDamaged(
   dto: { productId: number; quantity: number; disposal: "SUPPLIER" | "WRITTEN_OFF" | "RESTORED"; reason: string; reference?: string | null; note?: string | null },
   actorId: number,
+  branchId: number,
 ) {
   return prisma.$transaction(async (tx) => {
     const product = await productOrFail(tx, dto.productId);
-    const updated = await tx.inventoryProduct.updateMany({
-      where: { id: product.id, damagedQuantity: { gte: dto.quantity } },
-      data: { damagedQuantity: { decrement: dto.quantity }, ...(dto.disposal === "RESTORED" ? { quantity: { increment: dto.quantity } } : {}) },
-    });
-    if (updated.count === 0) throw AppError.validation({ quantity: [`Only ${product.damagedQuantity} damaged ${product.name} kept aside`] });
-    const shift = await findOpenShift(tx);
+    await changeStock(tx, branchId, product.id, { damaged: -dto.quantity, ...(dto.disposal === "RESTORED" ? { quantity: dto.quantity } : {}) });
+    const shift = await findOpenShift(tx, branchId);
     const returnNo = await nextReturnNo(tx);
     await tx.posReturn.create({
       data: {
         returnNo, type: "DAMAGE_CLEARED", productId: product.id, productName: productLabel(product), quantity: dto.quantity,
         unitPrice: product.sellingPrice ?? 0, unitCost: unitCostOf(product), disposal: dto.disposal, reason: dto.reason,
-        reference: dto.reference?.trim() || null, note: dto.note?.trim() || null, shiftId: shift?.id ?? null, createdById: actorId,
+        reference: dto.reference?.trim() || null, note: dto.note?.trim() || null, shiftId: shift?.id ?? null, branchId, createdById: actorId,
       },
     });
     await recordMovements(tx, [
       { productId: product.id, kind: "DAMAGED", type: "CLEARED", quantity: -dto.quantity, reference: returnNo, createdById: actorId },
       ...(dto.disposal === "RESTORED" ? [{ productId: product.id, kind: "STOCK" as const, type: "RESTORED" as const, quantity: dto.quantity, reference: returnNo, createdById: actorId }] : []),
-    ], shift?.id ?? null);
+    ], { branchId, shiftId: shift?.id ?? null });
     return getReturn(returnNo, tx);
   });
 }
@@ -216,6 +208,7 @@ export async function getBillForReturn(billNo: string, db: Tx | typeof prisma = 
 export async function createRefund(
   dto: { billNo: string; lines: Array<{ productId: number; quantity: number; condition: "SHELF" | "DAMAGED" }>; method: "CASH" | "WALLET"; reason: string; note?: string | null },
   actorId: number,
+  branchId: number,
 ) {
   const settings = await getSettings();
   return prisma.$transaction(async (tx) => {
@@ -239,9 +232,10 @@ export async function createRefund(
       total = round2(rows.reduce((sum, row) => sum + row.amount, 0));
     }
 
-    const shift = await findOpenShift(tx);
+    // Bottles come back into the branch they were brought to; cash comes out of that branch's drawer.
+    const shift = await findOpenShift(tx, branchId);
     if (dto.method === "CASH") {
-      if (!shift) throw AppError.validation({ method: ["No shift is open — start a shift to pay money back from the cash drawer"] });
+      if (!shift) throw AppError.validation({ method: ["No shift is open at this branch — start a shift to pay money back from the cash drawer"] });
       const available = await drawerCash(shift.id, tx);
       if (total > available + 0.001) throw AppError.validation({ method: [`Only ${rs(available)} should be in the drawer`] });
     }
@@ -279,23 +273,18 @@ export async function createRefund(
           invoiceGroupCode: bill.billNo, customerId: bill.member?.id ?? null, customerName: bill.member?.name ?? null, customerMobile: bill.member?.mobile ?? null,
           unitPrice: row.unitRefund, refundAmount: row.amount, refundMethod: dto.method, pointsReversed: linePoints,
           unitCost: product ? unitCostOf(product) : null, reason: dto.reason, note: dto.note?.trim() || null,
-          shiftId: shift?.id ?? null, createdById: actorId,
+          shiftId: shift?.id ?? null, branchId, createdById: actorId,
         },
       });
       if (product) {
-        await tx.inventoryProduct.update({
-          where: { id: product.id },
-          data: {
-            ...(row.condition === "SHELF" ? { quantity: { increment: row.quantity } } : { damagedQuantity: { increment: row.quantity } }),
-            // Bottles back unopened are no longer counted as sold.
-            soldQuantity: { decrement: Math.min(row.quantity, Math.max(0, product.soldQuantity)) },
-          },
-        });
+        await changeStock(tx, branchId, product.id, row.condition === "SHELF" ? { quantity: row.quantity } : { damaged: row.quantity });
+        // Bottles back are no longer counted as sold.
+        await tx.inventoryProduct.update({ where: { id: product.id }, data: { soldQuantity: { decrement: Math.min(row.quantity, Math.max(0, product.soldQuantity)) } } });
       }
     }
     await recordMovements(tx, rows.map((row) => row.condition === "SHELF"
       ? { productId: row.productId, kind: "STOCK" as const, type: "CUSTOMER_RETURN" as const, quantity: row.quantity, reference: returnNo, createdById: actorId }
-      : { productId: row.productId, kind: "DAMAGED" as const, type: "IN" as const, quantity: row.quantity, reference: returnNo, createdById: actorId }), shift?.id ?? null);
+      : { productId: row.productId, kind: "DAMAGED" as const, type: "IN" as const, quantity: row.quantity, reference: returnNo, createdById: actorId }), { branchId, shiftId: shift?.id ?? null });
 
     if (dto.method === "WALLET" && bill.member && member) {
       await tx.posWalletTransaction.create({
@@ -377,8 +366,9 @@ export async function getReturn(returnNo: string, db: Tx | typeof prisma = prism
   };
 }
 
-export async function listReturns(q: { page: number; limit: number; type?: ReturnType; from?: string; to?: string; search?: string }) {
+export async function listReturns(q: { page: number; limit: number; type?: ReturnType; from?: string; to?: string; search?: string }, branchId: number | null) {
   const where: Prisma.PosReturnWhereInput = {
+    ...(branchId ? { branchId } : {}),
     ...(q.type ? { type: q.type } : {}),
     ...(q.from || q.to ? { createdAt: { ...(q.from ? { gte: new Date(`${q.from}T00:00:00`) } : {}), ...(q.to ? { lte: new Date(`${q.to}T23:59:59.999`) } : {}) } } : {}),
     ...(q.search ? { OR: [
@@ -397,13 +387,15 @@ export async function listReturns(q: { page: number; limit: number; type?: Retur
 }
 
 /** Damaged stock kept aside right now, and today's totals, for the top of the page. */
-export async function getOverview() {
+export async function getOverview(branchId: number) {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
-  const [damaged, today] = await Promise.all([
-    prisma.inventoryProduct.findMany({ where: { damagedQuantity: { gt: 0 } }, select: PRODUCT_SELECT, orderBy: { name: "asc" } }),
-    prisma.posReturn.findMany({ where: { createdAt: { gte: start } }, select: { type: true, quantity: true, refundAmount: true, refundMethod: true, returnNo: true } }),
+  const [damagedHere, today] = await Promise.all([
+    prisma.branchStock.findMany({ where: { branchId, damagedQuantity: { gt: 0 } }, select: { productId: true } }),
+    prisma.posReturn.findMany({ where: { createdAt: { gte: start }, branchId }, select: { type: true, quantity: true, refundAmount: true, refundMethod: true, returnNo: true } }),
   ]);
+  // This branch's damaged stock (quantity = its shelf, damagedQuantity = kept aside here).
+  const damaged = await forBranch(branchId, await prisma.inventoryProduct.findMany({ where: { id: { in: damagedHere.map((row) => row.productId) } }, select: { ...PRODUCT_SELECT, emptyBottlesOnHand: true }, orderBy: { name: "asc" } }));
   const damagedRows = damaged.map((product) => {
     const cost = unitCostOf(product);
     return { productId: product.id, name: productLabel(product), damaged: product.damagedQuantity, inStock: product.quantity, unitCost: cost, value: cost == null ? null : round2(cost * product.damagedQuantity) };

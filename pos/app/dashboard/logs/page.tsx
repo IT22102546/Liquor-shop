@@ -13,6 +13,8 @@ type ActivityLog = {
   actorName: string | null;
   actorEmail: string | null;
   actorRole: string | null;
+  /** Branch it happened at (null = company-wide). */
+  branch?: string | null;
   action: string;
   category: string;
   summary: string;
@@ -40,6 +42,9 @@ const CATEGORIES: Array<{ value: string; label: string; color: string }> = [
   { value: "STAFF", label: "Staff", color: "var(--c4)" },
   { value: "CASHBOOK", label: "Day End & cash", color: "var(--c6)" },
   { value: "PURCHASE", label: "Purchase orders", color: "var(--c1)" },
+  { value: "RETURN", label: "Returns & damages", color: "var(--danger)" },
+  { value: "GOODS", label: "GRN & transfers", color: "var(--c2)" },
+  { value: "BRANCH", label: "Branches", color: "var(--c4)" },
   { value: "ACCOUNTS", label: "Accounts", color: "var(--c6)" },
   { value: "CUSTOMER", label: "Customers", color: "var(--c3)" },
   { value: "OTHER", label: "Other", color: "var(--text-soft)" },
@@ -194,6 +199,7 @@ export default function ActivityLogPage() {
                       <span className="lx-log-meta">
                         <strong>{who}</strong>
                         {log.actorRole && <> · {ROLE_LABELS[log.actorRole as PosAdminRole] ?? log.actorRole}</>}
+                        {log.branch && <> · {log.branch}</>}
                         <> · <span title={new Date(log.createdAt).toLocaleString()}>{relativeTime(log.createdAt)}</span></>
                       </span>
                     </span>
@@ -205,6 +211,7 @@ export default function ActivityLogPage() {
                       <dl>
                         <div><dt>When</dt><dd>{new Date(log.createdAt).toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</dd></div>
                         <div><dt>Who</dt><dd>{who}{log.actorRole ? ` · ${ROLE_LABELS[log.actorRole as PosAdminRole] ?? log.actorRole}` : ""}</dd></div>
+                        {log.branch && <div><dt>Branch</dt><dd>{log.branch}</dd></div>}
                         <div><dt>Device</dt><dd>{deviceLabel(log.userAgent)}</dd></div>
                         {log.details?.facts?.map((item) => (
                           <div key={item.label}><dt>{item.label}</dt><dd>{item.value}</dd></div>

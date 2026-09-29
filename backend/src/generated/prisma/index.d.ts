@@ -183,6 +183,36 @@ export type PosWalletTransaction = $Result.DefaultSelection<Prisma.$PosWalletTra
  * DAMAGE_CLEARED damaged stock sent back to the supplier, thrown away, or put back on the shelf
  */
 export type PosReturn = $Result.DefaultSelection<Prisma.$PosReturnPayload>
+/**
+ * Model Branch
+ * A shop branch. Each branch has its own stock, tills (shifts), Day End and cash drawer.
+ */
+export type Branch = $Result.DefaultSelection<Prisma.$BranchPayload>
+/**
+ * Model BranchStock
+ * Stock of one product in one branch. The product's own quantity / damaged / empties are the totals of all branches.
+ */
+export type BranchStock = $Result.DefaultSelection<Prisma.$BranchStockPayload>
+/**
+ * Model Grn
+ * GRN (Goods Received Note): goods delivered by a supplier into a branch, checked against the supplier's invoice.
+ */
+export type Grn = $Result.DefaultSelection<Prisma.$GrnPayload>
+/**
+ * Model GrnItem
+ * 
+ */
+export type GrnItem = $Result.DefaultSelection<Prisma.$GrnItemPayload>
+/**
+ * Model Gtn
+ * GTN (Goods Transfer Note): stock sent from one branch to another. SENT (in transit) → RECEIVED, or CANCELLED.
+ */
+export type Gtn = $Result.DefaultSelection<Prisma.$GtnPayload>
+/**
+ * Model GtnItem
+ * 
+ */
+export type GtnItem = $Result.DefaultSelection<Prisma.$GtnItemPayload>
 
 /**
  * Enums
@@ -849,6 +879,66 @@ export class PrismaClient<
     * ```
     */
   get posReturn(): Prisma.PosReturnDelegate<ExtArgs>;
+
+  /**
+   * `prisma.branch`: Exposes CRUD operations for the **Branch** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Branches
+    * const branches = await prisma.branch.findMany()
+    * ```
+    */
+  get branch(): Prisma.BranchDelegate<ExtArgs>;
+
+  /**
+   * `prisma.branchStock`: Exposes CRUD operations for the **BranchStock** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more BranchStocks
+    * const branchStocks = await prisma.branchStock.findMany()
+    * ```
+    */
+  get branchStock(): Prisma.BranchStockDelegate<ExtArgs>;
+
+  /**
+   * `prisma.grn`: Exposes CRUD operations for the **Grn** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Grns
+    * const grns = await prisma.grn.findMany()
+    * ```
+    */
+  get grn(): Prisma.GrnDelegate<ExtArgs>;
+
+  /**
+   * `prisma.grnItem`: Exposes CRUD operations for the **GrnItem** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more GrnItems
+    * const grnItems = await prisma.grnItem.findMany()
+    * ```
+    */
+  get grnItem(): Prisma.GrnItemDelegate<ExtArgs>;
+
+  /**
+   * `prisma.gtn`: Exposes CRUD operations for the **Gtn** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Gtns
+    * const gtns = await prisma.gtn.findMany()
+    * ```
+    */
+  get gtn(): Prisma.GtnDelegate<ExtArgs>;
+
+  /**
+   * `prisma.gtnItem`: Exposes CRUD operations for the **GtnItem** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more GtnItems
+    * const gtnItems = await prisma.gtnItem.findMany()
+    * ```
+    */
+  get gtnItem(): Prisma.GtnItemDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -1322,7 +1412,13 @@ export namespace Prisma {
     PurchaseOrderItem: 'PurchaseOrderItem',
     PurchaseOrderEmail: 'PurchaseOrderEmail',
     PosWalletTransaction: 'PosWalletTransaction',
-    PosReturn: 'PosReturn'
+    PosReturn: 'PosReturn',
+    Branch: 'Branch',
+    BranchStock: 'BranchStock',
+    Grn: 'Grn',
+    GrnItem: 'GrnItem',
+    Gtn: 'Gtn',
+    GtnItem: 'GtnItem'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1338,7 +1434,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "posAdmin" | "posCounterSale" | "supplier" | "inventoryBrand" | "inventoryCategory" | "inventoryProduct" | "inventoryProductExpense" | "inventoryProductImage" | "posCustomer" | "posCustomerPurchase" | "posInvoiceTerm" | "posInstallment" | "posInstallmentPayment" | "contactRequest" | "account" | "accountRelationship" | "accountReceipt" | "accountVoucher" | "accountTransaction" | "invoicePayment" | "accountDeposit" | "accountDepositItem" | "activityLog" | "posSetting" | "posShift" | "posCashEntry" | "inventoryMovement" | "purchaseOrder" | "purchaseOrderItem" | "purchaseOrderEmail" | "posWalletTransaction" | "posReturn"
+      modelProps: "user" | "posAdmin" | "posCounterSale" | "supplier" | "inventoryBrand" | "inventoryCategory" | "inventoryProduct" | "inventoryProductExpense" | "inventoryProductImage" | "posCustomer" | "posCustomerPurchase" | "posInvoiceTerm" | "posInstallment" | "posInstallmentPayment" | "contactRequest" | "account" | "accountRelationship" | "accountReceipt" | "accountVoucher" | "accountTransaction" | "invoicePayment" | "accountDeposit" | "accountDepositItem" | "activityLog" | "posSetting" | "posShift" | "posCashEntry" | "inventoryMovement" | "purchaseOrder" | "purchaseOrderItem" | "purchaseOrderEmail" | "posWalletTransaction" | "posReturn" | "branch" | "branchStock" | "grn" | "grnItem" | "gtn" | "gtnItem"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3652,6 +3748,426 @@ export namespace Prisma {
           }
         }
       }
+      Branch: {
+        payload: Prisma.$BranchPayload<ExtArgs>
+        fields: Prisma.BranchFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BranchFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BranchPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BranchFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BranchPayload>
+          }
+          findFirst: {
+            args: Prisma.BranchFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BranchPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BranchFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BranchPayload>
+          }
+          findMany: {
+            args: Prisma.BranchFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BranchPayload>[]
+          }
+          create: {
+            args: Prisma.BranchCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BranchPayload>
+          }
+          createMany: {
+            args: Prisma.BranchCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BranchCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BranchPayload>[]
+          }
+          delete: {
+            args: Prisma.BranchDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BranchPayload>
+          }
+          update: {
+            args: Prisma.BranchUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BranchPayload>
+          }
+          deleteMany: {
+            args: Prisma.BranchDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BranchUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.BranchUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BranchPayload>
+          }
+          aggregate: {
+            args: Prisma.BranchAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBranch>
+          }
+          groupBy: {
+            args: Prisma.BranchGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BranchGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BranchCountArgs<ExtArgs>
+            result: $Utils.Optional<BranchCountAggregateOutputType> | number
+          }
+        }
+      }
+      BranchStock: {
+        payload: Prisma.$BranchStockPayload<ExtArgs>
+        fields: Prisma.BranchStockFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BranchStockFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BranchStockPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BranchStockFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BranchStockPayload>
+          }
+          findFirst: {
+            args: Prisma.BranchStockFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BranchStockPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BranchStockFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BranchStockPayload>
+          }
+          findMany: {
+            args: Prisma.BranchStockFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BranchStockPayload>[]
+          }
+          create: {
+            args: Prisma.BranchStockCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BranchStockPayload>
+          }
+          createMany: {
+            args: Prisma.BranchStockCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BranchStockCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BranchStockPayload>[]
+          }
+          delete: {
+            args: Prisma.BranchStockDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BranchStockPayload>
+          }
+          update: {
+            args: Prisma.BranchStockUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BranchStockPayload>
+          }
+          deleteMany: {
+            args: Prisma.BranchStockDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BranchStockUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.BranchStockUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BranchStockPayload>
+          }
+          aggregate: {
+            args: Prisma.BranchStockAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBranchStock>
+          }
+          groupBy: {
+            args: Prisma.BranchStockGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BranchStockGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BranchStockCountArgs<ExtArgs>
+            result: $Utils.Optional<BranchStockCountAggregateOutputType> | number
+          }
+        }
+      }
+      Grn: {
+        payload: Prisma.$GrnPayload<ExtArgs>
+        fields: Prisma.GrnFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.GrnFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GrnPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.GrnFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GrnPayload>
+          }
+          findFirst: {
+            args: Prisma.GrnFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GrnPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.GrnFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GrnPayload>
+          }
+          findMany: {
+            args: Prisma.GrnFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GrnPayload>[]
+          }
+          create: {
+            args: Prisma.GrnCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GrnPayload>
+          }
+          createMany: {
+            args: Prisma.GrnCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.GrnCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GrnPayload>[]
+          }
+          delete: {
+            args: Prisma.GrnDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GrnPayload>
+          }
+          update: {
+            args: Prisma.GrnUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GrnPayload>
+          }
+          deleteMany: {
+            args: Prisma.GrnDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.GrnUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.GrnUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GrnPayload>
+          }
+          aggregate: {
+            args: Prisma.GrnAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGrn>
+          }
+          groupBy: {
+            args: Prisma.GrnGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GrnGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.GrnCountArgs<ExtArgs>
+            result: $Utils.Optional<GrnCountAggregateOutputType> | number
+          }
+        }
+      }
+      GrnItem: {
+        payload: Prisma.$GrnItemPayload<ExtArgs>
+        fields: Prisma.GrnItemFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.GrnItemFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GrnItemPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.GrnItemFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GrnItemPayload>
+          }
+          findFirst: {
+            args: Prisma.GrnItemFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GrnItemPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.GrnItemFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GrnItemPayload>
+          }
+          findMany: {
+            args: Prisma.GrnItemFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GrnItemPayload>[]
+          }
+          create: {
+            args: Prisma.GrnItemCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GrnItemPayload>
+          }
+          createMany: {
+            args: Prisma.GrnItemCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.GrnItemCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GrnItemPayload>[]
+          }
+          delete: {
+            args: Prisma.GrnItemDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GrnItemPayload>
+          }
+          update: {
+            args: Prisma.GrnItemUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GrnItemPayload>
+          }
+          deleteMany: {
+            args: Prisma.GrnItemDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.GrnItemUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.GrnItemUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GrnItemPayload>
+          }
+          aggregate: {
+            args: Prisma.GrnItemAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGrnItem>
+          }
+          groupBy: {
+            args: Prisma.GrnItemGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GrnItemGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.GrnItemCountArgs<ExtArgs>
+            result: $Utils.Optional<GrnItemCountAggregateOutputType> | number
+          }
+        }
+      }
+      Gtn: {
+        payload: Prisma.$GtnPayload<ExtArgs>
+        fields: Prisma.GtnFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.GtnFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GtnPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.GtnFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GtnPayload>
+          }
+          findFirst: {
+            args: Prisma.GtnFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GtnPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.GtnFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GtnPayload>
+          }
+          findMany: {
+            args: Prisma.GtnFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GtnPayload>[]
+          }
+          create: {
+            args: Prisma.GtnCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GtnPayload>
+          }
+          createMany: {
+            args: Prisma.GtnCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.GtnCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GtnPayload>[]
+          }
+          delete: {
+            args: Prisma.GtnDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GtnPayload>
+          }
+          update: {
+            args: Prisma.GtnUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GtnPayload>
+          }
+          deleteMany: {
+            args: Prisma.GtnDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.GtnUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.GtnUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GtnPayload>
+          }
+          aggregate: {
+            args: Prisma.GtnAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGtn>
+          }
+          groupBy: {
+            args: Prisma.GtnGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GtnGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.GtnCountArgs<ExtArgs>
+            result: $Utils.Optional<GtnCountAggregateOutputType> | number
+          }
+        }
+      }
+      GtnItem: {
+        payload: Prisma.$GtnItemPayload<ExtArgs>
+        fields: Prisma.GtnItemFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.GtnItemFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GtnItemPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.GtnItemFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GtnItemPayload>
+          }
+          findFirst: {
+            args: Prisma.GtnItemFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GtnItemPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.GtnItemFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GtnItemPayload>
+          }
+          findMany: {
+            args: Prisma.GtnItemFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GtnItemPayload>[]
+          }
+          create: {
+            args: Prisma.GtnItemCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GtnItemPayload>
+          }
+          createMany: {
+            args: Prisma.GtnItemCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.GtnItemCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GtnItemPayload>[]
+          }
+          delete: {
+            args: Prisma.GtnItemDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GtnItemPayload>
+          }
+          update: {
+            args: Prisma.GtnItemUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GtnItemPayload>
+          }
+          deleteMany: {
+            args: Prisma.GtnItemDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.GtnItemUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.GtnItemUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GtnItemPayload>
+          }
+          aggregate: {
+            args: Prisma.GtnItemAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGtnItem>
+          }
+          groupBy: {
+            args: Prisma.GtnItemGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GtnItemGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.GtnItemCountArgs<ExtArgs>
+            result: $Utils.Optional<GtnItemCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -3951,6 +4467,7 @@ export namespace Prisma {
     purchaseOrderItems: number
     returns: number
     customerPurchases: number
+    branchStock: number
   }
 
   export type InventoryProductCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3959,6 +4476,7 @@ export namespace Prisma {
     purchaseOrderItems?: boolean | InventoryProductCountOutputTypeCountPurchaseOrderItemsArgs
     returns?: boolean | InventoryProductCountOutputTypeCountReturnsArgs
     customerPurchases?: boolean | InventoryProductCountOutputTypeCountCustomerPurchasesArgs
+    branchStock?: boolean | InventoryProductCountOutputTypeCountBranchStockArgs
   }
 
   // Custom InputTypes
@@ -4005,6 +4523,13 @@ export namespace Prisma {
    */
   export type InventoryProductCountOutputTypeCountCustomerPurchasesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PosCustomerPurchaseWhereInput
+  }
+
+  /**
+   * InventoryProductCountOutputType without action
+   */
+  export type InventoryProductCountOutputTypeCountBranchStockArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BranchStockWhereInput
   }
 
 
@@ -4437,6 +4962,126 @@ export namespace Prisma {
    */
   export type PurchaseOrderCountOutputTypeCountEmailsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PurchaseOrderEmailWhereInput
+  }
+
+
+  /**
+   * Count Type BranchCountOutputType
+   */
+
+  export type BranchCountOutputType = {
+    stock: number
+    grns: number
+    gtnsOut: number
+    gtnsIn: number
+  }
+
+  export type BranchCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    stock?: boolean | BranchCountOutputTypeCountStockArgs
+    grns?: boolean | BranchCountOutputTypeCountGrnsArgs
+    gtnsOut?: boolean | BranchCountOutputTypeCountGtnsOutArgs
+    gtnsIn?: boolean | BranchCountOutputTypeCountGtnsInArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * BranchCountOutputType without action
+   */
+  export type BranchCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BranchCountOutputType
+     */
+    select?: BranchCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * BranchCountOutputType without action
+   */
+  export type BranchCountOutputTypeCountStockArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BranchStockWhereInput
+  }
+
+  /**
+   * BranchCountOutputType without action
+   */
+  export type BranchCountOutputTypeCountGrnsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GrnWhereInput
+  }
+
+  /**
+   * BranchCountOutputType without action
+   */
+  export type BranchCountOutputTypeCountGtnsOutArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GtnWhereInput
+  }
+
+  /**
+   * BranchCountOutputType without action
+   */
+  export type BranchCountOutputTypeCountGtnsInArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GtnWhereInput
+  }
+
+
+  /**
+   * Count Type GrnCountOutputType
+   */
+
+  export type GrnCountOutputType = {
+    items: number
+  }
+
+  export type GrnCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    items?: boolean | GrnCountOutputTypeCountItemsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * GrnCountOutputType without action
+   */
+  export type GrnCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GrnCountOutputType
+     */
+    select?: GrnCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * GrnCountOutputType without action
+   */
+  export type GrnCountOutputTypeCountItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GrnItemWhereInput
+  }
+
+
+  /**
+   * Count Type GtnCountOutputType
+   */
+
+  export type GtnCountOutputType = {
+    items: number
+  }
+
+  export type GtnCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    items?: boolean | GtnCountOutputTypeCountItemsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * GtnCountOutputType without action
+   */
+  export type GtnCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GtnCountOutputType
+     */
+    select?: GtnCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * GtnCountOutputType without action
+   */
+  export type GtnCountOutputTypeCountItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GtnItemWhereInput
   }
 
 
@@ -5406,14 +6051,20 @@ export namespace Prisma {
 
   export type PosAdminAvgAggregateOutputType = {
     id: number | null
+    branchId: number | null
+    activeBranchId: number | null
   }
 
   export type PosAdminSumAggregateOutputType = {
     id: number | null
+    branchId: number | null
+    activeBranchId: number | null
   }
 
   export type PosAdminMinAggregateOutputType = {
     id: number | null
+    branchId: number | null
+    activeBranchId: number | null
     name: string | null
     email: string | null
     passwordHash: string | null
@@ -5426,6 +6077,8 @@ export namespace Prisma {
 
   export type PosAdminMaxAggregateOutputType = {
     id: number | null
+    branchId: number | null
+    activeBranchId: number | null
     name: string | null
     email: string | null
     passwordHash: string | null
@@ -5438,6 +6091,8 @@ export namespace Prisma {
 
   export type PosAdminCountAggregateOutputType = {
     id: number
+    branchId: number
+    activeBranchId: number
     name: number
     email: number
     passwordHash: number
@@ -5452,14 +6107,20 @@ export namespace Prisma {
 
   export type PosAdminAvgAggregateInputType = {
     id?: true
+    branchId?: true
+    activeBranchId?: true
   }
 
   export type PosAdminSumAggregateInputType = {
     id?: true
+    branchId?: true
+    activeBranchId?: true
   }
 
   export type PosAdminMinAggregateInputType = {
     id?: true
+    branchId?: true
+    activeBranchId?: true
     name?: true
     email?: true
     passwordHash?: true
@@ -5472,6 +6133,8 @@ export namespace Prisma {
 
   export type PosAdminMaxAggregateInputType = {
     id?: true
+    branchId?: true
+    activeBranchId?: true
     name?: true
     email?: true
     passwordHash?: true
@@ -5484,6 +6147,8 @@ export namespace Prisma {
 
   export type PosAdminCountAggregateInputType = {
     id?: true
+    branchId?: true
+    activeBranchId?: true
     name?: true
     email?: true
     passwordHash?: true
@@ -5583,6 +6248,8 @@ export namespace Prisma {
 
   export type PosAdminGroupByOutputType = {
     id: number
+    branchId: number | null
+    activeBranchId: number | null
     name: string
     email: string
     passwordHash: string
@@ -5614,6 +6281,8 @@ export namespace Prisma {
 
   export type PosAdminSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    branchId?: boolean
+    activeBranchId?: boolean
     name?: boolean
     email?: boolean
     passwordHash?: boolean
@@ -5628,6 +6297,8 @@ export namespace Prisma {
 
   export type PosAdminSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    branchId?: boolean
+    activeBranchId?: boolean
     name?: boolean
     email?: boolean
     passwordHash?: boolean
@@ -5640,6 +6311,8 @@ export namespace Prisma {
 
   export type PosAdminSelectScalar = {
     id?: boolean
+    branchId?: boolean
+    activeBranchId?: boolean
     name?: boolean
     email?: boolean
     passwordHash?: boolean
@@ -5663,6 +6336,14 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      /**
+       * Fixed branch (cashiers); null = can work in any branch and switch between them.
+       */
+      branchId: number | null
+      /**
+       * Branch someone without a fixed branch is working in right now.
+       */
+      activeBranchId: number | null
       name: string
       email: string
       passwordHash: string
@@ -6066,6 +6747,8 @@ export namespace Prisma {
    */ 
   interface PosAdminFieldRefs {
     readonly id: FieldRef<"PosAdmin", 'Int'>
+    readonly branchId: FieldRef<"PosAdmin", 'Int'>
+    readonly activeBranchId: FieldRef<"PosAdmin", 'Int'>
     readonly name: FieldRef<"PosAdmin", 'String'>
     readonly email: FieldRef<"PosAdmin", 'String'>
     readonly passwordHash: FieldRef<"PosAdmin", 'String'>
@@ -6436,6 +7119,7 @@ export namespace Prisma {
 
   export type PosCounterSaleAvgAggregateOutputType = {
     id: number | null
+    branchId: number | null
     totalAmount: number | null
     emptyDeduction: number | null
     emptiesReturned: number | null
@@ -6459,6 +7143,7 @@ export namespace Prisma {
 
   export type PosCounterSaleSumAggregateOutputType = {
     id: number | null
+    branchId: number | null
     totalAmount: number | null
     emptyDeduction: number | null
     emptiesReturned: number | null
@@ -6482,6 +7167,7 @@ export namespace Prisma {
 
   export type PosCounterSaleMinAggregateOutputType = {
     id: number | null
+    branchId: number | null
     invoiceGroupCode: string | null
     totalAmount: number | null
     emptyDeduction: number | null
@@ -6510,6 +7196,7 @@ export namespace Prisma {
 
   export type PosCounterSaleMaxAggregateOutputType = {
     id: number | null
+    branchId: number | null
     invoiceGroupCode: string | null
     totalAmount: number | null
     emptyDeduction: number | null
@@ -6538,6 +7225,7 @@ export namespace Prisma {
 
   export type PosCounterSaleCountAggregateOutputType = {
     id: number
+    branchId: number
     invoiceGroupCode: number
     totalAmount: number
     emptyDeduction: number
@@ -6568,6 +7256,7 @@ export namespace Prisma {
 
   export type PosCounterSaleAvgAggregateInputType = {
     id?: true
+    branchId?: true
     totalAmount?: true
     emptyDeduction?: true
     emptiesReturned?: true
@@ -6591,6 +7280,7 @@ export namespace Prisma {
 
   export type PosCounterSaleSumAggregateInputType = {
     id?: true
+    branchId?: true
     totalAmount?: true
     emptyDeduction?: true
     emptiesReturned?: true
@@ -6614,6 +7304,7 @@ export namespace Prisma {
 
   export type PosCounterSaleMinAggregateInputType = {
     id?: true
+    branchId?: true
     invoiceGroupCode?: true
     totalAmount?: true
     emptyDeduction?: true
@@ -6642,6 +7333,7 @@ export namespace Prisma {
 
   export type PosCounterSaleMaxAggregateInputType = {
     id?: true
+    branchId?: true
     invoiceGroupCode?: true
     totalAmount?: true
     emptyDeduction?: true
@@ -6670,6 +7362,7 @@ export namespace Prisma {
 
   export type PosCounterSaleCountAggregateInputType = {
     id?: true
+    branchId?: true
     invoiceGroupCode?: true
     totalAmount?: true
     emptyDeduction?: true
@@ -6785,6 +7478,7 @@ export namespace Prisma {
 
   export type PosCounterSaleGroupByOutputType = {
     id: number
+    branchId: number | null
     invoiceGroupCode: string
     totalAmount: number
     emptyDeduction: number
@@ -6832,6 +7526,7 @@ export namespace Prisma {
 
   export type PosCounterSaleSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    branchId?: boolean
     invoiceGroupCode?: boolean
     totalAmount?: boolean
     emptyDeduction?: boolean
@@ -6863,6 +7558,7 @@ export namespace Prisma {
 
   export type PosCounterSaleSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    branchId?: boolean
     invoiceGroupCode?: boolean
     totalAmount?: boolean
     emptyDeduction?: boolean
@@ -6894,6 +7590,7 @@ export namespace Prisma {
 
   export type PosCounterSaleSelectScalar = {
     id?: boolean
+    branchId?: boolean
     invoiceGroupCode?: boolean
     totalAmount?: boolean
     emptyDeduction?: boolean
@@ -6940,6 +7637,10 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      /**
+       * Branch this belongs to (every till, drawer and stock count is per branch).
+       */
+      branchId: number | null
       invoiceGroupCode: string
       totalAmount: number
       /**
@@ -7391,6 +8092,7 @@ export namespace Prisma {
    */ 
   interface PosCounterSaleFieldRefs {
     readonly id: FieldRef<"PosCounterSale", 'Int'>
+    readonly branchId: FieldRef<"PosCounterSale", 'Int'>
     readonly invoiceGroupCode: FieldRef<"PosCounterSale", 'String'>
     readonly totalAmount: FieldRef<"PosCounterSale", 'Float'>
     readonly emptyDeduction: FieldRef<"PosCounterSale", 'Float'>
@@ -10859,6 +11561,7 @@ export namespace Prisma {
     sellingPrice: number | null
     emptyBottlePrice: number | null
     emptyBottlesOnHand: number | null
+    isHardLiquor: boolean | null
     damagedQuantity: number | null
     description: string | null
     lastSoldAt: Date | null
@@ -10884,6 +11587,7 @@ export namespace Prisma {
     sellingPrice: number | null
     emptyBottlePrice: number | null
     emptyBottlesOnHand: number | null
+    isHardLiquor: boolean | null
     damagedQuantity: number | null
     description: string | null
     lastSoldAt: Date | null
@@ -10909,6 +11613,7 @@ export namespace Prisma {
     sellingPrice: number
     emptyBottlePrice: number
     emptyBottlesOnHand: number
+    isHardLiquor: number
     damagedQuantity: number
     description: number
     lastSoldAt: number
@@ -10970,6 +11675,7 @@ export namespace Prisma {
     sellingPrice?: true
     emptyBottlePrice?: true
     emptyBottlesOnHand?: true
+    isHardLiquor?: true
     damagedQuantity?: true
     description?: true
     lastSoldAt?: true
@@ -10995,6 +11701,7 @@ export namespace Prisma {
     sellingPrice?: true
     emptyBottlePrice?: true
     emptyBottlesOnHand?: true
+    isHardLiquor?: true
     damagedQuantity?: true
     description?: true
     lastSoldAt?: true
@@ -11020,6 +11727,7 @@ export namespace Prisma {
     sellingPrice?: true
     emptyBottlePrice?: true
     emptyBottlesOnHand?: true
+    isHardLiquor?: true
     damagedQuantity?: true
     description?: true
     lastSoldAt?: true
@@ -11132,6 +11840,7 @@ export namespace Prisma {
     sellingPrice: number | null
     emptyBottlePrice: number | null
     emptyBottlesOnHand: number
+    isHardLiquor: boolean
     damagedQuantity: number
     description: string | null
     lastSoldAt: Date | null
@@ -11176,6 +11885,7 @@ export namespace Prisma {
     sellingPrice?: boolean
     emptyBottlePrice?: boolean
     emptyBottlesOnHand?: boolean
+    isHardLiquor?: boolean
     damagedQuantity?: boolean
     description?: boolean
     lastSoldAt?: boolean
@@ -11189,6 +11899,7 @@ export namespace Prisma {
     purchaseOrderItems?: boolean | InventoryProduct$purchaseOrderItemsArgs<ExtArgs>
     returns?: boolean | InventoryProduct$returnsArgs<ExtArgs>
     customerPurchases?: boolean | InventoryProduct$customerPurchasesArgs<ExtArgs>
+    branchStock?: boolean | InventoryProduct$branchStockArgs<ExtArgs>
     _count?: boolean | InventoryProductCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["inventoryProduct"]>
 
@@ -11210,6 +11921,7 @@ export namespace Prisma {
     sellingPrice?: boolean
     emptyBottlePrice?: boolean
     emptyBottlesOnHand?: boolean
+    isHardLiquor?: boolean
     damagedQuantity?: boolean
     description?: boolean
     lastSoldAt?: boolean
@@ -11238,6 +11950,7 @@ export namespace Prisma {
     sellingPrice?: boolean
     emptyBottlePrice?: boolean
     emptyBottlesOnHand?: boolean
+    isHardLiquor?: boolean
     damagedQuantity?: boolean
     description?: boolean
     lastSoldAt?: boolean
@@ -11254,6 +11967,7 @@ export namespace Prisma {
     purchaseOrderItems?: boolean | InventoryProduct$purchaseOrderItemsArgs<ExtArgs>
     returns?: boolean | InventoryProduct$returnsArgs<ExtArgs>
     customerPurchases?: boolean | InventoryProduct$customerPurchasesArgs<ExtArgs>
+    branchStock?: boolean | InventoryProduct$branchStockArgs<ExtArgs>
     _count?: boolean | InventoryProductCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type InventoryProductIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -11273,6 +11987,7 @@ export namespace Prisma {
       purchaseOrderItems: Prisma.$PurchaseOrderItemPayload<ExtArgs>[]
       returns: Prisma.$PosReturnPayload<ExtArgs>[]
       customerPurchases: Prisma.$PosCustomerPurchasePayload<ExtArgs>[]
+      branchStock: Prisma.$BranchStockPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -11298,6 +12013,10 @@ export namespace Prisma {
        * Empty bottles collected at the counter and not yet returned to the supplier.
        */
       emptyBottlesOnHand: number
+      /**
+       * Counts toward the hard liquor limit per bill (Sri Lankan law). Ticked on the product; beer is not.
+       */
+      isHardLiquor: boolean
       /**
        * Damaged bottles kept aside (not for sale) until sent back to the supplier or thrown away.
        */
@@ -11678,6 +12397,7 @@ export namespace Prisma {
     purchaseOrderItems<T extends InventoryProduct$purchaseOrderItemsArgs<ExtArgs> = {}>(args?: Subset<T, InventoryProduct$purchaseOrderItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PurchaseOrderItemPayload<ExtArgs>, T, "findMany"> | Null>
     returns<T extends InventoryProduct$returnsArgs<ExtArgs> = {}>(args?: Subset<T, InventoryProduct$returnsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosReturnPayload<ExtArgs>, T, "findMany"> | Null>
     customerPurchases<T extends InventoryProduct$customerPurchasesArgs<ExtArgs> = {}>(args?: Subset<T, InventoryProduct$customerPurchasesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosCustomerPurchasePayload<ExtArgs>, T, "findMany"> | Null>
+    branchStock<T extends InventoryProduct$branchStockArgs<ExtArgs> = {}>(args?: Subset<T, InventoryProduct$branchStockArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BranchStockPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -11724,6 +12444,7 @@ export namespace Prisma {
     readonly sellingPrice: FieldRef<"InventoryProduct", 'Float'>
     readonly emptyBottlePrice: FieldRef<"InventoryProduct", 'Float'>
     readonly emptyBottlesOnHand: FieldRef<"InventoryProduct", 'Int'>
+    readonly isHardLiquor: FieldRef<"InventoryProduct", 'Boolean'>
     readonly damagedQuantity: FieldRef<"InventoryProduct", 'Int'>
     readonly description: FieldRef<"InventoryProduct", 'String'>
     readonly lastSoldAt: FieldRef<"InventoryProduct", 'DateTime'>
@@ -12159,6 +12880,26 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: PosCustomerPurchaseScalarFieldEnum | PosCustomerPurchaseScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryProduct.branchStock
+   */
+  export type InventoryProduct$branchStockArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BranchStock
+     */
+    select?: BranchStockSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchStockInclude<ExtArgs> | null
+    where?: BranchStockWhereInput
+    orderBy?: BranchStockOrderByWithRelationInput | BranchStockOrderByWithRelationInput[]
+    cursor?: BranchStockWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BranchStockScalarFieldEnum | BranchStockScalarFieldEnum[]
   }
 
   /**
@@ -15417,6 +16158,7 @@ export namespace Prisma {
     quantity: number | null
     emptiesReturned: number | null
     emptyDeduction: number | null
+    isHardLiquor: boolean | null
     billDiscount: number | null
     purchasedAt: Date | null
   }
@@ -15444,6 +16186,7 @@ export namespace Prisma {
     quantity: number | null
     emptiesReturned: number | null
     emptyDeduction: number | null
+    isHardLiquor: boolean | null
     billDiscount: number | null
     purchasedAt: Date | null
   }
@@ -15472,6 +16215,7 @@ export namespace Prisma {
     quantity: number
     emptiesReturned: number
     emptyDeduction: number
+    isHardLiquor: number
     billDiscount: number
     purchasedAt: number
     _all: number
@@ -15537,6 +16281,7 @@ export namespace Prisma {
     quantity?: true
     emptiesReturned?: true
     emptyDeduction?: true
+    isHardLiquor?: true
     billDiscount?: true
     purchasedAt?: true
   }
@@ -15564,6 +16309,7 @@ export namespace Prisma {
     quantity?: true
     emptiesReturned?: true
     emptyDeduction?: true
+    isHardLiquor?: true
     billDiscount?: true
     purchasedAt?: true
   }
@@ -15592,6 +16338,7 @@ export namespace Prisma {
     quantity?: true
     emptiesReturned?: true
     emptyDeduction?: true
+    isHardLiquor?: true
     billDiscount?: true
     purchasedAt?: true
     _all?: true
@@ -15707,6 +16454,7 @@ export namespace Prisma {
     quantity: number
     emptiesReturned: number
     emptyDeduction: number
+    isHardLiquor: boolean
     billDiscount: number
     purchasedAt: Date
     _count: PosCustomerPurchaseCountAggregateOutputType | null
@@ -15754,6 +16502,7 @@ export namespace Prisma {
     quantity?: boolean
     emptiesReturned?: boolean
     emptyDeduction?: boolean
+    isHardLiquor?: boolean
     billDiscount?: boolean
     purchasedAt?: boolean
     customer?: boolean | PosCustomerDefaultArgs<ExtArgs>
@@ -15788,6 +16537,7 @@ export namespace Prisma {
     quantity?: boolean
     emptiesReturned?: boolean
     emptyDeduction?: boolean
+    isHardLiquor?: boolean
     billDiscount?: boolean
     purchasedAt?: boolean
     customer?: boolean | PosCustomerDefaultArgs<ExtArgs>
@@ -15818,6 +16568,7 @@ export namespace Prisma {
     quantity?: boolean
     emptiesReturned?: boolean
     emptyDeduction?: boolean
+    isHardLiquor?: boolean
     billDiscount?: boolean
     purchasedAt?: boolean
   }
@@ -15871,6 +16622,10 @@ export namespace Prisma {
        */
       emptiesReturned: number
       emptyDeduction: number
+      /**
+       * Whether this product counted as hard liquor when it was sold (kept even if the product is changed later).
+       */
+      isHardLiquor: boolean
       /**
        * This line's share of the bill discount and redeemed points (already taken off finalSellingPrice).
        */
@@ -16297,6 +17052,7 @@ export namespace Prisma {
     readonly quantity: FieldRef<"PosCustomerPurchase", 'Int'>
     readonly emptiesReturned: FieldRef<"PosCustomerPurchase", 'Int'>
     readonly emptyDeduction: FieldRef<"PosCustomerPurchase", 'Float'>
+    readonly isHardLiquor: FieldRef<"PosCustomerPurchase", 'Boolean'>
     readonly billDiscount: FieldRef<"PosCustomerPurchase", 'Float'>
     readonly purchasedAt: FieldRef<"PosCustomerPurchase", 'DateTime'>
   }
@@ -29574,16 +30330,19 @@ export namespace Prisma {
 
   export type ActivityLogAvgAggregateOutputType = {
     id: number | null
+    branchId: number | null
     actorId: number | null
   }
 
   export type ActivityLogSumAggregateOutputType = {
     id: number | null
+    branchId: number | null
     actorId: number | null
   }
 
   export type ActivityLogMinAggregateOutputType = {
     id: number | null
+    branchId: number | null
     actorId: number | null
     actorName: string | null
     actorEmail: string | null
@@ -29600,6 +30359,7 @@ export namespace Prisma {
 
   export type ActivityLogMaxAggregateOutputType = {
     id: number | null
+    branchId: number | null
     actorId: number | null
     actorName: string | null
     actorEmail: string | null
@@ -29616,6 +30376,7 @@ export namespace Prisma {
 
   export type ActivityLogCountAggregateOutputType = {
     id: number
+    branchId: number
     actorId: number
     actorName: number
     actorEmail: number
@@ -29635,16 +30396,19 @@ export namespace Prisma {
 
   export type ActivityLogAvgAggregateInputType = {
     id?: true
+    branchId?: true
     actorId?: true
   }
 
   export type ActivityLogSumAggregateInputType = {
     id?: true
+    branchId?: true
     actorId?: true
   }
 
   export type ActivityLogMinAggregateInputType = {
     id?: true
+    branchId?: true
     actorId?: true
     actorName?: true
     actorEmail?: true
@@ -29661,6 +30425,7 @@ export namespace Prisma {
 
   export type ActivityLogMaxAggregateInputType = {
     id?: true
+    branchId?: true
     actorId?: true
     actorName?: true
     actorEmail?: true
@@ -29677,6 +30442,7 @@ export namespace Prisma {
 
   export type ActivityLogCountAggregateInputType = {
     id?: true
+    branchId?: true
     actorId?: true
     actorName?: true
     actorEmail?: true
@@ -29781,6 +30547,7 @@ export namespace Prisma {
 
   export type ActivityLogGroupByOutputType = {
     id: number
+    branchId: number | null
     actorId: number | null
     actorName: string | null
     actorEmail: string | null
@@ -29817,6 +30584,7 @@ export namespace Prisma {
 
   export type ActivityLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    branchId?: boolean
     actorId?: boolean
     actorName?: boolean
     actorEmail?: boolean
@@ -29834,6 +30602,7 @@ export namespace Prisma {
 
   export type ActivityLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    branchId?: boolean
     actorId?: boolean
     actorName?: boolean
     actorEmail?: boolean
@@ -29851,6 +30620,7 @@ export namespace Prisma {
 
   export type ActivityLogSelectScalar = {
     id?: boolean
+    branchId?: boolean
     actorId?: boolean
     actorName?: boolean
     actorEmail?: boolean
@@ -29872,6 +30642,10 @@ export namespace Prisma {
     objects: {}
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      /**
+       * Branch this belongs to (every till, drawer and stock count is per branch).
+       */
+      branchId: number | null
       actorId: number | null
       actorName: string | null
       actorEmail: string | null
@@ -30285,6 +31059,7 @@ export namespace Prisma {
    */ 
   interface ActivityLogFieldRefs {
     readonly id: FieldRef<"ActivityLog", 'Int'>
+    readonly branchId: FieldRef<"ActivityLog", 'Int'>
     readonly actorId: FieldRef<"ActivityLog", 'Int'>
     readonly actorName: FieldRef<"ActivityLog", 'String'>
     readonly actorEmail: FieldRef<"ActivityLog", 'String'>
@@ -31496,6 +32271,7 @@ export namespace Prisma {
 
   export type PosShiftAvgAggregateOutputType = {
     id: number | null
+    branchId: number | null
     openedById: number | null
     openingFloat: number | null
     countedCash: number | null
@@ -31510,6 +32286,7 @@ export namespace Prisma {
 
   export type PosShiftSumAggregateOutputType = {
     id: number | null
+    branchId: number | null
     openedById: number | null
     openingFloat: number | null
     countedCash: number | null
@@ -31524,6 +32301,7 @@ export namespace Prisma {
 
   export type PosShiftMinAggregateOutputType = {
     id: number | null
+    branchId: number | null
     shiftNo: string | null
     status: string | null
     openedById: number | null
@@ -31546,6 +32324,7 @@ export namespace Prisma {
 
   export type PosShiftMaxAggregateOutputType = {
     id: number | null
+    branchId: number | null
     shiftNo: string | null
     status: string | null
     openedById: number | null
@@ -31568,6 +32347,7 @@ export namespace Prisma {
 
   export type PosShiftCountAggregateOutputType = {
     id: number
+    branchId: number
     shiftNo: number
     status: number
     openedById: number
@@ -31594,6 +32374,7 @@ export namespace Prisma {
 
   export type PosShiftAvgAggregateInputType = {
     id?: true
+    branchId?: true
     openedById?: true
     openingFloat?: true
     countedCash?: true
@@ -31608,6 +32389,7 @@ export namespace Prisma {
 
   export type PosShiftSumAggregateInputType = {
     id?: true
+    branchId?: true
     openedById?: true
     openingFloat?: true
     countedCash?: true
@@ -31622,6 +32404,7 @@ export namespace Prisma {
 
   export type PosShiftMinAggregateInputType = {
     id?: true
+    branchId?: true
     shiftNo?: true
     status?: true
     openedById?: true
@@ -31644,6 +32427,7 @@ export namespace Prisma {
 
   export type PosShiftMaxAggregateInputType = {
     id?: true
+    branchId?: true
     shiftNo?: true
     status?: true
     openedById?: true
@@ -31666,6 +32450,7 @@ export namespace Prisma {
 
   export type PosShiftCountAggregateInputType = {
     id?: true
+    branchId?: true
     shiftNo?: true
     status?: true
     openedById?: true
@@ -31777,6 +32562,7 @@ export namespace Prisma {
 
   export type PosShiftGroupByOutputType = {
     id: number
+    branchId: number | null
     shiftNo: string
     status: string
     openedById: number
@@ -31820,6 +32606,7 @@ export namespace Prisma {
 
   export type PosShiftSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    branchId?: boolean
     shiftNo?: boolean
     status?: boolean
     openedById?: boolean
@@ -31849,6 +32636,7 @@ export namespace Prisma {
 
   export type PosShiftSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    branchId?: boolean
     shiftNo?: boolean
     status?: boolean
     openedById?: boolean
@@ -31873,6 +32661,7 @@ export namespace Prisma {
 
   export type PosShiftSelectScalar = {
     id?: boolean
+    branchId?: boolean
     shiftNo?: boolean
     status?: boolean
     openedById?: boolean
@@ -31914,6 +32703,10 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      /**
+       * Branch this belongs to (every till, drawer and stock count is per branch).
+       */
+      branchId: number | null
       shiftNo: string
       status: string
       openedById: number
@@ -32341,6 +33134,7 @@ export namespace Prisma {
    */ 
   interface PosShiftFieldRefs {
     readonly id: FieldRef<"PosShift", 'Int'>
+    readonly branchId: FieldRef<"PosShift", 'Int'>
     readonly shiftNo: FieldRef<"PosShift", 'String'>
     readonly status: FieldRef<"PosShift", 'String'>
     readonly openedById: FieldRef<"PosShift", 'Int'>
@@ -32783,6 +33577,7 @@ export namespace Prisma {
 
   export type PosCashEntryAvgAggregateOutputType = {
     id: number | null
+    branchId: number | null
     amount: number | null
     shiftId: number | null
     createdById: number | null
@@ -32792,6 +33587,7 @@ export namespace Prisma {
 
   export type PosCashEntrySumAggregateOutputType = {
     id: number | null
+    branchId: number | null
     amount: number | null
     shiftId: number | null
     createdById: number | null
@@ -32801,6 +33597,7 @@ export namespace Prisma {
 
   export type PosCashEntryMinAggregateOutputType = {
     id: number | null
+    branchId: number | null
     entryNo: string | null
     direction: string | null
     category: string | null
@@ -32826,6 +33623,7 @@ export namespace Prisma {
 
   export type PosCashEntryMaxAggregateOutputType = {
     id: number | null
+    branchId: number | null
     entryNo: string | null
     direction: string | null
     category: string | null
@@ -32851,6 +33649,7 @@ export namespace Prisma {
 
   export type PosCashEntryCountAggregateOutputType = {
     id: number
+    branchId: number
     entryNo: number
     direction: number
     category: number
@@ -32878,6 +33677,7 @@ export namespace Prisma {
 
   export type PosCashEntryAvgAggregateInputType = {
     id?: true
+    branchId?: true
     amount?: true
     shiftId?: true
     createdById?: true
@@ -32887,6 +33687,7 @@ export namespace Prisma {
 
   export type PosCashEntrySumAggregateInputType = {
     id?: true
+    branchId?: true
     amount?: true
     shiftId?: true
     createdById?: true
@@ -32896,6 +33697,7 @@ export namespace Prisma {
 
   export type PosCashEntryMinAggregateInputType = {
     id?: true
+    branchId?: true
     entryNo?: true
     direction?: true
     category?: true
@@ -32921,6 +33723,7 @@ export namespace Prisma {
 
   export type PosCashEntryMaxAggregateInputType = {
     id?: true
+    branchId?: true
     entryNo?: true
     direction?: true
     category?: true
@@ -32946,6 +33749,7 @@ export namespace Prisma {
 
   export type PosCashEntryCountAggregateInputType = {
     id?: true
+    branchId?: true
     entryNo?: true
     direction?: true
     category?: true
@@ -33058,6 +33862,7 @@ export namespace Prisma {
 
   export type PosCashEntryGroupByOutputType = {
     id: number
+    branchId: number | null
     entryNo: string
     direction: string
     category: string
@@ -33102,6 +33907,7 @@ export namespace Prisma {
 
   export type PosCashEntrySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    branchId?: boolean
     entryNo?: boolean
     direction?: boolean
     category?: boolean
@@ -33128,6 +33934,7 @@ export namespace Prisma {
 
   export type PosCashEntrySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    branchId?: boolean
     entryNo?: boolean
     direction?: boolean
     category?: boolean
@@ -33154,6 +33961,7 @@ export namespace Prisma {
 
   export type PosCashEntrySelectScalar = {
     id?: boolean
+    branchId?: boolean
     entryNo?: boolean
     direction?: boolean
     category?: boolean
@@ -33191,6 +33999,10 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      /**
+       * Branch this belongs to (every till, drawer and stock count is per branch).
+       */
+      branchId: number | null
       entryNo: string
       direction: string
       category: string
@@ -33617,6 +34429,7 @@ export namespace Prisma {
    */ 
   interface PosCashEntryFieldRefs {
     readonly id: FieldRef<"PosCashEntry", 'Int'>
+    readonly branchId: FieldRef<"PosCashEntry", 'Int'>
     readonly entryNo: FieldRef<"PosCashEntry", 'String'>
     readonly direction: FieldRef<"PosCashEntry", 'String'>
     readonly category: FieldRef<"PosCashEntry", 'String'>
@@ -33999,6 +34812,7 @@ export namespace Prisma {
 
   export type InventoryMovementAvgAggregateOutputType = {
     id: number | null
+    branchId: number | null
     productId: number | null
     quantity: number | null
     shiftId: number | null
@@ -34007,6 +34821,7 @@ export namespace Prisma {
 
   export type InventoryMovementSumAggregateOutputType = {
     id: number | null
+    branchId: number | null
     productId: number | null
     quantity: number | null
     shiftId: number | null
@@ -34015,6 +34830,7 @@ export namespace Prisma {
 
   export type InventoryMovementMinAggregateOutputType = {
     id: number | null
+    branchId: number | null
     productId: number | null
     kind: string | null
     type: string | null
@@ -34027,6 +34843,7 @@ export namespace Prisma {
 
   export type InventoryMovementMaxAggregateOutputType = {
     id: number | null
+    branchId: number | null
     productId: number | null
     kind: string | null
     type: string | null
@@ -34039,6 +34856,7 @@ export namespace Prisma {
 
   export type InventoryMovementCountAggregateOutputType = {
     id: number
+    branchId: number
     productId: number
     kind: number
     type: number
@@ -34053,6 +34871,7 @@ export namespace Prisma {
 
   export type InventoryMovementAvgAggregateInputType = {
     id?: true
+    branchId?: true
     productId?: true
     quantity?: true
     shiftId?: true
@@ -34061,6 +34880,7 @@ export namespace Prisma {
 
   export type InventoryMovementSumAggregateInputType = {
     id?: true
+    branchId?: true
     productId?: true
     quantity?: true
     shiftId?: true
@@ -34069,6 +34889,7 @@ export namespace Prisma {
 
   export type InventoryMovementMinAggregateInputType = {
     id?: true
+    branchId?: true
     productId?: true
     kind?: true
     type?: true
@@ -34081,6 +34902,7 @@ export namespace Prisma {
 
   export type InventoryMovementMaxAggregateInputType = {
     id?: true
+    branchId?: true
     productId?: true
     kind?: true
     type?: true
@@ -34093,6 +34915,7 @@ export namespace Prisma {
 
   export type InventoryMovementCountAggregateInputType = {
     id?: true
+    branchId?: true
     productId?: true
     kind?: true
     type?: true
@@ -34192,6 +35015,7 @@ export namespace Prisma {
 
   export type InventoryMovementGroupByOutputType = {
     id: number
+    branchId: number | null
     productId: number
     kind: string
     type: string
@@ -34223,6 +35047,7 @@ export namespace Prisma {
 
   export type InventoryMovementSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    branchId?: boolean
     productId?: boolean
     kind?: boolean
     type?: boolean
@@ -34236,6 +35061,7 @@ export namespace Prisma {
 
   export type InventoryMovementSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    branchId?: boolean
     productId?: boolean
     kind?: boolean
     type?: boolean
@@ -34249,6 +35075,7 @@ export namespace Prisma {
 
   export type InventoryMovementSelectScalar = {
     id?: boolean
+    branchId?: boolean
     productId?: boolean
     kind?: boolean
     type?: boolean
@@ -34273,6 +35100,10 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      /**
+       * Branch this belongs to (every till, drawer and stock count is per branch).
+       */
+      branchId: number | null
       productId: number
       /**
        * STOCK (bottles for sale) or EMPTIES (empty bottles on hand).
@@ -34685,6 +35516,7 @@ export namespace Prisma {
    */ 
   interface InventoryMovementFieldRefs {
     readonly id: FieldRef<"InventoryMovement", 'Int'>
+    readonly branchId: FieldRef<"InventoryMovement", 'Int'>
     readonly productId: FieldRef<"InventoryMovement", 'Int'>
     readonly kind: FieldRef<"InventoryMovement", 'String'>
     readonly type: FieldRef<"InventoryMovement", 'String'>
@@ -35054,6 +35886,7 @@ export namespace Prisma {
 
   export type PurchaseOrderAvgAggregateOutputType = {
     id: number | null
+    branchId: number | null
     supplierId: number | null
     total: number | null
     createdById: number | null
@@ -35064,6 +35897,7 @@ export namespace Prisma {
 
   export type PurchaseOrderSumAggregateOutputType = {
     id: number | null
+    branchId: number | null
     supplierId: number | null
     total: number | null
     createdById: number | null
@@ -35074,6 +35908,7 @@ export namespace Prisma {
 
   export type PurchaseOrderMinAggregateOutputType = {
     id: number | null
+    branchId: number | null
     poNumber: string | null
     supplierId: number | null
     status: string | null
@@ -35095,6 +35930,7 @@ export namespace Prisma {
 
   export type PurchaseOrderMaxAggregateOutputType = {
     id: number | null
+    branchId: number | null
     poNumber: string | null
     supplierId: number | null
     status: string | null
@@ -35116,6 +35952,7 @@ export namespace Prisma {
 
   export type PurchaseOrderCountAggregateOutputType = {
     id: number
+    branchId: number
     poNumber: number
     supplierId: number
     status: number
@@ -35139,6 +35976,7 @@ export namespace Prisma {
 
   export type PurchaseOrderAvgAggregateInputType = {
     id?: true
+    branchId?: true
     supplierId?: true
     total?: true
     createdById?: true
@@ -35149,6 +35987,7 @@ export namespace Prisma {
 
   export type PurchaseOrderSumAggregateInputType = {
     id?: true
+    branchId?: true
     supplierId?: true
     total?: true
     createdById?: true
@@ -35159,6 +35998,7 @@ export namespace Prisma {
 
   export type PurchaseOrderMinAggregateInputType = {
     id?: true
+    branchId?: true
     poNumber?: true
     supplierId?: true
     status?: true
@@ -35180,6 +36020,7 @@ export namespace Prisma {
 
   export type PurchaseOrderMaxAggregateInputType = {
     id?: true
+    branchId?: true
     poNumber?: true
     supplierId?: true
     status?: true
@@ -35201,6 +36042,7 @@ export namespace Prisma {
 
   export type PurchaseOrderCountAggregateInputType = {
     id?: true
+    branchId?: true
     poNumber?: true
     supplierId?: true
     status?: true
@@ -35309,6 +36151,7 @@ export namespace Prisma {
 
   export type PurchaseOrderGroupByOutputType = {
     id: number
+    branchId: number | null
     poNumber: string
     supplierId: number
     status: string
@@ -35349,6 +36192,7 @@ export namespace Prisma {
 
   export type PurchaseOrderSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    branchId?: boolean
     poNumber?: boolean
     supplierId?: boolean
     status?: boolean
@@ -35374,6 +36218,7 @@ export namespace Prisma {
 
   export type PurchaseOrderSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    branchId?: boolean
     poNumber?: boolean
     supplierId?: boolean
     status?: boolean
@@ -35396,6 +36241,7 @@ export namespace Prisma {
 
   export type PurchaseOrderSelectScalar = {
     id?: boolean
+    branchId?: boolean
     poNumber?: boolean
     supplierId?: boolean
     status?: boolean
@@ -35434,6 +36280,10 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      /**
+       * Branch the goods are delivered to (received there on a GRN).
+       */
+      branchId: number | null
       poNumber: string
       supplierId: number
       status: string
@@ -35848,6 +36698,7 @@ export namespace Prisma {
    */ 
   interface PurchaseOrderFieldRefs {
     readonly id: FieldRef<"PurchaseOrder", 'Int'>
+    readonly branchId: FieldRef<"PurchaseOrder", 'Int'>
     readonly poNumber: FieldRef<"PurchaseOrder", 'String'>
     readonly supplierId: FieldRef<"PurchaseOrder", 'Int'>
     readonly status: FieldRef<"PurchaseOrder", 'String'>
@@ -39399,6 +40250,7 @@ export namespace Prisma {
 
   export type PosReturnAvgAggregateOutputType = {
     id: number | null
+    branchId: number | null
     productId: number | null
     quantity: number | null
     customerId: number | null
@@ -39412,6 +40264,7 @@ export namespace Prisma {
 
   export type PosReturnSumAggregateOutputType = {
     id: number | null
+    branchId: number | null
     productId: number | null
     quantity: number | null
     customerId: number | null
@@ -39425,6 +40278,7 @@ export namespace Prisma {
 
   export type PosReturnMinAggregateOutputType = {
     id: number | null
+    branchId: number | null
     returnNo: string | null
     type: string | null
     productId: number | null
@@ -39451,6 +40305,7 @@ export namespace Prisma {
 
   export type PosReturnMaxAggregateOutputType = {
     id: number | null
+    branchId: number | null
     returnNo: string | null
     type: string | null
     productId: number | null
@@ -39477,6 +40332,7 @@ export namespace Prisma {
 
   export type PosReturnCountAggregateOutputType = {
     id: number
+    branchId: number
     returnNo: number
     type: number
     productId: number
@@ -39505,6 +40361,7 @@ export namespace Prisma {
 
   export type PosReturnAvgAggregateInputType = {
     id?: true
+    branchId?: true
     productId?: true
     quantity?: true
     customerId?: true
@@ -39518,6 +40375,7 @@ export namespace Prisma {
 
   export type PosReturnSumAggregateInputType = {
     id?: true
+    branchId?: true
     productId?: true
     quantity?: true
     customerId?: true
@@ -39531,6 +40389,7 @@ export namespace Prisma {
 
   export type PosReturnMinAggregateInputType = {
     id?: true
+    branchId?: true
     returnNo?: true
     type?: true
     productId?: true
@@ -39557,6 +40416,7 @@ export namespace Prisma {
 
   export type PosReturnMaxAggregateInputType = {
     id?: true
+    branchId?: true
     returnNo?: true
     type?: true
     productId?: true
@@ -39583,6 +40443,7 @@ export namespace Prisma {
 
   export type PosReturnCountAggregateInputType = {
     id?: true
+    branchId?: true
     returnNo?: true
     type?: true
     productId?: true
@@ -39696,6 +40557,7 @@ export namespace Prisma {
 
   export type PosReturnGroupByOutputType = {
     id: number
+    branchId: number | null
     returnNo: string
     type: string
     productId: number | null
@@ -39741,6 +40603,7 @@ export namespace Prisma {
 
   export type PosReturnSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    branchId?: boolean
     returnNo?: boolean
     type?: boolean
     productId?: boolean
@@ -39770,6 +40633,7 @@ export namespace Prisma {
 
   export type PosReturnSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    branchId?: boolean
     returnNo?: boolean
     type?: boolean
     productId?: boolean
@@ -39799,6 +40663,7 @@ export namespace Prisma {
 
   export type PosReturnSelectScalar = {
     id?: boolean
+    branchId?: boolean
     returnNo?: boolean
     type?: boolean
     productId?: boolean
@@ -39843,6 +40708,10 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      /**
+       * Branch this belongs to (every till, drawer and stock count is per branch).
+       */
+      branchId: number | null
       returnNo: string
       type: string
       productId: number | null
@@ -40283,6 +41152,7 @@ export namespace Prisma {
    */ 
   interface PosReturnFieldRefs {
     readonly id: FieldRef<"PosReturn", 'Int'>
+    readonly branchId: FieldRef<"PosReturn", 'Int'>
     readonly returnNo: FieldRef<"PosReturn", 'String'>
     readonly type: FieldRef<"PosReturn", 'String'>
     readonly productId: FieldRef<"PosReturn", 'Int'>
@@ -40683,6 +41553,6620 @@ export namespace Prisma {
 
 
   /**
+   * Model Branch
+   */
+
+  export type AggregateBranch = {
+    _count: BranchCountAggregateOutputType | null
+    _avg: BranchAvgAggregateOutputType | null
+    _sum: BranchSumAggregateOutputType | null
+    _min: BranchMinAggregateOutputType | null
+    _max: BranchMaxAggregateOutputType | null
+  }
+
+  export type BranchAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type BranchSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type BranchMinAggregateOutputType = {
+    id: number | null
+    code: string | null
+    name: string | null
+    address: string | null
+    phone: string | null
+    isMain: boolean | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BranchMaxAggregateOutputType = {
+    id: number | null
+    code: string | null
+    name: string | null
+    address: string | null
+    phone: string | null
+    isMain: boolean | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BranchCountAggregateOutputType = {
+    id: number
+    code: number
+    name: number
+    address: number
+    phone: number
+    isMain: number
+    isActive: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type BranchAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type BranchSumAggregateInputType = {
+    id?: true
+  }
+
+  export type BranchMinAggregateInputType = {
+    id?: true
+    code?: true
+    name?: true
+    address?: true
+    phone?: true
+    isMain?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type BranchMaxAggregateInputType = {
+    id?: true
+    code?: true
+    name?: true
+    address?: true
+    phone?: true
+    isMain?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type BranchCountAggregateInputType = {
+    id?: true
+    code?: true
+    name?: true
+    address?: true
+    phone?: true
+    isMain?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type BranchAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Branch to aggregate.
+     */
+    where?: BranchWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Branches to fetch.
+     */
+    orderBy?: BranchOrderByWithRelationInput | BranchOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BranchWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Branches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Branches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Branches
+    **/
+    _count?: true | BranchCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: BranchAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: BranchSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BranchMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BranchMaxAggregateInputType
+  }
+
+  export type GetBranchAggregateType<T extends BranchAggregateArgs> = {
+        [P in keyof T & keyof AggregateBranch]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBranch[P]>
+      : GetScalarType<T[P], AggregateBranch[P]>
+  }
+
+
+
+
+  export type BranchGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BranchWhereInput
+    orderBy?: BranchOrderByWithAggregationInput | BranchOrderByWithAggregationInput[]
+    by: BranchScalarFieldEnum[] | BranchScalarFieldEnum
+    having?: BranchScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BranchCountAggregateInputType | true
+    _avg?: BranchAvgAggregateInputType
+    _sum?: BranchSumAggregateInputType
+    _min?: BranchMinAggregateInputType
+    _max?: BranchMaxAggregateInputType
+  }
+
+  export type BranchGroupByOutputType = {
+    id: number
+    code: string
+    name: string
+    address: string | null
+    phone: string | null
+    isMain: boolean
+    isActive: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: BranchCountAggregateOutputType | null
+    _avg: BranchAvgAggregateOutputType | null
+    _sum: BranchSumAggregateOutputType | null
+    _min: BranchMinAggregateOutputType | null
+    _max: BranchMaxAggregateOutputType | null
+  }
+
+  type GetBranchGroupByPayload<T extends BranchGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BranchGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BranchGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BranchGroupByOutputType[P]>
+            : GetScalarType<T[P], BranchGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BranchSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    address?: boolean
+    phone?: boolean
+    isMain?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    stock?: boolean | Branch$stockArgs<ExtArgs>
+    grns?: boolean | Branch$grnsArgs<ExtArgs>
+    gtnsOut?: boolean | Branch$gtnsOutArgs<ExtArgs>
+    gtnsIn?: boolean | Branch$gtnsInArgs<ExtArgs>
+    _count?: boolean | BranchCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["branch"]>
+
+  export type BranchSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    address?: boolean
+    phone?: boolean
+    isMain?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["branch"]>
+
+  export type BranchSelectScalar = {
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    address?: boolean
+    phone?: boolean
+    isMain?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type BranchInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    stock?: boolean | Branch$stockArgs<ExtArgs>
+    grns?: boolean | Branch$grnsArgs<ExtArgs>
+    gtnsOut?: boolean | Branch$gtnsOutArgs<ExtArgs>
+    gtnsIn?: boolean | Branch$gtnsInArgs<ExtArgs>
+    _count?: boolean | BranchCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type BranchIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $BranchPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Branch"
+    objects: {
+      stock: Prisma.$BranchStockPayload<ExtArgs>[]
+      grns: Prisma.$GrnPayload<ExtArgs>[]
+      gtnsOut: Prisma.$GtnPayload<ExtArgs>[]
+      gtnsIn: Prisma.$GtnPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      code: string
+      name: string
+      address: string | null
+      phone: string | null
+      /**
+       * The first branch; existing stock and records were moved here when branches were added.
+       */
+      isMain: boolean
+      isActive: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["branch"]>
+    composites: {}
+  }
+
+  type BranchGetPayload<S extends boolean | null | undefined | BranchDefaultArgs> = $Result.GetResult<Prisma.$BranchPayload, S>
+
+  type BranchCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<BranchFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: BranchCountAggregateInputType | true
+    }
+
+  export interface BranchDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Branch'], meta: { name: 'Branch' } }
+    /**
+     * Find zero or one Branch that matches the filter.
+     * @param {BranchFindUniqueArgs} args - Arguments to find a Branch
+     * @example
+     * // Get one Branch
+     * const branch = await prisma.branch.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BranchFindUniqueArgs>(args: SelectSubset<T, BranchFindUniqueArgs<ExtArgs>>): Prisma__BranchClient<$Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one Branch that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {BranchFindUniqueOrThrowArgs} args - Arguments to find a Branch
+     * @example
+     * // Get one Branch
+     * const branch = await prisma.branch.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BranchFindUniqueOrThrowArgs>(args: SelectSubset<T, BranchFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BranchClient<$Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first Branch that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BranchFindFirstArgs} args - Arguments to find a Branch
+     * @example
+     * // Get one Branch
+     * const branch = await prisma.branch.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BranchFindFirstArgs>(args?: SelectSubset<T, BranchFindFirstArgs<ExtArgs>>): Prisma__BranchClient<$Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first Branch that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BranchFindFirstOrThrowArgs} args - Arguments to find a Branch
+     * @example
+     * // Get one Branch
+     * const branch = await prisma.branch.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BranchFindFirstOrThrowArgs>(args?: SelectSubset<T, BranchFindFirstOrThrowArgs<ExtArgs>>): Prisma__BranchClient<$Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more Branches that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BranchFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Branches
+     * const branches = await prisma.branch.findMany()
+     * 
+     * // Get first 10 Branches
+     * const branches = await prisma.branch.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const branchWithIdOnly = await prisma.branch.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends BranchFindManyArgs>(args?: SelectSubset<T, BranchFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a Branch.
+     * @param {BranchCreateArgs} args - Arguments to create a Branch.
+     * @example
+     * // Create one Branch
+     * const Branch = await prisma.branch.create({
+     *   data: {
+     *     // ... data to create a Branch
+     *   }
+     * })
+     * 
+     */
+    create<T extends BranchCreateArgs>(args: SelectSubset<T, BranchCreateArgs<ExtArgs>>): Prisma__BranchClient<$Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many Branches.
+     * @param {BranchCreateManyArgs} args - Arguments to create many Branches.
+     * @example
+     * // Create many Branches
+     * const branch = await prisma.branch.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BranchCreateManyArgs>(args?: SelectSubset<T, BranchCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Branches and returns the data saved in the database.
+     * @param {BranchCreateManyAndReturnArgs} args - Arguments to create many Branches.
+     * @example
+     * // Create many Branches
+     * const branch = await prisma.branch.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Branches and only return the `id`
+     * const branchWithIdOnly = await prisma.branch.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BranchCreateManyAndReturnArgs>(args?: SelectSubset<T, BranchCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a Branch.
+     * @param {BranchDeleteArgs} args - Arguments to delete one Branch.
+     * @example
+     * // Delete one Branch
+     * const Branch = await prisma.branch.delete({
+     *   where: {
+     *     // ... filter to delete one Branch
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BranchDeleteArgs>(args: SelectSubset<T, BranchDeleteArgs<ExtArgs>>): Prisma__BranchClient<$Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one Branch.
+     * @param {BranchUpdateArgs} args - Arguments to update one Branch.
+     * @example
+     * // Update one Branch
+     * const branch = await prisma.branch.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BranchUpdateArgs>(args: SelectSubset<T, BranchUpdateArgs<ExtArgs>>): Prisma__BranchClient<$Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more Branches.
+     * @param {BranchDeleteManyArgs} args - Arguments to filter Branches to delete.
+     * @example
+     * // Delete a few Branches
+     * const { count } = await prisma.branch.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BranchDeleteManyArgs>(args?: SelectSubset<T, BranchDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Branches.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BranchUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Branches
+     * const branch = await prisma.branch.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BranchUpdateManyArgs>(args: SelectSubset<T, BranchUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one Branch.
+     * @param {BranchUpsertArgs} args - Arguments to update or create a Branch.
+     * @example
+     * // Update or create a Branch
+     * const branch = await prisma.branch.upsert({
+     *   create: {
+     *     // ... data to create a Branch
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Branch we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BranchUpsertArgs>(args: SelectSubset<T, BranchUpsertArgs<ExtArgs>>): Prisma__BranchClient<$Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of Branches.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BranchCountArgs} args - Arguments to filter Branches to count.
+     * @example
+     * // Count the number of Branches
+     * const count = await prisma.branch.count({
+     *   where: {
+     *     // ... the filter for the Branches we want to count
+     *   }
+     * })
+    **/
+    count<T extends BranchCountArgs>(
+      args?: Subset<T, BranchCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BranchCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Branch.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BranchAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BranchAggregateArgs>(args: Subset<T, BranchAggregateArgs>): Prisma.PrismaPromise<GetBranchAggregateType<T>>
+
+    /**
+     * Group by Branch.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BranchGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BranchGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BranchGroupByArgs['orderBy'] }
+        : { orderBy?: BranchGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BranchGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBranchGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Branch model
+   */
+  readonly fields: BranchFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Branch.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BranchClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    stock<T extends Branch$stockArgs<ExtArgs> = {}>(args?: Subset<T, Branch$stockArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BranchStockPayload<ExtArgs>, T, "findMany"> | Null>
+    grns<T extends Branch$grnsArgs<ExtArgs> = {}>(args?: Subset<T, Branch$grnsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GrnPayload<ExtArgs>, T, "findMany"> | Null>
+    gtnsOut<T extends Branch$gtnsOutArgs<ExtArgs> = {}>(args?: Subset<T, Branch$gtnsOutArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GtnPayload<ExtArgs>, T, "findMany"> | Null>
+    gtnsIn<T extends Branch$gtnsInArgs<ExtArgs> = {}>(args?: Subset<T, Branch$gtnsInArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GtnPayload<ExtArgs>, T, "findMany"> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Branch model
+   */ 
+  interface BranchFieldRefs {
+    readonly id: FieldRef<"Branch", 'Int'>
+    readonly code: FieldRef<"Branch", 'String'>
+    readonly name: FieldRef<"Branch", 'String'>
+    readonly address: FieldRef<"Branch", 'String'>
+    readonly phone: FieldRef<"Branch", 'String'>
+    readonly isMain: FieldRef<"Branch", 'Boolean'>
+    readonly isActive: FieldRef<"Branch", 'Boolean'>
+    readonly createdAt: FieldRef<"Branch", 'DateTime'>
+    readonly updatedAt: FieldRef<"Branch", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Branch findUnique
+   */
+  export type BranchFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Branch
+     */
+    select?: BranchSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchInclude<ExtArgs> | null
+    /**
+     * Filter, which Branch to fetch.
+     */
+    where: BranchWhereUniqueInput
+  }
+
+  /**
+   * Branch findUniqueOrThrow
+   */
+  export type BranchFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Branch
+     */
+    select?: BranchSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchInclude<ExtArgs> | null
+    /**
+     * Filter, which Branch to fetch.
+     */
+    where: BranchWhereUniqueInput
+  }
+
+  /**
+   * Branch findFirst
+   */
+  export type BranchFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Branch
+     */
+    select?: BranchSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchInclude<ExtArgs> | null
+    /**
+     * Filter, which Branch to fetch.
+     */
+    where?: BranchWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Branches to fetch.
+     */
+    orderBy?: BranchOrderByWithRelationInput | BranchOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Branches.
+     */
+    cursor?: BranchWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Branches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Branches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Branches.
+     */
+    distinct?: BranchScalarFieldEnum | BranchScalarFieldEnum[]
+  }
+
+  /**
+   * Branch findFirstOrThrow
+   */
+  export type BranchFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Branch
+     */
+    select?: BranchSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchInclude<ExtArgs> | null
+    /**
+     * Filter, which Branch to fetch.
+     */
+    where?: BranchWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Branches to fetch.
+     */
+    orderBy?: BranchOrderByWithRelationInput | BranchOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Branches.
+     */
+    cursor?: BranchWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Branches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Branches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Branches.
+     */
+    distinct?: BranchScalarFieldEnum | BranchScalarFieldEnum[]
+  }
+
+  /**
+   * Branch findMany
+   */
+  export type BranchFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Branch
+     */
+    select?: BranchSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchInclude<ExtArgs> | null
+    /**
+     * Filter, which Branches to fetch.
+     */
+    where?: BranchWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Branches to fetch.
+     */
+    orderBy?: BranchOrderByWithRelationInput | BranchOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Branches.
+     */
+    cursor?: BranchWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Branches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Branches.
+     */
+    skip?: number
+    distinct?: BranchScalarFieldEnum | BranchScalarFieldEnum[]
+  }
+
+  /**
+   * Branch create
+   */
+  export type BranchCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Branch
+     */
+    select?: BranchSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Branch.
+     */
+    data: XOR<BranchCreateInput, BranchUncheckedCreateInput>
+  }
+
+  /**
+   * Branch createMany
+   */
+  export type BranchCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Branches.
+     */
+    data: BranchCreateManyInput | BranchCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Branch createManyAndReturn
+   */
+  export type BranchCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Branch
+     */
+    select?: BranchSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many Branches.
+     */
+    data: BranchCreateManyInput | BranchCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Branch update
+   */
+  export type BranchUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Branch
+     */
+    select?: BranchSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Branch.
+     */
+    data: XOR<BranchUpdateInput, BranchUncheckedUpdateInput>
+    /**
+     * Choose, which Branch to update.
+     */
+    where: BranchWhereUniqueInput
+  }
+
+  /**
+   * Branch updateMany
+   */
+  export type BranchUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Branches.
+     */
+    data: XOR<BranchUpdateManyMutationInput, BranchUncheckedUpdateManyInput>
+    /**
+     * Filter which Branches to update
+     */
+    where?: BranchWhereInput
+  }
+
+  /**
+   * Branch upsert
+   */
+  export type BranchUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Branch
+     */
+    select?: BranchSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Branch to update in case it exists.
+     */
+    where: BranchWhereUniqueInput
+    /**
+     * In case the Branch found by the `where` argument doesn't exist, create a new Branch with this data.
+     */
+    create: XOR<BranchCreateInput, BranchUncheckedCreateInput>
+    /**
+     * In case the Branch was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BranchUpdateInput, BranchUncheckedUpdateInput>
+  }
+
+  /**
+   * Branch delete
+   */
+  export type BranchDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Branch
+     */
+    select?: BranchSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchInclude<ExtArgs> | null
+    /**
+     * Filter which Branch to delete.
+     */
+    where: BranchWhereUniqueInput
+  }
+
+  /**
+   * Branch deleteMany
+   */
+  export type BranchDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Branches to delete
+     */
+    where?: BranchWhereInput
+  }
+
+  /**
+   * Branch.stock
+   */
+  export type Branch$stockArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BranchStock
+     */
+    select?: BranchStockSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchStockInclude<ExtArgs> | null
+    where?: BranchStockWhereInput
+    orderBy?: BranchStockOrderByWithRelationInput | BranchStockOrderByWithRelationInput[]
+    cursor?: BranchStockWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BranchStockScalarFieldEnum | BranchStockScalarFieldEnum[]
+  }
+
+  /**
+   * Branch.grns
+   */
+  export type Branch$grnsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grn
+     */
+    select?: GrnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnInclude<ExtArgs> | null
+    where?: GrnWhereInput
+    orderBy?: GrnOrderByWithRelationInput | GrnOrderByWithRelationInput[]
+    cursor?: GrnWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: GrnScalarFieldEnum | GrnScalarFieldEnum[]
+  }
+
+  /**
+   * Branch.gtnsOut
+   */
+  export type Branch$gtnsOutArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Gtn
+     */
+    select?: GtnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnInclude<ExtArgs> | null
+    where?: GtnWhereInput
+    orderBy?: GtnOrderByWithRelationInput | GtnOrderByWithRelationInput[]
+    cursor?: GtnWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: GtnScalarFieldEnum | GtnScalarFieldEnum[]
+  }
+
+  /**
+   * Branch.gtnsIn
+   */
+  export type Branch$gtnsInArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Gtn
+     */
+    select?: GtnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnInclude<ExtArgs> | null
+    where?: GtnWhereInput
+    orderBy?: GtnOrderByWithRelationInput | GtnOrderByWithRelationInput[]
+    cursor?: GtnWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: GtnScalarFieldEnum | GtnScalarFieldEnum[]
+  }
+
+  /**
+   * Branch without action
+   */
+  export type BranchDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Branch
+     */
+    select?: BranchSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model BranchStock
+   */
+
+  export type AggregateBranchStock = {
+    _count: BranchStockCountAggregateOutputType | null
+    _avg: BranchStockAvgAggregateOutputType | null
+    _sum: BranchStockSumAggregateOutputType | null
+    _min: BranchStockMinAggregateOutputType | null
+    _max: BranchStockMaxAggregateOutputType | null
+  }
+
+  export type BranchStockAvgAggregateOutputType = {
+    id: number | null
+    branchId: number | null
+    productId: number | null
+    quantity: number | null
+    damagedQuantity: number | null
+    emptyBottlesOnHand: number | null
+  }
+
+  export type BranchStockSumAggregateOutputType = {
+    id: number | null
+    branchId: number | null
+    productId: number | null
+    quantity: number | null
+    damagedQuantity: number | null
+    emptyBottlesOnHand: number | null
+  }
+
+  export type BranchStockMinAggregateOutputType = {
+    id: number | null
+    branchId: number | null
+    productId: number | null
+    quantity: number | null
+    damagedQuantity: number | null
+    emptyBottlesOnHand: number | null
+    updatedAt: Date | null
+  }
+
+  export type BranchStockMaxAggregateOutputType = {
+    id: number | null
+    branchId: number | null
+    productId: number | null
+    quantity: number | null
+    damagedQuantity: number | null
+    emptyBottlesOnHand: number | null
+    updatedAt: Date | null
+  }
+
+  export type BranchStockCountAggregateOutputType = {
+    id: number
+    branchId: number
+    productId: number
+    quantity: number
+    damagedQuantity: number
+    emptyBottlesOnHand: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type BranchStockAvgAggregateInputType = {
+    id?: true
+    branchId?: true
+    productId?: true
+    quantity?: true
+    damagedQuantity?: true
+    emptyBottlesOnHand?: true
+  }
+
+  export type BranchStockSumAggregateInputType = {
+    id?: true
+    branchId?: true
+    productId?: true
+    quantity?: true
+    damagedQuantity?: true
+    emptyBottlesOnHand?: true
+  }
+
+  export type BranchStockMinAggregateInputType = {
+    id?: true
+    branchId?: true
+    productId?: true
+    quantity?: true
+    damagedQuantity?: true
+    emptyBottlesOnHand?: true
+    updatedAt?: true
+  }
+
+  export type BranchStockMaxAggregateInputType = {
+    id?: true
+    branchId?: true
+    productId?: true
+    quantity?: true
+    damagedQuantity?: true
+    emptyBottlesOnHand?: true
+    updatedAt?: true
+  }
+
+  export type BranchStockCountAggregateInputType = {
+    id?: true
+    branchId?: true
+    productId?: true
+    quantity?: true
+    damagedQuantity?: true
+    emptyBottlesOnHand?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type BranchStockAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BranchStock to aggregate.
+     */
+    where?: BranchStockWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BranchStocks to fetch.
+     */
+    orderBy?: BranchStockOrderByWithRelationInput | BranchStockOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BranchStockWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BranchStocks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BranchStocks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned BranchStocks
+    **/
+    _count?: true | BranchStockCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: BranchStockAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: BranchStockSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BranchStockMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BranchStockMaxAggregateInputType
+  }
+
+  export type GetBranchStockAggregateType<T extends BranchStockAggregateArgs> = {
+        [P in keyof T & keyof AggregateBranchStock]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBranchStock[P]>
+      : GetScalarType<T[P], AggregateBranchStock[P]>
+  }
+
+
+
+
+  export type BranchStockGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BranchStockWhereInput
+    orderBy?: BranchStockOrderByWithAggregationInput | BranchStockOrderByWithAggregationInput[]
+    by: BranchStockScalarFieldEnum[] | BranchStockScalarFieldEnum
+    having?: BranchStockScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BranchStockCountAggregateInputType | true
+    _avg?: BranchStockAvgAggregateInputType
+    _sum?: BranchStockSumAggregateInputType
+    _min?: BranchStockMinAggregateInputType
+    _max?: BranchStockMaxAggregateInputType
+  }
+
+  export type BranchStockGroupByOutputType = {
+    id: number
+    branchId: number
+    productId: number
+    quantity: number
+    damagedQuantity: number
+    emptyBottlesOnHand: number
+    updatedAt: Date
+    _count: BranchStockCountAggregateOutputType | null
+    _avg: BranchStockAvgAggregateOutputType | null
+    _sum: BranchStockSumAggregateOutputType | null
+    _min: BranchStockMinAggregateOutputType | null
+    _max: BranchStockMaxAggregateOutputType | null
+  }
+
+  type GetBranchStockGroupByPayload<T extends BranchStockGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BranchStockGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BranchStockGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BranchStockGroupByOutputType[P]>
+            : GetScalarType<T[P], BranchStockGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BranchStockSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    branchId?: boolean
+    productId?: boolean
+    quantity?: boolean
+    damagedQuantity?: boolean
+    emptyBottlesOnHand?: boolean
+    updatedAt?: boolean
+    branch?: boolean | BranchDefaultArgs<ExtArgs>
+    product?: boolean | InventoryProductDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["branchStock"]>
+
+  export type BranchStockSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    branchId?: boolean
+    productId?: boolean
+    quantity?: boolean
+    damagedQuantity?: boolean
+    emptyBottlesOnHand?: boolean
+    updatedAt?: boolean
+    branch?: boolean | BranchDefaultArgs<ExtArgs>
+    product?: boolean | InventoryProductDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["branchStock"]>
+
+  export type BranchStockSelectScalar = {
+    id?: boolean
+    branchId?: boolean
+    productId?: boolean
+    quantity?: boolean
+    damagedQuantity?: boolean
+    emptyBottlesOnHand?: boolean
+    updatedAt?: boolean
+  }
+
+  export type BranchStockInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    branch?: boolean | BranchDefaultArgs<ExtArgs>
+    product?: boolean | InventoryProductDefaultArgs<ExtArgs>
+  }
+  export type BranchStockIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    branch?: boolean | BranchDefaultArgs<ExtArgs>
+    product?: boolean | InventoryProductDefaultArgs<ExtArgs>
+  }
+
+  export type $BranchStockPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "BranchStock"
+    objects: {
+      branch: Prisma.$BranchPayload<ExtArgs>
+      product: Prisma.$InventoryProductPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      branchId: number
+      productId: number
+      quantity: number
+      damagedQuantity: number
+      emptyBottlesOnHand: number
+      updatedAt: Date
+    }, ExtArgs["result"]["branchStock"]>
+    composites: {}
+  }
+
+  type BranchStockGetPayload<S extends boolean | null | undefined | BranchStockDefaultArgs> = $Result.GetResult<Prisma.$BranchStockPayload, S>
+
+  type BranchStockCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<BranchStockFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: BranchStockCountAggregateInputType | true
+    }
+
+  export interface BranchStockDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['BranchStock'], meta: { name: 'BranchStock' } }
+    /**
+     * Find zero or one BranchStock that matches the filter.
+     * @param {BranchStockFindUniqueArgs} args - Arguments to find a BranchStock
+     * @example
+     * // Get one BranchStock
+     * const branchStock = await prisma.branchStock.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BranchStockFindUniqueArgs>(args: SelectSubset<T, BranchStockFindUniqueArgs<ExtArgs>>): Prisma__BranchStockClient<$Result.GetResult<Prisma.$BranchStockPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one BranchStock that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {BranchStockFindUniqueOrThrowArgs} args - Arguments to find a BranchStock
+     * @example
+     * // Get one BranchStock
+     * const branchStock = await prisma.branchStock.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BranchStockFindUniqueOrThrowArgs>(args: SelectSubset<T, BranchStockFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BranchStockClient<$Result.GetResult<Prisma.$BranchStockPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first BranchStock that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BranchStockFindFirstArgs} args - Arguments to find a BranchStock
+     * @example
+     * // Get one BranchStock
+     * const branchStock = await prisma.branchStock.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BranchStockFindFirstArgs>(args?: SelectSubset<T, BranchStockFindFirstArgs<ExtArgs>>): Prisma__BranchStockClient<$Result.GetResult<Prisma.$BranchStockPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first BranchStock that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BranchStockFindFirstOrThrowArgs} args - Arguments to find a BranchStock
+     * @example
+     * // Get one BranchStock
+     * const branchStock = await prisma.branchStock.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BranchStockFindFirstOrThrowArgs>(args?: SelectSubset<T, BranchStockFindFirstOrThrowArgs<ExtArgs>>): Prisma__BranchStockClient<$Result.GetResult<Prisma.$BranchStockPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more BranchStocks that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BranchStockFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all BranchStocks
+     * const branchStocks = await prisma.branchStock.findMany()
+     * 
+     * // Get first 10 BranchStocks
+     * const branchStocks = await prisma.branchStock.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const branchStockWithIdOnly = await prisma.branchStock.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends BranchStockFindManyArgs>(args?: SelectSubset<T, BranchStockFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BranchStockPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a BranchStock.
+     * @param {BranchStockCreateArgs} args - Arguments to create a BranchStock.
+     * @example
+     * // Create one BranchStock
+     * const BranchStock = await prisma.branchStock.create({
+     *   data: {
+     *     // ... data to create a BranchStock
+     *   }
+     * })
+     * 
+     */
+    create<T extends BranchStockCreateArgs>(args: SelectSubset<T, BranchStockCreateArgs<ExtArgs>>): Prisma__BranchStockClient<$Result.GetResult<Prisma.$BranchStockPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many BranchStocks.
+     * @param {BranchStockCreateManyArgs} args - Arguments to create many BranchStocks.
+     * @example
+     * // Create many BranchStocks
+     * const branchStock = await prisma.branchStock.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BranchStockCreateManyArgs>(args?: SelectSubset<T, BranchStockCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many BranchStocks and returns the data saved in the database.
+     * @param {BranchStockCreateManyAndReturnArgs} args - Arguments to create many BranchStocks.
+     * @example
+     * // Create many BranchStocks
+     * const branchStock = await prisma.branchStock.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many BranchStocks and only return the `id`
+     * const branchStockWithIdOnly = await prisma.branchStock.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BranchStockCreateManyAndReturnArgs>(args?: SelectSubset<T, BranchStockCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BranchStockPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a BranchStock.
+     * @param {BranchStockDeleteArgs} args - Arguments to delete one BranchStock.
+     * @example
+     * // Delete one BranchStock
+     * const BranchStock = await prisma.branchStock.delete({
+     *   where: {
+     *     // ... filter to delete one BranchStock
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BranchStockDeleteArgs>(args: SelectSubset<T, BranchStockDeleteArgs<ExtArgs>>): Prisma__BranchStockClient<$Result.GetResult<Prisma.$BranchStockPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one BranchStock.
+     * @param {BranchStockUpdateArgs} args - Arguments to update one BranchStock.
+     * @example
+     * // Update one BranchStock
+     * const branchStock = await prisma.branchStock.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BranchStockUpdateArgs>(args: SelectSubset<T, BranchStockUpdateArgs<ExtArgs>>): Prisma__BranchStockClient<$Result.GetResult<Prisma.$BranchStockPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more BranchStocks.
+     * @param {BranchStockDeleteManyArgs} args - Arguments to filter BranchStocks to delete.
+     * @example
+     * // Delete a few BranchStocks
+     * const { count } = await prisma.branchStock.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BranchStockDeleteManyArgs>(args?: SelectSubset<T, BranchStockDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BranchStocks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BranchStockUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many BranchStocks
+     * const branchStock = await prisma.branchStock.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BranchStockUpdateManyArgs>(args: SelectSubset<T, BranchStockUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one BranchStock.
+     * @param {BranchStockUpsertArgs} args - Arguments to update or create a BranchStock.
+     * @example
+     * // Update or create a BranchStock
+     * const branchStock = await prisma.branchStock.upsert({
+     *   create: {
+     *     // ... data to create a BranchStock
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the BranchStock we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BranchStockUpsertArgs>(args: SelectSubset<T, BranchStockUpsertArgs<ExtArgs>>): Prisma__BranchStockClient<$Result.GetResult<Prisma.$BranchStockPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of BranchStocks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BranchStockCountArgs} args - Arguments to filter BranchStocks to count.
+     * @example
+     * // Count the number of BranchStocks
+     * const count = await prisma.branchStock.count({
+     *   where: {
+     *     // ... the filter for the BranchStocks we want to count
+     *   }
+     * })
+    **/
+    count<T extends BranchStockCountArgs>(
+      args?: Subset<T, BranchStockCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BranchStockCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a BranchStock.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BranchStockAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BranchStockAggregateArgs>(args: Subset<T, BranchStockAggregateArgs>): Prisma.PrismaPromise<GetBranchStockAggregateType<T>>
+
+    /**
+     * Group by BranchStock.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BranchStockGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BranchStockGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BranchStockGroupByArgs['orderBy'] }
+        : { orderBy?: BranchStockGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BranchStockGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBranchStockGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the BranchStock model
+   */
+  readonly fields: BranchStockFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for BranchStock.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BranchStockClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    branch<T extends BranchDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BranchDefaultArgs<ExtArgs>>): Prisma__BranchClient<$Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    product<T extends InventoryProductDefaultArgs<ExtArgs> = {}>(args?: Subset<T, InventoryProductDefaultArgs<ExtArgs>>): Prisma__InventoryProductClient<$Result.GetResult<Prisma.$InventoryProductPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the BranchStock model
+   */ 
+  interface BranchStockFieldRefs {
+    readonly id: FieldRef<"BranchStock", 'Int'>
+    readonly branchId: FieldRef<"BranchStock", 'Int'>
+    readonly productId: FieldRef<"BranchStock", 'Int'>
+    readonly quantity: FieldRef<"BranchStock", 'Int'>
+    readonly damagedQuantity: FieldRef<"BranchStock", 'Int'>
+    readonly emptyBottlesOnHand: FieldRef<"BranchStock", 'Int'>
+    readonly updatedAt: FieldRef<"BranchStock", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * BranchStock findUnique
+   */
+  export type BranchStockFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BranchStock
+     */
+    select?: BranchStockSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchStockInclude<ExtArgs> | null
+    /**
+     * Filter, which BranchStock to fetch.
+     */
+    where: BranchStockWhereUniqueInput
+  }
+
+  /**
+   * BranchStock findUniqueOrThrow
+   */
+  export type BranchStockFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BranchStock
+     */
+    select?: BranchStockSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchStockInclude<ExtArgs> | null
+    /**
+     * Filter, which BranchStock to fetch.
+     */
+    where: BranchStockWhereUniqueInput
+  }
+
+  /**
+   * BranchStock findFirst
+   */
+  export type BranchStockFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BranchStock
+     */
+    select?: BranchStockSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchStockInclude<ExtArgs> | null
+    /**
+     * Filter, which BranchStock to fetch.
+     */
+    where?: BranchStockWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BranchStocks to fetch.
+     */
+    orderBy?: BranchStockOrderByWithRelationInput | BranchStockOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BranchStocks.
+     */
+    cursor?: BranchStockWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BranchStocks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BranchStocks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BranchStocks.
+     */
+    distinct?: BranchStockScalarFieldEnum | BranchStockScalarFieldEnum[]
+  }
+
+  /**
+   * BranchStock findFirstOrThrow
+   */
+  export type BranchStockFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BranchStock
+     */
+    select?: BranchStockSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchStockInclude<ExtArgs> | null
+    /**
+     * Filter, which BranchStock to fetch.
+     */
+    where?: BranchStockWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BranchStocks to fetch.
+     */
+    orderBy?: BranchStockOrderByWithRelationInput | BranchStockOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BranchStocks.
+     */
+    cursor?: BranchStockWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BranchStocks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BranchStocks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BranchStocks.
+     */
+    distinct?: BranchStockScalarFieldEnum | BranchStockScalarFieldEnum[]
+  }
+
+  /**
+   * BranchStock findMany
+   */
+  export type BranchStockFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BranchStock
+     */
+    select?: BranchStockSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchStockInclude<ExtArgs> | null
+    /**
+     * Filter, which BranchStocks to fetch.
+     */
+    where?: BranchStockWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BranchStocks to fetch.
+     */
+    orderBy?: BranchStockOrderByWithRelationInput | BranchStockOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing BranchStocks.
+     */
+    cursor?: BranchStockWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BranchStocks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BranchStocks.
+     */
+    skip?: number
+    distinct?: BranchStockScalarFieldEnum | BranchStockScalarFieldEnum[]
+  }
+
+  /**
+   * BranchStock create
+   */
+  export type BranchStockCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BranchStock
+     */
+    select?: BranchStockSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchStockInclude<ExtArgs> | null
+    /**
+     * The data needed to create a BranchStock.
+     */
+    data: XOR<BranchStockCreateInput, BranchStockUncheckedCreateInput>
+  }
+
+  /**
+   * BranchStock createMany
+   */
+  export type BranchStockCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many BranchStocks.
+     */
+    data: BranchStockCreateManyInput | BranchStockCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BranchStock createManyAndReturn
+   */
+  export type BranchStockCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BranchStock
+     */
+    select?: BranchStockSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many BranchStocks.
+     */
+    data: BranchStockCreateManyInput | BranchStockCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchStockIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * BranchStock update
+   */
+  export type BranchStockUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BranchStock
+     */
+    select?: BranchStockSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchStockInclude<ExtArgs> | null
+    /**
+     * The data needed to update a BranchStock.
+     */
+    data: XOR<BranchStockUpdateInput, BranchStockUncheckedUpdateInput>
+    /**
+     * Choose, which BranchStock to update.
+     */
+    where: BranchStockWhereUniqueInput
+  }
+
+  /**
+   * BranchStock updateMany
+   */
+  export type BranchStockUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update BranchStocks.
+     */
+    data: XOR<BranchStockUpdateManyMutationInput, BranchStockUncheckedUpdateManyInput>
+    /**
+     * Filter which BranchStocks to update
+     */
+    where?: BranchStockWhereInput
+  }
+
+  /**
+   * BranchStock upsert
+   */
+  export type BranchStockUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BranchStock
+     */
+    select?: BranchStockSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchStockInclude<ExtArgs> | null
+    /**
+     * The filter to search for the BranchStock to update in case it exists.
+     */
+    where: BranchStockWhereUniqueInput
+    /**
+     * In case the BranchStock found by the `where` argument doesn't exist, create a new BranchStock with this data.
+     */
+    create: XOR<BranchStockCreateInput, BranchStockUncheckedCreateInput>
+    /**
+     * In case the BranchStock was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BranchStockUpdateInput, BranchStockUncheckedUpdateInput>
+  }
+
+  /**
+   * BranchStock delete
+   */
+  export type BranchStockDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BranchStock
+     */
+    select?: BranchStockSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchStockInclude<ExtArgs> | null
+    /**
+     * Filter which BranchStock to delete.
+     */
+    where: BranchStockWhereUniqueInput
+  }
+
+  /**
+   * BranchStock deleteMany
+   */
+  export type BranchStockDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BranchStocks to delete
+     */
+    where?: BranchStockWhereInput
+  }
+
+  /**
+   * BranchStock without action
+   */
+  export type BranchStockDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BranchStock
+     */
+    select?: BranchStockSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BranchStockInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Grn
+   */
+
+  export type AggregateGrn = {
+    _count: GrnCountAggregateOutputType | null
+    _avg: GrnAvgAggregateOutputType | null
+    _sum: GrnSumAggregateOutputType | null
+    _min: GrnMinAggregateOutputType | null
+    _max: GrnMaxAggregateOutputType | null
+  }
+
+  export type GrnAvgAggregateOutputType = {
+    id: number | null
+    branchId: number | null
+    supplierId: number | null
+    purchaseOrderId: number | null
+    invoiceTotal: number | null
+    acceptedUnits: number | null
+    rejectedUnits: number | null
+    totalCost: number | null
+    shiftId: number | null
+    receivedById: number | null
+  }
+
+  export type GrnSumAggregateOutputType = {
+    id: number | null
+    branchId: number | null
+    supplierId: number | null
+    purchaseOrderId: number | null
+    invoiceTotal: number | null
+    acceptedUnits: number | null
+    rejectedUnits: number | null
+    totalCost: number | null
+    shiftId: number | null
+    receivedById: number | null
+  }
+
+  export type GrnMinAggregateOutputType = {
+    id: number | null
+    grnNo: string | null
+    branchId: number | null
+    supplierId: number | null
+    supplierName: string | null
+    purchaseOrderId: number | null
+    poNumber: string | null
+    supplierInvoiceNo: string | null
+    invoiceDate: Date | null
+    invoiceTotal: number | null
+    notes: string | null
+    acceptedUnits: number | null
+    rejectedUnits: number | null
+    totalCost: number | null
+    shiftId: number | null
+    receivedById: number | null
+    createdAt: Date | null
+  }
+
+  export type GrnMaxAggregateOutputType = {
+    id: number | null
+    grnNo: string | null
+    branchId: number | null
+    supplierId: number | null
+    supplierName: string | null
+    purchaseOrderId: number | null
+    poNumber: string | null
+    supplierInvoiceNo: string | null
+    invoiceDate: Date | null
+    invoiceTotal: number | null
+    notes: string | null
+    acceptedUnits: number | null
+    rejectedUnits: number | null
+    totalCost: number | null
+    shiftId: number | null
+    receivedById: number | null
+    createdAt: Date | null
+  }
+
+  export type GrnCountAggregateOutputType = {
+    id: number
+    grnNo: number
+    branchId: number
+    supplierId: number
+    supplierName: number
+    purchaseOrderId: number
+    poNumber: number
+    supplierInvoiceNo: number
+    invoiceDate: number
+    invoiceTotal: number
+    notes: number
+    acceptedUnits: number
+    rejectedUnits: number
+    totalCost: number
+    shiftId: number
+    receivedById: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type GrnAvgAggregateInputType = {
+    id?: true
+    branchId?: true
+    supplierId?: true
+    purchaseOrderId?: true
+    invoiceTotal?: true
+    acceptedUnits?: true
+    rejectedUnits?: true
+    totalCost?: true
+    shiftId?: true
+    receivedById?: true
+  }
+
+  export type GrnSumAggregateInputType = {
+    id?: true
+    branchId?: true
+    supplierId?: true
+    purchaseOrderId?: true
+    invoiceTotal?: true
+    acceptedUnits?: true
+    rejectedUnits?: true
+    totalCost?: true
+    shiftId?: true
+    receivedById?: true
+  }
+
+  export type GrnMinAggregateInputType = {
+    id?: true
+    grnNo?: true
+    branchId?: true
+    supplierId?: true
+    supplierName?: true
+    purchaseOrderId?: true
+    poNumber?: true
+    supplierInvoiceNo?: true
+    invoiceDate?: true
+    invoiceTotal?: true
+    notes?: true
+    acceptedUnits?: true
+    rejectedUnits?: true
+    totalCost?: true
+    shiftId?: true
+    receivedById?: true
+    createdAt?: true
+  }
+
+  export type GrnMaxAggregateInputType = {
+    id?: true
+    grnNo?: true
+    branchId?: true
+    supplierId?: true
+    supplierName?: true
+    purchaseOrderId?: true
+    poNumber?: true
+    supplierInvoiceNo?: true
+    invoiceDate?: true
+    invoiceTotal?: true
+    notes?: true
+    acceptedUnits?: true
+    rejectedUnits?: true
+    totalCost?: true
+    shiftId?: true
+    receivedById?: true
+    createdAt?: true
+  }
+
+  export type GrnCountAggregateInputType = {
+    id?: true
+    grnNo?: true
+    branchId?: true
+    supplierId?: true
+    supplierName?: true
+    purchaseOrderId?: true
+    poNumber?: true
+    supplierInvoiceNo?: true
+    invoiceDate?: true
+    invoiceTotal?: true
+    notes?: true
+    acceptedUnits?: true
+    rejectedUnits?: true
+    totalCost?: true
+    shiftId?: true
+    receivedById?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type GrnAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Grn to aggregate.
+     */
+    where?: GrnWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Grns to fetch.
+     */
+    orderBy?: GrnOrderByWithRelationInput | GrnOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: GrnWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Grns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Grns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Grns
+    **/
+    _count?: true | GrnCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: GrnAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: GrnSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GrnMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GrnMaxAggregateInputType
+  }
+
+  export type GetGrnAggregateType<T extends GrnAggregateArgs> = {
+        [P in keyof T & keyof AggregateGrn]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGrn[P]>
+      : GetScalarType<T[P], AggregateGrn[P]>
+  }
+
+
+
+
+  export type GrnGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GrnWhereInput
+    orderBy?: GrnOrderByWithAggregationInput | GrnOrderByWithAggregationInput[]
+    by: GrnScalarFieldEnum[] | GrnScalarFieldEnum
+    having?: GrnScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GrnCountAggregateInputType | true
+    _avg?: GrnAvgAggregateInputType
+    _sum?: GrnSumAggregateInputType
+    _min?: GrnMinAggregateInputType
+    _max?: GrnMaxAggregateInputType
+  }
+
+  export type GrnGroupByOutputType = {
+    id: number
+    grnNo: string
+    branchId: number
+    supplierId: number | null
+    supplierName: string
+    purchaseOrderId: number | null
+    poNumber: string | null
+    supplierInvoiceNo: string | null
+    invoiceDate: Date | null
+    invoiceTotal: number | null
+    notes: string | null
+    acceptedUnits: number
+    rejectedUnits: number
+    totalCost: number
+    shiftId: number | null
+    receivedById: number
+    createdAt: Date
+    _count: GrnCountAggregateOutputType | null
+    _avg: GrnAvgAggregateOutputType | null
+    _sum: GrnSumAggregateOutputType | null
+    _min: GrnMinAggregateOutputType | null
+    _max: GrnMaxAggregateOutputType | null
+  }
+
+  type GetGrnGroupByPayload<T extends GrnGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GrnGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GrnGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GrnGroupByOutputType[P]>
+            : GetScalarType<T[P], GrnGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type GrnSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    grnNo?: boolean
+    branchId?: boolean
+    supplierId?: boolean
+    supplierName?: boolean
+    purchaseOrderId?: boolean
+    poNumber?: boolean
+    supplierInvoiceNo?: boolean
+    invoiceDate?: boolean
+    invoiceTotal?: boolean
+    notes?: boolean
+    acceptedUnits?: boolean
+    rejectedUnits?: boolean
+    totalCost?: boolean
+    shiftId?: boolean
+    receivedById?: boolean
+    createdAt?: boolean
+    branch?: boolean | BranchDefaultArgs<ExtArgs>
+    items?: boolean | Grn$itemsArgs<ExtArgs>
+    _count?: boolean | GrnCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["grn"]>
+
+  export type GrnSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    grnNo?: boolean
+    branchId?: boolean
+    supplierId?: boolean
+    supplierName?: boolean
+    purchaseOrderId?: boolean
+    poNumber?: boolean
+    supplierInvoiceNo?: boolean
+    invoiceDate?: boolean
+    invoiceTotal?: boolean
+    notes?: boolean
+    acceptedUnits?: boolean
+    rejectedUnits?: boolean
+    totalCost?: boolean
+    shiftId?: boolean
+    receivedById?: boolean
+    createdAt?: boolean
+    branch?: boolean | BranchDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["grn"]>
+
+  export type GrnSelectScalar = {
+    id?: boolean
+    grnNo?: boolean
+    branchId?: boolean
+    supplierId?: boolean
+    supplierName?: boolean
+    purchaseOrderId?: boolean
+    poNumber?: boolean
+    supplierInvoiceNo?: boolean
+    invoiceDate?: boolean
+    invoiceTotal?: boolean
+    notes?: boolean
+    acceptedUnits?: boolean
+    rejectedUnits?: boolean
+    totalCost?: boolean
+    shiftId?: boolean
+    receivedById?: boolean
+    createdAt?: boolean
+  }
+
+  export type GrnInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    branch?: boolean | BranchDefaultArgs<ExtArgs>
+    items?: boolean | Grn$itemsArgs<ExtArgs>
+    _count?: boolean | GrnCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type GrnIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    branch?: boolean | BranchDefaultArgs<ExtArgs>
+  }
+
+  export type $GrnPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Grn"
+    objects: {
+      branch: Prisma.$BranchPayload<ExtArgs>
+      items: Prisma.$GrnItemPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      grnNo: string
+      branchId: number
+      supplierId: number | null
+      supplierName: string
+      purchaseOrderId: number | null
+      poNumber: string | null
+      supplierInvoiceNo: string | null
+      invoiceDate: Date | null
+      /**
+       * Total on the supplier's invoice, to check against what was accepted.
+       */
+      invoiceTotal: number | null
+      notes: string | null
+      acceptedUnits: number
+      rejectedUnits: number
+      /**
+       * Value of the accepted goods at the cost entered.
+       */
+      totalCost: number
+      shiftId: number | null
+      receivedById: number
+      createdAt: Date
+    }, ExtArgs["result"]["grn"]>
+    composites: {}
+  }
+
+  type GrnGetPayload<S extends boolean | null | undefined | GrnDefaultArgs> = $Result.GetResult<Prisma.$GrnPayload, S>
+
+  type GrnCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<GrnFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: GrnCountAggregateInputType | true
+    }
+
+  export interface GrnDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Grn'], meta: { name: 'Grn' } }
+    /**
+     * Find zero or one Grn that matches the filter.
+     * @param {GrnFindUniqueArgs} args - Arguments to find a Grn
+     * @example
+     * // Get one Grn
+     * const grn = await prisma.grn.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends GrnFindUniqueArgs>(args: SelectSubset<T, GrnFindUniqueArgs<ExtArgs>>): Prisma__GrnClient<$Result.GetResult<Prisma.$GrnPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one Grn that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {GrnFindUniqueOrThrowArgs} args - Arguments to find a Grn
+     * @example
+     * // Get one Grn
+     * const grn = await prisma.grn.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends GrnFindUniqueOrThrowArgs>(args: SelectSubset<T, GrnFindUniqueOrThrowArgs<ExtArgs>>): Prisma__GrnClient<$Result.GetResult<Prisma.$GrnPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first Grn that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GrnFindFirstArgs} args - Arguments to find a Grn
+     * @example
+     * // Get one Grn
+     * const grn = await prisma.grn.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends GrnFindFirstArgs>(args?: SelectSubset<T, GrnFindFirstArgs<ExtArgs>>): Prisma__GrnClient<$Result.GetResult<Prisma.$GrnPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first Grn that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GrnFindFirstOrThrowArgs} args - Arguments to find a Grn
+     * @example
+     * // Get one Grn
+     * const grn = await prisma.grn.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends GrnFindFirstOrThrowArgs>(args?: SelectSubset<T, GrnFindFirstOrThrowArgs<ExtArgs>>): Prisma__GrnClient<$Result.GetResult<Prisma.$GrnPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more Grns that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GrnFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Grns
+     * const grns = await prisma.grn.findMany()
+     * 
+     * // Get first 10 Grns
+     * const grns = await prisma.grn.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const grnWithIdOnly = await prisma.grn.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends GrnFindManyArgs>(args?: SelectSubset<T, GrnFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GrnPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a Grn.
+     * @param {GrnCreateArgs} args - Arguments to create a Grn.
+     * @example
+     * // Create one Grn
+     * const Grn = await prisma.grn.create({
+     *   data: {
+     *     // ... data to create a Grn
+     *   }
+     * })
+     * 
+     */
+    create<T extends GrnCreateArgs>(args: SelectSubset<T, GrnCreateArgs<ExtArgs>>): Prisma__GrnClient<$Result.GetResult<Prisma.$GrnPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many Grns.
+     * @param {GrnCreateManyArgs} args - Arguments to create many Grns.
+     * @example
+     * // Create many Grns
+     * const grn = await prisma.grn.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends GrnCreateManyArgs>(args?: SelectSubset<T, GrnCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Grns and returns the data saved in the database.
+     * @param {GrnCreateManyAndReturnArgs} args - Arguments to create many Grns.
+     * @example
+     * // Create many Grns
+     * const grn = await prisma.grn.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Grns and only return the `id`
+     * const grnWithIdOnly = await prisma.grn.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends GrnCreateManyAndReturnArgs>(args?: SelectSubset<T, GrnCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GrnPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a Grn.
+     * @param {GrnDeleteArgs} args - Arguments to delete one Grn.
+     * @example
+     * // Delete one Grn
+     * const Grn = await prisma.grn.delete({
+     *   where: {
+     *     // ... filter to delete one Grn
+     *   }
+     * })
+     * 
+     */
+    delete<T extends GrnDeleteArgs>(args: SelectSubset<T, GrnDeleteArgs<ExtArgs>>): Prisma__GrnClient<$Result.GetResult<Prisma.$GrnPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one Grn.
+     * @param {GrnUpdateArgs} args - Arguments to update one Grn.
+     * @example
+     * // Update one Grn
+     * const grn = await prisma.grn.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends GrnUpdateArgs>(args: SelectSubset<T, GrnUpdateArgs<ExtArgs>>): Prisma__GrnClient<$Result.GetResult<Prisma.$GrnPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more Grns.
+     * @param {GrnDeleteManyArgs} args - Arguments to filter Grns to delete.
+     * @example
+     * // Delete a few Grns
+     * const { count } = await prisma.grn.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends GrnDeleteManyArgs>(args?: SelectSubset<T, GrnDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Grns.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GrnUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Grns
+     * const grn = await prisma.grn.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends GrnUpdateManyArgs>(args: SelectSubset<T, GrnUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one Grn.
+     * @param {GrnUpsertArgs} args - Arguments to update or create a Grn.
+     * @example
+     * // Update or create a Grn
+     * const grn = await prisma.grn.upsert({
+     *   create: {
+     *     // ... data to create a Grn
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Grn we want to update
+     *   }
+     * })
+     */
+    upsert<T extends GrnUpsertArgs>(args: SelectSubset<T, GrnUpsertArgs<ExtArgs>>): Prisma__GrnClient<$Result.GetResult<Prisma.$GrnPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of Grns.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GrnCountArgs} args - Arguments to filter Grns to count.
+     * @example
+     * // Count the number of Grns
+     * const count = await prisma.grn.count({
+     *   where: {
+     *     // ... the filter for the Grns we want to count
+     *   }
+     * })
+    **/
+    count<T extends GrnCountArgs>(
+      args?: Subset<T, GrnCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GrnCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Grn.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GrnAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GrnAggregateArgs>(args: Subset<T, GrnAggregateArgs>): Prisma.PrismaPromise<GetGrnAggregateType<T>>
+
+    /**
+     * Group by Grn.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GrnGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends GrnGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: GrnGroupByArgs['orderBy'] }
+        : { orderBy?: GrnGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, GrnGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGrnGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Grn model
+   */
+  readonly fields: GrnFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Grn.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__GrnClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    branch<T extends BranchDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BranchDefaultArgs<ExtArgs>>): Prisma__BranchClient<$Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    items<T extends Grn$itemsArgs<ExtArgs> = {}>(args?: Subset<T, Grn$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GrnItemPayload<ExtArgs>, T, "findMany"> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Grn model
+   */ 
+  interface GrnFieldRefs {
+    readonly id: FieldRef<"Grn", 'Int'>
+    readonly grnNo: FieldRef<"Grn", 'String'>
+    readonly branchId: FieldRef<"Grn", 'Int'>
+    readonly supplierId: FieldRef<"Grn", 'Int'>
+    readonly supplierName: FieldRef<"Grn", 'String'>
+    readonly purchaseOrderId: FieldRef<"Grn", 'Int'>
+    readonly poNumber: FieldRef<"Grn", 'String'>
+    readonly supplierInvoiceNo: FieldRef<"Grn", 'String'>
+    readonly invoiceDate: FieldRef<"Grn", 'DateTime'>
+    readonly invoiceTotal: FieldRef<"Grn", 'Float'>
+    readonly notes: FieldRef<"Grn", 'String'>
+    readonly acceptedUnits: FieldRef<"Grn", 'Int'>
+    readonly rejectedUnits: FieldRef<"Grn", 'Int'>
+    readonly totalCost: FieldRef<"Grn", 'Float'>
+    readonly shiftId: FieldRef<"Grn", 'Int'>
+    readonly receivedById: FieldRef<"Grn", 'Int'>
+    readonly createdAt: FieldRef<"Grn", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Grn findUnique
+   */
+  export type GrnFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grn
+     */
+    select?: GrnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnInclude<ExtArgs> | null
+    /**
+     * Filter, which Grn to fetch.
+     */
+    where: GrnWhereUniqueInput
+  }
+
+  /**
+   * Grn findUniqueOrThrow
+   */
+  export type GrnFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grn
+     */
+    select?: GrnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnInclude<ExtArgs> | null
+    /**
+     * Filter, which Grn to fetch.
+     */
+    where: GrnWhereUniqueInput
+  }
+
+  /**
+   * Grn findFirst
+   */
+  export type GrnFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grn
+     */
+    select?: GrnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnInclude<ExtArgs> | null
+    /**
+     * Filter, which Grn to fetch.
+     */
+    where?: GrnWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Grns to fetch.
+     */
+    orderBy?: GrnOrderByWithRelationInput | GrnOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Grns.
+     */
+    cursor?: GrnWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Grns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Grns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Grns.
+     */
+    distinct?: GrnScalarFieldEnum | GrnScalarFieldEnum[]
+  }
+
+  /**
+   * Grn findFirstOrThrow
+   */
+  export type GrnFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grn
+     */
+    select?: GrnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnInclude<ExtArgs> | null
+    /**
+     * Filter, which Grn to fetch.
+     */
+    where?: GrnWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Grns to fetch.
+     */
+    orderBy?: GrnOrderByWithRelationInput | GrnOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Grns.
+     */
+    cursor?: GrnWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Grns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Grns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Grns.
+     */
+    distinct?: GrnScalarFieldEnum | GrnScalarFieldEnum[]
+  }
+
+  /**
+   * Grn findMany
+   */
+  export type GrnFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grn
+     */
+    select?: GrnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnInclude<ExtArgs> | null
+    /**
+     * Filter, which Grns to fetch.
+     */
+    where?: GrnWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Grns to fetch.
+     */
+    orderBy?: GrnOrderByWithRelationInput | GrnOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Grns.
+     */
+    cursor?: GrnWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Grns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Grns.
+     */
+    skip?: number
+    distinct?: GrnScalarFieldEnum | GrnScalarFieldEnum[]
+  }
+
+  /**
+   * Grn create
+   */
+  export type GrnCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grn
+     */
+    select?: GrnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Grn.
+     */
+    data: XOR<GrnCreateInput, GrnUncheckedCreateInput>
+  }
+
+  /**
+   * Grn createMany
+   */
+  export type GrnCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Grns.
+     */
+    data: GrnCreateManyInput | GrnCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Grn createManyAndReturn
+   */
+  export type GrnCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grn
+     */
+    select?: GrnSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many Grns.
+     */
+    data: GrnCreateManyInput | GrnCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Grn update
+   */
+  export type GrnUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grn
+     */
+    select?: GrnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Grn.
+     */
+    data: XOR<GrnUpdateInput, GrnUncheckedUpdateInput>
+    /**
+     * Choose, which Grn to update.
+     */
+    where: GrnWhereUniqueInput
+  }
+
+  /**
+   * Grn updateMany
+   */
+  export type GrnUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Grns.
+     */
+    data: XOR<GrnUpdateManyMutationInput, GrnUncheckedUpdateManyInput>
+    /**
+     * Filter which Grns to update
+     */
+    where?: GrnWhereInput
+  }
+
+  /**
+   * Grn upsert
+   */
+  export type GrnUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grn
+     */
+    select?: GrnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Grn to update in case it exists.
+     */
+    where: GrnWhereUniqueInput
+    /**
+     * In case the Grn found by the `where` argument doesn't exist, create a new Grn with this data.
+     */
+    create: XOR<GrnCreateInput, GrnUncheckedCreateInput>
+    /**
+     * In case the Grn was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<GrnUpdateInput, GrnUncheckedUpdateInput>
+  }
+
+  /**
+   * Grn delete
+   */
+  export type GrnDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grn
+     */
+    select?: GrnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnInclude<ExtArgs> | null
+    /**
+     * Filter which Grn to delete.
+     */
+    where: GrnWhereUniqueInput
+  }
+
+  /**
+   * Grn deleteMany
+   */
+  export type GrnDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Grns to delete
+     */
+    where?: GrnWhereInput
+  }
+
+  /**
+   * Grn.items
+   */
+  export type Grn$itemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GrnItem
+     */
+    select?: GrnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnItemInclude<ExtArgs> | null
+    where?: GrnItemWhereInput
+    orderBy?: GrnItemOrderByWithRelationInput | GrnItemOrderByWithRelationInput[]
+    cursor?: GrnItemWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: GrnItemScalarFieldEnum | GrnItemScalarFieldEnum[]
+  }
+
+  /**
+   * Grn without action
+   */
+  export type GrnDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grn
+     */
+    select?: GrnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model GrnItem
+   */
+
+  export type AggregateGrnItem = {
+    _count: GrnItemCountAggregateOutputType | null
+    _avg: GrnItemAvgAggregateOutputType | null
+    _sum: GrnItemSumAggregateOutputType | null
+    _min: GrnItemMinAggregateOutputType | null
+    _max: GrnItemMaxAggregateOutputType | null
+  }
+
+  export type GrnItemAvgAggregateOutputType = {
+    id: number | null
+    grnId: number | null
+    productId: number | null
+    purchaseOrderItemId: number | null
+    orderedQty: number | null
+    deliveredQty: number | null
+    acceptedQty: number | null
+    rejectedQty: number | null
+    unitCost: number | null
+    lineTotal: number | null
+  }
+
+  export type GrnItemSumAggregateOutputType = {
+    id: number | null
+    grnId: number | null
+    productId: number | null
+    purchaseOrderItemId: number | null
+    orderedQty: number | null
+    deliveredQty: number | null
+    acceptedQty: number | null
+    rejectedQty: number | null
+    unitCost: number | null
+    lineTotal: number | null
+  }
+
+  export type GrnItemMinAggregateOutputType = {
+    id: number | null
+    grnId: number | null
+    productId: number | null
+    description: string | null
+    purchaseOrderItemId: number | null
+    orderedQty: number | null
+    deliveredQty: number | null
+    acceptedQty: number | null
+    rejectedQty: number | null
+    rejectReason: string | null
+    unitCost: number | null
+    lineTotal: number | null
+  }
+
+  export type GrnItemMaxAggregateOutputType = {
+    id: number | null
+    grnId: number | null
+    productId: number | null
+    description: string | null
+    purchaseOrderItemId: number | null
+    orderedQty: number | null
+    deliveredQty: number | null
+    acceptedQty: number | null
+    rejectedQty: number | null
+    rejectReason: string | null
+    unitCost: number | null
+    lineTotal: number | null
+  }
+
+  export type GrnItemCountAggregateOutputType = {
+    id: number
+    grnId: number
+    productId: number
+    description: number
+    purchaseOrderItemId: number
+    orderedQty: number
+    deliveredQty: number
+    acceptedQty: number
+    rejectedQty: number
+    rejectReason: number
+    unitCost: number
+    lineTotal: number
+    _all: number
+  }
+
+
+  export type GrnItemAvgAggregateInputType = {
+    id?: true
+    grnId?: true
+    productId?: true
+    purchaseOrderItemId?: true
+    orderedQty?: true
+    deliveredQty?: true
+    acceptedQty?: true
+    rejectedQty?: true
+    unitCost?: true
+    lineTotal?: true
+  }
+
+  export type GrnItemSumAggregateInputType = {
+    id?: true
+    grnId?: true
+    productId?: true
+    purchaseOrderItemId?: true
+    orderedQty?: true
+    deliveredQty?: true
+    acceptedQty?: true
+    rejectedQty?: true
+    unitCost?: true
+    lineTotal?: true
+  }
+
+  export type GrnItemMinAggregateInputType = {
+    id?: true
+    grnId?: true
+    productId?: true
+    description?: true
+    purchaseOrderItemId?: true
+    orderedQty?: true
+    deliveredQty?: true
+    acceptedQty?: true
+    rejectedQty?: true
+    rejectReason?: true
+    unitCost?: true
+    lineTotal?: true
+  }
+
+  export type GrnItemMaxAggregateInputType = {
+    id?: true
+    grnId?: true
+    productId?: true
+    description?: true
+    purchaseOrderItemId?: true
+    orderedQty?: true
+    deliveredQty?: true
+    acceptedQty?: true
+    rejectedQty?: true
+    rejectReason?: true
+    unitCost?: true
+    lineTotal?: true
+  }
+
+  export type GrnItemCountAggregateInputType = {
+    id?: true
+    grnId?: true
+    productId?: true
+    description?: true
+    purchaseOrderItemId?: true
+    orderedQty?: true
+    deliveredQty?: true
+    acceptedQty?: true
+    rejectedQty?: true
+    rejectReason?: true
+    unitCost?: true
+    lineTotal?: true
+    _all?: true
+  }
+
+  export type GrnItemAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GrnItem to aggregate.
+     */
+    where?: GrnItemWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GrnItems to fetch.
+     */
+    orderBy?: GrnItemOrderByWithRelationInput | GrnItemOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: GrnItemWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GrnItems from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GrnItems.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned GrnItems
+    **/
+    _count?: true | GrnItemCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: GrnItemAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: GrnItemSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GrnItemMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GrnItemMaxAggregateInputType
+  }
+
+  export type GetGrnItemAggregateType<T extends GrnItemAggregateArgs> = {
+        [P in keyof T & keyof AggregateGrnItem]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGrnItem[P]>
+      : GetScalarType<T[P], AggregateGrnItem[P]>
+  }
+
+
+
+
+  export type GrnItemGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GrnItemWhereInput
+    orderBy?: GrnItemOrderByWithAggregationInput | GrnItemOrderByWithAggregationInput[]
+    by: GrnItemScalarFieldEnum[] | GrnItemScalarFieldEnum
+    having?: GrnItemScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GrnItemCountAggregateInputType | true
+    _avg?: GrnItemAvgAggregateInputType
+    _sum?: GrnItemSumAggregateInputType
+    _min?: GrnItemMinAggregateInputType
+    _max?: GrnItemMaxAggregateInputType
+  }
+
+  export type GrnItemGroupByOutputType = {
+    id: number
+    grnId: number
+    productId: number | null
+    description: string
+    purchaseOrderItemId: number | null
+    orderedQty: number | null
+    deliveredQty: number
+    acceptedQty: number
+    rejectedQty: number
+    rejectReason: string | null
+    unitCost: number
+    lineTotal: number
+    _count: GrnItemCountAggregateOutputType | null
+    _avg: GrnItemAvgAggregateOutputType | null
+    _sum: GrnItemSumAggregateOutputType | null
+    _min: GrnItemMinAggregateOutputType | null
+    _max: GrnItemMaxAggregateOutputType | null
+  }
+
+  type GetGrnItemGroupByPayload<T extends GrnItemGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GrnItemGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GrnItemGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GrnItemGroupByOutputType[P]>
+            : GetScalarType<T[P], GrnItemGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type GrnItemSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    grnId?: boolean
+    productId?: boolean
+    description?: boolean
+    purchaseOrderItemId?: boolean
+    orderedQty?: boolean
+    deliveredQty?: boolean
+    acceptedQty?: boolean
+    rejectedQty?: boolean
+    rejectReason?: boolean
+    unitCost?: boolean
+    lineTotal?: boolean
+    grn?: boolean | GrnDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["grnItem"]>
+
+  export type GrnItemSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    grnId?: boolean
+    productId?: boolean
+    description?: boolean
+    purchaseOrderItemId?: boolean
+    orderedQty?: boolean
+    deliveredQty?: boolean
+    acceptedQty?: boolean
+    rejectedQty?: boolean
+    rejectReason?: boolean
+    unitCost?: boolean
+    lineTotal?: boolean
+    grn?: boolean | GrnDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["grnItem"]>
+
+  export type GrnItemSelectScalar = {
+    id?: boolean
+    grnId?: boolean
+    productId?: boolean
+    description?: boolean
+    purchaseOrderItemId?: boolean
+    orderedQty?: boolean
+    deliveredQty?: boolean
+    acceptedQty?: boolean
+    rejectedQty?: boolean
+    rejectReason?: boolean
+    unitCost?: boolean
+    lineTotal?: boolean
+  }
+
+  export type GrnItemInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    grn?: boolean | GrnDefaultArgs<ExtArgs>
+  }
+  export type GrnItemIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    grn?: boolean | GrnDefaultArgs<ExtArgs>
+  }
+
+  export type $GrnItemPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "GrnItem"
+    objects: {
+      grn: Prisma.$GrnPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      grnId: number
+      productId: number | null
+      description: string
+      purchaseOrderItemId: number | null
+      /**
+       * Still due on the purchase order when the delivery came (null without an order).
+       */
+      orderedQty: number | null
+      /**
+       * Delivered = accepted (into stock) + rejected (sent back with the driver).
+       */
+      deliveredQty: number
+      acceptedQty: number
+      rejectedQty: number
+      rejectReason: string | null
+      unitCost: number
+      lineTotal: number
+    }, ExtArgs["result"]["grnItem"]>
+    composites: {}
+  }
+
+  type GrnItemGetPayload<S extends boolean | null | undefined | GrnItemDefaultArgs> = $Result.GetResult<Prisma.$GrnItemPayload, S>
+
+  type GrnItemCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<GrnItemFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: GrnItemCountAggregateInputType | true
+    }
+
+  export interface GrnItemDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['GrnItem'], meta: { name: 'GrnItem' } }
+    /**
+     * Find zero or one GrnItem that matches the filter.
+     * @param {GrnItemFindUniqueArgs} args - Arguments to find a GrnItem
+     * @example
+     * // Get one GrnItem
+     * const grnItem = await prisma.grnItem.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends GrnItemFindUniqueArgs>(args: SelectSubset<T, GrnItemFindUniqueArgs<ExtArgs>>): Prisma__GrnItemClient<$Result.GetResult<Prisma.$GrnItemPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one GrnItem that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {GrnItemFindUniqueOrThrowArgs} args - Arguments to find a GrnItem
+     * @example
+     * // Get one GrnItem
+     * const grnItem = await prisma.grnItem.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends GrnItemFindUniqueOrThrowArgs>(args: SelectSubset<T, GrnItemFindUniqueOrThrowArgs<ExtArgs>>): Prisma__GrnItemClient<$Result.GetResult<Prisma.$GrnItemPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first GrnItem that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GrnItemFindFirstArgs} args - Arguments to find a GrnItem
+     * @example
+     * // Get one GrnItem
+     * const grnItem = await prisma.grnItem.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends GrnItemFindFirstArgs>(args?: SelectSubset<T, GrnItemFindFirstArgs<ExtArgs>>): Prisma__GrnItemClient<$Result.GetResult<Prisma.$GrnItemPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first GrnItem that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GrnItemFindFirstOrThrowArgs} args - Arguments to find a GrnItem
+     * @example
+     * // Get one GrnItem
+     * const grnItem = await prisma.grnItem.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends GrnItemFindFirstOrThrowArgs>(args?: SelectSubset<T, GrnItemFindFirstOrThrowArgs<ExtArgs>>): Prisma__GrnItemClient<$Result.GetResult<Prisma.$GrnItemPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more GrnItems that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GrnItemFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all GrnItems
+     * const grnItems = await prisma.grnItem.findMany()
+     * 
+     * // Get first 10 GrnItems
+     * const grnItems = await prisma.grnItem.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const grnItemWithIdOnly = await prisma.grnItem.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends GrnItemFindManyArgs>(args?: SelectSubset<T, GrnItemFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GrnItemPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a GrnItem.
+     * @param {GrnItemCreateArgs} args - Arguments to create a GrnItem.
+     * @example
+     * // Create one GrnItem
+     * const GrnItem = await prisma.grnItem.create({
+     *   data: {
+     *     // ... data to create a GrnItem
+     *   }
+     * })
+     * 
+     */
+    create<T extends GrnItemCreateArgs>(args: SelectSubset<T, GrnItemCreateArgs<ExtArgs>>): Prisma__GrnItemClient<$Result.GetResult<Prisma.$GrnItemPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many GrnItems.
+     * @param {GrnItemCreateManyArgs} args - Arguments to create many GrnItems.
+     * @example
+     * // Create many GrnItems
+     * const grnItem = await prisma.grnItem.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends GrnItemCreateManyArgs>(args?: SelectSubset<T, GrnItemCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many GrnItems and returns the data saved in the database.
+     * @param {GrnItemCreateManyAndReturnArgs} args - Arguments to create many GrnItems.
+     * @example
+     * // Create many GrnItems
+     * const grnItem = await prisma.grnItem.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many GrnItems and only return the `id`
+     * const grnItemWithIdOnly = await prisma.grnItem.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends GrnItemCreateManyAndReturnArgs>(args?: SelectSubset<T, GrnItemCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GrnItemPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a GrnItem.
+     * @param {GrnItemDeleteArgs} args - Arguments to delete one GrnItem.
+     * @example
+     * // Delete one GrnItem
+     * const GrnItem = await prisma.grnItem.delete({
+     *   where: {
+     *     // ... filter to delete one GrnItem
+     *   }
+     * })
+     * 
+     */
+    delete<T extends GrnItemDeleteArgs>(args: SelectSubset<T, GrnItemDeleteArgs<ExtArgs>>): Prisma__GrnItemClient<$Result.GetResult<Prisma.$GrnItemPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one GrnItem.
+     * @param {GrnItemUpdateArgs} args - Arguments to update one GrnItem.
+     * @example
+     * // Update one GrnItem
+     * const grnItem = await prisma.grnItem.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends GrnItemUpdateArgs>(args: SelectSubset<T, GrnItemUpdateArgs<ExtArgs>>): Prisma__GrnItemClient<$Result.GetResult<Prisma.$GrnItemPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more GrnItems.
+     * @param {GrnItemDeleteManyArgs} args - Arguments to filter GrnItems to delete.
+     * @example
+     * // Delete a few GrnItems
+     * const { count } = await prisma.grnItem.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends GrnItemDeleteManyArgs>(args?: SelectSubset<T, GrnItemDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GrnItems.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GrnItemUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many GrnItems
+     * const grnItem = await prisma.grnItem.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends GrnItemUpdateManyArgs>(args: SelectSubset<T, GrnItemUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one GrnItem.
+     * @param {GrnItemUpsertArgs} args - Arguments to update or create a GrnItem.
+     * @example
+     * // Update or create a GrnItem
+     * const grnItem = await prisma.grnItem.upsert({
+     *   create: {
+     *     // ... data to create a GrnItem
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the GrnItem we want to update
+     *   }
+     * })
+     */
+    upsert<T extends GrnItemUpsertArgs>(args: SelectSubset<T, GrnItemUpsertArgs<ExtArgs>>): Prisma__GrnItemClient<$Result.GetResult<Prisma.$GrnItemPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of GrnItems.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GrnItemCountArgs} args - Arguments to filter GrnItems to count.
+     * @example
+     * // Count the number of GrnItems
+     * const count = await prisma.grnItem.count({
+     *   where: {
+     *     // ... the filter for the GrnItems we want to count
+     *   }
+     * })
+    **/
+    count<T extends GrnItemCountArgs>(
+      args?: Subset<T, GrnItemCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GrnItemCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a GrnItem.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GrnItemAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GrnItemAggregateArgs>(args: Subset<T, GrnItemAggregateArgs>): Prisma.PrismaPromise<GetGrnItemAggregateType<T>>
+
+    /**
+     * Group by GrnItem.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GrnItemGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends GrnItemGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: GrnItemGroupByArgs['orderBy'] }
+        : { orderBy?: GrnItemGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, GrnItemGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGrnItemGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the GrnItem model
+   */
+  readonly fields: GrnItemFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for GrnItem.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__GrnItemClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    grn<T extends GrnDefaultArgs<ExtArgs> = {}>(args?: Subset<T, GrnDefaultArgs<ExtArgs>>): Prisma__GrnClient<$Result.GetResult<Prisma.$GrnPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the GrnItem model
+   */ 
+  interface GrnItemFieldRefs {
+    readonly id: FieldRef<"GrnItem", 'Int'>
+    readonly grnId: FieldRef<"GrnItem", 'Int'>
+    readonly productId: FieldRef<"GrnItem", 'Int'>
+    readonly description: FieldRef<"GrnItem", 'String'>
+    readonly purchaseOrderItemId: FieldRef<"GrnItem", 'Int'>
+    readonly orderedQty: FieldRef<"GrnItem", 'Int'>
+    readonly deliveredQty: FieldRef<"GrnItem", 'Int'>
+    readonly acceptedQty: FieldRef<"GrnItem", 'Int'>
+    readonly rejectedQty: FieldRef<"GrnItem", 'Int'>
+    readonly rejectReason: FieldRef<"GrnItem", 'String'>
+    readonly unitCost: FieldRef<"GrnItem", 'Float'>
+    readonly lineTotal: FieldRef<"GrnItem", 'Float'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * GrnItem findUnique
+   */
+  export type GrnItemFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GrnItem
+     */
+    select?: GrnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnItemInclude<ExtArgs> | null
+    /**
+     * Filter, which GrnItem to fetch.
+     */
+    where: GrnItemWhereUniqueInput
+  }
+
+  /**
+   * GrnItem findUniqueOrThrow
+   */
+  export type GrnItemFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GrnItem
+     */
+    select?: GrnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnItemInclude<ExtArgs> | null
+    /**
+     * Filter, which GrnItem to fetch.
+     */
+    where: GrnItemWhereUniqueInput
+  }
+
+  /**
+   * GrnItem findFirst
+   */
+  export type GrnItemFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GrnItem
+     */
+    select?: GrnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnItemInclude<ExtArgs> | null
+    /**
+     * Filter, which GrnItem to fetch.
+     */
+    where?: GrnItemWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GrnItems to fetch.
+     */
+    orderBy?: GrnItemOrderByWithRelationInput | GrnItemOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GrnItems.
+     */
+    cursor?: GrnItemWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GrnItems from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GrnItems.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GrnItems.
+     */
+    distinct?: GrnItemScalarFieldEnum | GrnItemScalarFieldEnum[]
+  }
+
+  /**
+   * GrnItem findFirstOrThrow
+   */
+  export type GrnItemFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GrnItem
+     */
+    select?: GrnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnItemInclude<ExtArgs> | null
+    /**
+     * Filter, which GrnItem to fetch.
+     */
+    where?: GrnItemWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GrnItems to fetch.
+     */
+    orderBy?: GrnItemOrderByWithRelationInput | GrnItemOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GrnItems.
+     */
+    cursor?: GrnItemWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GrnItems from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GrnItems.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GrnItems.
+     */
+    distinct?: GrnItemScalarFieldEnum | GrnItemScalarFieldEnum[]
+  }
+
+  /**
+   * GrnItem findMany
+   */
+  export type GrnItemFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GrnItem
+     */
+    select?: GrnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnItemInclude<ExtArgs> | null
+    /**
+     * Filter, which GrnItems to fetch.
+     */
+    where?: GrnItemWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GrnItems to fetch.
+     */
+    orderBy?: GrnItemOrderByWithRelationInput | GrnItemOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing GrnItems.
+     */
+    cursor?: GrnItemWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GrnItems from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GrnItems.
+     */
+    skip?: number
+    distinct?: GrnItemScalarFieldEnum | GrnItemScalarFieldEnum[]
+  }
+
+  /**
+   * GrnItem create
+   */
+  export type GrnItemCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GrnItem
+     */
+    select?: GrnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnItemInclude<ExtArgs> | null
+    /**
+     * The data needed to create a GrnItem.
+     */
+    data: XOR<GrnItemCreateInput, GrnItemUncheckedCreateInput>
+  }
+
+  /**
+   * GrnItem createMany
+   */
+  export type GrnItemCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many GrnItems.
+     */
+    data: GrnItemCreateManyInput | GrnItemCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GrnItem createManyAndReturn
+   */
+  export type GrnItemCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GrnItem
+     */
+    select?: GrnItemSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many GrnItems.
+     */
+    data: GrnItemCreateManyInput | GrnItemCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnItemIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * GrnItem update
+   */
+  export type GrnItemUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GrnItem
+     */
+    select?: GrnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnItemInclude<ExtArgs> | null
+    /**
+     * The data needed to update a GrnItem.
+     */
+    data: XOR<GrnItemUpdateInput, GrnItemUncheckedUpdateInput>
+    /**
+     * Choose, which GrnItem to update.
+     */
+    where: GrnItemWhereUniqueInput
+  }
+
+  /**
+   * GrnItem updateMany
+   */
+  export type GrnItemUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update GrnItems.
+     */
+    data: XOR<GrnItemUpdateManyMutationInput, GrnItemUncheckedUpdateManyInput>
+    /**
+     * Filter which GrnItems to update
+     */
+    where?: GrnItemWhereInput
+  }
+
+  /**
+   * GrnItem upsert
+   */
+  export type GrnItemUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GrnItem
+     */
+    select?: GrnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnItemInclude<ExtArgs> | null
+    /**
+     * The filter to search for the GrnItem to update in case it exists.
+     */
+    where: GrnItemWhereUniqueInput
+    /**
+     * In case the GrnItem found by the `where` argument doesn't exist, create a new GrnItem with this data.
+     */
+    create: XOR<GrnItemCreateInput, GrnItemUncheckedCreateInput>
+    /**
+     * In case the GrnItem was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<GrnItemUpdateInput, GrnItemUncheckedUpdateInput>
+  }
+
+  /**
+   * GrnItem delete
+   */
+  export type GrnItemDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GrnItem
+     */
+    select?: GrnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnItemInclude<ExtArgs> | null
+    /**
+     * Filter which GrnItem to delete.
+     */
+    where: GrnItemWhereUniqueInput
+  }
+
+  /**
+   * GrnItem deleteMany
+   */
+  export type GrnItemDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GrnItems to delete
+     */
+    where?: GrnItemWhereInput
+  }
+
+  /**
+   * GrnItem without action
+   */
+  export type GrnItemDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GrnItem
+     */
+    select?: GrnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GrnItemInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Gtn
+   */
+
+  export type AggregateGtn = {
+    _count: GtnCountAggregateOutputType | null
+    _avg: GtnAvgAggregateOutputType | null
+    _sum: GtnSumAggregateOutputType | null
+    _min: GtnMinAggregateOutputType | null
+    _max: GtnMaxAggregateOutputType | null
+  }
+
+  export type GtnAvgAggregateOutputType = {
+    id: number | null
+    fromBranchId: number | null
+    toBranchId: number | null
+    sentById: number | null
+    sentShiftId: number | null
+    receivedById: number | null
+    receivedShiftId: number | null
+    cancelledById: number | null
+  }
+
+  export type GtnSumAggregateOutputType = {
+    id: number | null
+    fromBranchId: number | null
+    toBranchId: number | null
+    sentById: number | null
+    sentShiftId: number | null
+    receivedById: number | null
+    receivedShiftId: number | null
+    cancelledById: number | null
+  }
+
+  export type GtnMinAggregateOutputType = {
+    id: number | null
+    gtnNo: string | null
+    fromBranchId: number | null
+    toBranchId: number | null
+    status: string | null
+    notes: string | null
+    carriedBy: string | null
+    sentById: number | null
+    sentAt: Date | null
+    sentShiftId: number | null
+    receivedById: number | null
+    receivedAt: Date | null
+    receivedShiftId: number | null
+    receiveNote: string | null
+    cancelledById: number | null
+    cancelledAt: Date | null
+    cancelReason: string | null
+  }
+
+  export type GtnMaxAggregateOutputType = {
+    id: number | null
+    gtnNo: string | null
+    fromBranchId: number | null
+    toBranchId: number | null
+    status: string | null
+    notes: string | null
+    carriedBy: string | null
+    sentById: number | null
+    sentAt: Date | null
+    sentShiftId: number | null
+    receivedById: number | null
+    receivedAt: Date | null
+    receivedShiftId: number | null
+    receiveNote: string | null
+    cancelledById: number | null
+    cancelledAt: Date | null
+    cancelReason: string | null
+  }
+
+  export type GtnCountAggregateOutputType = {
+    id: number
+    gtnNo: number
+    fromBranchId: number
+    toBranchId: number
+    status: number
+    notes: number
+    carriedBy: number
+    sentById: number
+    sentAt: number
+    sentShiftId: number
+    receivedById: number
+    receivedAt: number
+    receivedShiftId: number
+    receiveNote: number
+    cancelledById: number
+    cancelledAt: number
+    cancelReason: number
+    _all: number
+  }
+
+
+  export type GtnAvgAggregateInputType = {
+    id?: true
+    fromBranchId?: true
+    toBranchId?: true
+    sentById?: true
+    sentShiftId?: true
+    receivedById?: true
+    receivedShiftId?: true
+    cancelledById?: true
+  }
+
+  export type GtnSumAggregateInputType = {
+    id?: true
+    fromBranchId?: true
+    toBranchId?: true
+    sentById?: true
+    sentShiftId?: true
+    receivedById?: true
+    receivedShiftId?: true
+    cancelledById?: true
+  }
+
+  export type GtnMinAggregateInputType = {
+    id?: true
+    gtnNo?: true
+    fromBranchId?: true
+    toBranchId?: true
+    status?: true
+    notes?: true
+    carriedBy?: true
+    sentById?: true
+    sentAt?: true
+    sentShiftId?: true
+    receivedById?: true
+    receivedAt?: true
+    receivedShiftId?: true
+    receiveNote?: true
+    cancelledById?: true
+    cancelledAt?: true
+    cancelReason?: true
+  }
+
+  export type GtnMaxAggregateInputType = {
+    id?: true
+    gtnNo?: true
+    fromBranchId?: true
+    toBranchId?: true
+    status?: true
+    notes?: true
+    carriedBy?: true
+    sentById?: true
+    sentAt?: true
+    sentShiftId?: true
+    receivedById?: true
+    receivedAt?: true
+    receivedShiftId?: true
+    receiveNote?: true
+    cancelledById?: true
+    cancelledAt?: true
+    cancelReason?: true
+  }
+
+  export type GtnCountAggregateInputType = {
+    id?: true
+    gtnNo?: true
+    fromBranchId?: true
+    toBranchId?: true
+    status?: true
+    notes?: true
+    carriedBy?: true
+    sentById?: true
+    sentAt?: true
+    sentShiftId?: true
+    receivedById?: true
+    receivedAt?: true
+    receivedShiftId?: true
+    receiveNote?: true
+    cancelledById?: true
+    cancelledAt?: true
+    cancelReason?: true
+    _all?: true
+  }
+
+  export type GtnAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Gtn to aggregate.
+     */
+    where?: GtnWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Gtns to fetch.
+     */
+    orderBy?: GtnOrderByWithRelationInput | GtnOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: GtnWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Gtns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Gtns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Gtns
+    **/
+    _count?: true | GtnCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: GtnAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: GtnSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GtnMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GtnMaxAggregateInputType
+  }
+
+  export type GetGtnAggregateType<T extends GtnAggregateArgs> = {
+        [P in keyof T & keyof AggregateGtn]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGtn[P]>
+      : GetScalarType<T[P], AggregateGtn[P]>
+  }
+
+
+
+
+  export type GtnGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GtnWhereInput
+    orderBy?: GtnOrderByWithAggregationInput | GtnOrderByWithAggregationInput[]
+    by: GtnScalarFieldEnum[] | GtnScalarFieldEnum
+    having?: GtnScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GtnCountAggregateInputType | true
+    _avg?: GtnAvgAggregateInputType
+    _sum?: GtnSumAggregateInputType
+    _min?: GtnMinAggregateInputType
+    _max?: GtnMaxAggregateInputType
+  }
+
+  export type GtnGroupByOutputType = {
+    id: number
+    gtnNo: string
+    fromBranchId: number
+    toBranchId: number
+    status: string
+    notes: string | null
+    carriedBy: string | null
+    sentById: number
+    sentAt: Date
+    sentShiftId: number | null
+    receivedById: number | null
+    receivedAt: Date | null
+    receivedShiftId: number | null
+    receiveNote: string | null
+    cancelledById: number | null
+    cancelledAt: Date | null
+    cancelReason: string | null
+    _count: GtnCountAggregateOutputType | null
+    _avg: GtnAvgAggregateOutputType | null
+    _sum: GtnSumAggregateOutputType | null
+    _min: GtnMinAggregateOutputType | null
+    _max: GtnMaxAggregateOutputType | null
+  }
+
+  type GetGtnGroupByPayload<T extends GtnGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GtnGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GtnGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GtnGroupByOutputType[P]>
+            : GetScalarType<T[P], GtnGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type GtnSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    gtnNo?: boolean
+    fromBranchId?: boolean
+    toBranchId?: boolean
+    status?: boolean
+    notes?: boolean
+    carriedBy?: boolean
+    sentById?: boolean
+    sentAt?: boolean
+    sentShiftId?: boolean
+    receivedById?: boolean
+    receivedAt?: boolean
+    receivedShiftId?: boolean
+    receiveNote?: boolean
+    cancelledById?: boolean
+    cancelledAt?: boolean
+    cancelReason?: boolean
+    fromBranch?: boolean | BranchDefaultArgs<ExtArgs>
+    toBranch?: boolean | BranchDefaultArgs<ExtArgs>
+    items?: boolean | Gtn$itemsArgs<ExtArgs>
+    _count?: boolean | GtnCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["gtn"]>
+
+  export type GtnSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    gtnNo?: boolean
+    fromBranchId?: boolean
+    toBranchId?: boolean
+    status?: boolean
+    notes?: boolean
+    carriedBy?: boolean
+    sentById?: boolean
+    sentAt?: boolean
+    sentShiftId?: boolean
+    receivedById?: boolean
+    receivedAt?: boolean
+    receivedShiftId?: boolean
+    receiveNote?: boolean
+    cancelledById?: boolean
+    cancelledAt?: boolean
+    cancelReason?: boolean
+    fromBranch?: boolean | BranchDefaultArgs<ExtArgs>
+    toBranch?: boolean | BranchDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["gtn"]>
+
+  export type GtnSelectScalar = {
+    id?: boolean
+    gtnNo?: boolean
+    fromBranchId?: boolean
+    toBranchId?: boolean
+    status?: boolean
+    notes?: boolean
+    carriedBy?: boolean
+    sentById?: boolean
+    sentAt?: boolean
+    sentShiftId?: boolean
+    receivedById?: boolean
+    receivedAt?: boolean
+    receivedShiftId?: boolean
+    receiveNote?: boolean
+    cancelledById?: boolean
+    cancelledAt?: boolean
+    cancelReason?: boolean
+  }
+
+  export type GtnInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    fromBranch?: boolean | BranchDefaultArgs<ExtArgs>
+    toBranch?: boolean | BranchDefaultArgs<ExtArgs>
+    items?: boolean | Gtn$itemsArgs<ExtArgs>
+    _count?: boolean | GtnCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type GtnIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    fromBranch?: boolean | BranchDefaultArgs<ExtArgs>
+    toBranch?: boolean | BranchDefaultArgs<ExtArgs>
+  }
+
+  export type $GtnPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Gtn"
+    objects: {
+      fromBranch: Prisma.$BranchPayload<ExtArgs>
+      toBranch: Prisma.$BranchPayload<ExtArgs>
+      items: Prisma.$GtnItemPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      gtnNo: string
+      fromBranchId: number
+      toBranchId: number
+      status: string
+      notes: string | null
+      /**
+       * Who carried it (driver / staff member), as written on the note.
+       */
+      carriedBy: string | null
+      sentById: number
+      sentAt: Date
+      sentShiftId: number | null
+      receivedById: number | null
+      receivedAt: Date | null
+      receivedShiftId: number | null
+      receiveNote: string | null
+      cancelledById: number | null
+      cancelledAt: Date | null
+      cancelReason: string | null
+    }, ExtArgs["result"]["gtn"]>
+    composites: {}
+  }
+
+  type GtnGetPayload<S extends boolean | null | undefined | GtnDefaultArgs> = $Result.GetResult<Prisma.$GtnPayload, S>
+
+  type GtnCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<GtnFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: GtnCountAggregateInputType | true
+    }
+
+  export interface GtnDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Gtn'], meta: { name: 'Gtn' } }
+    /**
+     * Find zero or one Gtn that matches the filter.
+     * @param {GtnFindUniqueArgs} args - Arguments to find a Gtn
+     * @example
+     * // Get one Gtn
+     * const gtn = await prisma.gtn.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends GtnFindUniqueArgs>(args: SelectSubset<T, GtnFindUniqueArgs<ExtArgs>>): Prisma__GtnClient<$Result.GetResult<Prisma.$GtnPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one Gtn that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {GtnFindUniqueOrThrowArgs} args - Arguments to find a Gtn
+     * @example
+     * // Get one Gtn
+     * const gtn = await prisma.gtn.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends GtnFindUniqueOrThrowArgs>(args: SelectSubset<T, GtnFindUniqueOrThrowArgs<ExtArgs>>): Prisma__GtnClient<$Result.GetResult<Prisma.$GtnPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first Gtn that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GtnFindFirstArgs} args - Arguments to find a Gtn
+     * @example
+     * // Get one Gtn
+     * const gtn = await prisma.gtn.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends GtnFindFirstArgs>(args?: SelectSubset<T, GtnFindFirstArgs<ExtArgs>>): Prisma__GtnClient<$Result.GetResult<Prisma.$GtnPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first Gtn that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GtnFindFirstOrThrowArgs} args - Arguments to find a Gtn
+     * @example
+     * // Get one Gtn
+     * const gtn = await prisma.gtn.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends GtnFindFirstOrThrowArgs>(args?: SelectSubset<T, GtnFindFirstOrThrowArgs<ExtArgs>>): Prisma__GtnClient<$Result.GetResult<Prisma.$GtnPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more Gtns that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GtnFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Gtns
+     * const gtns = await prisma.gtn.findMany()
+     * 
+     * // Get first 10 Gtns
+     * const gtns = await prisma.gtn.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const gtnWithIdOnly = await prisma.gtn.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends GtnFindManyArgs>(args?: SelectSubset<T, GtnFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GtnPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a Gtn.
+     * @param {GtnCreateArgs} args - Arguments to create a Gtn.
+     * @example
+     * // Create one Gtn
+     * const Gtn = await prisma.gtn.create({
+     *   data: {
+     *     // ... data to create a Gtn
+     *   }
+     * })
+     * 
+     */
+    create<T extends GtnCreateArgs>(args: SelectSubset<T, GtnCreateArgs<ExtArgs>>): Prisma__GtnClient<$Result.GetResult<Prisma.$GtnPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many Gtns.
+     * @param {GtnCreateManyArgs} args - Arguments to create many Gtns.
+     * @example
+     * // Create many Gtns
+     * const gtn = await prisma.gtn.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends GtnCreateManyArgs>(args?: SelectSubset<T, GtnCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Gtns and returns the data saved in the database.
+     * @param {GtnCreateManyAndReturnArgs} args - Arguments to create many Gtns.
+     * @example
+     * // Create many Gtns
+     * const gtn = await prisma.gtn.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Gtns and only return the `id`
+     * const gtnWithIdOnly = await prisma.gtn.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends GtnCreateManyAndReturnArgs>(args?: SelectSubset<T, GtnCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GtnPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a Gtn.
+     * @param {GtnDeleteArgs} args - Arguments to delete one Gtn.
+     * @example
+     * // Delete one Gtn
+     * const Gtn = await prisma.gtn.delete({
+     *   where: {
+     *     // ... filter to delete one Gtn
+     *   }
+     * })
+     * 
+     */
+    delete<T extends GtnDeleteArgs>(args: SelectSubset<T, GtnDeleteArgs<ExtArgs>>): Prisma__GtnClient<$Result.GetResult<Prisma.$GtnPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one Gtn.
+     * @param {GtnUpdateArgs} args - Arguments to update one Gtn.
+     * @example
+     * // Update one Gtn
+     * const gtn = await prisma.gtn.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends GtnUpdateArgs>(args: SelectSubset<T, GtnUpdateArgs<ExtArgs>>): Prisma__GtnClient<$Result.GetResult<Prisma.$GtnPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more Gtns.
+     * @param {GtnDeleteManyArgs} args - Arguments to filter Gtns to delete.
+     * @example
+     * // Delete a few Gtns
+     * const { count } = await prisma.gtn.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends GtnDeleteManyArgs>(args?: SelectSubset<T, GtnDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Gtns.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GtnUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Gtns
+     * const gtn = await prisma.gtn.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends GtnUpdateManyArgs>(args: SelectSubset<T, GtnUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one Gtn.
+     * @param {GtnUpsertArgs} args - Arguments to update or create a Gtn.
+     * @example
+     * // Update or create a Gtn
+     * const gtn = await prisma.gtn.upsert({
+     *   create: {
+     *     // ... data to create a Gtn
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Gtn we want to update
+     *   }
+     * })
+     */
+    upsert<T extends GtnUpsertArgs>(args: SelectSubset<T, GtnUpsertArgs<ExtArgs>>): Prisma__GtnClient<$Result.GetResult<Prisma.$GtnPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of Gtns.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GtnCountArgs} args - Arguments to filter Gtns to count.
+     * @example
+     * // Count the number of Gtns
+     * const count = await prisma.gtn.count({
+     *   where: {
+     *     // ... the filter for the Gtns we want to count
+     *   }
+     * })
+    **/
+    count<T extends GtnCountArgs>(
+      args?: Subset<T, GtnCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GtnCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Gtn.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GtnAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GtnAggregateArgs>(args: Subset<T, GtnAggregateArgs>): Prisma.PrismaPromise<GetGtnAggregateType<T>>
+
+    /**
+     * Group by Gtn.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GtnGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends GtnGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: GtnGroupByArgs['orderBy'] }
+        : { orderBy?: GtnGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, GtnGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGtnGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Gtn model
+   */
+  readonly fields: GtnFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Gtn.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__GtnClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    fromBranch<T extends BranchDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BranchDefaultArgs<ExtArgs>>): Prisma__BranchClient<$Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    toBranch<T extends BranchDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BranchDefaultArgs<ExtArgs>>): Prisma__BranchClient<$Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    items<T extends Gtn$itemsArgs<ExtArgs> = {}>(args?: Subset<T, Gtn$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GtnItemPayload<ExtArgs>, T, "findMany"> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Gtn model
+   */ 
+  interface GtnFieldRefs {
+    readonly id: FieldRef<"Gtn", 'Int'>
+    readonly gtnNo: FieldRef<"Gtn", 'String'>
+    readonly fromBranchId: FieldRef<"Gtn", 'Int'>
+    readonly toBranchId: FieldRef<"Gtn", 'Int'>
+    readonly status: FieldRef<"Gtn", 'String'>
+    readonly notes: FieldRef<"Gtn", 'String'>
+    readonly carriedBy: FieldRef<"Gtn", 'String'>
+    readonly sentById: FieldRef<"Gtn", 'Int'>
+    readonly sentAt: FieldRef<"Gtn", 'DateTime'>
+    readonly sentShiftId: FieldRef<"Gtn", 'Int'>
+    readonly receivedById: FieldRef<"Gtn", 'Int'>
+    readonly receivedAt: FieldRef<"Gtn", 'DateTime'>
+    readonly receivedShiftId: FieldRef<"Gtn", 'Int'>
+    readonly receiveNote: FieldRef<"Gtn", 'String'>
+    readonly cancelledById: FieldRef<"Gtn", 'Int'>
+    readonly cancelledAt: FieldRef<"Gtn", 'DateTime'>
+    readonly cancelReason: FieldRef<"Gtn", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Gtn findUnique
+   */
+  export type GtnFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Gtn
+     */
+    select?: GtnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnInclude<ExtArgs> | null
+    /**
+     * Filter, which Gtn to fetch.
+     */
+    where: GtnWhereUniqueInput
+  }
+
+  /**
+   * Gtn findUniqueOrThrow
+   */
+  export type GtnFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Gtn
+     */
+    select?: GtnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnInclude<ExtArgs> | null
+    /**
+     * Filter, which Gtn to fetch.
+     */
+    where: GtnWhereUniqueInput
+  }
+
+  /**
+   * Gtn findFirst
+   */
+  export type GtnFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Gtn
+     */
+    select?: GtnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnInclude<ExtArgs> | null
+    /**
+     * Filter, which Gtn to fetch.
+     */
+    where?: GtnWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Gtns to fetch.
+     */
+    orderBy?: GtnOrderByWithRelationInput | GtnOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Gtns.
+     */
+    cursor?: GtnWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Gtns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Gtns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Gtns.
+     */
+    distinct?: GtnScalarFieldEnum | GtnScalarFieldEnum[]
+  }
+
+  /**
+   * Gtn findFirstOrThrow
+   */
+  export type GtnFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Gtn
+     */
+    select?: GtnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnInclude<ExtArgs> | null
+    /**
+     * Filter, which Gtn to fetch.
+     */
+    where?: GtnWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Gtns to fetch.
+     */
+    orderBy?: GtnOrderByWithRelationInput | GtnOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Gtns.
+     */
+    cursor?: GtnWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Gtns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Gtns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Gtns.
+     */
+    distinct?: GtnScalarFieldEnum | GtnScalarFieldEnum[]
+  }
+
+  /**
+   * Gtn findMany
+   */
+  export type GtnFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Gtn
+     */
+    select?: GtnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnInclude<ExtArgs> | null
+    /**
+     * Filter, which Gtns to fetch.
+     */
+    where?: GtnWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Gtns to fetch.
+     */
+    orderBy?: GtnOrderByWithRelationInput | GtnOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Gtns.
+     */
+    cursor?: GtnWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Gtns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Gtns.
+     */
+    skip?: number
+    distinct?: GtnScalarFieldEnum | GtnScalarFieldEnum[]
+  }
+
+  /**
+   * Gtn create
+   */
+  export type GtnCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Gtn
+     */
+    select?: GtnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Gtn.
+     */
+    data: XOR<GtnCreateInput, GtnUncheckedCreateInput>
+  }
+
+  /**
+   * Gtn createMany
+   */
+  export type GtnCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Gtns.
+     */
+    data: GtnCreateManyInput | GtnCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Gtn createManyAndReturn
+   */
+  export type GtnCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Gtn
+     */
+    select?: GtnSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many Gtns.
+     */
+    data: GtnCreateManyInput | GtnCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Gtn update
+   */
+  export type GtnUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Gtn
+     */
+    select?: GtnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Gtn.
+     */
+    data: XOR<GtnUpdateInput, GtnUncheckedUpdateInput>
+    /**
+     * Choose, which Gtn to update.
+     */
+    where: GtnWhereUniqueInput
+  }
+
+  /**
+   * Gtn updateMany
+   */
+  export type GtnUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Gtns.
+     */
+    data: XOR<GtnUpdateManyMutationInput, GtnUncheckedUpdateManyInput>
+    /**
+     * Filter which Gtns to update
+     */
+    where?: GtnWhereInput
+  }
+
+  /**
+   * Gtn upsert
+   */
+  export type GtnUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Gtn
+     */
+    select?: GtnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Gtn to update in case it exists.
+     */
+    where: GtnWhereUniqueInput
+    /**
+     * In case the Gtn found by the `where` argument doesn't exist, create a new Gtn with this data.
+     */
+    create: XOR<GtnCreateInput, GtnUncheckedCreateInput>
+    /**
+     * In case the Gtn was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<GtnUpdateInput, GtnUncheckedUpdateInput>
+  }
+
+  /**
+   * Gtn delete
+   */
+  export type GtnDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Gtn
+     */
+    select?: GtnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnInclude<ExtArgs> | null
+    /**
+     * Filter which Gtn to delete.
+     */
+    where: GtnWhereUniqueInput
+  }
+
+  /**
+   * Gtn deleteMany
+   */
+  export type GtnDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Gtns to delete
+     */
+    where?: GtnWhereInput
+  }
+
+  /**
+   * Gtn.items
+   */
+  export type Gtn$itemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GtnItem
+     */
+    select?: GtnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnItemInclude<ExtArgs> | null
+    where?: GtnItemWhereInput
+    orderBy?: GtnItemOrderByWithRelationInput | GtnItemOrderByWithRelationInput[]
+    cursor?: GtnItemWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: GtnItemScalarFieldEnum | GtnItemScalarFieldEnum[]
+  }
+
+  /**
+   * Gtn without action
+   */
+  export type GtnDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Gtn
+     */
+    select?: GtnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model GtnItem
+   */
+
+  export type AggregateGtnItem = {
+    _count: GtnItemCountAggregateOutputType | null
+    _avg: GtnItemAvgAggregateOutputType | null
+    _sum: GtnItemSumAggregateOutputType | null
+    _min: GtnItemMinAggregateOutputType | null
+    _max: GtnItemMaxAggregateOutputType | null
+  }
+
+  export type GtnItemAvgAggregateOutputType = {
+    id: number | null
+    gtnId: number | null
+    productId: number | null
+    sentQty: number | null
+    receivedQty: number | null
+    damagedQty: number | null
+    missingQty: number | null
+    unitCost: number | null
+  }
+
+  export type GtnItemSumAggregateOutputType = {
+    id: number | null
+    gtnId: number | null
+    productId: number | null
+    sentQty: number | null
+    receivedQty: number | null
+    damagedQty: number | null
+    missingQty: number | null
+    unitCost: number | null
+  }
+
+  export type GtnItemMinAggregateOutputType = {
+    id: number | null
+    gtnId: number | null
+    productId: number | null
+    productName: string | null
+    sentQty: number | null
+    receivedQty: number | null
+    damagedQty: number | null
+    missingQty: number | null
+    unitCost: number | null
+  }
+
+  export type GtnItemMaxAggregateOutputType = {
+    id: number | null
+    gtnId: number | null
+    productId: number | null
+    productName: string | null
+    sentQty: number | null
+    receivedQty: number | null
+    damagedQty: number | null
+    missingQty: number | null
+    unitCost: number | null
+  }
+
+  export type GtnItemCountAggregateOutputType = {
+    id: number
+    gtnId: number
+    productId: number
+    productName: number
+    sentQty: number
+    receivedQty: number
+    damagedQty: number
+    missingQty: number
+    unitCost: number
+    _all: number
+  }
+
+
+  export type GtnItemAvgAggregateInputType = {
+    id?: true
+    gtnId?: true
+    productId?: true
+    sentQty?: true
+    receivedQty?: true
+    damagedQty?: true
+    missingQty?: true
+    unitCost?: true
+  }
+
+  export type GtnItemSumAggregateInputType = {
+    id?: true
+    gtnId?: true
+    productId?: true
+    sentQty?: true
+    receivedQty?: true
+    damagedQty?: true
+    missingQty?: true
+    unitCost?: true
+  }
+
+  export type GtnItemMinAggregateInputType = {
+    id?: true
+    gtnId?: true
+    productId?: true
+    productName?: true
+    sentQty?: true
+    receivedQty?: true
+    damagedQty?: true
+    missingQty?: true
+    unitCost?: true
+  }
+
+  export type GtnItemMaxAggregateInputType = {
+    id?: true
+    gtnId?: true
+    productId?: true
+    productName?: true
+    sentQty?: true
+    receivedQty?: true
+    damagedQty?: true
+    missingQty?: true
+    unitCost?: true
+  }
+
+  export type GtnItemCountAggregateInputType = {
+    id?: true
+    gtnId?: true
+    productId?: true
+    productName?: true
+    sentQty?: true
+    receivedQty?: true
+    damagedQty?: true
+    missingQty?: true
+    unitCost?: true
+    _all?: true
+  }
+
+  export type GtnItemAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GtnItem to aggregate.
+     */
+    where?: GtnItemWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GtnItems to fetch.
+     */
+    orderBy?: GtnItemOrderByWithRelationInput | GtnItemOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: GtnItemWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GtnItems from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GtnItems.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned GtnItems
+    **/
+    _count?: true | GtnItemCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: GtnItemAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: GtnItemSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GtnItemMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GtnItemMaxAggregateInputType
+  }
+
+  export type GetGtnItemAggregateType<T extends GtnItemAggregateArgs> = {
+        [P in keyof T & keyof AggregateGtnItem]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGtnItem[P]>
+      : GetScalarType<T[P], AggregateGtnItem[P]>
+  }
+
+
+
+
+  export type GtnItemGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GtnItemWhereInput
+    orderBy?: GtnItemOrderByWithAggregationInput | GtnItemOrderByWithAggregationInput[]
+    by: GtnItemScalarFieldEnum[] | GtnItemScalarFieldEnum
+    having?: GtnItemScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GtnItemCountAggregateInputType | true
+    _avg?: GtnItemAvgAggregateInputType
+    _sum?: GtnItemSumAggregateInputType
+    _min?: GtnItemMinAggregateInputType
+    _max?: GtnItemMaxAggregateInputType
+  }
+
+  export type GtnItemGroupByOutputType = {
+    id: number
+    gtnId: number
+    productId: number | null
+    productName: string
+    sentQty: number
+    receivedQty: number | null
+    damagedQty: number
+    missingQty: number
+    unitCost: number | null
+    _count: GtnItemCountAggregateOutputType | null
+    _avg: GtnItemAvgAggregateOutputType | null
+    _sum: GtnItemSumAggregateOutputType | null
+    _min: GtnItemMinAggregateOutputType | null
+    _max: GtnItemMaxAggregateOutputType | null
+  }
+
+  type GetGtnItemGroupByPayload<T extends GtnItemGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GtnItemGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GtnItemGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GtnItemGroupByOutputType[P]>
+            : GetScalarType<T[P], GtnItemGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type GtnItemSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    gtnId?: boolean
+    productId?: boolean
+    productName?: boolean
+    sentQty?: boolean
+    receivedQty?: boolean
+    damagedQty?: boolean
+    missingQty?: boolean
+    unitCost?: boolean
+    gtn?: boolean | GtnDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["gtnItem"]>
+
+  export type GtnItemSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    gtnId?: boolean
+    productId?: boolean
+    productName?: boolean
+    sentQty?: boolean
+    receivedQty?: boolean
+    damagedQty?: boolean
+    missingQty?: boolean
+    unitCost?: boolean
+    gtn?: boolean | GtnDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["gtnItem"]>
+
+  export type GtnItemSelectScalar = {
+    id?: boolean
+    gtnId?: boolean
+    productId?: boolean
+    productName?: boolean
+    sentQty?: boolean
+    receivedQty?: boolean
+    damagedQty?: boolean
+    missingQty?: boolean
+    unitCost?: boolean
+  }
+
+  export type GtnItemInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    gtn?: boolean | GtnDefaultArgs<ExtArgs>
+  }
+  export type GtnItemIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    gtn?: boolean | GtnDefaultArgs<ExtArgs>
+  }
+
+  export type $GtnItemPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "GtnItem"
+    objects: {
+      gtn: Prisma.$GtnPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      gtnId: number
+      productId: number | null
+      productName: string
+      sentQty: number
+      /**
+       * Filled in on receiving: good (to the shelf) + damaged (kept aside) + missing = sent.
+       */
+      receivedQty: number | null
+      damagedQty: number
+      missingQty: number
+      unitCost: number | null
+    }, ExtArgs["result"]["gtnItem"]>
+    composites: {}
+  }
+
+  type GtnItemGetPayload<S extends boolean | null | undefined | GtnItemDefaultArgs> = $Result.GetResult<Prisma.$GtnItemPayload, S>
+
+  type GtnItemCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<GtnItemFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: GtnItemCountAggregateInputType | true
+    }
+
+  export interface GtnItemDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['GtnItem'], meta: { name: 'GtnItem' } }
+    /**
+     * Find zero or one GtnItem that matches the filter.
+     * @param {GtnItemFindUniqueArgs} args - Arguments to find a GtnItem
+     * @example
+     * // Get one GtnItem
+     * const gtnItem = await prisma.gtnItem.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends GtnItemFindUniqueArgs>(args: SelectSubset<T, GtnItemFindUniqueArgs<ExtArgs>>): Prisma__GtnItemClient<$Result.GetResult<Prisma.$GtnItemPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one GtnItem that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {GtnItemFindUniqueOrThrowArgs} args - Arguments to find a GtnItem
+     * @example
+     * // Get one GtnItem
+     * const gtnItem = await prisma.gtnItem.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends GtnItemFindUniqueOrThrowArgs>(args: SelectSubset<T, GtnItemFindUniqueOrThrowArgs<ExtArgs>>): Prisma__GtnItemClient<$Result.GetResult<Prisma.$GtnItemPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first GtnItem that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GtnItemFindFirstArgs} args - Arguments to find a GtnItem
+     * @example
+     * // Get one GtnItem
+     * const gtnItem = await prisma.gtnItem.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends GtnItemFindFirstArgs>(args?: SelectSubset<T, GtnItemFindFirstArgs<ExtArgs>>): Prisma__GtnItemClient<$Result.GetResult<Prisma.$GtnItemPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first GtnItem that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GtnItemFindFirstOrThrowArgs} args - Arguments to find a GtnItem
+     * @example
+     * // Get one GtnItem
+     * const gtnItem = await prisma.gtnItem.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends GtnItemFindFirstOrThrowArgs>(args?: SelectSubset<T, GtnItemFindFirstOrThrowArgs<ExtArgs>>): Prisma__GtnItemClient<$Result.GetResult<Prisma.$GtnItemPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more GtnItems that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GtnItemFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all GtnItems
+     * const gtnItems = await prisma.gtnItem.findMany()
+     * 
+     * // Get first 10 GtnItems
+     * const gtnItems = await prisma.gtnItem.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const gtnItemWithIdOnly = await prisma.gtnItem.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends GtnItemFindManyArgs>(args?: SelectSubset<T, GtnItemFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GtnItemPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a GtnItem.
+     * @param {GtnItemCreateArgs} args - Arguments to create a GtnItem.
+     * @example
+     * // Create one GtnItem
+     * const GtnItem = await prisma.gtnItem.create({
+     *   data: {
+     *     // ... data to create a GtnItem
+     *   }
+     * })
+     * 
+     */
+    create<T extends GtnItemCreateArgs>(args: SelectSubset<T, GtnItemCreateArgs<ExtArgs>>): Prisma__GtnItemClient<$Result.GetResult<Prisma.$GtnItemPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many GtnItems.
+     * @param {GtnItemCreateManyArgs} args - Arguments to create many GtnItems.
+     * @example
+     * // Create many GtnItems
+     * const gtnItem = await prisma.gtnItem.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends GtnItemCreateManyArgs>(args?: SelectSubset<T, GtnItemCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many GtnItems and returns the data saved in the database.
+     * @param {GtnItemCreateManyAndReturnArgs} args - Arguments to create many GtnItems.
+     * @example
+     * // Create many GtnItems
+     * const gtnItem = await prisma.gtnItem.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many GtnItems and only return the `id`
+     * const gtnItemWithIdOnly = await prisma.gtnItem.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends GtnItemCreateManyAndReturnArgs>(args?: SelectSubset<T, GtnItemCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GtnItemPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a GtnItem.
+     * @param {GtnItemDeleteArgs} args - Arguments to delete one GtnItem.
+     * @example
+     * // Delete one GtnItem
+     * const GtnItem = await prisma.gtnItem.delete({
+     *   where: {
+     *     // ... filter to delete one GtnItem
+     *   }
+     * })
+     * 
+     */
+    delete<T extends GtnItemDeleteArgs>(args: SelectSubset<T, GtnItemDeleteArgs<ExtArgs>>): Prisma__GtnItemClient<$Result.GetResult<Prisma.$GtnItemPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one GtnItem.
+     * @param {GtnItemUpdateArgs} args - Arguments to update one GtnItem.
+     * @example
+     * // Update one GtnItem
+     * const gtnItem = await prisma.gtnItem.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends GtnItemUpdateArgs>(args: SelectSubset<T, GtnItemUpdateArgs<ExtArgs>>): Prisma__GtnItemClient<$Result.GetResult<Prisma.$GtnItemPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more GtnItems.
+     * @param {GtnItemDeleteManyArgs} args - Arguments to filter GtnItems to delete.
+     * @example
+     * // Delete a few GtnItems
+     * const { count } = await prisma.gtnItem.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends GtnItemDeleteManyArgs>(args?: SelectSubset<T, GtnItemDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GtnItems.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GtnItemUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many GtnItems
+     * const gtnItem = await prisma.gtnItem.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends GtnItemUpdateManyArgs>(args: SelectSubset<T, GtnItemUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one GtnItem.
+     * @param {GtnItemUpsertArgs} args - Arguments to update or create a GtnItem.
+     * @example
+     * // Update or create a GtnItem
+     * const gtnItem = await prisma.gtnItem.upsert({
+     *   create: {
+     *     // ... data to create a GtnItem
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the GtnItem we want to update
+     *   }
+     * })
+     */
+    upsert<T extends GtnItemUpsertArgs>(args: SelectSubset<T, GtnItemUpsertArgs<ExtArgs>>): Prisma__GtnItemClient<$Result.GetResult<Prisma.$GtnItemPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of GtnItems.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GtnItemCountArgs} args - Arguments to filter GtnItems to count.
+     * @example
+     * // Count the number of GtnItems
+     * const count = await prisma.gtnItem.count({
+     *   where: {
+     *     // ... the filter for the GtnItems we want to count
+     *   }
+     * })
+    **/
+    count<T extends GtnItemCountArgs>(
+      args?: Subset<T, GtnItemCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GtnItemCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a GtnItem.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GtnItemAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GtnItemAggregateArgs>(args: Subset<T, GtnItemAggregateArgs>): Prisma.PrismaPromise<GetGtnItemAggregateType<T>>
+
+    /**
+     * Group by GtnItem.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GtnItemGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends GtnItemGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: GtnItemGroupByArgs['orderBy'] }
+        : { orderBy?: GtnItemGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, GtnItemGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGtnItemGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the GtnItem model
+   */
+  readonly fields: GtnItemFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for GtnItem.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__GtnItemClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    gtn<T extends GtnDefaultArgs<ExtArgs> = {}>(args?: Subset<T, GtnDefaultArgs<ExtArgs>>): Prisma__GtnClient<$Result.GetResult<Prisma.$GtnPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the GtnItem model
+   */ 
+  interface GtnItemFieldRefs {
+    readonly id: FieldRef<"GtnItem", 'Int'>
+    readonly gtnId: FieldRef<"GtnItem", 'Int'>
+    readonly productId: FieldRef<"GtnItem", 'Int'>
+    readonly productName: FieldRef<"GtnItem", 'String'>
+    readonly sentQty: FieldRef<"GtnItem", 'Int'>
+    readonly receivedQty: FieldRef<"GtnItem", 'Int'>
+    readonly damagedQty: FieldRef<"GtnItem", 'Int'>
+    readonly missingQty: FieldRef<"GtnItem", 'Int'>
+    readonly unitCost: FieldRef<"GtnItem", 'Float'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * GtnItem findUnique
+   */
+  export type GtnItemFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GtnItem
+     */
+    select?: GtnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnItemInclude<ExtArgs> | null
+    /**
+     * Filter, which GtnItem to fetch.
+     */
+    where: GtnItemWhereUniqueInput
+  }
+
+  /**
+   * GtnItem findUniqueOrThrow
+   */
+  export type GtnItemFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GtnItem
+     */
+    select?: GtnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnItemInclude<ExtArgs> | null
+    /**
+     * Filter, which GtnItem to fetch.
+     */
+    where: GtnItemWhereUniqueInput
+  }
+
+  /**
+   * GtnItem findFirst
+   */
+  export type GtnItemFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GtnItem
+     */
+    select?: GtnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnItemInclude<ExtArgs> | null
+    /**
+     * Filter, which GtnItem to fetch.
+     */
+    where?: GtnItemWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GtnItems to fetch.
+     */
+    orderBy?: GtnItemOrderByWithRelationInput | GtnItemOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GtnItems.
+     */
+    cursor?: GtnItemWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GtnItems from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GtnItems.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GtnItems.
+     */
+    distinct?: GtnItemScalarFieldEnum | GtnItemScalarFieldEnum[]
+  }
+
+  /**
+   * GtnItem findFirstOrThrow
+   */
+  export type GtnItemFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GtnItem
+     */
+    select?: GtnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnItemInclude<ExtArgs> | null
+    /**
+     * Filter, which GtnItem to fetch.
+     */
+    where?: GtnItemWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GtnItems to fetch.
+     */
+    orderBy?: GtnItemOrderByWithRelationInput | GtnItemOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GtnItems.
+     */
+    cursor?: GtnItemWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GtnItems from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GtnItems.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GtnItems.
+     */
+    distinct?: GtnItemScalarFieldEnum | GtnItemScalarFieldEnum[]
+  }
+
+  /**
+   * GtnItem findMany
+   */
+  export type GtnItemFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GtnItem
+     */
+    select?: GtnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnItemInclude<ExtArgs> | null
+    /**
+     * Filter, which GtnItems to fetch.
+     */
+    where?: GtnItemWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GtnItems to fetch.
+     */
+    orderBy?: GtnItemOrderByWithRelationInput | GtnItemOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing GtnItems.
+     */
+    cursor?: GtnItemWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GtnItems from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GtnItems.
+     */
+    skip?: number
+    distinct?: GtnItemScalarFieldEnum | GtnItemScalarFieldEnum[]
+  }
+
+  /**
+   * GtnItem create
+   */
+  export type GtnItemCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GtnItem
+     */
+    select?: GtnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnItemInclude<ExtArgs> | null
+    /**
+     * The data needed to create a GtnItem.
+     */
+    data: XOR<GtnItemCreateInput, GtnItemUncheckedCreateInput>
+  }
+
+  /**
+   * GtnItem createMany
+   */
+  export type GtnItemCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many GtnItems.
+     */
+    data: GtnItemCreateManyInput | GtnItemCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GtnItem createManyAndReturn
+   */
+  export type GtnItemCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GtnItem
+     */
+    select?: GtnItemSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many GtnItems.
+     */
+    data: GtnItemCreateManyInput | GtnItemCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnItemIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * GtnItem update
+   */
+  export type GtnItemUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GtnItem
+     */
+    select?: GtnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnItemInclude<ExtArgs> | null
+    /**
+     * The data needed to update a GtnItem.
+     */
+    data: XOR<GtnItemUpdateInput, GtnItemUncheckedUpdateInput>
+    /**
+     * Choose, which GtnItem to update.
+     */
+    where: GtnItemWhereUniqueInput
+  }
+
+  /**
+   * GtnItem updateMany
+   */
+  export type GtnItemUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update GtnItems.
+     */
+    data: XOR<GtnItemUpdateManyMutationInput, GtnItemUncheckedUpdateManyInput>
+    /**
+     * Filter which GtnItems to update
+     */
+    where?: GtnItemWhereInput
+  }
+
+  /**
+   * GtnItem upsert
+   */
+  export type GtnItemUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GtnItem
+     */
+    select?: GtnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnItemInclude<ExtArgs> | null
+    /**
+     * The filter to search for the GtnItem to update in case it exists.
+     */
+    where: GtnItemWhereUniqueInput
+    /**
+     * In case the GtnItem found by the `where` argument doesn't exist, create a new GtnItem with this data.
+     */
+    create: XOR<GtnItemCreateInput, GtnItemUncheckedCreateInput>
+    /**
+     * In case the GtnItem was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<GtnItemUpdateInput, GtnItemUncheckedUpdateInput>
+  }
+
+  /**
+   * GtnItem delete
+   */
+  export type GtnItemDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GtnItem
+     */
+    select?: GtnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnItemInclude<ExtArgs> | null
+    /**
+     * Filter which GtnItem to delete.
+     */
+    where: GtnItemWhereUniqueInput
+  }
+
+  /**
+   * GtnItem deleteMany
+   */
+  export type GtnItemDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GtnItems to delete
+     */
+    where?: GtnItemWhereInput
+  }
+
+  /**
+   * GtnItem without action
+   */
+  export type GtnItemDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GtnItem
+     */
+    select?: GtnItemSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GtnItemInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -40712,6 +48196,8 @@ export namespace Prisma {
 
   export const PosAdminScalarFieldEnum: {
     id: 'id',
+    branchId: 'branchId',
+    activeBranchId: 'activeBranchId',
     name: 'name',
     email: 'email',
     passwordHash: 'passwordHash',
@@ -40727,6 +48213,7 @@ export namespace Prisma {
 
   export const PosCounterSaleScalarFieldEnum: {
     id: 'id',
+    branchId: 'branchId',
     invoiceGroupCode: 'invoiceGroupCode',
     totalAmount: 'totalAmount',
     emptyDeduction: 'emptyDeduction',
@@ -40811,6 +48298,7 @@ export namespace Prisma {
     sellingPrice: 'sellingPrice',
     emptyBottlePrice: 'emptyBottlePrice',
     emptyBottlesOnHand: 'emptyBottlesOnHand',
+    isHardLiquor: 'isHardLiquor',
     damagedQuantity: 'damagedQuantity',
     description: 'description',
     lastSoldAt: 'lastSoldAt',
@@ -40890,6 +48378,7 @@ export namespace Prisma {
     quantity: 'quantity',
     emptiesReturned: 'emptiesReturned',
     emptyDeduction: 'emptyDeduction',
+    isHardLiquor: 'isHardLiquor',
     billDiscount: 'billDiscount',
     purchasedAt: 'purchasedAt'
   };
@@ -41090,6 +48579,7 @@ export namespace Prisma {
 
   export const ActivityLogScalarFieldEnum: {
     id: 'id',
+    branchId: 'branchId',
     actorId: 'actorId',
     actorName: 'actorName',
     actorEmail: 'actorEmail',
@@ -41120,6 +48610,7 @@ export namespace Prisma {
 
   export const PosShiftScalarFieldEnum: {
     id: 'id',
+    branchId: 'branchId',
     shiftNo: 'shiftNo',
     status: 'status',
     openedById: 'openedById',
@@ -41147,6 +48638,7 @@ export namespace Prisma {
 
   export const PosCashEntryScalarFieldEnum: {
     id: 'id',
+    branchId: 'branchId',
     entryNo: 'entryNo',
     direction: 'direction',
     category: 'category',
@@ -41175,6 +48667,7 @@ export namespace Prisma {
 
   export const InventoryMovementScalarFieldEnum: {
     id: 'id',
+    branchId: 'branchId',
     productId: 'productId',
     kind: 'kind',
     type: 'type',
@@ -41190,6 +48683,7 @@ export namespace Prisma {
 
   export const PurchaseOrderScalarFieldEnum: {
     id: 'id',
+    branchId: 'branchId',
     poNumber: 'poNumber',
     supplierId: 'supplierId',
     status: 'status',
@@ -41261,6 +48755,7 @@ export namespace Prisma {
 
   export const PosReturnScalarFieldEnum: {
     id: 'id',
+    branchId: 'branchId',
     returnNo: 'returnNo',
     type: 'type',
     productId: 'productId',
@@ -41286,6 +48781,113 @@ export namespace Prisma {
   };
 
   export type PosReturnScalarFieldEnum = (typeof PosReturnScalarFieldEnum)[keyof typeof PosReturnScalarFieldEnum]
+
+
+  export const BranchScalarFieldEnum: {
+    id: 'id',
+    code: 'code',
+    name: 'name',
+    address: 'address',
+    phone: 'phone',
+    isMain: 'isMain',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type BranchScalarFieldEnum = (typeof BranchScalarFieldEnum)[keyof typeof BranchScalarFieldEnum]
+
+
+  export const BranchStockScalarFieldEnum: {
+    id: 'id',
+    branchId: 'branchId',
+    productId: 'productId',
+    quantity: 'quantity',
+    damagedQuantity: 'damagedQuantity',
+    emptyBottlesOnHand: 'emptyBottlesOnHand',
+    updatedAt: 'updatedAt'
+  };
+
+  export type BranchStockScalarFieldEnum = (typeof BranchStockScalarFieldEnum)[keyof typeof BranchStockScalarFieldEnum]
+
+
+  export const GrnScalarFieldEnum: {
+    id: 'id',
+    grnNo: 'grnNo',
+    branchId: 'branchId',
+    supplierId: 'supplierId',
+    supplierName: 'supplierName',
+    purchaseOrderId: 'purchaseOrderId',
+    poNumber: 'poNumber',
+    supplierInvoiceNo: 'supplierInvoiceNo',
+    invoiceDate: 'invoiceDate',
+    invoiceTotal: 'invoiceTotal',
+    notes: 'notes',
+    acceptedUnits: 'acceptedUnits',
+    rejectedUnits: 'rejectedUnits',
+    totalCost: 'totalCost',
+    shiftId: 'shiftId',
+    receivedById: 'receivedById',
+    createdAt: 'createdAt'
+  };
+
+  export type GrnScalarFieldEnum = (typeof GrnScalarFieldEnum)[keyof typeof GrnScalarFieldEnum]
+
+
+  export const GrnItemScalarFieldEnum: {
+    id: 'id',
+    grnId: 'grnId',
+    productId: 'productId',
+    description: 'description',
+    purchaseOrderItemId: 'purchaseOrderItemId',
+    orderedQty: 'orderedQty',
+    deliveredQty: 'deliveredQty',
+    acceptedQty: 'acceptedQty',
+    rejectedQty: 'rejectedQty',
+    rejectReason: 'rejectReason',
+    unitCost: 'unitCost',
+    lineTotal: 'lineTotal'
+  };
+
+  export type GrnItemScalarFieldEnum = (typeof GrnItemScalarFieldEnum)[keyof typeof GrnItemScalarFieldEnum]
+
+
+  export const GtnScalarFieldEnum: {
+    id: 'id',
+    gtnNo: 'gtnNo',
+    fromBranchId: 'fromBranchId',
+    toBranchId: 'toBranchId',
+    status: 'status',
+    notes: 'notes',
+    carriedBy: 'carriedBy',
+    sentById: 'sentById',
+    sentAt: 'sentAt',
+    sentShiftId: 'sentShiftId',
+    receivedById: 'receivedById',
+    receivedAt: 'receivedAt',
+    receivedShiftId: 'receivedShiftId',
+    receiveNote: 'receiveNote',
+    cancelledById: 'cancelledById',
+    cancelledAt: 'cancelledAt',
+    cancelReason: 'cancelReason'
+  };
+
+  export type GtnScalarFieldEnum = (typeof GtnScalarFieldEnum)[keyof typeof GtnScalarFieldEnum]
+
+
+  export const GtnItemScalarFieldEnum: {
+    id: 'id',
+    gtnId: 'gtnId',
+    productId: 'productId',
+    productName: 'productName',
+    sentQty: 'sentQty',
+    receivedQty: 'receivedQty',
+    damagedQty: 'damagedQty',
+    missingQty: 'missingQty',
+    unitCost: 'unitCost'
+  };
+
+  export type GtnItemScalarFieldEnum = (typeof GtnItemScalarFieldEnum)[keyof typeof GtnItemScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -41712,6 +49314,8 @@ export namespace Prisma {
     OR?: PosAdminWhereInput[]
     NOT?: PosAdminWhereInput | PosAdminWhereInput[]
     id?: IntFilter<"PosAdmin"> | number
+    branchId?: IntNullableFilter<"PosAdmin"> | number | null
+    activeBranchId?: IntNullableFilter<"PosAdmin"> | number | null
     name?: StringFilter<"PosAdmin"> | string
     email?: StringFilter<"PosAdmin"> | string
     passwordHash?: StringFilter<"PosAdmin"> | string
@@ -41725,6 +49329,8 @@ export namespace Prisma {
 
   export type PosAdminOrderByWithRelationInput = {
     id?: SortOrder
+    branchId?: SortOrderInput | SortOrder
+    activeBranchId?: SortOrderInput | SortOrder
     name?: SortOrder
     email?: SortOrder
     passwordHash?: SortOrder
@@ -41742,6 +49348,8 @@ export namespace Prisma {
     AND?: PosAdminWhereInput | PosAdminWhereInput[]
     OR?: PosAdminWhereInput[]
     NOT?: PosAdminWhereInput | PosAdminWhereInput[]
+    branchId?: IntNullableFilter<"PosAdmin"> | number | null
+    activeBranchId?: IntNullableFilter<"PosAdmin"> | number | null
     name?: StringFilter<"PosAdmin"> | string
     passwordHash?: StringFilter<"PosAdmin"> | string
     role?: EnumPosAdminRoleFilter<"PosAdmin"> | $Enums.PosAdminRole
@@ -41754,6 +49362,8 @@ export namespace Prisma {
 
   export type PosAdminOrderByWithAggregationInput = {
     id?: SortOrder
+    branchId?: SortOrderInput | SortOrder
+    activeBranchId?: SortOrderInput | SortOrder
     name?: SortOrder
     email?: SortOrder
     passwordHash?: SortOrder
@@ -41774,6 +49384,8 @@ export namespace Prisma {
     OR?: PosAdminScalarWhereWithAggregatesInput[]
     NOT?: PosAdminScalarWhereWithAggregatesInput | PosAdminScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"PosAdmin"> | number
+    branchId?: IntNullableWithAggregatesFilter<"PosAdmin"> | number | null
+    activeBranchId?: IntNullableWithAggregatesFilter<"PosAdmin"> | number | null
     name?: StringWithAggregatesFilter<"PosAdmin"> | string
     email?: StringWithAggregatesFilter<"PosAdmin"> | string
     passwordHash?: StringWithAggregatesFilter<"PosAdmin"> | string
@@ -41789,6 +49401,7 @@ export namespace Prisma {
     OR?: PosCounterSaleWhereInput[]
     NOT?: PosCounterSaleWhereInput | PosCounterSaleWhereInput[]
     id?: IntFilter<"PosCounterSale"> | number
+    branchId?: IntNullableFilter<"PosCounterSale"> | number | null
     invoiceGroupCode?: StringFilter<"PosCounterSale"> | string
     totalAmount?: FloatFilter<"PosCounterSale"> | number
     emptyDeduction?: FloatFilter<"PosCounterSale"> | number
@@ -41820,6 +49433,7 @@ export namespace Prisma {
 
   export type PosCounterSaleOrderByWithRelationInput = {
     id?: SortOrder
+    branchId?: SortOrderInput | SortOrder
     invoiceGroupCode?: SortOrder
     totalAmount?: SortOrder
     emptyDeduction?: SortOrder
@@ -41855,6 +49469,7 @@ export namespace Prisma {
     AND?: PosCounterSaleWhereInput | PosCounterSaleWhereInput[]
     OR?: PosCounterSaleWhereInput[]
     NOT?: PosCounterSaleWhereInput | PosCounterSaleWhereInput[]
+    branchId?: IntNullableFilter<"PosCounterSale"> | number | null
     totalAmount?: FloatFilter<"PosCounterSale"> | number
     emptyDeduction?: FloatFilter<"PosCounterSale"> | number
     emptiesReturned?: IntFilter<"PosCounterSale"> | number
@@ -41885,6 +49500,7 @@ export namespace Prisma {
 
   export type PosCounterSaleOrderByWithAggregationInput = {
     id?: SortOrder
+    branchId?: SortOrderInput | SortOrder
     invoiceGroupCode?: SortOrder
     totalAmount?: SortOrder
     emptyDeduction?: SortOrder
@@ -41921,6 +49537,7 @@ export namespace Prisma {
     OR?: PosCounterSaleScalarWhereWithAggregatesInput[]
     NOT?: PosCounterSaleScalarWhereWithAggregatesInput | PosCounterSaleScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"PosCounterSale"> | number
+    branchId?: IntNullableWithAggregatesFilter<"PosCounterSale"> | number | null
     invoiceGroupCode?: StringWithAggregatesFilter<"PosCounterSale"> | string
     totalAmount?: FloatWithAggregatesFilter<"PosCounterSale"> | number
     emptyDeduction?: FloatWithAggregatesFilter<"PosCounterSale"> | number
@@ -42162,6 +49779,7 @@ export namespace Prisma {
     sellingPrice?: FloatNullableFilter<"InventoryProduct"> | number | null
     emptyBottlePrice?: FloatNullableFilter<"InventoryProduct"> | number | null
     emptyBottlesOnHand?: IntFilter<"InventoryProduct"> | number
+    isHardLiquor?: BoolFilter<"InventoryProduct"> | boolean
     damagedQuantity?: IntFilter<"InventoryProduct"> | number
     description?: StringNullableFilter<"InventoryProduct"> | string | null
     lastSoldAt?: DateTimeNullableFilter<"InventoryProduct"> | Date | string | null
@@ -42175,6 +49793,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemListRelationFilter
     returns?: PosReturnListRelationFilter
     customerPurchases?: PosCustomerPurchaseListRelationFilter
+    branchStock?: BranchStockListRelationFilter
   }
 
   export type InventoryProductOrderByWithRelationInput = {
@@ -42195,6 +49814,7 @@ export namespace Prisma {
     sellingPrice?: SortOrderInput | SortOrder
     emptyBottlePrice?: SortOrderInput | SortOrder
     emptyBottlesOnHand?: SortOrder
+    isHardLiquor?: SortOrder
     damagedQuantity?: SortOrder
     description?: SortOrderInput | SortOrder
     lastSoldAt?: SortOrderInput | SortOrder
@@ -42208,6 +49828,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemOrderByRelationAggregateInput
     returns?: PosReturnOrderByRelationAggregateInput
     customerPurchases?: PosCustomerPurchaseOrderByRelationAggregateInput
+    branchStock?: BranchStockOrderByRelationAggregateInput
   }
 
   export type InventoryProductWhereUniqueInput = Prisma.AtLeast<{
@@ -42231,6 +49852,7 @@ export namespace Prisma {
     sellingPrice?: FloatNullableFilter<"InventoryProduct"> | number | null
     emptyBottlePrice?: FloatNullableFilter<"InventoryProduct"> | number | null
     emptyBottlesOnHand?: IntFilter<"InventoryProduct"> | number
+    isHardLiquor?: BoolFilter<"InventoryProduct"> | boolean
     damagedQuantity?: IntFilter<"InventoryProduct"> | number
     description?: StringNullableFilter<"InventoryProduct"> | string | null
     lastSoldAt?: DateTimeNullableFilter<"InventoryProduct"> | Date | string | null
@@ -42244,6 +49866,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemListRelationFilter
     returns?: PosReturnListRelationFilter
     customerPurchases?: PosCustomerPurchaseListRelationFilter
+    branchStock?: BranchStockListRelationFilter
   }, "id" | "displayId">
 
   export type InventoryProductOrderByWithAggregationInput = {
@@ -42264,6 +49887,7 @@ export namespace Prisma {
     sellingPrice?: SortOrderInput | SortOrder
     emptyBottlePrice?: SortOrderInput | SortOrder
     emptyBottlesOnHand?: SortOrder
+    isHardLiquor?: SortOrder
     damagedQuantity?: SortOrder
     description?: SortOrderInput | SortOrder
     lastSoldAt?: SortOrderInput | SortOrder
@@ -42297,6 +49921,7 @@ export namespace Prisma {
     sellingPrice?: FloatNullableWithAggregatesFilter<"InventoryProduct"> | number | null
     emptyBottlePrice?: FloatNullableWithAggregatesFilter<"InventoryProduct"> | number | null
     emptyBottlesOnHand?: IntWithAggregatesFilter<"InventoryProduct"> | number
+    isHardLiquor?: BoolWithAggregatesFilter<"InventoryProduct"> | boolean
     damagedQuantity?: IntWithAggregatesFilter<"InventoryProduct"> | number
     description?: StringNullableWithAggregatesFilter<"InventoryProduct"> | string | null
     lastSoldAt?: DateTimeNullableWithAggregatesFilter<"InventoryProduct"> | Date | string | null
@@ -42571,6 +50196,7 @@ export namespace Prisma {
     quantity?: IntFilter<"PosCustomerPurchase"> | number
     emptiesReturned?: IntFilter<"PosCustomerPurchase"> | number
     emptyDeduction?: FloatFilter<"PosCustomerPurchase"> | number
+    isHardLiquor?: BoolFilter<"PosCustomerPurchase"> | boolean
     billDiscount?: FloatFilter<"PosCustomerPurchase"> | number
     purchasedAt?: DateTimeFilter<"PosCustomerPurchase"> | Date | string
     customer?: XOR<PosCustomerRelationFilter, PosCustomerWhereInput>
@@ -42604,6 +50230,7 @@ export namespace Prisma {
     quantity?: SortOrder
     emptiesReturned?: SortOrder
     emptyDeduction?: SortOrder
+    isHardLiquor?: SortOrder
     billDiscount?: SortOrder
     purchasedAt?: SortOrder
     customer?: PosCustomerOrderByWithRelationInput
@@ -42640,6 +50267,7 @@ export namespace Prisma {
     quantity?: IntFilter<"PosCustomerPurchase"> | number
     emptiesReturned?: IntFilter<"PosCustomerPurchase"> | number
     emptyDeduction?: FloatFilter<"PosCustomerPurchase"> | number
+    isHardLiquor?: BoolFilter<"PosCustomerPurchase"> | boolean
     billDiscount?: FloatFilter<"PosCustomerPurchase"> | number
     purchasedAt?: DateTimeFilter<"PosCustomerPurchase"> | Date | string
     customer?: XOR<PosCustomerRelationFilter, PosCustomerWhereInput>
@@ -42673,6 +50301,7 @@ export namespace Prisma {
     quantity?: SortOrder
     emptiesReturned?: SortOrder
     emptyDeduction?: SortOrder
+    isHardLiquor?: SortOrder
     billDiscount?: SortOrder
     purchasedAt?: SortOrder
     _count?: PosCustomerPurchaseCountOrderByAggregateInput
@@ -42709,6 +50338,7 @@ export namespace Prisma {
     quantity?: IntWithAggregatesFilter<"PosCustomerPurchase"> | number
     emptiesReturned?: IntWithAggregatesFilter<"PosCustomerPurchase"> | number
     emptyDeduction?: FloatWithAggregatesFilter<"PosCustomerPurchase"> | number
+    isHardLiquor?: BoolWithAggregatesFilter<"PosCustomerPurchase"> | boolean
     billDiscount?: FloatWithAggregatesFilter<"PosCustomerPurchase"> | number
     purchasedAt?: DateTimeWithAggregatesFilter<"PosCustomerPurchase"> | Date | string
   }
@@ -43761,6 +51391,7 @@ export namespace Prisma {
     OR?: ActivityLogWhereInput[]
     NOT?: ActivityLogWhereInput | ActivityLogWhereInput[]
     id?: IntFilter<"ActivityLog"> | number
+    branchId?: IntNullableFilter<"ActivityLog"> | number | null
     actorId?: IntNullableFilter<"ActivityLog"> | number | null
     actorName?: StringNullableFilter<"ActivityLog"> | string | null
     actorEmail?: StringNullableFilter<"ActivityLog"> | string | null
@@ -43778,6 +51409,7 @@ export namespace Prisma {
 
   export type ActivityLogOrderByWithRelationInput = {
     id?: SortOrder
+    branchId?: SortOrderInput | SortOrder
     actorId?: SortOrderInput | SortOrder
     actorName?: SortOrderInput | SortOrder
     actorEmail?: SortOrderInput | SortOrder
@@ -43798,6 +51430,7 @@ export namespace Prisma {
     AND?: ActivityLogWhereInput | ActivityLogWhereInput[]
     OR?: ActivityLogWhereInput[]
     NOT?: ActivityLogWhereInput | ActivityLogWhereInput[]
+    branchId?: IntNullableFilter<"ActivityLog"> | number | null
     actorId?: IntNullableFilter<"ActivityLog"> | number | null
     actorName?: StringNullableFilter<"ActivityLog"> | string | null
     actorEmail?: StringNullableFilter<"ActivityLog"> | string | null
@@ -43815,6 +51448,7 @@ export namespace Prisma {
 
   export type ActivityLogOrderByWithAggregationInput = {
     id?: SortOrder
+    branchId?: SortOrderInput | SortOrder
     actorId?: SortOrderInput | SortOrder
     actorName?: SortOrderInput | SortOrder
     actorEmail?: SortOrderInput | SortOrder
@@ -43840,6 +51474,7 @@ export namespace Prisma {
     OR?: ActivityLogScalarWhereWithAggregatesInput[]
     NOT?: ActivityLogScalarWhereWithAggregatesInput | ActivityLogScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"ActivityLog"> | number
+    branchId?: IntNullableWithAggregatesFilter<"ActivityLog"> | number | null
     actorId?: IntNullableWithAggregatesFilter<"ActivityLog"> | number | null
     actorName?: StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
     actorEmail?: StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
@@ -43909,6 +51544,7 @@ export namespace Prisma {
     OR?: PosShiftWhereInput[]
     NOT?: PosShiftWhereInput | PosShiftWhereInput[]
     id?: IntFilter<"PosShift"> | number
+    branchId?: IntNullableFilter<"PosShift"> | number | null
     shiftNo?: StringFilter<"PosShift"> | string
     status?: StringFilter<"PosShift"> | string
     openedById?: IntFilter<"PosShift"> | number
@@ -43937,6 +51573,7 @@ export namespace Prisma {
 
   export type PosShiftOrderByWithRelationInput = {
     id?: SortOrder
+    branchId?: SortOrderInput | SortOrder
     shiftNo?: SortOrder
     status?: SortOrder
     openedById?: SortOrder
@@ -43969,6 +51606,7 @@ export namespace Prisma {
     AND?: PosShiftWhereInput | PosShiftWhereInput[]
     OR?: PosShiftWhereInput[]
     NOT?: PosShiftWhereInput | PosShiftWhereInput[]
+    branchId?: IntNullableFilter<"PosShift"> | number | null
     status?: StringFilter<"PosShift"> | string
     openedById?: IntFilter<"PosShift"> | number
     openedAt?: DateTimeFilter<"PosShift"> | Date | string
@@ -43996,6 +51634,7 @@ export namespace Prisma {
 
   export type PosShiftOrderByWithAggregationInput = {
     id?: SortOrder
+    branchId?: SortOrderInput | SortOrder
     shiftNo?: SortOrder
     status?: SortOrder
     openedById?: SortOrder
@@ -44028,6 +51667,7 @@ export namespace Prisma {
     OR?: PosShiftScalarWhereWithAggregatesInput[]
     NOT?: PosShiftScalarWhereWithAggregatesInput | PosShiftScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"PosShift"> | number
+    branchId?: IntNullableWithAggregatesFilter<"PosShift"> | number | null
     shiftNo?: StringWithAggregatesFilter<"PosShift"> | string
     status?: StringWithAggregatesFilter<"PosShift"> | string
     openedById?: IntWithAggregatesFilter<"PosShift"> | number
@@ -44055,6 +51695,7 @@ export namespace Prisma {
     OR?: PosCashEntryWhereInput[]
     NOT?: PosCashEntryWhereInput | PosCashEntryWhereInput[]
     id?: IntFilter<"PosCashEntry"> | number
+    branchId?: IntNullableFilter<"PosCashEntry"> | number | null
     entryNo?: StringFilter<"PosCashEntry"> | string
     direction?: StringFilter<"PosCashEntry"> | string
     category?: StringFilter<"PosCashEntry"> | string
@@ -44081,6 +51722,7 @@ export namespace Prisma {
 
   export type PosCashEntryOrderByWithRelationInput = {
     id?: SortOrder
+    branchId?: SortOrderInput | SortOrder
     entryNo?: SortOrder
     direction?: SortOrder
     category?: SortOrder
@@ -44111,6 +51753,7 @@ export namespace Prisma {
     AND?: PosCashEntryWhereInput | PosCashEntryWhereInput[]
     OR?: PosCashEntryWhereInput[]
     NOT?: PosCashEntryWhereInput | PosCashEntryWhereInput[]
+    branchId?: IntNullableFilter<"PosCashEntry"> | number | null
     direction?: StringFilter<"PosCashEntry"> | string
     category?: StringFilter<"PosCashEntry"> | string
     amount?: FloatFilter<"PosCashEntry"> | number
@@ -44136,6 +51779,7 @@ export namespace Prisma {
 
   export type PosCashEntryOrderByWithAggregationInput = {
     id?: SortOrder
+    branchId?: SortOrderInput | SortOrder
     entryNo?: SortOrder
     direction?: SortOrder
     category?: SortOrder
@@ -44169,6 +51813,7 @@ export namespace Prisma {
     OR?: PosCashEntryScalarWhereWithAggregatesInput[]
     NOT?: PosCashEntryScalarWhereWithAggregatesInput | PosCashEntryScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"PosCashEntry"> | number
+    branchId?: IntNullableWithAggregatesFilter<"PosCashEntry"> | number | null
     entryNo?: StringWithAggregatesFilter<"PosCashEntry"> | string
     direction?: StringWithAggregatesFilter<"PosCashEntry"> | string
     category?: StringWithAggregatesFilter<"PosCashEntry"> | string
@@ -44197,6 +51842,7 @@ export namespace Prisma {
     OR?: InventoryMovementWhereInput[]
     NOT?: InventoryMovementWhereInput | InventoryMovementWhereInput[]
     id?: IntFilter<"InventoryMovement"> | number
+    branchId?: IntNullableFilter<"InventoryMovement"> | number | null
     productId?: IntFilter<"InventoryMovement"> | number
     kind?: StringFilter<"InventoryMovement"> | string
     type?: StringFilter<"InventoryMovement"> | string
@@ -44210,6 +51856,7 @@ export namespace Prisma {
 
   export type InventoryMovementOrderByWithRelationInput = {
     id?: SortOrder
+    branchId?: SortOrderInput | SortOrder
     productId?: SortOrder
     kind?: SortOrder
     type?: SortOrder
@@ -44226,6 +51873,7 @@ export namespace Prisma {
     AND?: InventoryMovementWhereInput | InventoryMovementWhereInput[]
     OR?: InventoryMovementWhereInput[]
     NOT?: InventoryMovementWhereInput | InventoryMovementWhereInput[]
+    branchId?: IntNullableFilter<"InventoryMovement"> | number | null
     productId?: IntFilter<"InventoryMovement"> | number
     kind?: StringFilter<"InventoryMovement"> | string
     type?: StringFilter<"InventoryMovement"> | string
@@ -44239,6 +51887,7 @@ export namespace Prisma {
 
   export type InventoryMovementOrderByWithAggregationInput = {
     id?: SortOrder
+    branchId?: SortOrderInput | SortOrder
     productId?: SortOrder
     kind?: SortOrder
     type?: SortOrder
@@ -44259,6 +51908,7 @@ export namespace Prisma {
     OR?: InventoryMovementScalarWhereWithAggregatesInput[]
     NOT?: InventoryMovementScalarWhereWithAggregatesInput | InventoryMovementScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"InventoryMovement"> | number
+    branchId?: IntNullableWithAggregatesFilter<"InventoryMovement"> | number | null
     productId?: IntWithAggregatesFilter<"InventoryMovement"> | number
     kind?: StringWithAggregatesFilter<"InventoryMovement"> | string
     type?: StringWithAggregatesFilter<"InventoryMovement"> | string
@@ -44274,6 +51924,7 @@ export namespace Prisma {
     OR?: PurchaseOrderWhereInput[]
     NOT?: PurchaseOrderWhereInput | PurchaseOrderWhereInput[]
     id?: IntFilter<"PurchaseOrder"> | number
+    branchId?: IntNullableFilter<"PurchaseOrder"> | number | null
     poNumber?: StringFilter<"PurchaseOrder"> | string
     supplierId?: IntFilter<"PurchaseOrder"> | number
     status?: StringFilter<"PurchaseOrder"> | string
@@ -44298,6 +51949,7 @@ export namespace Prisma {
 
   export type PurchaseOrderOrderByWithRelationInput = {
     id?: SortOrder
+    branchId?: SortOrderInput | SortOrder
     poNumber?: SortOrder
     supplierId?: SortOrder
     status?: SortOrder
@@ -44326,6 +51978,7 @@ export namespace Prisma {
     AND?: PurchaseOrderWhereInput | PurchaseOrderWhereInput[]
     OR?: PurchaseOrderWhereInput[]
     NOT?: PurchaseOrderWhereInput | PurchaseOrderWhereInput[]
+    branchId?: IntNullableFilter<"PurchaseOrder"> | number | null
     supplierId?: IntFilter<"PurchaseOrder"> | number
     status?: StringFilter<"PurchaseOrder"> | string
     orderDate?: DateTimeFilter<"PurchaseOrder"> | Date | string
@@ -44349,6 +52002,7 @@ export namespace Prisma {
 
   export type PurchaseOrderOrderByWithAggregationInput = {
     id?: SortOrder
+    branchId?: SortOrderInput | SortOrder
     poNumber?: SortOrder
     supplierId?: SortOrder
     status?: SortOrder
@@ -44378,6 +52032,7 @@ export namespace Prisma {
     OR?: PurchaseOrderScalarWhereWithAggregatesInput[]
     NOT?: PurchaseOrderScalarWhereWithAggregatesInput | PurchaseOrderScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"PurchaseOrder"> | number
+    branchId?: IntNullableWithAggregatesFilter<"PurchaseOrder"> | number | null
     poNumber?: StringWithAggregatesFilter<"PurchaseOrder"> | string
     supplierId?: IntWithAggregatesFilter<"PurchaseOrder"> | number
     status?: StringWithAggregatesFilter<"PurchaseOrder"> | string
@@ -44646,6 +52301,7 @@ export namespace Prisma {
     OR?: PosReturnWhereInput[]
     NOT?: PosReturnWhereInput | PosReturnWhereInput[]
     id?: IntFilter<"PosReturn"> | number
+    branchId?: IntNullableFilter<"PosReturn"> | number | null
     returnNo?: StringFilter<"PosReturn"> | string
     type?: StringFilter<"PosReturn"> | string
     productId?: IntNullableFilter<"PosReturn"> | number | null
@@ -44675,6 +52331,7 @@ export namespace Prisma {
 
   export type PosReturnOrderByWithRelationInput = {
     id?: SortOrder
+    branchId?: SortOrderInput | SortOrder
     returnNo?: SortOrder
     type?: SortOrder
     productId?: SortOrderInput | SortOrder
@@ -44707,6 +52364,7 @@ export namespace Prisma {
     AND?: PosReturnWhereInput | PosReturnWhereInput[]
     OR?: PosReturnWhereInput[]
     NOT?: PosReturnWhereInput | PosReturnWhereInput[]
+    branchId?: IntNullableFilter<"PosReturn"> | number | null
     returnNo?: StringFilter<"PosReturn"> | string
     type?: StringFilter<"PosReturn"> | string
     productId?: IntNullableFilter<"PosReturn"> | number | null
@@ -44736,6 +52394,7 @@ export namespace Prisma {
 
   export type PosReturnOrderByWithAggregationInput = {
     id?: SortOrder
+    branchId?: SortOrderInput | SortOrder
     returnNo?: SortOrder
     type?: SortOrder
     productId?: SortOrderInput | SortOrder
@@ -44770,6 +52429,7 @@ export namespace Prisma {
     OR?: PosReturnScalarWhereWithAggregatesInput[]
     NOT?: PosReturnScalarWhereWithAggregatesInput | PosReturnScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"PosReturn"> | number
+    branchId?: IntNullableWithAggregatesFilter<"PosReturn"> | number | null
     returnNo?: StringWithAggregatesFilter<"PosReturn"> | string
     type?: StringWithAggregatesFilter<"PosReturn"> | string
     productId?: IntNullableWithAggregatesFilter<"PosReturn"> | number | null
@@ -44792,6 +52452,575 @@ export namespace Prisma {
     shiftId?: IntNullableWithAggregatesFilter<"PosReturn"> | number | null
     createdById?: IntWithAggregatesFilter<"PosReturn"> | number
     createdAt?: DateTimeWithAggregatesFilter<"PosReturn"> | Date | string
+  }
+
+  export type BranchWhereInput = {
+    AND?: BranchWhereInput | BranchWhereInput[]
+    OR?: BranchWhereInput[]
+    NOT?: BranchWhereInput | BranchWhereInput[]
+    id?: IntFilter<"Branch"> | number
+    code?: StringFilter<"Branch"> | string
+    name?: StringFilter<"Branch"> | string
+    address?: StringNullableFilter<"Branch"> | string | null
+    phone?: StringNullableFilter<"Branch"> | string | null
+    isMain?: BoolFilter<"Branch"> | boolean
+    isActive?: BoolFilter<"Branch"> | boolean
+    createdAt?: DateTimeFilter<"Branch"> | Date | string
+    updatedAt?: DateTimeFilter<"Branch"> | Date | string
+    stock?: BranchStockListRelationFilter
+    grns?: GrnListRelationFilter
+    gtnsOut?: GtnListRelationFilter
+    gtnsIn?: GtnListRelationFilter
+  }
+
+  export type BranchOrderByWithRelationInput = {
+    id?: SortOrder
+    code?: SortOrder
+    name?: SortOrder
+    address?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
+    isMain?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    stock?: BranchStockOrderByRelationAggregateInput
+    grns?: GrnOrderByRelationAggregateInput
+    gtnsOut?: GtnOrderByRelationAggregateInput
+    gtnsIn?: GtnOrderByRelationAggregateInput
+  }
+
+  export type BranchWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    code?: string
+    AND?: BranchWhereInput | BranchWhereInput[]
+    OR?: BranchWhereInput[]
+    NOT?: BranchWhereInput | BranchWhereInput[]
+    name?: StringFilter<"Branch"> | string
+    address?: StringNullableFilter<"Branch"> | string | null
+    phone?: StringNullableFilter<"Branch"> | string | null
+    isMain?: BoolFilter<"Branch"> | boolean
+    isActive?: BoolFilter<"Branch"> | boolean
+    createdAt?: DateTimeFilter<"Branch"> | Date | string
+    updatedAt?: DateTimeFilter<"Branch"> | Date | string
+    stock?: BranchStockListRelationFilter
+    grns?: GrnListRelationFilter
+    gtnsOut?: GtnListRelationFilter
+    gtnsIn?: GtnListRelationFilter
+  }, "id" | "code">
+
+  export type BranchOrderByWithAggregationInput = {
+    id?: SortOrder
+    code?: SortOrder
+    name?: SortOrder
+    address?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
+    isMain?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: BranchCountOrderByAggregateInput
+    _avg?: BranchAvgOrderByAggregateInput
+    _max?: BranchMaxOrderByAggregateInput
+    _min?: BranchMinOrderByAggregateInput
+    _sum?: BranchSumOrderByAggregateInput
+  }
+
+  export type BranchScalarWhereWithAggregatesInput = {
+    AND?: BranchScalarWhereWithAggregatesInput | BranchScalarWhereWithAggregatesInput[]
+    OR?: BranchScalarWhereWithAggregatesInput[]
+    NOT?: BranchScalarWhereWithAggregatesInput | BranchScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"Branch"> | number
+    code?: StringWithAggregatesFilter<"Branch"> | string
+    name?: StringWithAggregatesFilter<"Branch"> | string
+    address?: StringNullableWithAggregatesFilter<"Branch"> | string | null
+    phone?: StringNullableWithAggregatesFilter<"Branch"> | string | null
+    isMain?: BoolWithAggregatesFilter<"Branch"> | boolean
+    isActive?: BoolWithAggregatesFilter<"Branch"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"Branch"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Branch"> | Date | string
+  }
+
+  export type BranchStockWhereInput = {
+    AND?: BranchStockWhereInput | BranchStockWhereInput[]
+    OR?: BranchStockWhereInput[]
+    NOT?: BranchStockWhereInput | BranchStockWhereInput[]
+    id?: IntFilter<"BranchStock"> | number
+    branchId?: IntFilter<"BranchStock"> | number
+    productId?: IntFilter<"BranchStock"> | number
+    quantity?: IntFilter<"BranchStock"> | number
+    damagedQuantity?: IntFilter<"BranchStock"> | number
+    emptyBottlesOnHand?: IntFilter<"BranchStock"> | number
+    updatedAt?: DateTimeFilter<"BranchStock"> | Date | string
+    branch?: XOR<BranchRelationFilter, BranchWhereInput>
+    product?: XOR<InventoryProductRelationFilter, InventoryProductWhereInput>
+  }
+
+  export type BranchStockOrderByWithRelationInput = {
+    id?: SortOrder
+    branchId?: SortOrder
+    productId?: SortOrder
+    quantity?: SortOrder
+    damagedQuantity?: SortOrder
+    emptyBottlesOnHand?: SortOrder
+    updatedAt?: SortOrder
+    branch?: BranchOrderByWithRelationInput
+    product?: InventoryProductOrderByWithRelationInput
+  }
+
+  export type BranchStockWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    branchId_productId?: BranchStockBranchIdProductIdCompoundUniqueInput
+    AND?: BranchStockWhereInput | BranchStockWhereInput[]
+    OR?: BranchStockWhereInput[]
+    NOT?: BranchStockWhereInput | BranchStockWhereInput[]
+    branchId?: IntFilter<"BranchStock"> | number
+    productId?: IntFilter<"BranchStock"> | number
+    quantity?: IntFilter<"BranchStock"> | number
+    damagedQuantity?: IntFilter<"BranchStock"> | number
+    emptyBottlesOnHand?: IntFilter<"BranchStock"> | number
+    updatedAt?: DateTimeFilter<"BranchStock"> | Date | string
+    branch?: XOR<BranchRelationFilter, BranchWhereInput>
+    product?: XOR<InventoryProductRelationFilter, InventoryProductWhereInput>
+  }, "id" | "branchId_productId">
+
+  export type BranchStockOrderByWithAggregationInput = {
+    id?: SortOrder
+    branchId?: SortOrder
+    productId?: SortOrder
+    quantity?: SortOrder
+    damagedQuantity?: SortOrder
+    emptyBottlesOnHand?: SortOrder
+    updatedAt?: SortOrder
+    _count?: BranchStockCountOrderByAggregateInput
+    _avg?: BranchStockAvgOrderByAggregateInput
+    _max?: BranchStockMaxOrderByAggregateInput
+    _min?: BranchStockMinOrderByAggregateInput
+    _sum?: BranchStockSumOrderByAggregateInput
+  }
+
+  export type BranchStockScalarWhereWithAggregatesInput = {
+    AND?: BranchStockScalarWhereWithAggregatesInput | BranchStockScalarWhereWithAggregatesInput[]
+    OR?: BranchStockScalarWhereWithAggregatesInput[]
+    NOT?: BranchStockScalarWhereWithAggregatesInput | BranchStockScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"BranchStock"> | number
+    branchId?: IntWithAggregatesFilter<"BranchStock"> | number
+    productId?: IntWithAggregatesFilter<"BranchStock"> | number
+    quantity?: IntWithAggregatesFilter<"BranchStock"> | number
+    damagedQuantity?: IntWithAggregatesFilter<"BranchStock"> | number
+    emptyBottlesOnHand?: IntWithAggregatesFilter<"BranchStock"> | number
+    updatedAt?: DateTimeWithAggregatesFilter<"BranchStock"> | Date | string
+  }
+
+  export type GrnWhereInput = {
+    AND?: GrnWhereInput | GrnWhereInput[]
+    OR?: GrnWhereInput[]
+    NOT?: GrnWhereInput | GrnWhereInput[]
+    id?: IntFilter<"Grn"> | number
+    grnNo?: StringFilter<"Grn"> | string
+    branchId?: IntFilter<"Grn"> | number
+    supplierId?: IntNullableFilter<"Grn"> | number | null
+    supplierName?: StringFilter<"Grn"> | string
+    purchaseOrderId?: IntNullableFilter<"Grn"> | number | null
+    poNumber?: StringNullableFilter<"Grn"> | string | null
+    supplierInvoiceNo?: StringNullableFilter<"Grn"> | string | null
+    invoiceDate?: DateTimeNullableFilter<"Grn"> | Date | string | null
+    invoiceTotal?: FloatNullableFilter<"Grn"> | number | null
+    notes?: StringNullableFilter<"Grn"> | string | null
+    acceptedUnits?: IntFilter<"Grn"> | number
+    rejectedUnits?: IntFilter<"Grn"> | number
+    totalCost?: FloatFilter<"Grn"> | number
+    shiftId?: IntNullableFilter<"Grn"> | number | null
+    receivedById?: IntFilter<"Grn"> | number
+    createdAt?: DateTimeFilter<"Grn"> | Date | string
+    branch?: XOR<BranchRelationFilter, BranchWhereInput>
+    items?: GrnItemListRelationFilter
+  }
+
+  export type GrnOrderByWithRelationInput = {
+    id?: SortOrder
+    grnNo?: SortOrder
+    branchId?: SortOrder
+    supplierId?: SortOrderInput | SortOrder
+    supplierName?: SortOrder
+    purchaseOrderId?: SortOrderInput | SortOrder
+    poNumber?: SortOrderInput | SortOrder
+    supplierInvoiceNo?: SortOrderInput | SortOrder
+    invoiceDate?: SortOrderInput | SortOrder
+    invoiceTotal?: SortOrderInput | SortOrder
+    notes?: SortOrderInput | SortOrder
+    acceptedUnits?: SortOrder
+    rejectedUnits?: SortOrder
+    totalCost?: SortOrder
+    shiftId?: SortOrderInput | SortOrder
+    receivedById?: SortOrder
+    createdAt?: SortOrder
+    branch?: BranchOrderByWithRelationInput
+    items?: GrnItemOrderByRelationAggregateInput
+  }
+
+  export type GrnWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    grnNo?: string
+    AND?: GrnWhereInput | GrnWhereInput[]
+    OR?: GrnWhereInput[]
+    NOT?: GrnWhereInput | GrnWhereInput[]
+    branchId?: IntFilter<"Grn"> | number
+    supplierId?: IntNullableFilter<"Grn"> | number | null
+    supplierName?: StringFilter<"Grn"> | string
+    purchaseOrderId?: IntNullableFilter<"Grn"> | number | null
+    poNumber?: StringNullableFilter<"Grn"> | string | null
+    supplierInvoiceNo?: StringNullableFilter<"Grn"> | string | null
+    invoiceDate?: DateTimeNullableFilter<"Grn"> | Date | string | null
+    invoiceTotal?: FloatNullableFilter<"Grn"> | number | null
+    notes?: StringNullableFilter<"Grn"> | string | null
+    acceptedUnits?: IntFilter<"Grn"> | number
+    rejectedUnits?: IntFilter<"Grn"> | number
+    totalCost?: FloatFilter<"Grn"> | number
+    shiftId?: IntNullableFilter<"Grn"> | number | null
+    receivedById?: IntFilter<"Grn"> | number
+    createdAt?: DateTimeFilter<"Grn"> | Date | string
+    branch?: XOR<BranchRelationFilter, BranchWhereInput>
+    items?: GrnItemListRelationFilter
+  }, "id" | "grnNo">
+
+  export type GrnOrderByWithAggregationInput = {
+    id?: SortOrder
+    grnNo?: SortOrder
+    branchId?: SortOrder
+    supplierId?: SortOrderInput | SortOrder
+    supplierName?: SortOrder
+    purchaseOrderId?: SortOrderInput | SortOrder
+    poNumber?: SortOrderInput | SortOrder
+    supplierInvoiceNo?: SortOrderInput | SortOrder
+    invoiceDate?: SortOrderInput | SortOrder
+    invoiceTotal?: SortOrderInput | SortOrder
+    notes?: SortOrderInput | SortOrder
+    acceptedUnits?: SortOrder
+    rejectedUnits?: SortOrder
+    totalCost?: SortOrder
+    shiftId?: SortOrderInput | SortOrder
+    receivedById?: SortOrder
+    createdAt?: SortOrder
+    _count?: GrnCountOrderByAggregateInput
+    _avg?: GrnAvgOrderByAggregateInput
+    _max?: GrnMaxOrderByAggregateInput
+    _min?: GrnMinOrderByAggregateInput
+    _sum?: GrnSumOrderByAggregateInput
+  }
+
+  export type GrnScalarWhereWithAggregatesInput = {
+    AND?: GrnScalarWhereWithAggregatesInput | GrnScalarWhereWithAggregatesInput[]
+    OR?: GrnScalarWhereWithAggregatesInput[]
+    NOT?: GrnScalarWhereWithAggregatesInput | GrnScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"Grn"> | number
+    grnNo?: StringWithAggregatesFilter<"Grn"> | string
+    branchId?: IntWithAggregatesFilter<"Grn"> | number
+    supplierId?: IntNullableWithAggregatesFilter<"Grn"> | number | null
+    supplierName?: StringWithAggregatesFilter<"Grn"> | string
+    purchaseOrderId?: IntNullableWithAggregatesFilter<"Grn"> | number | null
+    poNumber?: StringNullableWithAggregatesFilter<"Grn"> | string | null
+    supplierInvoiceNo?: StringNullableWithAggregatesFilter<"Grn"> | string | null
+    invoiceDate?: DateTimeNullableWithAggregatesFilter<"Grn"> | Date | string | null
+    invoiceTotal?: FloatNullableWithAggregatesFilter<"Grn"> | number | null
+    notes?: StringNullableWithAggregatesFilter<"Grn"> | string | null
+    acceptedUnits?: IntWithAggregatesFilter<"Grn"> | number
+    rejectedUnits?: IntWithAggregatesFilter<"Grn"> | number
+    totalCost?: FloatWithAggregatesFilter<"Grn"> | number
+    shiftId?: IntNullableWithAggregatesFilter<"Grn"> | number | null
+    receivedById?: IntWithAggregatesFilter<"Grn"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"Grn"> | Date | string
+  }
+
+  export type GrnItemWhereInput = {
+    AND?: GrnItemWhereInput | GrnItemWhereInput[]
+    OR?: GrnItemWhereInput[]
+    NOT?: GrnItemWhereInput | GrnItemWhereInput[]
+    id?: IntFilter<"GrnItem"> | number
+    grnId?: IntFilter<"GrnItem"> | number
+    productId?: IntNullableFilter<"GrnItem"> | number | null
+    description?: StringFilter<"GrnItem"> | string
+    purchaseOrderItemId?: IntNullableFilter<"GrnItem"> | number | null
+    orderedQty?: IntNullableFilter<"GrnItem"> | number | null
+    deliveredQty?: IntFilter<"GrnItem"> | number
+    acceptedQty?: IntFilter<"GrnItem"> | number
+    rejectedQty?: IntFilter<"GrnItem"> | number
+    rejectReason?: StringNullableFilter<"GrnItem"> | string | null
+    unitCost?: FloatFilter<"GrnItem"> | number
+    lineTotal?: FloatFilter<"GrnItem"> | number
+    grn?: XOR<GrnRelationFilter, GrnWhereInput>
+  }
+
+  export type GrnItemOrderByWithRelationInput = {
+    id?: SortOrder
+    grnId?: SortOrder
+    productId?: SortOrderInput | SortOrder
+    description?: SortOrder
+    purchaseOrderItemId?: SortOrderInput | SortOrder
+    orderedQty?: SortOrderInput | SortOrder
+    deliveredQty?: SortOrder
+    acceptedQty?: SortOrder
+    rejectedQty?: SortOrder
+    rejectReason?: SortOrderInput | SortOrder
+    unitCost?: SortOrder
+    lineTotal?: SortOrder
+    grn?: GrnOrderByWithRelationInput
+  }
+
+  export type GrnItemWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: GrnItemWhereInput | GrnItemWhereInput[]
+    OR?: GrnItemWhereInput[]
+    NOT?: GrnItemWhereInput | GrnItemWhereInput[]
+    grnId?: IntFilter<"GrnItem"> | number
+    productId?: IntNullableFilter<"GrnItem"> | number | null
+    description?: StringFilter<"GrnItem"> | string
+    purchaseOrderItemId?: IntNullableFilter<"GrnItem"> | number | null
+    orderedQty?: IntNullableFilter<"GrnItem"> | number | null
+    deliveredQty?: IntFilter<"GrnItem"> | number
+    acceptedQty?: IntFilter<"GrnItem"> | number
+    rejectedQty?: IntFilter<"GrnItem"> | number
+    rejectReason?: StringNullableFilter<"GrnItem"> | string | null
+    unitCost?: FloatFilter<"GrnItem"> | number
+    lineTotal?: FloatFilter<"GrnItem"> | number
+    grn?: XOR<GrnRelationFilter, GrnWhereInput>
+  }, "id">
+
+  export type GrnItemOrderByWithAggregationInput = {
+    id?: SortOrder
+    grnId?: SortOrder
+    productId?: SortOrderInput | SortOrder
+    description?: SortOrder
+    purchaseOrderItemId?: SortOrderInput | SortOrder
+    orderedQty?: SortOrderInput | SortOrder
+    deliveredQty?: SortOrder
+    acceptedQty?: SortOrder
+    rejectedQty?: SortOrder
+    rejectReason?: SortOrderInput | SortOrder
+    unitCost?: SortOrder
+    lineTotal?: SortOrder
+    _count?: GrnItemCountOrderByAggregateInput
+    _avg?: GrnItemAvgOrderByAggregateInput
+    _max?: GrnItemMaxOrderByAggregateInput
+    _min?: GrnItemMinOrderByAggregateInput
+    _sum?: GrnItemSumOrderByAggregateInput
+  }
+
+  export type GrnItemScalarWhereWithAggregatesInput = {
+    AND?: GrnItemScalarWhereWithAggregatesInput | GrnItemScalarWhereWithAggregatesInput[]
+    OR?: GrnItemScalarWhereWithAggregatesInput[]
+    NOT?: GrnItemScalarWhereWithAggregatesInput | GrnItemScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"GrnItem"> | number
+    grnId?: IntWithAggregatesFilter<"GrnItem"> | number
+    productId?: IntNullableWithAggregatesFilter<"GrnItem"> | number | null
+    description?: StringWithAggregatesFilter<"GrnItem"> | string
+    purchaseOrderItemId?: IntNullableWithAggregatesFilter<"GrnItem"> | number | null
+    orderedQty?: IntNullableWithAggregatesFilter<"GrnItem"> | number | null
+    deliveredQty?: IntWithAggregatesFilter<"GrnItem"> | number
+    acceptedQty?: IntWithAggregatesFilter<"GrnItem"> | number
+    rejectedQty?: IntWithAggregatesFilter<"GrnItem"> | number
+    rejectReason?: StringNullableWithAggregatesFilter<"GrnItem"> | string | null
+    unitCost?: FloatWithAggregatesFilter<"GrnItem"> | number
+    lineTotal?: FloatWithAggregatesFilter<"GrnItem"> | number
+  }
+
+  export type GtnWhereInput = {
+    AND?: GtnWhereInput | GtnWhereInput[]
+    OR?: GtnWhereInput[]
+    NOT?: GtnWhereInput | GtnWhereInput[]
+    id?: IntFilter<"Gtn"> | number
+    gtnNo?: StringFilter<"Gtn"> | string
+    fromBranchId?: IntFilter<"Gtn"> | number
+    toBranchId?: IntFilter<"Gtn"> | number
+    status?: StringFilter<"Gtn"> | string
+    notes?: StringNullableFilter<"Gtn"> | string | null
+    carriedBy?: StringNullableFilter<"Gtn"> | string | null
+    sentById?: IntFilter<"Gtn"> | number
+    sentAt?: DateTimeFilter<"Gtn"> | Date | string
+    sentShiftId?: IntNullableFilter<"Gtn"> | number | null
+    receivedById?: IntNullableFilter<"Gtn"> | number | null
+    receivedAt?: DateTimeNullableFilter<"Gtn"> | Date | string | null
+    receivedShiftId?: IntNullableFilter<"Gtn"> | number | null
+    receiveNote?: StringNullableFilter<"Gtn"> | string | null
+    cancelledById?: IntNullableFilter<"Gtn"> | number | null
+    cancelledAt?: DateTimeNullableFilter<"Gtn"> | Date | string | null
+    cancelReason?: StringNullableFilter<"Gtn"> | string | null
+    fromBranch?: XOR<BranchRelationFilter, BranchWhereInput>
+    toBranch?: XOR<BranchRelationFilter, BranchWhereInput>
+    items?: GtnItemListRelationFilter
+  }
+
+  export type GtnOrderByWithRelationInput = {
+    id?: SortOrder
+    gtnNo?: SortOrder
+    fromBranchId?: SortOrder
+    toBranchId?: SortOrder
+    status?: SortOrder
+    notes?: SortOrderInput | SortOrder
+    carriedBy?: SortOrderInput | SortOrder
+    sentById?: SortOrder
+    sentAt?: SortOrder
+    sentShiftId?: SortOrderInput | SortOrder
+    receivedById?: SortOrderInput | SortOrder
+    receivedAt?: SortOrderInput | SortOrder
+    receivedShiftId?: SortOrderInput | SortOrder
+    receiveNote?: SortOrderInput | SortOrder
+    cancelledById?: SortOrderInput | SortOrder
+    cancelledAt?: SortOrderInput | SortOrder
+    cancelReason?: SortOrderInput | SortOrder
+    fromBranch?: BranchOrderByWithRelationInput
+    toBranch?: BranchOrderByWithRelationInput
+    items?: GtnItemOrderByRelationAggregateInput
+  }
+
+  export type GtnWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    gtnNo?: string
+    AND?: GtnWhereInput | GtnWhereInput[]
+    OR?: GtnWhereInput[]
+    NOT?: GtnWhereInput | GtnWhereInput[]
+    fromBranchId?: IntFilter<"Gtn"> | number
+    toBranchId?: IntFilter<"Gtn"> | number
+    status?: StringFilter<"Gtn"> | string
+    notes?: StringNullableFilter<"Gtn"> | string | null
+    carriedBy?: StringNullableFilter<"Gtn"> | string | null
+    sentById?: IntFilter<"Gtn"> | number
+    sentAt?: DateTimeFilter<"Gtn"> | Date | string
+    sentShiftId?: IntNullableFilter<"Gtn"> | number | null
+    receivedById?: IntNullableFilter<"Gtn"> | number | null
+    receivedAt?: DateTimeNullableFilter<"Gtn"> | Date | string | null
+    receivedShiftId?: IntNullableFilter<"Gtn"> | number | null
+    receiveNote?: StringNullableFilter<"Gtn"> | string | null
+    cancelledById?: IntNullableFilter<"Gtn"> | number | null
+    cancelledAt?: DateTimeNullableFilter<"Gtn"> | Date | string | null
+    cancelReason?: StringNullableFilter<"Gtn"> | string | null
+    fromBranch?: XOR<BranchRelationFilter, BranchWhereInput>
+    toBranch?: XOR<BranchRelationFilter, BranchWhereInput>
+    items?: GtnItemListRelationFilter
+  }, "id" | "gtnNo">
+
+  export type GtnOrderByWithAggregationInput = {
+    id?: SortOrder
+    gtnNo?: SortOrder
+    fromBranchId?: SortOrder
+    toBranchId?: SortOrder
+    status?: SortOrder
+    notes?: SortOrderInput | SortOrder
+    carriedBy?: SortOrderInput | SortOrder
+    sentById?: SortOrder
+    sentAt?: SortOrder
+    sentShiftId?: SortOrderInput | SortOrder
+    receivedById?: SortOrderInput | SortOrder
+    receivedAt?: SortOrderInput | SortOrder
+    receivedShiftId?: SortOrderInput | SortOrder
+    receiveNote?: SortOrderInput | SortOrder
+    cancelledById?: SortOrderInput | SortOrder
+    cancelledAt?: SortOrderInput | SortOrder
+    cancelReason?: SortOrderInput | SortOrder
+    _count?: GtnCountOrderByAggregateInput
+    _avg?: GtnAvgOrderByAggregateInput
+    _max?: GtnMaxOrderByAggregateInput
+    _min?: GtnMinOrderByAggregateInput
+    _sum?: GtnSumOrderByAggregateInput
+  }
+
+  export type GtnScalarWhereWithAggregatesInput = {
+    AND?: GtnScalarWhereWithAggregatesInput | GtnScalarWhereWithAggregatesInput[]
+    OR?: GtnScalarWhereWithAggregatesInput[]
+    NOT?: GtnScalarWhereWithAggregatesInput | GtnScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"Gtn"> | number
+    gtnNo?: StringWithAggregatesFilter<"Gtn"> | string
+    fromBranchId?: IntWithAggregatesFilter<"Gtn"> | number
+    toBranchId?: IntWithAggregatesFilter<"Gtn"> | number
+    status?: StringWithAggregatesFilter<"Gtn"> | string
+    notes?: StringNullableWithAggregatesFilter<"Gtn"> | string | null
+    carriedBy?: StringNullableWithAggregatesFilter<"Gtn"> | string | null
+    sentById?: IntWithAggregatesFilter<"Gtn"> | number
+    sentAt?: DateTimeWithAggregatesFilter<"Gtn"> | Date | string
+    sentShiftId?: IntNullableWithAggregatesFilter<"Gtn"> | number | null
+    receivedById?: IntNullableWithAggregatesFilter<"Gtn"> | number | null
+    receivedAt?: DateTimeNullableWithAggregatesFilter<"Gtn"> | Date | string | null
+    receivedShiftId?: IntNullableWithAggregatesFilter<"Gtn"> | number | null
+    receiveNote?: StringNullableWithAggregatesFilter<"Gtn"> | string | null
+    cancelledById?: IntNullableWithAggregatesFilter<"Gtn"> | number | null
+    cancelledAt?: DateTimeNullableWithAggregatesFilter<"Gtn"> | Date | string | null
+    cancelReason?: StringNullableWithAggregatesFilter<"Gtn"> | string | null
+  }
+
+  export type GtnItemWhereInput = {
+    AND?: GtnItemWhereInput | GtnItemWhereInput[]
+    OR?: GtnItemWhereInput[]
+    NOT?: GtnItemWhereInput | GtnItemWhereInput[]
+    id?: IntFilter<"GtnItem"> | number
+    gtnId?: IntFilter<"GtnItem"> | number
+    productId?: IntNullableFilter<"GtnItem"> | number | null
+    productName?: StringFilter<"GtnItem"> | string
+    sentQty?: IntFilter<"GtnItem"> | number
+    receivedQty?: IntNullableFilter<"GtnItem"> | number | null
+    damagedQty?: IntFilter<"GtnItem"> | number
+    missingQty?: IntFilter<"GtnItem"> | number
+    unitCost?: FloatNullableFilter<"GtnItem"> | number | null
+    gtn?: XOR<GtnRelationFilter, GtnWhereInput>
+  }
+
+  export type GtnItemOrderByWithRelationInput = {
+    id?: SortOrder
+    gtnId?: SortOrder
+    productId?: SortOrderInput | SortOrder
+    productName?: SortOrder
+    sentQty?: SortOrder
+    receivedQty?: SortOrderInput | SortOrder
+    damagedQty?: SortOrder
+    missingQty?: SortOrder
+    unitCost?: SortOrderInput | SortOrder
+    gtn?: GtnOrderByWithRelationInput
+  }
+
+  export type GtnItemWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: GtnItemWhereInput | GtnItemWhereInput[]
+    OR?: GtnItemWhereInput[]
+    NOT?: GtnItemWhereInput | GtnItemWhereInput[]
+    gtnId?: IntFilter<"GtnItem"> | number
+    productId?: IntNullableFilter<"GtnItem"> | number | null
+    productName?: StringFilter<"GtnItem"> | string
+    sentQty?: IntFilter<"GtnItem"> | number
+    receivedQty?: IntNullableFilter<"GtnItem"> | number | null
+    damagedQty?: IntFilter<"GtnItem"> | number
+    missingQty?: IntFilter<"GtnItem"> | number
+    unitCost?: FloatNullableFilter<"GtnItem"> | number | null
+    gtn?: XOR<GtnRelationFilter, GtnWhereInput>
+  }, "id">
+
+  export type GtnItemOrderByWithAggregationInput = {
+    id?: SortOrder
+    gtnId?: SortOrder
+    productId?: SortOrderInput | SortOrder
+    productName?: SortOrder
+    sentQty?: SortOrder
+    receivedQty?: SortOrderInput | SortOrder
+    damagedQty?: SortOrder
+    missingQty?: SortOrder
+    unitCost?: SortOrderInput | SortOrder
+    _count?: GtnItemCountOrderByAggregateInput
+    _avg?: GtnItemAvgOrderByAggregateInput
+    _max?: GtnItemMaxOrderByAggregateInput
+    _min?: GtnItemMinOrderByAggregateInput
+    _sum?: GtnItemSumOrderByAggregateInput
+  }
+
+  export type GtnItemScalarWhereWithAggregatesInput = {
+    AND?: GtnItemScalarWhereWithAggregatesInput | GtnItemScalarWhereWithAggregatesInput[]
+    OR?: GtnItemScalarWhereWithAggregatesInput[]
+    NOT?: GtnItemScalarWhereWithAggregatesInput | GtnItemScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"GtnItem"> | number
+    gtnId?: IntWithAggregatesFilter<"GtnItem"> | number
+    productId?: IntNullableWithAggregatesFilter<"GtnItem"> | number | null
+    productName?: StringWithAggregatesFilter<"GtnItem"> | string
+    sentQty?: IntWithAggregatesFilter<"GtnItem"> | number
+    receivedQty?: IntNullableWithAggregatesFilter<"GtnItem"> | number | null
+    damagedQty?: IntWithAggregatesFilter<"GtnItem"> | number
+    missingQty?: IntWithAggregatesFilter<"GtnItem"> | number
+    unitCost?: FloatNullableWithAggregatesFilter<"GtnItem"> | number | null
   }
 
   export type UserCreateInput = {
@@ -44869,6 +53098,8 @@ export namespace Prisma {
   }
 
   export type PosAdminCreateInput = {
+    branchId?: number | null
+    activeBranchId?: number | null
     name: string
     email: string
     passwordHash: string
@@ -44882,6 +53113,8 @@ export namespace Prisma {
 
   export type PosAdminUncheckedCreateInput = {
     id?: number
+    branchId?: number | null
+    activeBranchId?: number | null
     name: string
     email: string
     passwordHash: string
@@ -44894,6 +53127,8 @@ export namespace Prisma {
   }
 
   export type PosAdminUpdateInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    activeBranchId?: NullableIntFieldUpdateOperationsInput | number | null
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
@@ -44907,6 +53142,8 @@ export namespace Prisma {
 
   export type PosAdminUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    activeBranchId?: NullableIntFieldUpdateOperationsInput | number | null
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
@@ -44920,6 +53157,8 @@ export namespace Prisma {
 
   export type PosAdminCreateManyInput = {
     id?: number
+    branchId?: number | null
+    activeBranchId?: number | null
     name: string
     email: string
     passwordHash: string
@@ -44931,6 +53170,8 @@ export namespace Prisma {
   }
 
   export type PosAdminUpdateManyMutationInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    activeBranchId?: NullableIntFieldUpdateOperationsInput | number | null
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
@@ -44943,6 +53184,8 @@ export namespace Prisma {
 
   export type PosAdminUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    activeBranchId?: NullableIntFieldUpdateOperationsInput | number | null
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
@@ -44954,6 +53197,7 @@ export namespace Prisma {
   }
 
   export type PosCounterSaleCreateInput = {
+    branchId?: number | null
     invoiceGroupCode: string
     totalAmount: number
     emptyDeduction?: number
@@ -44982,6 +53226,7 @@ export namespace Prisma {
 
   export type PosCounterSaleUncheckedCreateInput = {
     id?: number
+    branchId?: number | null
     invoiceGroupCode: string
     totalAmount: number
     emptyDeduction?: number
@@ -45009,6 +53254,7 @@ export namespace Prisma {
   }
 
   export type PosCounterSaleUpdateInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
@@ -45037,6 +53283,7 @@ export namespace Prisma {
 
   export type PosCounterSaleUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
@@ -45065,6 +53312,7 @@ export namespace Prisma {
 
   export type PosCounterSaleCreateManyInput = {
     id?: number
+    branchId?: number | null
     invoiceGroupCode: string
     totalAmount: number
     emptyDeduction?: number
@@ -45092,6 +53340,7 @@ export namespace Prisma {
   }
 
   export type PosCounterSaleUpdateManyMutationInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
@@ -45117,6 +53366,7 @@ export namespace Prisma {
 
   export type PosCounterSaleUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
@@ -45360,6 +53610,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -45373,6 +53624,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemCreateNestedManyWithoutProductInput
     returns?: PosReturnCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseCreateNestedManyWithoutInventoryProductInput
+    branchStock?: BranchStockCreateNestedManyWithoutProductInput
   }
 
   export type InventoryProductUncheckedCreateInput = {
@@ -45393,6 +53645,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -45403,6 +53656,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemUncheckedCreateNestedManyWithoutProductInput
     returns?: PosReturnUncheckedCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutInventoryProductInput
+    branchStock?: BranchStockUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type InventoryProductUpdateInput = {
@@ -45419,6 +53673,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -45432,6 +53687,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemUpdateManyWithoutProductNestedInput
     returns?: PosReturnUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUpdateManyWithoutInventoryProductNestedInput
+    branchStock?: BranchStockUpdateManyWithoutProductNestedInput
   }
 
   export type InventoryProductUncheckedUpdateInput = {
@@ -45452,6 +53708,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -45462,6 +53719,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemUncheckedUpdateManyWithoutProductNestedInput
     returns?: PosReturnUncheckedUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutInventoryProductNestedInput
+    branchStock?: BranchStockUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type InventoryProductCreateManyInput = {
@@ -45482,6 +53740,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -45503,6 +53762,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -45528,6 +53788,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -45813,6 +54074,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    isHardLiquor?: boolean
     billDiscount?: number
     purchasedAt?: Date | string
     customer: PosCustomerCreateNestedOneWithoutPurchasesInput
@@ -45846,6 +54108,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    isHardLiquor?: boolean
     billDiscount?: number
     purchasedAt?: Date | string
     receipts?: AccountReceiptUncheckedCreateNestedManyWithoutPurchaseInput
@@ -45874,6 +54137,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customer?: PosCustomerUpdateOneRequiredWithoutPurchasesNestedInput
@@ -45907,6 +54171,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     receipts?: AccountReceiptUncheckedUpdateManyWithoutPurchaseNestedInput
@@ -45938,6 +54203,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    isHardLiquor?: boolean
     billDiscount?: number
     purchasedAt?: Date | string
   }
@@ -45963,6 +54229,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -45991,6 +54258,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -47090,6 +55358,7 @@ export namespace Prisma {
   }
 
   export type ActivityLogCreateInput = {
+    branchId?: number | null
     actorId?: number | null
     actorName?: string | null
     actorEmail?: string | null
@@ -47107,6 +55376,7 @@ export namespace Prisma {
 
   export type ActivityLogUncheckedCreateInput = {
     id?: number
+    branchId?: number | null
     actorId?: number | null
     actorName?: string | null
     actorEmail?: string | null
@@ -47123,6 +55393,7 @@ export namespace Prisma {
   }
 
   export type ActivityLogUpdateInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     actorId?: NullableIntFieldUpdateOperationsInput | number | null
     actorName?: NullableStringFieldUpdateOperationsInput | string | null
     actorEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -47140,6 +55411,7 @@ export namespace Prisma {
 
   export type ActivityLogUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     actorId?: NullableIntFieldUpdateOperationsInput | number | null
     actorName?: NullableStringFieldUpdateOperationsInput | string | null
     actorEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -47157,6 +55429,7 @@ export namespace Prisma {
 
   export type ActivityLogCreateManyInput = {
     id?: number
+    branchId?: number | null
     actorId?: number | null
     actorName?: string | null
     actorEmail?: string | null
@@ -47173,6 +55446,7 @@ export namespace Prisma {
   }
 
   export type ActivityLogUpdateManyMutationInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     actorId?: NullableIntFieldUpdateOperationsInput | number | null
     actorName?: NullableStringFieldUpdateOperationsInput | string | null
     actorEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -47190,6 +55464,7 @@ export namespace Prisma {
 
   export type ActivityLogUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     actorId?: NullableIntFieldUpdateOperationsInput | number | null
     actorName?: NullableStringFieldUpdateOperationsInput | string | null
     actorEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -47255,6 +55530,7 @@ export namespace Prisma {
   }
 
   export type PosShiftCreateInput = {
+    branchId?: number | null
     shiftNo: string
     status?: string
     openedById: number
@@ -47283,6 +55559,7 @@ export namespace Prisma {
 
   export type PosShiftUncheckedCreateInput = {
     id?: number
+    branchId?: number | null
     shiftNo: string
     status?: string
     openedById: number
@@ -47310,6 +55587,7 @@ export namespace Prisma {
   }
 
   export type PosShiftUpdateInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     shiftNo?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     openedById?: IntFieldUpdateOperationsInput | number
@@ -47338,6 +55616,7 @@ export namespace Prisma {
 
   export type PosShiftUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     shiftNo?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     openedById?: IntFieldUpdateOperationsInput | number
@@ -47366,6 +55645,7 @@ export namespace Prisma {
 
   export type PosShiftCreateManyInput = {
     id?: number
+    branchId?: number | null
     shiftNo: string
     status?: string
     openedById: number
@@ -47389,6 +55669,7 @@ export namespace Prisma {
   }
 
   export type PosShiftUpdateManyMutationInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     shiftNo?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     openedById?: IntFieldUpdateOperationsInput | number
@@ -47413,6 +55694,7 @@ export namespace Prisma {
 
   export type PosShiftUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     shiftNo?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     openedById?: IntFieldUpdateOperationsInput | number
@@ -47436,6 +55718,7 @@ export namespace Prisma {
   }
 
   export type PosCashEntryCreateInput = {
+    branchId?: number | null
     entryNo: string
     direction: string
     category: string
@@ -47461,6 +55744,7 @@ export namespace Prisma {
 
   export type PosCashEntryUncheckedCreateInput = {
     id?: number
+    branchId?: number | null
     entryNo: string
     direction: string
     category: string
@@ -47485,6 +55769,7 @@ export namespace Prisma {
   }
 
   export type PosCashEntryUpdateInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     entryNo?: StringFieldUpdateOperationsInput | string
     direction?: StringFieldUpdateOperationsInput | string
     category?: StringFieldUpdateOperationsInput | string
@@ -47510,6 +55795,7 @@ export namespace Prisma {
 
   export type PosCashEntryUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     entryNo?: StringFieldUpdateOperationsInput | string
     direction?: StringFieldUpdateOperationsInput | string
     category?: StringFieldUpdateOperationsInput | string
@@ -47535,6 +55821,7 @@ export namespace Prisma {
 
   export type PosCashEntryCreateManyInput = {
     id?: number
+    branchId?: number | null
     entryNo: string
     direction: string
     category: string
@@ -47559,6 +55846,7 @@ export namespace Prisma {
   }
 
   export type PosCashEntryUpdateManyMutationInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     entryNo?: StringFieldUpdateOperationsInput | string
     direction?: StringFieldUpdateOperationsInput | string
     category?: StringFieldUpdateOperationsInput | string
@@ -47583,6 +55871,7 @@ export namespace Prisma {
 
   export type PosCashEntryUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     entryNo?: StringFieldUpdateOperationsInput | string
     direction?: StringFieldUpdateOperationsInput | string
     category?: StringFieldUpdateOperationsInput | string
@@ -47607,6 +55896,7 @@ export namespace Prisma {
   }
 
   export type InventoryMovementCreateInput = {
+    branchId?: number | null
     productId: number
     kind: string
     type: string
@@ -47619,6 +55909,7 @@ export namespace Prisma {
 
   export type InventoryMovementUncheckedCreateInput = {
     id?: number
+    branchId?: number | null
     productId: number
     kind: string
     type: string
@@ -47630,6 +55921,7 @@ export namespace Prisma {
   }
 
   export type InventoryMovementUpdateInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     productId?: IntFieldUpdateOperationsInput | number
     kind?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
@@ -47642,6 +55934,7 @@ export namespace Prisma {
 
   export type InventoryMovementUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     productId?: IntFieldUpdateOperationsInput | number
     kind?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
@@ -47654,6 +55947,7 @@ export namespace Prisma {
 
   export type InventoryMovementCreateManyInput = {
     id?: number
+    branchId?: number | null
     productId: number
     kind: string
     type: string
@@ -47665,6 +55959,7 @@ export namespace Prisma {
   }
 
   export type InventoryMovementUpdateManyMutationInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     productId?: IntFieldUpdateOperationsInput | number
     kind?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
@@ -47676,6 +55971,7 @@ export namespace Prisma {
 
   export type InventoryMovementUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     productId?: IntFieldUpdateOperationsInput | number
     kind?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
@@ -47687,6 +55983,7 @@ export namespace Prisma {
   }
 
   export type PurchaseOrderCreateInput = {
+    branchId?: number | null
     poNumber: string
     status?: string
     orderDate?: Date | string
@@ -47710,6 +56007,7 @@ export namespace Prisma {
 
   export type PurchaseOrderUncheckedCreateInput = {
     id?: number
+    branchId?: number | null
     poNumber: string
     supplierId: number
     status?: string
@@ -47732,6 +56030,7 @@ export namespace Prisma {
   }
 
   export type PurchaseOrderUpdateInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     poNumber?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     orderDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -47755,6 +56054,7 @@ export namespace Prisma {
 
   export type PurchaseOrderUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     poNumber?: StringFieldUpdateOperationsInput | string
     supplierId?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
@@ -47778,6 +56078,7 @@ export namespace Prisma {
 
   export type PurchaseOrderCreateManyInput = {
     id?: number
+    branchId?: number | null
     poNumber: string
     supplierId: number
     status?: string
@@ -47798,6 +56099,7 @@ export namespace Prisma {
   }
 
   export type PurchaseOrderUpdateManyMutationInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     poNumber?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     orderDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -47818,6 +56120,7 @@ export namespace Prisma {
 
   export type PurchaseOrderUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     poNumber?: StringFieldUpdateOperationsInput | string
     supplierId?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
@@ -48091,6 +56394,7 @@ export namespace Prisma {
   }
 
   export type PosReturnCreateInput = {
+    branchId?: number | null
     returnNo: string
     type: string
     productName: string
@@ -48117,6 +56421,7 @@ export namespace Prisma {
 
   export type PosReturnUncheckedCreateInput = {
     id?: number
+    branchId?: number | null
     returnNo: string
     type: string
     productId?: number | null
@@ -48142,6 +56447,7 @@ export namespace Prisma {
   }
 
   export type PosReturnUpdateInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     returnNo?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     productName?: StringFieldUpdateOperationsInput | string
@@ -48168,6 +56474,7 @@ export namespace Prisma {
 
   export type PosReturnUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     returnNo?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     productId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -48194,6 +56501,7 @@ export namespace Prisma {
 
   export type PosReturnCreateManyInput = {
     id?: number
+    branchId?: number | null
     returnNo: string
     type: string
     productId?: number | null
@@ -48219,6 +56527,7 @@ export namespace Prisma {
   }
 
   export type PosReturnUpdateManyMutationInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     returnNo?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     productName?: StringFieldUpdateOperationsInput | string
@@ -48242,6 +56551,7 @@ export namespace Prisma {
 
   export type PosReturnUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     returnNo?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     productId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -48264,6 +56574,628 @@ export namespace Prisma {
     shiftId?: NullableIntFieldUpdateOperationsInput | number | null
     createdById?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BranchCreateInput = {
+    code: string
+    name: string
+    address?: string | null
+    phone?: string | null
+    isMain?: boolean
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stock?: BranchStockCreateNestedManyWithoutBranchInput
+    grns?: GrnCreateNestedManyWithoutBranchInput
+    gtnsOut?: GtnCreateNestedManyWithoutFromBranchInput
+    gtnsIn?: GtnCreateNestedManyWithoutToBranchInput
+  }
+
+  export type BranchUncheckedCreateInput = {
+    id?: number
+    code: string
+    name: string
+    address?: string | null
+    phone?: string | null
+    isMain?: boolean
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stock?: BranchStockUncheckedCreateNestedManyWithoutBranchInput
+    grns?: GrnUncheckedCreateNestedManyWithoutBranchInput
+    gtnsOut?: GtnUncheckedCreateNestedManyWithoutFromBranchInput
+    gtnsIn?: GtnUncheckedCreateNestedManyWithoutToBranchInput
+  }
+
+  export type BranchUpdateInput = {
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isMain?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stock?: BranchStockUpdateManyWithoutBranchNestedInput
+    grns?: GrnUpdateManyWithoutBranchNestedInput
+    gtnsOut?: GtnUpdateManyWithoutFromBranchNestedInput
+    gtnsIn?: GtnUpdateManyWithoutToBranchNestedInput
+  }
+
+  export type BranchUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isMain?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stock?: BranchStockUncheckedUpdateManyWithoutBranchNestedInput
+    grns?: GrnUncheckedUpdateManyWithoutBranchNestedInput
+    gtnsOut?: GtnUncheckedUpdateManyWithoutFromBranchNestedInput
+    gtnsIn?: GtnUncheckedUpdateManyWithoutToBranchNestedInput
+  }
+
+  export type BranchCreateManyInput = {
+    id?: number
+    code: string
+    name: string
+    address?: string | null
+    phone?: string | null
+    isMain?: boolean
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BranchUpdateManyMutationInput = {
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isMain?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BranchUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isMain?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BranchStockCreateInput = {
+    quantity?: number
+    damagedQuantity?: number
+    emptyBottlesOnHand?: number
+    updatedAt?: Date | string
+    branch: BranchCreateNestedOneWithoutStockInput
+    product: InventoryProductCreateNestedOneWithoutBranchStockInput
+  }
+
+  export type BranchStockUncheckedCreateInput = {
+    id?: number
+    branchId: number
+    productId: number
+    quantity?: number
+    damagedQuantity?: number
+    emptyBottlesOnHand?: number
+    updatedAt?: Date | string
+  }
+
+  export type BranchStockUpdateInput = {
+    quantity?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    branch?: BranchUpdateOneRequiredWithoutStockNestedInput
+    product?: InventoryProductUpdateOneRequiredWithoutBranchStockNestedInput
+  }
+
+  export type BranchStockUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    branchId?: IntFieldUpdateOperationsInput | number
+    productId?: IntFieldUpdateOperationsInput | number
+    quantity?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BranchStockCreateManyInput = {
+    id?: number
+    branchId: number
+    productId: number
+    quantity?: number
+    damagedQuantity?: number
+    emptyBottlesOnHand?: number
+    updatedAt?: Date | string
+  }
+
+  export type BranchStockUpdateManyMutationInput = {
+    quantity?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BranchStockUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    branchId?: IntFieldUpdateOperationsInput | number
+    productId?: IntFieldUpdateOperationsInput | number
+    quantity?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GrnCreateInput = {
+    grnNo: string
+    supplierId?: number | null
+    supplierName: string
+    purchaseOrderId?: number | null
+    poNumber?: string | null
+    supplierInvoiceNo?: string | null
+    invoiceDate?: Date | string | null
+    invoiceTotal?: number | null
+    notes?: string | null
+    acceptedUnits?: number
+    rejectedUnits?: number
+    totalCost?: number
+    shiftId?: number | null
+    receivedById: number
+    createdAt?: Date | string
+    branch: BranchCreateNestedOneWithoutGrnsInput
+    items?: GrnItemCreateNestedManyWithoutGrnInput
+  }
+
+  export type GrnUncheckedCreateInput = {
+    id?: number
+    grnNo: string
+    branchId: number
+    supplierId?: number | null
+    supplierName: string
+    purchaseOrderId?: number | null
+    poNumber?: string | null
+    supplierInvoiceNo?: string | null
+    invoiceDate?: Date | string | null
+    invoiceTotal?: number | null
+    notes?: string | null
+    acceptedUnits?: number
+    rejectedUnits?: number
+    totalCost?: number
+    shiftId?: number | null
+    receivedById: number
+    createdAt?: Date | string
+    items?: GrnItemUncheckedCreateNestedManyWithoutGrnInput
+  }
+
+  export type GrnUpdateInput = {
+    grnNo?: StringFieldUpdateOperationsInput | string
+    supplierId?: NullableIntFieldUpdateOperationsInput | number | null
+    supplierName?: StringFieldUpdateOperationsInput | string
+    purchaseOrderId?: NullableIntFieldUpdateOperationsInput | number | null
+    poNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    supplierInvoiceNo?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invoiceTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedUnits?: IntFieldUpdateOperationsInput | number
+    rejectedUnits?: IntFieldUpdateOperationsInput | number
+    totalCost?: FloatFieldUpdateOperationsInput | number
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    branch?: BranchUpdateOneRequiredWithoutGrnsNestedInput
+    items?: GrnItemUpdateManyWithoutGrnNestedInput
+  }
+
+  export type GrnUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    grnNo?: StringFieldUpdateOperationsInput | string
+    branchId?: IntFieldUpdateOperationsInput | number
+    supplierId?: NullableIntFieldUpdateOperationsInput | number | null
+    supplierName?: StringFieldUpdateOperationsInput | string
+    purchaseOrderId?: NullableIntFieldUpdateOperationsInput | number | null
+    poNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    supplierInvoiceNo?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invoiceTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedUnits?: IntFieldUpdateOperationsInput | number
+    rejectedUnits?: IntFieldUpdateOperationsInput | number
+    totalCost?: FloatFieldUpdateOperationsInput | number
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: GrnItemUncheckedUpdateManyWithoutGrnNestedInput
+  }
+
+  export type GrnCreateManyInput = {
+    id?: number
+    grnNo: string
+    branchId: number
+    supplierId?: number | null
+    supplierName: string
+    purchaseOrderId?: number | null
+    poNumber?: string | null
+    supplierInvoiceNo?: string | null
+    invoiceDate?: Date | string | null
+    invoiceTotal?: number | null
+    notes?: string | null
+    acceptedUnits?: number
+    rejectedUnits?: number
+    totalCost?: number
+    shiftId?: number | null
+    receivedById: number
+    createdAt?: Date | string
+  }
+
+  export type GrnUpdateManyMutationInput = {
+    grnNo?: StringFieldUpdateOperationsInput | string
+    supplierId?: NullableIntFieldUpdateOperationsInput | number | null
+    supplierName?: StringFieldUpdateOperationsInput | string
+    purchaseOrderId?: NullableIntFieldUpdateOperationsInput | number | null
+    poNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    supplierInvoiceNo?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invoiceTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedUnits?: IntFieldUpdateOperationsInput | number
+    rejectedUnits?: IntFieldUpdateOperationsInput | number
+    totalCost?: FloatFieldUpdateOperationsInput | number
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GrnUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    grnNo?: StringFieldUpdateOperationsInput | string
+    branchId?: IntFieldUpdateOperationsInput | number
+    supplierId?: NullableIntFieldUpdateOperationsInput | number | null
+    supplierName?: StringFieldUpdateOperationsInput | string
+    purchaseOrderId?: NullableIntFieldUpdateOperationsInput | number | null
+    poNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    supplierInvoiceNo?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invoiceTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedUnits?: IntFieldUpdateOperationsInput | number
+    rejectedUnits?: IntFieldUpdateOperationsInput | number
+    totalCost?: FloatFieldUpdateOperationsInput | number
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GrnItemCreateInput = {
+    productId?: number | null
+    description: string
+    purchaseOrderItemId?: number | null
+    orderedQty?: number | null
+    deliveredQty: number
+    acceptedQty: number
+    rejectedQty?: number
+    rejectReason?: string | null
+    unitCost: number
+    lineTotal: number
+    grn: GrnCreateNestedOneWithoutItemsInput
+  }
+
+  export type GrnItemUncheckedCreateInput = {
+    id?: number
+    grnId: number
+    productId?: number | null
+    description: string
+    purchaseOrderItemId?: number | null
+    orderedQty?: number | null
+    deliveredQty: number
+    acceptedQty: number
+    rejectedQty?: number
+    rejectReason?: string | null
+    unitCost: number
+    lineTotal: number
+  }
+
+  export type GrnItemUpdateInput = {
+    productId?: NullableIntFieldUpdateOperationsInput | number | null
+    description?: StringFieldUpdateOperationsInput | string
+    purchaseOrderItemId?: NullableIntFieldUpdateOperationsInput | number | null
+    orderedQty?: NullableIntFieldUpdateOperationsInput | number | null
+    deliveredQty?: IntFieldUpdateOperationsInput | number
+    acceptedQty?: IntFieldUpdateOperationsInput | number
+    rejectedQty?: IntFieldUpdateOperationsInput | number
+    rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
+    unitCost?: FloatFieldUpdateOperationsInput | number
+    lineTotal?: FloatFieldUpdateOperationsInput | number
+    grn?: GrnUpdateOneRequiredWithoutItemsNestedInput
+  }
+
+  export type GrnItemUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    grnId?: IntFieldUpdateOperationsInput | number
+    productId?: NullableIntFieldUpdateOperationsInput | number | null
+    description?: StringFieldUpdateOperationsInput | string
+    purchaseOrderItemId?: NullableIntFieldUpdateOperationsInput | number | null
+    orderedQty?: NullableIntFieldUpdateOperationsInput | number | null
+    deliveredQty?: IntFieldUpdateOperationsInput | number
+    acceptedQty?: IntFieldUpdateOperationsInput | number
+    rejectedQty?: IntFieldUpdateOperationsInput | number
+    rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
+    unitCost?: FloatFieldUpdateOperationsInput | number
+    lineTotal?: FloatFieldUpdateOperationsInput | number
+  }
+
+  export type GrnItemCreateManyInput = {
+    id?: number
+    grnId: number
+    productId?: number | null
+    description: string
+    purchaseOrderItemId?: number | null
+    orderedQty?: number | null
+    deliveredQty: number
+    acceptedQty: number
+    rejectedQty?: number
+    rejectReason?: string | null
+    unitCost: number
+    lineTotal: number
+  }
+
+  export type GrnItemUpdateManyMutationInput = {
+    productId?: NullableIntFieldUpdateOperationsInput | number | null
+    description?: StringFieldUpdateOperationsInput | string
+    purchaseOrderItemId?: NullableIntFieldUpdateOperationsInput | number | null
+    orderedQty?: NullableIntFieldUpdateOperationsInput | number | null
+    deliveredQty?: IntFieldUpdateOperationsInput | number
+    acceptedQty?: IntFieldUpdateOperationsInput | number
+    rejectedQty?: IntFieldUpdateOperationsInput | number
+    rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
+    unitCost?: FloatFieldUpdateOperationsInput | number
+    lineTotal?: FloatFieldUpdateOperationsInput | number
+  }
+
+  export type GrnItemUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    grnId?: IntFieldUpdateOperationsInput | number
+    productId?: NullableIntFieldUpdateOperationsInput | number | null
+    description?: StringFieldUpdateOperationsInput | string
+    purchaseOrderItemId?: NullableIntFieldUpdateOperationsInput | number | null
+    orderedQty?: NullableIntFieldUpdateOperationsInput | number | null
+    deliveredQty?: IntFieldUpdateOperationsInput | number
+    acceptedQty?: IntFieldUpdateOperationsInput | number
+    rejectedQty?: IntFieldUpdateOperationsInput | number
+    rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
+    unitCost?: FloatFieldUpdateOperationsInput | number
+    lineTotal?: FloatFieldUpdateOperationsInput | number
+  }
+
+  export type GtnCreateInput = {
+    gtnNo: string
+    status?: string
+    notes?: string | null
+    carriedBy?: string | null
+    sentById: number
+    sentAt?: Date | string
+    sentShiftId?: number | null
+    receivedById?: number | null
+    receivedAt?: Date | string | null
+    receivedShiftId?: number | null
+    receiveNote?: string | null
+    cancelledById?: number | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    fromBranch: BranchCreateNestedOneWithoutGtnsOutInput
+    toBranch: BranchCreateNestedOneWithoutGtnsInInput
+    items?: GtnItemCreateNestedManyWithoutGtnInput
+  }
+
+  export type GtnUncheckedCreateInput = {
+    id?: number
+    gtnNo: string
+    fromBranchId: number
+    toBranchId: number
+    status?: string
+    notes?: string | null
+    carriedBy?: string | null
+    sentById: number
+    sentAt?: Date | string
+    sentShiftId?: number | null
+    receivedById?: number | null
+    receivedAt?: Date | string | null
+    receivedShiftId?: number | null
+    receiveNote?: string | null
+    cancelledById?: number | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    items?: GtnItemUncheckedCreateNestedManyWithoutGtnInput
+  }
+
+  export type GtnUpdateInput = {
+    gtnNo?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    carriedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    sentById?: IntFieldUpdateOperationsInput | number
+    sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sentShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    receivedShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receiveNote?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledById?: NullableIntFieldUpdateOperationsInput | number | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fromBranch?: BranchUpdateOneRequiredWithoutGtnsOutNestedInput
+    toBranch?: BranchUpdateOneRequiredWithoutGtnsInNestedInput
+    items?: GtnItemUpdateManyWithoutGtnNestedInput
+  }
+
+  export type GtnUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    gtnNo?: StringFieldUpdateOperationsInput | string
+    fromBranchId?: IntFieldUpdateOperationsInput | number
+    toBranchId?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    carriedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    sentById?: IntFieldUpdateOperationsInput | number
+    sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sentShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    receivedShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receiveNote?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledById?: NullableIntFieldUpdateOperationsInput | number | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    items?: GtnItemUncheckedUpdateManyWithoutGtnNestedInput
+  }
+
+  export type GtnCreateManyInput = {
+    id?: number
+    gtnNo: string
+    fromBranchId: number
+    toBranchId: number
+    status?: string
+    notes?: string | null
+    carriedBy?: string | null
+    sentById: number
+    sentAt?: Date | string
+    sentShiftId?: number | null
+    receivedById?: number | null
+    receivedAt?: Date | string | null
+    receivedShiftId?: number | null
+    receiveNote?: string | null
+    cancelledById?: number | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+  }
+
+  export type GtnUpdateManyMutationInput = {
+    gtnNo?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    carriedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    sentById?: IntFieldUpdateOperationsInput | number
+    sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sentShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    receivedShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receiveNote?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledById?: NullableIntFieldUpdateOperationsInput | number | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type GtnUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    gtnNo?: StringFieldUpdateOperationsInput | string
+    fromBranchId?: IntFieldUpdateOperationsInput | number
+    toBranchId?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    carriedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    sentById?: IntFieldUpdateOperationsInput | number
+    sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sentShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    receivedShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receiveNote?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledById?: NullableIntFieldUpdateOperationsInput | number | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type GtnItemCreateInput = {
+    productId?: number | null
+    productName: string
+    sentQty: number
+    receivedQty?: number | null
+    damagedQty?: number
+    missingQty?: number
+    unitCost?: number | null
+    gtn: GtnCreateNestedOneWithoutItemsInput
+  }
+
+  export type GtnItemUncheckedCreateInput = {
+    id?: number
+    gtnId: number
+    productId?: number | null
+    productName: string
+    sentQty: number
+    receivedQty?: number | null
+    damagedQty?: number
+    missingQty?: number
+    unitCost?: number | null
+  }
+
+  export type GtnItemUpdateInput = {
+    productId?: NullableIntFieldUpdateOperationsInput | number | null
+    productName?: StringFieldUpdateOperationsInput | string
+    sentQty?: IntFieldUpdateOperationsInput | number
+    receivedQty?: NullableIntFieldUpdateOperationsInput | number | null
+    damagedQty?: IntFieldUpdateOperationsInput | number
+    missingQty?: IntFieldUpdateOperationsInput | number
+    unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    gtn?: GtnUpdateOneRequiredWithoutItemsNestedInput
+  }
+
+  export type GtnItemUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    gtnId?: IntFieldUpdateOperationsInput | number
+    productId?: NullableIntFieldUpdateOperationsInput | number | null
+    productName?: StringFieldUpdateOperationsInput | string
+    sentQty?: IntFieldUpdateOperationsInput | number
+    receivedQty?: NullableIntFieldUpdateOperationsInput | number | null
+    damagedQty?: IntFieldUpdateOperationsInput | number
+    missingQty?: IntFieldUpdateOperationsInput | number
+    unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
+  }
+
+  export type GtnItemCreateManyInput = {
+    id?: number
+    gtnId: number
+    productId?: number | null
+    productName: string
+    sentQty: number
+    receivedQty?: number | null
+    damagedQty?: number
+    missingQty?: number
+    unitCost?: number | null
+  }
+
+  export type GtnItemUpdateManyMutationInput = {
+    productId?: NullableIntFieldUpdateOperationsInput | number | null
+    productName?: StringFieldUpdateOperationsInput | string
+    sentQty?: IntFieldUpdateOperationsInput | number
+    receivedQty?: NullableIntFieldUpdateOperationsInput | number | null
+    damagedQty?: IntFieldUpdateOperationsInput | number
+    missingQty?: IntFieldUpdateOperationsInput | number
+    unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
+  }
+
+  export type GtnItemUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    gtnId?: IntFieldUpdateOperationsInput | number
+    productId?: NullableIntFieldUpdateOperationsInput | number | null
+    productName?: StringFieldUpdateOperationsInput | string
+    sentQty?: IntFieldUpdateOperationsInput | number
+    receivedQty?: NullableIntFieldUpdateOperationsInput | number | null
+    damagedQty?: IntFieldUpdateOperationsInput | number
+    missingQty?: IntFieldUpdateOperationsInput | number
+    unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -48447,6 +57379,17 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type EnumPosAdminRoleFilter<$PrismaModel = never> = {
     equals?: $Enums.PosAdminRole | EnumPosAdminRoleFieldRefInput<$PrismaModel>
     in?: $Enums.PosAdminRole[] | ListEnumPosAdminRoleFieldRefInput<$PrismaModel>
@@ -48482,6 +57425,8 @@ export namespace Prisma {
 
   export type PosAdminCountOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
+    activeBranchId?: SortOrder
     name?: SortOrder
     email?: SortOrder
     passwordHash?: SortOrder
@@ -48494,10 +57439,14 @@ export namespace Prisma {
 
   export type PosAdminAvgOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
+    activeBranchId?: SortOrder
   }
 
   export type PosAdminMaxOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
+    activeBranchId?: SortOrder
     name?: SortOrder
     email?: SortOrder
     passwordHash?: SortOrder
@@ -48510,6 +57459,8 @@ export namespace Prisma {
 
   export type PosAdminMinOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
+    activeBranchId?: SortOrder
     name?: SortOrder
     email?: SortOrder
     passwordHash?: SortOrder
@@ -48522,6 +57473,24 @@ export namespace Prisma {
 
   export type PosAdminSumOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
+    activeBranchId?: SortOrder
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type EnumPosAdminRoleWithAggregatesFilter<$PrismaModel = never> = {
@@ -48574,17 +57543,6 @@ export namespace Prisma {
     not?: NestedEnumPaymentMethodFilter<$PrismaModel> | $Enums.PaymentMethod
   }
 
-  export type IntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
   export type FloatNullableFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel> | null
     in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
@@ -48613,6 +57571,7 @@ export namespace Prisma {
 
   export type PosCounterSaleCountOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     invoiceGroupCode?: SortOrder
     totalAmount?: SortOrder
     emptyDeduction?: SortOrder
@@ -48641,6 +57600,7 @@ export namespace Prisma {
 
   export type PosCounterSaleAvgOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     totalAmount?: SortOrder
     emptyDeduction?: SortOrder
     emptiesReturned?: SortOrder
@@ -48664,6 +57624,7 @@ export namespace Prisma {
 
   export type PosCounterSaleMaxOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     invoiceGroupCode?: SortOrder
     totalAmount?: SortOrder
     emptyDeduction?: SortOrder
@@ -48692,6 +57653,7 @@ export namespace Prisma {
 
   export type PosCounterSaleMinOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     invoiceGroupCode?: SortOrder
     totalAmount?: SortOrder
     emptyDeduction?: SortOrder
@@ -48720,6 +57682,7 @@ export namespace Prisma {
 
   export type PosCounterSaleSumOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     totalAmount?: SortOrder
     emptyDeduction?: SortOrder
     emptiesReturned?: SortOrder
@@ -48765,22 +57728,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumPaymentMethodFilter<$PrismaModel>
     _max?: NestedEnumPaymentMethodFilter<$PrismaModel>
-  }
-
-  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -48972,6 +57919,12 @@ export namespace Prisma {
     none?: PosCustomerPurchaseWhereInput
   }
 
+  export type BranchStockListRelationFilter = {
+    every?: BranchStockWhereInput
+    some?: BranchStockWhereInput
+    none?: BranchStockWhereInput
+  }
+
   export type InventoryProductExpenseOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -48989,6 +57942,10 @@ export namespace Prisma {
   }
 
   export type PosCustomerPurchaseOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type BranchStockOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -49010,6 +57967,7 @@ export namespace Prisma {
     sellingPrice?: SortOrder
     emptyBottlePrice?: SortOrder
     emptyBottlesOnHand?: SortOrder
+    isHardLiquor?: SortOrder
     damagedQuantity?: SortOrder
     description?: SortOrder
     lastSoldAt?: SortOrder
@@ -49052,6 +58010,7 @@ export namespace Prisma {
     sellingPrice?: SortOrder
     emptyBottlePrice?: SortOrder
     emptyBottlesOnHand?: SortOrder
+    isHardLiquor?: SortOrder
     damagedQuantity?: SortOrder
     description?: SortOrder
     lastSoldAt?: SortOrder
@@ -49077,6 +58036,7 @@ export namespace Prisma {
     sellingPrice?: SortOrder
     emptyBottlePrice?: SortOrder
     emptyBottlesOnHand?: SortOrder
+    isHardLiquor?: SortOrder
     damagedQuantity?: SortOrder
     description?: SortOrder
     lastSoldAt?: SortOrder
@@ -49385,6 +58345,7 @@ export namespace Prisma {
     quantity?: SortOrder
     emptiesReturned?: SortOrder
     emptyDeduction?: SortOrder
+    isHardLiquor?: SortOrder
     billDiscount?: SortOrder
     purchasedAt?: SortOrder
   }
@@ -49430,6 +58391,7 @@ export namespace Prisma {
     quantity?: SortOrder
     emptiesReturned?: SortOrder
     emptyDeduction?: SortOrder
+    isHardLiquor?: SortOrder
     billDiscount?: SortOrder
     purchasedAt?: SortOrder
   }
@@ -49457,6 +58419,7 @@ export namespace Prisma {
     quantity?: SortOrder
     emptiesReturned?: SortOrder
     emptyDeduction?: SortOrder
+    isHardLiquor?: SortOrder
     billDiscount?: SortOrder
     purchasedAt?: SortOrder
   }
@@ -50467,6 +59430,7 @@ export namespace Prisma {
 
   export type ActivityLogCountOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     actorId?: SortOrder
     actorName?: SortOrder
     actorEmail?: SortOrder
@@ -50484,11 +59448,13 @@ export namespace Prisma {
 
   export type ActivityLogAvgOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     actorId?: SortOrder
   }
 
   export type ActivityLogMaxOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     actorId?: SortOrder
     actorName?: SortOrder
     actorEmail?: SortOrder
@@ -50505,6 +59471,7 @@ export namespace Prisma {
 
   export type ActivityLogMinOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     actorId?: SortOrder
     actorName?: SortOrder
     actorEmail?: SortOrder
@@ -50521,6 +59488,7 @@ export namespace Prisma {
 
   export type ActivityLogSumOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     actorId?: SortOrder
   }
   export type JsonNullableWithAggregatesFilter<$PrismaModel = never> = 
@@ -50598,6 +59566,7 @@ export namespace Prisma {
 
   export type PosShiftCountOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     shiftNo?: SortOrder
     status?: SortOrder
     openedById?: SortOrder
@@ -50622,6 +59591,7 @@ export namespace Prisma {
 
   export type PosShiftAvgOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     openedById?: SortOrder
     openingFloat?: SortOrder
     countedCash?: SortOrder
@@ -50636,6 +59606,7 @@ export namespace Prisma {
 
   export type PosShiftMaxOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     shiftNo?: SortOrder
     status?: SortOrder
     openedById?: SortOrder
@@ -50658,6 +59629,7 @@ export namespace Prisma {
 
   export type PosShiftMinOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     shiftNo?: SortOrder
     status?: SortOrder
     openedById?: SortOrder
@@ -50680,6 +59652,7 @@ export namespace Prisma {
 
   export type PosShiftSumOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     openedById?: SortOrder
     openingFloat?: SortOrder
     countedCash?: SortOrder
@@ -50694,6 +59667,7 @@ export namespace Prisma {
 
   export type PosCashEntryCountOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     entryNo?: SortOrder
     direction?: SortOrder
     category?: SortOrder
@@ -50719,6 +59693,7 @@ export namespace Prisma {
 
   export type PosCashEntryAvgOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     amount?: SortOrder
     shiftId?: SortOrder
     createdById?: SortOrder
@@ -50728,6 +59703,7 @@ export namespace Prisma {
 
   export type PosCashEntryMaxOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     entryNo?: SortOrder
     direction?: SortOrder
     category?: SortOrder
@@ -50753,6 +59729,7 @@ export namespace Prisma {
 
   export type PosCashEntryMinOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     entryNo?: SortOrder
     direction?: SortOrder
     category?: SortOrder
@@ -50778,6 +59755,7 @@ export namespace Prisma {
 
   export type PosCashEntrySumOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     amount?: SortOrder
     shiftId?: SortOrder
     createdById?: SortOrder
@@ -50787,6 +59765,7 @@ export namespace Prisma {
 
   export type InventoryMovementCountOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     productId?: SortOrder
     kind?: SortOrder
     type?: SortOrder
@@ -50799,6 +59778,7 @@ export namespace Prisma {
 
   export type InventoryMovementAvgOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     productId?: SortOrder
     quantity?: SortOrder
     shiftId?: SortOrder
@@ -50807,6 +59787,7 @@ export namespace Prisma {
 
   export type InventoryMovementMaxOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     productId?: SortOrder
     kind?: SortOrder
     type?: SortOrder
@@ -50819,6 +59800,7 @@ export namespace Prisma {
 
   export type InventoryMovementMinOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     productId?: SortOrder
     kind?: SortOrder
     type?: SortOrder
@@ -50831,6 +59813,7 @@ export namespace Prisma {
 
   export type InventoryMovementSumOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     productId?: SortOrder
     quantity?: SortOrder
     shiftId?: SortOrder
@@ -50854,6 +59837,7 @@ export namespace Prisma {
 
   export type PurchaseOrderCountOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     poNumber?: SortOrder
     supplierId?: SortOrder
     status?: SortOrder
@@ -50875,6 +59859,7 @@ export namespace Prisma {
 
   export type PurchaseOrderAvgOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     supplierId?: SortOrder
     total?: SortOrder
     createdById?: SortOrder
@@ -50885,6 +59870,7 @@ export namespace Prisma {
 
   export type PurchaseOrderMaxOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     poNumber?: SortOrder
     supplierId?: SortOrder
     status?: SortOrder
@@ -50906,6 +59892,7 @@ export namespace Prisma {
 
   export type PurchaseOrderMinOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     poNumber?: SortOrder
     supplierId?: SortOrder
     status?: SortOrder
@@ -50927,6 +59914,7 @@ export namespace Prisma {
 
   export type PurchaseOrderSumOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     supplierId?: SortOrder
     total?: SortOrder
     createdById?: SortOrder
@@ -51106,6 +60094,7 @@ export namespace Prisma {
 
   export type PosReturnCountOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     returnNo?: SortOrder
     type?: SortOrder
     productId?: SortOrder
@@ -51132,6 +60121,7 @@ export namespace Prisma {
 
   export type PosReturnAvgOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     productId?: SortOrder
     quantity?: SortOrder
     customerId?: SortOrder
@@ -51145,6 +60135,7 @@ export namespace Prisma {
 
   export type PosReturnMaxOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     returnNo?: SortOrder
     type?: SortOrder
     productId?: SortOrder
@@ -51171,6 +60162,7 @@ export namespace Prisma {
 
   export type PosReturnMinOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     returnNo?: SortOrder
     type?: SortOrder
     productId?: SortOrder
@@ -51197,6 +60189,7 @@ export namespace Prisma {
 
   export type PosReturnSumOrderByAggregateInput = {
     id?: SortOrder
+    branchId?: SortOrder
     productId?: SortOrder
     quantity?: SortOrder
     customerId?: SortOrder
@@ -51206,6 +60199,455 @@ export namespace Prisma {
     unitCost?: SortOrder
     shiftId?: SortOrder
     createdById?: SortOrder
+  }
+
+  export type GrnListRelationFilter = {
+    every?: GrnWhereInput
+    some?: GrnWhereInput
+    none?: GrnWhereInput
+  }
+
+  export type GtnListRelationFilter = {
+    every?: GtnWhereInput
+    some?: GtnWhereInput
+    none?: GtnWhereInput
+  }
+
+  export type GrnOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type GtnOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type BranchCountOrderByAggregateInput = {
+    id?: SortOrder
+    code?: SortOrder
+    name?: SortOrder
+    address?: SortOrder
+    phone?: SortOrder
+    isMain?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BranchAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type BranchMaxOrderByAggregateInput = {
+    id?: SortOrder
+    code?: SortOrder
+    name?: SortOrder
+    address?: SortOrder
+    phone?: SortOrder
+    isMain?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BranchMinOrderByAggregateInput = {
+    id?: SortOrder
+    code?: SortOrder
+    name?: SortOrder
+    address?: SortOrder
+    phone?: SortOrder
+    isMain?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BranchSumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type BranchRelationFilter = {
+    is?: BranchWhereInput
+    isNot?: BranchWhereInput
+  }
+
+  export type BranchStockBranchIdProductIdCompoundUniqueInput = {
+    branchId: number
+    productId: number
+  }
+
+  export type BranchStockCountOrderByAggregateInput = {
+    id?: SortOrder
+    branchId?: SortOrder
+    productId?: SortOrder
+    quantity?: SortOrder
+    damagedQuantity?: SortOrder
+    emptyBottlesOnHand?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BranchStockAvgOrderByAggregateInput = {
+    id?: SortOrder
+    branchId?: SortOrder
+    productId?: SortOrder
+    quantity?: SortOrder
+    damagedQuantity?: SortOrder
+    emptyBottlesOnHand?: SortOrder
+  }
+
+  export type BranchStockMaxOrderByAggregateInput = {
+    id?: SortOrder
+    branchId?: SortOrder
+    productId?: SortOrder
+    quantity?: SortOrder
+    damagedQuantity?: SortOrder
+    emptyBottlesOnHand?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BranchStockMinOrderByAggregateInput = {
+    id?: SortOrder
+    branchId?: SortOrder
+    productId?: SortOrder
+    quantity?: SortOrder
+    damagedQuantity?: SortOrder
+    emptyBottlesOnHand?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BranchStockSumOrderByAggregateInput = {
+    id?: SortOrder
+    branchId?: SortOrder
+    productId?: SortOrder
+    quantity?: SortOrder
+    damagedQuantity?: SortOrder
+    emptyBottlesOnHand?: SortOrder
+  }
+
+  export type GrnItemListRelationFilter = {
+    every?: GrnItemWhereInput
+    some?: GrnItemWhereInput
+    none?: GrnItemWhereInput
+  }
+
+  export type GrnItemOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type GrnCountOrderByAggregateInput = {
+    id?: SortOrder
+    grnNo?: SortOrder
+    branchId?: SortOrder
+    supplierId?: SortOrder
+    supplierName?: SortOrder
+    purchaseOrderId?: SortOrder
+    poNumber?: SortOrder
+    supplierInvoiceNo?: SortOrder
+    invoiceDate?: SortOrder
+    invoiceTotal?: SortOrder
+    notes?: SortOrder
+    acceptedUnits?: SortOrder
+    rejectedUnits?: SortOrder
+    totalCost?: SortOrder
+    shiftId?: SortOrder
+    receivedById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type GrnAvgOrderByAggregateInput = {
+    id?: SortOrder
+    branchId?: SortOrder
+    supplierId?: SortOrder
+    purchaseOrderId?: SortOrder
+    invoiceTotal?: SortOrder
+    acceptedUnits?: SortOrder
+    rejectedUnits?: SortOrder
+    totalCost?: SortOrder
+    shiftId?: SortOrder
+    receivedById?: SortOrder
+  }
+
+  export type GrnMaxOrderByAggregateInput = {
+    id?: SortOrder
+    grnNo?: SortOrder
+    branchId?: SortOrder
+    supplierId?: SortOrder
+    supplierName?: SortOrder
+    purchaseOrderId?: SortOrder
+    poNumber?: SortOrder
+    supplierInvoiceNo?: SortOrder
+    invoiceDate?: SortOrder
+    invoiceTotal?: SortOrder
+    notes?: SortOrder
+    acceptedUnits?: SortOrder
+    rejectedUnits?: SortOrder
+    totalCost?: SortOrder
+    shiftId?: SortOrder
+    receivedById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type GrnMinOrderByAggregateInput = {
+    id?: SortOrder
+    grnNo?: SortOrder
+    branchId?: SortOrder
+    supplierId?: SortOrder
+    supplierName?: SortOrder
+    purchaseOrderId?: SortOrder
+    poNumber?: SortOrder
+    supplierInvoiceNo?: SortOrder
+    invoiceDate?: SortOrder
+    invoiceTotal?: SortOrder
+    notes?: SortOrder
+    acceptedUnits?: SortOrder
+    rejectedUnits?: SortOrder
+    totalCost?: SortOrder
+    shiftId?: SortOrder
+    receivedById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type GrnSumOrderByAggregateInput = {
+    id?: SortOrder
+    branchId?: SortOrder
+    supplierId?: SortOrder
+    purchaseOrderId?: SortOrder
+    invoiceTotal?: SortOrder
+    acceptedUnits?: SortOrder
+    rejectedUnits?: SortOrder
+    totalCost?: SortOrder
+    shiftId?: SortOrder
+    receivedById?: SortOrder
+  }
+
+  export type GrnRelationFilter = {
+    is?: GrnWhereInput
+    isNot?: GrnWhereInput
+  }
+
+  export type GrnItemCountOrderByAggregateInput = {
+    id?: SortOrder
+    grnId?: SortOrder
+    productId?: SortOrder
+    description?: SortOrder
+    purchaseOrderItemId?: SortOrder
+    orderedQty?: SortOrder
+    deliveredQty?: SortOrder
+    acceptedQty?: SortOrder
+    rejectedQty?: SortOrder
+    rejectReason?: SortOrder
+    unitCost?: SortOrder
+    lineTotal?: SortOrder
+  }
+
+  export type GrnItemAvgOrderByAggregateInput = {
+    id?: SortOrder
+    grnId?: SortOrder
+    productId?: SortOrder
+    purchaseOrderItemId?: SortOrder
+    orderedQty?: SortOrder
+    deliveredQty?: SortOrder
+    acceptedQty?: SortOrder
+    rejectedQty?: SortOrder
+    unitCost?: SortOrder
+    lineTotal?: SortOrder
+  }
+
+  export type GrnItemMaxOrderByAggregateInput = {
+    id?: SortOrder
+    grnId?: SortOrder
+    productId?: SortOrder
+    description?: SortOrder
+    purchaseOrderItemId?: SortOrder
+    orderedQty?: SortOrder
+    deliveredQty?: SortOrder
+    acceptedQty?: SortOrder
+    rejectedQty?: SortOrder
+    rejectReason?: SortOrder
+    unitCost?: SortOrder
+    lineTotal?: SortOrder
+  }
+
+  export type GrnItemMinOrderByAggregateInput = {
+    id?: SortOrder
+    grnId?: SortOrder
+    productId?: SortOrder
+    description?: SortOrder
+    purchaseOrderItemId?: SortOrder
+    orderedQty?: SortOrder
+    deliveredQty?: SortOrder
+    acceptedQty?: SortOrder
+    rejectedQty?: SortOrder
+    rejectReason?: SortOrder
+    unitCost?: SortOrder
+    lineTotal?: SortOrder
+  }
+
+  export type GrnItemSumOrderByAggregateInput = {
+    id?: SortOrder
+    grnId?: SortOrder
+    productId?: SortOrder
+    purchaseOrderItemId?: SortOrder
+    orderedQty?: SortOrder
+    deliveredQty?: SortOrder
+    acceptedQty?: SortOrder
+    rejectedQty?: SortOrder
+    unitCost?: SortOrder
+    lineTotal?: SortOrder
+  }
+
+  export type GtnItemListRelationFilter = {
+    every?: GtnItemWhereInput
+    some?: GtnItemWhereInput
+    none?: GtnItemWhereInput
+  }
+
+  export type GtnItemOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type GtnCountOrderByAggregateInput = {
+    id?: SortOrder
+    gtnNo?: SortOrder
+    fromBranchId?: SortOrder
+    toBranchId?: SortOrder
+    status?: SortOrder
+    notes?: SortOrder
+    carriedBy?: SortOrder
+    sentById?: SortOrder
+    sentAt?: SortOrder
+    sentShiftId?: SortOrder
+    receivedById?: SortOrder
+    receivedAt?: SortOrder
+    receivedShiftId?: SortOrder
+    receiveNote?: SortOrder
+    cancelledById?: SortOrder
+    cancelledAt?: SortOrder
+    cancelReason?: SortOrder
+  }
+
+  export type GtnAvgOrderByAggregateInput = {
+    id?: SortOrder
+    fromBranchId?: SortOrder
+    toBranchId?: SortOrder
+    sentById?: SortOrder
+    sentShiftId?: SortOrder
+    receivedById?: SortOrder
+    receivedShiftId?: SortOrder
+    cancelledById?: SortOrder
+  }
+
+  export type GtnMaxOrderByAggregateInput = {
+    id?: SortOrder
+    gtnNo?: SortOrder
+    fromBranchId?: SortOrder
+    toBranchId?: SortOrder
+    status?: SortOrder
+    notes?: SortOrder
+    carriedBy?: SortOrder
+    sentById?: SortOrder
+    sentAt?: SortOrder
+    sentShiftId?: SortOrder
+    receivedById?: SortOrder
+    receivedAt?: SortOrder
+    receivedShiftId?: SortOrder
+    receiveNote?: SortOrder
+    cancelledById?: SortOrder
+    cancelledAt?: SortOrder
+    cancelReason?: SortOrder
+  }
+
+  export type GtnMinOrderByAggregateInput = {
+    id?: SortOrder
+    gtnNo?: SortOrder
+    fromBranchId?: SortOrder
+    toBranchId?: SortOrder
+    status?: SortOrder
+    notes?: SortOrder
+    carriedBy?: SortOrder
+    sentById?: SortOrder
+    sentAt?: SortOrder
+    sentShiftId?: SortOrder
+    receivedById?: SortOrder
+    receivedAt?: SortOrder
+    receivedShiftId?: SortOrder
+    receiveNote?: SortOrder
+    cancelledById?: SortOrder
+    cancelledAt?: SortOrder
+    cancelReason?: SortOrder
+  }
+
+  export type GtnSumOrderByAggregateInput = {
+    id?: SortOrder
+    fromBranchId?: SortOrder
+    toBranchId?: SortOrder
+    sentById?: SortOrder
+    sentShiftId?: SortOrder
+    receivedById?: SortOrder
+    receivedShiftId?: SortOrder
+    cancelledById?: SortOrder
+  }
+
+  export type GtnRelationFilter = {
+    is?: GtnWhereInput
+    isNot?: GtnWhereInput
+  }
+
+  export type GtnItemCountOrderByAggregateInput = {
+    id?: SortOrder
+    gtnId?: SortOrder
+    productId?: SortOrder
+    productName?: SortOrder
+    sentQty?: SortOrder
+    receivedQty?: SortOrder
+    damagedQty?: SortOrder
+    missingQty?: SortOrder
+    unitCost?: SortOrder
+  }
+
+  export type GtnItemAvgOrderByAggregateInput = {
+    id?: SortOrder
+    gtnId?: SortOrder
+    productId?: SortOrder
+    sentQty?: SortOrder
+    receivedQty?: SortOrder
+    damagedQty?: SortOrder
+    missingQty?: SortOrder
+    unitCost?: SortOrder
+  }
+
+  export type GtnItemMaxOrderByAggregateInput = {
+    id?: SortOrder
+    gtnId?: SortOrder
+    productId?: SortOrder
+    productName?: SortOrder
+    sentQty?: SortOrder
+    receivedQty?: SortOrder
+    damagedQty?: SortOrder
+    missingQty?: SortOrder
+    unitCost?: SortOrder
+  }
+
+  export type GtnItemMinOrderByAggregateInput = {
+    id?: SortOrder
+    gtnId?: SortOrder
+    productId?: SortOrder
+    productName?: SortOrder
+    sentQty?: SortOrder
+    receivedQty?: SortOrder
+    damagedQty?: SortOrder
+    missingQty?: SortOrder
+    unitCost?: SortOrder
+  }
+
+  export type GtnItemSumOrderByAggregateInput = {
+    id?: SortOrder
+    gtnId?: SortOrder
+    productId?: SortOrder
+    sentQty?: SortOrder
+    receivedQty?: SortOrder
+    damagedQty?: SortOrder
+    missingQty?: SortOrder
+    unitCost?: SortOrder
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -51244,6 +60686,14 @@ export namespace Prisma {
     connectOrCreate?: PosCounterSaleCreateOrConnectWithoutCashierInput | PosCounterSaleCreateOrConnectWithoutCashierInput[]
     createMany?: PosCounterSaleCreateManyCashierInputEnvelope
     connect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+  }
+
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type EnumPosAdminRoleFieldUpdateOperationsInput = {
@@ -51350,14 +60800,6 @@ export namespace Prisma {
     delete?: PosShiftWhereInput | boolean
     connect?: PosShiftWhereUniqueInput
     update?: XOR<XOR<PosShiftUpdateToOneWithWhereWithoutSalesInput, PosShiftUpdateWithoutSalesInput>, PosShiftUncheckedUpdateWithoutSalesInput>
-  }
-
-  export type NullableIntFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type InventoryProductCreateNestedManyWithoutSupplierInput = {
@@ -51581,6 +61023,13 @@ export namespace Prisma {
     connect?: PosCustomerPurchaseWhereUniqueInput | PosCustomerPurchaseWhereUniqueInput[]
   }
 
+  export type BranchStockCreateNestedManyWithoutProductInput = {
+    create?: XOR<BranchStockCreateWithoutProductInput, BranchStockUncheckedCreateWithoutProductInput> | BranchStockCreateWithoutProductInput[] | BranchStockUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: BranchStockCreateOrConnectWithoutProductInput | BranchStockCreateOrConnectWithoutProductInput[]
+    createMany?: BranchStockCreateManyProductInputEnvelope
+    connect?: BranchStockWhereUniqueInput | BranchStockWhereUniqueInput[]
+  }
+
   export type InventoryProductExpenseUncheckedCreateNestedManyWithoutProductInput = {
     create?: XOR<InventoryProductExpenseCreateWithoutProductInput, InventoryProductExpenseUncheckedCreateWithoutProductInput> | InventoryProductExpenseCreateWithoutProductInput[] | InventoryProductExpenseUncheckedCreateWithoutProductInput[]
     connectOrCreate?: InventoryProductExpenseCreateOrConnectWithoutProductInput | InventoryProductExpenseCreateOrConnectWithoutProductInput[]
@@ -51614,6 +61063,13 @@ export namespace Prisma {
     connectOrCreate?: PosCustomerPurchaseCreateOrConnectWithoutInventoryProductInput | PosCustomerPurchaseCreateOrConnectWithoutInventoryProductInput[]
     createMany?: PosCustomerPurchaseCreateManyInventoryProductInputEnvelope
     connect?: PosCustomerPurchaseWhereUniqueInput | PosCustomerPurchaseWhereUniqueInput[]
+  }
+
+  export type BranchStockUncheckedCreateNestedManyWithoutProductInput = {
+    create?: XOR<BranchStockCreateWithoutProductInput, BranchStockUncheckedCreateWithoutProductInput> | BranchStockCreateWithoutProductInput[] | BranchStockUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: BranchStockCreateOrConnectWithoutProductInput | BranchStockCreateOrConnectWithoutProductInput[]
+    createMany?: BranchStockCreateManyProductInputEnvelope
+    connect?: BranchStockWhereUniqueInput | BranchStockWhereUniqueInput[]
   }
 
   export type InventoryBrandUpdateOneRequiredWithoutProductsNestedInput = {
@@ -51712,6 +61168,20 @@ export namespace Prisma {
     deleteMany?: PosCustomerPurchaseScalarWhereInput | PosCustomerPurchaseScalarWhereInput[]
   }
 
+  export type BranchStockUpdateManyWithoutProductNestedInput = {
+    create?: XOR<BranchStockCreateWithoutProductInput, BranchStockUncheckedCreateWithoutProductInput> | BranchStockCreateWithoutProductInput[] | BranchStockUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: BranchStockCreateOrConnectWithoutProductInput | BranchStockCreateOrConnectWithoutProductInput[]
+    upsert?: BranchStockUpsertWithWhereUniqueWithoutProductInput | BranchStockUpsertWithWhereUniqueWithoutProductInput[]
+    createMany?: BranchStockCreateManyProductInputEnvelope
+    set?: BranchStockWhereUniqueInput | BranchStockWhereUniqueInput[]
+    disconnect?: BranchStockWhereUniqueInput | BranchStockWhereUniqueInput[]
+    delete?: BranchStockWhereUniqueInput | BranchStockWhereUniqueInput[]
+    connect?: BranchStockWhereUniqueInput | BranchStockWhereUniqueInput[]
+    update?: BranchStockUpdateWithWhereUniqueWithoutProductInput | BranchStockUpdateWithWhereUniqueWithoutProductInput[]
+    updateMany?: BranchStockUpdateManyWithWhereWithoutProductInput | BranchStockUpdateManyWithWhereWithoutProductInput[]
+    deleteMany?: BranchStockScalarWhereInput | BranchStockScalarWhereInput[]
+  }
+
   export type InventoryProductExpenseUncheckedUpdateManyWithoutProductNestedInput = {
     create?: XOR<InventoryProductExpenseCreateWithoutProductInput, InventoryProductExpenseUncheckedCreateWithoutProductInput> | InventoryProductExpenseCreateWithoutProductInput[] | InventoryProductExpenseUncheckedCreateWithoutProductInput[]
     connectOrCreate?: InventoryProductExpenseCreateOrConnectWithoutProductInput | InventoryProductExpenseCreateOrConnectWithoutProductInput[]
@@ -51780,6 +61250,20 @@ export namespace Prisma {
     update?: PosCustomerPurchaseUpdateWithWhereUniqueWithoutInventoryProductInput | PosCustomerPurchaseUpdateWithWhereUniqueWithoutInventoryProductInput[]
     updateMany?: PosCustomerPurchaseUpdateManyWithWhereWithoutInventoryProductInput | PosCustomerPurchaseUpdateManyWithWhereWithoutInventoryProductInput[]
     deleteMany?: PosCustomerPurchaseScalarWhereInput | PosCustomerPurchaseScalarWhereInput[]
+  }
+
+  export type BranchStockUncheckedUpdateManyWithoutProductNestedInput = {
+    create?: XOR<BranchStockCreateWithoutProductInput, BranchStockUncheckedCreateWithoutProductInput> | BranchStockCreateWithoutProductInput[] | BranchStockUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: BranchStockCreateOrConnectWithoutProductInput | BranchStockCreateOrConnectWithoutProductInput[]
+    upsert?: BranchStockUpsertWithWhereUniqueWithoutProductInput | BranchStockUpsertWithWhereUniqueWithoutProductInput[]
+    createMany?: BranchStockCreateManyProductInputEnvelope
+    set?: BranchStockWhereUniqueInput | BranchStockWhereUniqueInput[]
+    disconnect?: BranchStockWhereUniqueInput | BranchStockWhereUniqueInput[]
+    delete?: BranchStockWhereUniqueInput | BranchStockWhereUniqueInput[]
+    connect?: BranchStockWhereUniqueInput | BranchStockWhereUniqueInput[]
+    update?: BranchStockUpdateWithWhereUniqueWithoutProductInput | BranchStockUpdateWithWhereUniqueWithoutProductInput[]
+    updateMany?: BranchStockUpdateManyWithWhereWithoutProductInput | BranchStockUpdateManyWithWhereWithoutProductInput[]
+    deleteMany?: BranchStockScalarWhereInput | BranchStockScalarWhereInput[]
   }
 
   export type InventoryProductCreateNestedOneWithoutExpensesInput = {
@@ -53466,6 +62950,356 @@ export namespace Prisma {
     update?: XOR<XOR<PosShiftUpdateToOneWithWhereWithoutReturnsInput, PosShiftUpdateWithoutReturnsInput>, PosShiftUncheckedUpdateWithoutReturnsInput>
   }
 
+  export type BranchStockCreateNestedManyWithoutBranchInput = {
+    create?: XOR<BranchStockCreateWithoutBranchInput, BranchStockUncheckedCreateWithoutBranchInput> | BranchStockCreateWithoutBranchInput[] | BranchStockUncheckedCreateWithoutBranchInput[]
+    connectOrCreate?: BranchStockCreateOrConnectWithoutBranchInput | BranchStockCreateOrConnectWithoutBranchInput[]
+    createMany?: BranchStockCreateManyBranchInputEnvelope
+    connect?: BranchStockWhereUniqueInput | BranchStockWhereUniqueInput[]
+  }
+
+  export type GrnCreateNestedManyWithoutBranchInput = {
+    create?: XOR<GrnCreateWithoutBranchInput, GrnUncheckedCreateWithoutBranchInput> | GrnCreateWithoutBranchInput[] | GrnUncheckedCreateWithoutBranchInput[]
+    connectOrCreate?: GrnCreateOrConnectWithoutBranchInput | GrnCreateOrConnectWithoutBranchInput[]
+    createMany?: GrnCreateManyBranchInputEnvelope
+    connect?: GrnWhereUniqueInput | GrnWhereUniqueInput[]
+  }
+
+  export type GtnCreateNestedManyWithoutFromBranchInput = {
+    create?: XOR<GtnCreateWithoutFromBranchInput, GtnUncheckedCreateWithoutFromBranchInput> | GtnCreateWithoutFromBranchInput[] | GtnUncheckedCreateWithoutFromBranchInput[]
+    connectOrCreate?: GtnCreateOrConnectWithoutFromBranchInput | GtnCreateOrConnectWithoutFromBranchInput[]
+    createMany?: GtnCreateManyFromBranchInputEnvelope
+    connect?: GtnWhereUniqueInput | GtnWhereUniqueInput[]
+  }
+
+  export type GtnCreateNestedManyWithoutToBranchInput = {
+    create?: XOR<GtnCreateWithoutToBranchInput, GtnUncheckedCreateWithoutToBranchInput> | GtnCreateWithoutToBranchInput[] | GtnUncheckedCreateWithoutToBranchInput[]
+    connectOrCreate?: GtnCreateOrConnectWithoutToBranchInput | GtnCreateOrConnectWithoutToBranchInput[]
+    createMany?: GtnCreateManyToBranchInputEnvelope
+    connect?: GtnWhereUniqueInput | GtnWhereUniqueInput[]
+  }
+
+  export type BranchStockUncheckedCreateNestedManyWithoutBranchInput = {
+    create?: XOR<BranchStockCreateWithoutBranchInput, BranchStockUncheckedCreateWithoutBranchInput> | BranchStockCreateWithoutBranchInput[] | BranchStockUncheckedCreateWithoutBranchInput[]
+    connectOrCreate?: BranchStockCreateOrConnectWithoutBranchInput | BranchStockCreateOrConnectWithoutBranchInput[]
+    createMany?: BranchStockCreateManyBranchInputEnvelope
+    connect?: BranchStockWhereUniqueInput | BranchStockWhereUniqueInput[]
+  }
+
+  export type GrnUncheckedCreateNestedManyWithoutBranchInput = {
+    create?: XOR<GrnCreateWithoutBranchInput, GrnUncheckedCreateWithoutBranchInput> | GrnCreateWithoutBranchInput[] | GrnUncheckedCreateWithoutBranchInput[]
+    connectOrCreate?: GrnCreateOrConnectWithoutBranchInput | GrnCreateOrConnectWithoutBranchInput[]
+    createMany?: GrnCreateManyBranchInputEnvelope
+    connect?: GrnWhereUniqueInput | GrnWhereUniqueInput[]
+  }
+
+  export type GtnUncheckedCreateNestedManyWithoutFromBranchInput = {
+    create?: XOR<GtnCreateWithoutFromBranchInput, GtnUncheckedCreateWithoutFromBranchInput> | GtnCreateWithoutFromBranchInput[] | GtnUncheckedCreateWithoutFromBranchInput[]
+    connectOrCreate?: GtnCreateOrConnectWithoutFromBranchInput | GtnCreateOrConnectWithoutFromBranchInput[]
+    createMany?: GtnCreateManyFromBranchInputEnvelope
+    connect?: GtnWhereUniqueInput | GtnWhereUniqueInput[]
+  }
+
+  export type GtnUncheckedCreateNestedManyWithoutToBranchInput = {
+    create?: XOR<GtnCreateWithoutToBranchInput, GtnUncheckedCreateWithoutToBranchInput> | GtnCreateWithoutToBranchInput[] | GtnUncheckedCreateWithoutToBranchInput[]
+    connectOrCreate?: GtnCreateOrConnectWithoutToBranchInput | GtnCreateOrConnectWithoutToBranchInput[]
+    createMany?: GtnCreateManyToBranchInputEnvelope
+    connect?: GtnWhereUniqueInput | GtnWhereUniqueInput[]
+  }
+
+  export type BranchStockUpdateManyWithoutBranchNestedInput = {
+    create?: XOR<BranchStockCreateWithoutBranchInput, BranchStockUncheckedCreateWithoutBranchInput> | BranchStockCreateWithoutBranchInput[] | BranchStockUncheckedCreateWithoutBranchInput[]
+    connectOrCreate?: BranchStockCreateOrConnectWithoutBranchInput | BranchStockCreateOrConnectWithoutBranchInput[]
+    upsert?: BranchStockUpsertWithWhereUniqueWithoutBranchInput | BranchStockUpsertWithWhereUniqueWithoutBranchInput[]
+    createMany?: BranchStockCreateManyBranchInputEnvelope
+    set?: BranchStockWhereUniqueInput | BranchStockWhereUniqueInput[]
+    disconnect?: BranchStockWhereUniqueInput | BranchStockWhereUniqueInput[]
+    delete?: BranchStockWhereUniqueInput | BranchStockWhereUniqueInput[]
+    connect?: BranchStockWhereUniqueInput | BranchStockWhereUniqueInput[]
+    update?: BranchStockUpdateWithWhereUniqueWithoutBranchInput | BranchStockUpdateWithWhereUniqueWithoutBranchInput[]
+    updateMany?: BranchStockUpdateManyWithWhereWithoutBranchInput | BranchStockUpdateManyWithWhereWithoutBranchInput[]
+    deleteMany?: BranchStockScalarWhereInput | BranchStockScalarWhereInput[]
+  }
+
+  export type GrnUpdateManyWithoutBranchNestedInput = {
+    create?: XOR<GrnCreateWithoutBranchInput, GrnUncheckedCreateWithoutBranchInput> | GrnCreateWithoutBranchInput[] | GrnUncheckedCreateWithoutBranchInput[]
+    connectOrCreate?: GrnCreateOrConnectWithoutBranchInput | GrnCreateOrConnectWithoutBranchInput[]
+    upsert?: GrnUpsertWithWhereUniqueWithoutBranchInput | GrnUpsertWithWhereUniqueWithoutBranchInput[]
+    createMany?: GrnCreateManyBranchInputEnvelope
+    set?: GrnWhereUniqueInput | GrnWhereUniqueInput[]
+    disconnect?: GrnWhereUniqueInput | GrnWhereUniqueInput[]
+    delete?: GrnWhereUniqueInput | GrnWhereUniqueInput[]
+    connect?: GrnWhereUniqueInput | GrnWhereUniqueInput[]
+    update?: GrnUpdateWithWhereUniqueWithoutBranchInput | GrnUpdateWithWhereUniqueWithoutBranchInput[]
+    updateMany?: GrnUpdateManyWithWhereWithoutBranchInput | GrnUpdateManyWithWhereWithoutBranchInput[]
+    deleteMany?: GrnScalarWhereInput | GrnScalarWhereInput[]
+  }
+
+  export type GtnUpdateManyWithoutFromBranchNestedInput = {
+    create?: XOR<GtnCreateWithoutFromBranchInput, GtnUncheckedCreateWithoutFromBranchInput> | GtnCreateWithoutFromBranchInput[] | GtnUncheckedCreateWithoutFromBranchInput[]
+    connectOrCreate?: GtnCreateOrConnectWithoutFromBranchInput | GtnCreateOrConnectWithoutFromBranchInput[]
+    upsert?: GtnUpsertWithWhereUniqueWithoutFromBranchInput | GtnUpsertWithWhereUniqueWithoutFromBranchInput[]
+    createMany?: GtnCreateManyFromBranchInputEnvelope
+    set?: GtnWhereUniqueInput | GtnWhereUniqueInput[]
+    disconnect?: GtnWhereUniqueInput | GtnWhereUniqueInput[]
+    delete?: GtnWhereUniqueInput | GtnWhereUniqueInput[]
+    connect?: GtnWhereUniqueInput | GtnWhereUniqueInput[]
+    update?: GtnUpdateWithWhereUniqueWithoutFromBranchInput | GtnUpdateWithWhereUniqueWithoutFromBranchInput[]
+    updateMany?: GtnUpdateManyWithWhereWithoutFromBranchInput | GtnUpdateManyWithWhereWithoutFromBranchInput[]
+    deleteMany?: GtnScalarWhereInput | GtnScalarWhereInput[]
+  }
+
+  export type GtnUpdateManyWithoutToBranchNestedInput = {
+    create?: XOR<GtnCreateWithoutToBranchInput, GtnUncheckedCreateWithoutToBranchInput> | GtnCreateWithoutToBranchInput[] | GtnUncheckedCreateWithoutToBranchInput[]
+    connectOrCreate?: GtnCreateOrConnectWithoutToBranchInput | GtnCreateOrConnectWithoutToBranchInput[]
+    upsert?: GtnUpsertWithWhereUniqueWithoutToBranchInput | GtnUpsertWithWhereUniqueWithoutToBranchInput[]
+    createMany?: GtnCreateManyToBranchInputEnvelope
+    set?: GtnWhereUniqueInput | GtnWhereUniqueInput[]
+    disconnect?: GtnWhereUniqueInput | GtnWhereUniqueInput[]
+    delete?: GtnWhereUniqueInput | GtnWhereUniqueInput[]
+    connect?: GtnWhereUniqueInput | GtnWhereUniqueInput[]
+    update?: GtnUpdateWithWhereUniqueWithoutToBranchInput | GtnUpdateWithWhereUniqueWithoutToBranchInput[]
+    updateMany?: GtnUpdateManyWithWhereWithoutToBranchInput | GtnUpdateManyWithWhereWithoutToBranchInput[]
+    deleteMany?: GtnScalarWhereInput | GtnScalarWhereInput[]
+  }
+
+  export type BranchStockUncheckedUpdateManyWithoutBranchNestedInput = {
+    create?: XOR<BranchStockCreateWithoutBranchInput, BranchStockUncheckedCreateWithoutBranchInput> | BranchStockCreateWithoutBranchInput[] | BranchStockUncheckedCreateWithoutBranchInput[]
+    connectOrCreate?: BranchStockCreateOrConnectWithoutBranchInput | BranchStockCreateOrConnectWithoutBranchInput[]
+    upsert?: BranchStockUpsertWithWhereUniqueWithoutBranchInput | BranchStockUpsertWithWhereUniqueWithoutBranchInput[]
+    createMany?: BranchStockCreateManyBranchInputEnvelope
+    set?: BranchStockWhereUniqueInput | BranchStockWhereUniqueInput[]
+    disconnect?: BranchStockWhereUniqueInput | BranchStockWhereUniqueInput[]
+    delete?: BranchStockWhereUniqueInput | BranchStockWhereUniqueInput[]
+    connect?: BranchStockWhereUniqueInput | BranchStockWhereUniqueInput[]
+    update?: BranchStockUpdateWithWhereUniqueWithoutBranchInput | BranchStockUpdateWithWhereUniqueWithoutBranchInput[]
+    updateMany?: BranchStockUpdateManyWithWhereWithoutBranchInput | BranchStockUpdateManyWithWhereWithoutBranchInput[]
+    deleteMany?: BranchStockScalarWhereInput | BranchStockScalarWhereInput[]
+  }
+
+  export type GrnUncheckedUpdateManyWithoutBranchNestedInput = {
+    create?: XOR<GrnCreateWithoutBranchInput, GrnUncheckedCreateWithoutBranchInput> | GrnCreateWithoutBranchInput[] | GrnUncheckedCreateWithoutBranchInput[]
+    connectOrCreate?: GrnCreateOrConnectWithoutBranchInput | GrnCreateOrConnectWithoutBranchInput[]
+    upsert?: GrnUpsertWithWhereUniqueWithoutBranchInput | GrnUpsertWithWhereUniqueWithoutBranchInput[]
+    createMany?: GrnCreateManyBranchInputEnvelope
+    set?: GrnWhereUniqueInput | GrnWhereUniqueInput[]
+    disconnect?: GrnWhereUniqueInput | GrnWhereUniqueInput[]
+    delete?: GrnWhereUniqueInput | GrnWhereUniqueInput[]
+    connect?: GrnWhereUniqueInput | GrnWhereUniqueInput[]
+    update?: GrnUpdateWithWhereUniqueWithoutBranchInput | GrnUpdateWithWhereUniqueWithoutBranchInput[]
+    updateMany?: GrnUpdateManyWithWhereWithoutBranchInput | GrnUpdateManyWithWhereWithoutBranchInput[]
+    deleteMany?: GrnScalarWhereInput | GrnScalarWhereInput[]
+  }
+
+  export type GtnUncheckedUpdateManyWithoutFromBranchNestedInput = {
+    create?: XOR<GtnCreateWithoutFromBranchInput, GtnUncheckedCreateWithoutFromBranchInput> | GtnCreateWithoutFromBranchInput[] | GtnUncheckedCreateWithoutFromBranchInput[]
+    connectOrCreate?: GtnCreateOrConnectWithoutFromBranchInput | GtnCreateOrConnectWithoutFromBranchInput[]
+    upsert?: GtnUpsertWithWhereUniqueWithoutFromBranchInput | GtnUpsertWithWhereUniqueWithoutFromBranchInput[]
+    createMany?: GtnCreateManyFromBranchInputEnvelope
+    set?: GtnWhereUniqueInput | GtnWhereUniqueInput[]
+    disconnect?: GtnWhereUniqueInput | GtnWhereUniqueInput[]
+    delete?: GtnWhereUniqueInput | GtnWhereUniqueInput[]
+    connect?: GtnWhereUniqueInput | GtnWhereUniqueInput[]
+    update?: GtnUpdateWithWhereUniqueWithoutFromBranchInput | GtnUpdateWithWhereUniqueWithoutFromBranchInput[]
+    updateMany?: GtnUpdateManyWithWhereWithoutFromBranchInput | GtnUpdateManyWithWhereWithoutFromBranchInput[]
+    deleteMany?: GtnScalarWhereInput | GtnScalarWhereInput[]
+  }
+
+  export type GtnUncheckedUpdateManyWithoutToBranchNestedInput = {
+    create?: XOR<GtnCreateWithoutToBranchInput, GtnUncheckedCreateWithoutToBranchInput> | GtnCreateWithoutToBranchInput[] | GtnUncheckedCreateWithoutToBranchInput[]
+    connectOrCreate?: GtnCreateOrConnectWithoutToBranchInput | GtnCreateOrConnectWithoutToBranchInput[]
+    upsert?: GtnUpsertWithWhereUniqueWithoutToBranchInput | GtnUpsertWithWhereUniqueWithoutToBranchInput[]
+    createMany?: GtnCreateManyToBranchInputEnvelope
+    set?: GtnWhereUniqueInput | GtnWhereUniqueInput[]
+    disconnect?: GtnWhereUniqueInput | GtnWhereUniqueInput[]
+    delete?: GtnWhereUniqueInput | GtnWhereUniqueInput[]
+    connect?: GtnWhereUniqueInput | GtnWhereUniqueInput[]
+    update?: GtnUpdateWithWhereUniqueWithoutToBranchInput | GtnUpdateWithWhereUniqueWithoutToBranchInput[]
+    updateMany?: GtnUpdateManyWithWhereWithoutToBranchInput | GtnUpdateManyWithWhereWithoutToBranchInput[]
+    deleteMany?: GtnScalarWhereInput | GtnScalarWhereInput[]
+  }
+
+  export type BranchCreateNestedOneWithoutStockInput = {
+    create?: XOR<BranchCreateWithoutStockInput, BranchUncheckedCreateWithoutStockInput>
+    connectOrCreate?: BranchCreateOrConnectWithoutStockInput
+    connect?: BranchWhereUniqueInput
+  }
+
+  export type InventoryProductCreateNestedOneWithoutBranchStockInput = {
+    create?: XOR<InventoryProductCreateWithoutBranchStockInput, InventoryProductUncheckedCreateWithoutBranchStockInput>
+    connectOrCreate?: InventoryProductCreateOrConnectWithoutBranchStockInput
+    connect?: InventoryProductWhereUniqueInput
+  }
+
+  export type BranchUpdateOneRequiredWithoutStockNestedInput = {
+    create?: XOR<BranchCreateWithoutStockInput, BranchUncheckedCreateWithoutStockInput>
+    connectOrCreate?: BranchCreateOrConnectWithoutStockInput
+    upsert?: BranchUpsertWithoutStockInput
+    connect?: BranchWhereUniqueInput
+    update?: XOR<XOR<BranchUpdateToOneWithWhereWithoutStockInput, BranchUpdateWithoutStockInput>, BranchUncheckedUpdateWithoutStockInput>
+  }
+
+  export type InventoryProductUpdateOneRequiredWithoutBranchStockNestedInput = {
+    create?: XOR<InventoryProductCreateWithoutBranchStockInput, InventoryProductUncheckedCreateWithoutBranchStockInput>
+    connectOrCreate?: InventoryProductCreateOrConnectWithoutBranchStockInput
+    upsert?: InventoryProductUpsertWithoutBranchStockInput
+    connect?: InventoryProductWhereUniqueInput
+    update?: XOR<XOR<InventoryProductUpdateToOneWithWhereWithoutBranchStockInput, InventoryProductUpdateWithoutBranchStockInput>, InventoryProductUncheckedUpdateWithoutBranchStockInput>
+  }
+
+  export type BranchCreateNestedOneWithoutGrnsInput = {
+    create?: XOR<BranchCreateWithoutGrnsInput, BranchUncheckedCreateWithoutGrnsInput>
+    connectOrCreate?: BranchCreateOrConnectWithoutGrnsInput
+    connect?: BranchWhereUniqueInput
+  }
+
+  export type GrnItemCreateNestedManyWithoutGrnInput = {
+    create?: XOR<GrnItemCreateWithoutGrnInput, GrnItemUncheckedCreateWithoutGrnInput> | GrnItemCreateWithoutGrnInput[] | GrnItemUncheckedCreateWithoutGrnInput[]
+    connectOrCreate?: GrnItemCreateOrConnectWithoutGrnInput | GrnItemCreateOrConnectWithoutGrnInput[]
+    createMany?: GrnItemCreateManyGrnInputEnvelope
+    connect?: GrnItemWhereUniqueInput | GrnItemWhereUniqueInput[]
+  }
+
+  export type GrnItemUncheckedCreateNestedManyWithoutGrnInput = {
+    create?: XOR<GrnItemCreateWithoutGrnInput, GrnItemUncheckedCreateWithoutGrnInput> | GrnItemCreateWithoutGrnInput[] | GrnItemUncheckedCreateWithoutGrnInput[]
+    connectOrCreate?: GrnItemCreateOrConnectWithoutGrnInput | GrnItemCreateOrConnectWithoutGrnInput[]
+    createMany?: GrnItemCreateManyGrnInputEnvelope
+    connect?: GrnItemWhereUniqueInput | GrnItemWhereUniqueInput[]
+  }
+
+  export type BranchUpdateOneRequiredWithoutGrnsNestedInput = {
+    create?: XOR<BranchCreateWithoutGrnsInput, BranchUncheckedCreateWithoutGrnsInput>
+    connectOrCreate?: BranchCreateOrConnectWithoutGrnsInput
+    upsert?: BranchUpsertWithoutGrnsInput
+    connect?: BranchWhereUniqueInput
+    update?: XOR<XOR<BranchUpdateToOneWithWhereWithoutGrnsInput, BranchUpdateWithoutGrnsInput>, BranchUncheckedUpdateWithoutGrnsInput>
+  }
+
+  export type GrnItemUpdateManyWithoutGrnNestedInput = {
+    create?: XOR<GrnItemCreateWithoutGrnInput, GrnItemUncheckedCreateWithoutGrnInput> | GrnItemCreateWithoutGrnInput[] | GrnItemUncheckedCreateWithoutGrnInput[]
+    connectOrCreate?: GrnItemCreateOrConnectWithoutGrnInput | GrnItemCreateOrConnectWithoutGrnInput[]
+    upsert?: GrnItemUpsertWithWhereUniqueWithoutGrnInput | GrnItemUpsertWithWhereUniqueWithoutGrnInput[]
+    createMany?: GrnItemCreateManyGrnInputEnvelope
+    set?: GrnItemWhereUniqueInput | GrnItemWhereUniqueInput[]
+    disconnect?: GrnItemWhereUniqueInput | GrnItemWhereUniqueInput[]
+    delete?: GrnItemWhereUniqueInput | GrnItemWhereUniqueInput[]
+    connect?: GrnItemWhereUniqueInput | GrnItemWhereUniqueInput[]
+    update?: GrnItemUpdateWithWhereUniqueWithoutGrnInput | GrnItemUpdateWithWhereUniqueWithoutGrnInput[]
+    updateMany?: GrnItemUpdateManyWithWhereWithoutGrnInput | GrnItemUpdateManyWithWhereWithoutGrnInput[]
+    deleteMany?: GrnItemScalarWhereInput | GrnItemScalarWhereInput[]
+  }
+
+  export type GrnItemUncheckedUpdateManyWithoutGrnNestedInput = {
+    create?: XOR<GrnItemCreateWithoutGrnInput, GrnItemUncheckedCreateWithoutGrnInput> | GrnItemCreateWithoutGrnInput[] | GrnItemUncheckedCreateWithoutGrnInput[]
+    connectOrCreate?: GrnItemCreateOrConnectWithoutGrnInput | GrnItemCreateOrConnectWithoutGrnInput[]
+    upsert?: GrnItemUpsertWithWhereUniqueWithoutGrnInput | GrnItemUpsertWithWhereUniqueWithoutGrnInput[]
+    createMany?: GrnItemCreateManyGrnInputEnvelope
+    set?: GrnItemWhereUniqueInput | GrnItemWhereUniqueInput[]
+    disconnect?: GrnItemWhereUniqueInput | GrnItemWhereUniqueInput[]
+    delete?: GrnItemWhereUniqueInput | GrnItemWhereUniqueInput[]
+    connect?: GrnItemWhereUniqueInput | GrnItemWhereUniqueInput[]
+    update?: GrnItemUpdateWithWhereUniqueWithoutGrnInput | GrnItemUpdateWithWhereUniqueWithoutGrnInput[]
+    updateMany?: GrnItemUpdateManyWithWhereWithoutGrnInput | GrnItemUpdateManyWithWhereWithoutGrnInput[]
+    deleteMany?: GrnItemScalarWhereInput | GrnItemScalarWhereInput[]
+  }
+
+  export type GrnCreateNestedOneWithoutItemsInput = {
+    create?: XOR<GrnCreateWithoutItemsInput, GrnUncheckedCreateWithoutItemsInput>
+    connectOrCreate?: GrnCreateOrConnectWithoutItemsInput
+    connect?: GrnWhereUniqueInput
+  }
+
+  export type GrnUpdateOneRequiredWithoutItemsNestedInput = {
+    create?: XOR<GrnCreateWithoutItemsInput, GrnUncheckedCreateWithoutItemsInput>
+    connectOrCreate?: GrnCreateOrConnectWithoutItemsInput
+    upsert?: GrnUpsertWithoutItemsInput
+    connect?: GrnWhereUniqueInput
+    update?: XOR<XOR<GrnUpdateToOneWithWhereWithoutItemsInput, GrnUpdateWithoutItemsInput>, GrnUncheckedUpdateWithoutItemsInput>
+  }
+
+  export type BranchCreateNestedOneWithoutGtnsOutInput = {
+    create?: XOR<BranchCreateWithoutGtnsOutInput, BranchUncheckedCreateWithoutGtnsOutInput>
+    connectOrCreate?: BranchCreateOrConnectWithoutGtnsOutInput
+    connect?: BranchWhereUniqueInput
+  }
+
+  export type BranchCreateNestedOneWithoutGtnsInInput = {
+    create?: XOR<BranchCreateWithoutGtnsInInput, BranchUncheckedCreateWithoutGtnsInInput>
+    connectOrCreate?: BranchCreateOrConnectWithoutGtnsInInput
+    connect?: BranchWhereUniqueInput
+  }
+
+  export type GtnItemCreateNestedManyWithoutGtnInput = {
+    create?: XOR<GtnItemCreateWithoutGtnInput, GtnItemUncheckedCreateWithoutGtnInput> | GtnItemCreateWithoutGtnInput[] | GtnItemUncheckedCreateWithoutGtnInput[]
+    connectOrCreate?: GtnItemCreateOrConnectWithoutGtnInput | GtnItemCreateOrConnectWithoutGtnInput[]
+    createMany?: GtnItemCreateManyGtnInputEnvelope
+    connect?: GtnItemWhereUniqueInput | GtnItemWhereUniqueInput[]
+  }
+
+  export type GtnItemUncheckedCreateNestedManyWithoutGtnInput = {
+    create?: XOR<GtnItemCreateWithoutGtnInput, GtnItemUncheckedCreateWithoutGtnInput> | GtnItemCreateWithoutGtnInput[] | GtnItemUncheckedCreateWithoutGtnInput[]
+    connectOrCreate?: GtnItemCreateOrConnectWithoutGtnInput | GtnItemCreateOrConnectWithoutGtnInput[]
+    createMany?: GtnItemCreateManyGtnInputEnvelope
+    connect?: GtnItemWhereUniqueInput | GtnItemWhereUniqueInput[]
+  }
+
+  export type BranchUpdateOneRequiredWithoutGtnsOutNestedInput = {
+    create?: XOR<BranchCreateWithoutGtnsOutInput, BranchUncheckedCreateWithoutGtnsOutInput>
+    connectOrCreate?: BranchCreateOrConnectWithoutGtnsOutInput
+    upsert?: BranchUpsertWithoutGtnsOutInput
+    connect?: BranchWhereUniqueInput
+    update?: XOR<XOR<BranchUpdateToOneWithWhereWithoutGtnsOutInput, BranchUpdateWithoutGtnsOutInput>, BranchUncheckedUpdateWithoutGtnsOutInput>
+  }
+
+  export type BranchUpdateOneRequiredWithoutGtnsInNestedInput = {
+    create?: XOR<BranchCreateWithoutGtnsInInput, BranchUncheckedCreateWithoutGtnsInInput>
+    connectOrCreate?: BranchCreateOrConnectWithoutGtnsInInput
+    upsert?: BranchUpsertWithoutGtnsInInput
+    connect?: BranchWhereUniqueInput
+    update?: XOR<XOR<BranchUpdateToOneWithWhereWithoutGtnsInInput, BranchUpdateWithoutGtnsInInput>, BranchUncheckedUpdateWithoutGtnsInInput>
+  }
+
+  export type GtnItemUpdateManyWithoutGtnNestedInput = {
+    create?: XOR<GtnItemCreateWithoutGtnInput, GtnItemUncheckedCreateWithoutGtnInput> | GtnItemCreateWithoutGtnInput[] | GtnItemUncheckedCreateWithoutGtnInput[]
+    connectOrCreate?: GtnItemCreateOrConnectWithoutGtnInput | GtnItemCreateOrConnectWithoutGtnInput[]
+    upsert?: GtnItemUpsertWithWhereUniqueWithoutGtnInput | GtnItemUpsertWithWhereUniqueWithoutGtnInput[]
+    createMany?: GtnItemCreateManyGtnInputEnvelope
+    set?: GtnItemWhereUniqueInput | GtnItemWhereUniqueInput[]
+    disconnect?: GtnItemWhereUniqueInput | GtnItemWhereUniqueInput[]
+    delete?: GtnItemWhereUniqueInput | GtnItemWhereUniqueInput[]
+    connect?: GtnItemWhereUniqueInput | GtnItemWhereUniqueInput[]
+    update?: GtnItemUpdateWithWhereUniqueWithoutGtnInput | GtnItemUpdateWithWhereUniqueWithoutGtnInput[]
+    updateMany?: GtnItemUpdateManyWithWhereWithoutGtnInput | GtnItemUpdateManyWithWhereWithoutGtnInput[]
+    deleteMany?: GtnItemScalarWhereInput | GtnItemScalarWhereInput[]
+  }
+
+  export type GtnItemUncheckedUpdateManyWithoutGtnNestedInput = {
+    create?: XOR<GtnItemCreateWithoutGtnInput, GtnItemUncheckedCreateWithoutGtnInput> | GtnItemCreateWithoutGtnInput[] | GtnItemUncheckedCreateWithoutGtnInput[]
+    connectOrCreate?: GtnItemCreateOrConnectWithoutGtnInput | GtnItemCreateOrConnectWithoutGtnInput[]
+    upsert?: GtnItemUpsertWithWhereUniqueWithoutGtnInput | GtnItemUpsertWithWhereUniqueWithoutGtnInput[]
+    createMany?: GtnItemCreateManyGtnInputEnvelope
+    set?: GtnItemWhereUniqueInput | GtnItemWhereUniqueInput[]
+    disconnect?: GtnItemWhereUniqueInput | GtnItemWhereUniqueInput[]
+    delete?: GtnItemWhereUniqueInput | GtnItemWhereUniqueInput[]
+    connect?: GtnItemWhereUniqueInput | GtnItemWhereUniqueInput[]
+    update?: GtnItemUpdateWithWhereUniqueWithoutGtnInput | GtnItemUpdateWithWhereUniqueWithoutGtnInput[]
+    updateMany?: GtnItemUpdateManyWithWhereWithoutGtnInput | GtnItemUpdateManyWithWhereWithoutGtnInput[]
+    deleteMany?: GtnItemScalarWhereInput | GtnItemScalarWhereInput[]
+  }
+
+  export type GtnCreateNestedOneWithoutItemsInput = {
+    create?: XOR<GtnCreateWithoutItemsInput, GtnUncheckedCreateWithoutItemsInput>
+    connectOrCreate?: GtnCreateOrConnectWithoutItemsInput
+    connect?: GtnWhereUniqueInput
+  }
+
+  export type GtnUpdateOneRequiredWithoutItemsNestedInput = {
+    create?: XOR<GtnCreateWithoutItemsInput, GtnUncheckedCreateWithoutItemsInput>
+    connectOrCreate?: GtnCreateOrConnectWithoutItemsInput
+    upsert?: GtnUpsertWithoutItemsInput
+    connect?: GtnWhereUniqueInput
+    update?: XOR<XOR<GtnUpdateToOneWithWhereWithoutItemsInput, GtnUpdateWithoutItemsInput>, GtnUncheckedUpdateWithoutItemsInput>
+  }
+
   export type NestedIntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -53642,6 +63476,33 @@ export namespace Prisma {
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
   export type NestedEnumPosAdminRoleWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.PosAdminRole | EnumPosAdminRoleFieldRefInput<$PrismaModel>
     in?: $Enums.PosAdminRole[] | ListEnumPosAdminRoleFieldRefInput<$PrismaModel>
@@ -53681,17 +63542,6 @@ export namespace Prisma {
     not?: NestedEnumPaymentMethodFilter<$PrismaModel> | $Enums.PaymentMethod
   }
 
-  export type NestedFloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
-  }
-
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -53716,22 +63566,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumPaymentMethodFilter<$PrismaModel>
     _max?: NestedEnumPaymentMethodFilter<$PrismaModel>
-  }
-
-  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -54016,6 +63850,7 @@ export namespace Prisma {
   }
 
   export type PosCounterSaleCreateWithoutCashierInput = {
+    branchId?: number | null
     invoiceGroupCode: string
     totalAmount: number
     emptyDeduction?: number
@@ -54043,6 +63878,7 @@ export namespace Prisma {
 
   export type PosCounterSaleUncheckedCreateWithoutCashierInput = {
     id?: number
+    branchId?: number | null
     invoiceGroupCode: string
     totalAmount: number
     emptyDeduction?: number
@@ -54099,6 +63935,7 @@ export namespace Prisma {
     OR?: PosCounterSaleScalarWhereInput[]
     NOT?: PosCounterSaleScalarWhereInput | PosCounterSaleScalarWhereInput[]
     id?: IntFilter<"PosCounterSale"> | number
+    branchId?: IntNullableFilter<"PosCounterSale"> | number | null
     invoiceGroupCode?: StringFilter<"PosCounterSale"> | string
     totalAmount?: FloatFilter<"PosCounterSale"> | number
     emptyDeduction?: FloatFilter<"PosCounterSale"> | number
@@ -54126,6 +63963,8 @@ export namespace Prisma {
   }
 
   export type PosAdminCreateWithoutCounterSalesInput = {
+    branchId?: number | null
+    activeBranchId?: number | null
     name: string
     email: string
     passwordHash: string
@@ -54138,6 +63977,8 @@ export namespace Prisma {
 
   export type PosAdminUncheckedCreateWithoutCounterSalesInput = {
     id?: number
+    branchId?: number | null
+    activeBranchId?: number | null
     name: string
     email: string
     passwordHash: string
@@ -54202,6 +64043,7 @@ export namespace Prisma {
   }
 
   export type PosShiftCreateWithoutSalesInput = {
+    branchId?: number | null
     shiftNo: string
     status?: string
     openedById: number
@@ -54229,6 +64071,7 @@ export namespace Prisma {
 
   export type PosShiftUncheckedCreateWithoutSalesInput = {
     id?: number
+    branchId?: number | null
     shiftNo: string
     status?: string
     openedById: number
@@ -54271,6 +64114,8 @@ export namespace Prisma {
   }
 
   export type PosAdminUpdateWithoutCounterSalesInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    activeBranchId?: NullableIntFieldUpdateOperationsInput | number | null
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
@@ -54283,6 +64128,8 @@ export namespace Prisma {
 
   export type PosAdminUncheckedUpdateWithoutCounterSalesInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    activeBranchId?: NullableIntFieldUpdateOperationsInput | number | null
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
@@ -54359,6 +64206,7 @@ export namespace Prisma {
   }
 
   export type PosShiftUpdateWithoutSalesInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     shiftNo?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     openedById?: IntFieldUpdateOperationsInput | number
@@ -54386,6 +64234,7 @@ export namespace Prisma {
 
   export type PosShiftUncheckedUpdateWithoutSalesInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     shiftNo?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     openedById?: IntFieldUpdateOperationsInput | number
@@ -54425,6 +64274,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -54437,6 +64287,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemCreateNestedManyWithoutProductInput
     returns?: PosReturnCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseCreateNestedManyWithoutInventoryProductInput
+    branchStock?: BranchStockCreateNestedManyWithoutProductInput
   }
 
   export type InventoryProductUncheckedCreateWithoutSupplierInput = {
@@ -54456,6 +64307,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -54466,6 +64318,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemUncheckedCreateNestedManyWithoutProductInput
     returns?: PosReturnUncheckedCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutInventoryProductInput
+    branchStock?: BranchStockUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type InventoryProductCreateOrConnectWithoutSupplierInput = {
@@ -54479,6 +64332,7 @@ export namespace Prisma {
   }
 
   export type PurchaseOrderCreateWithoutSupplierInput = {
+    branchId?: number | null
     poNumber: string
     status?: string
     orderDate?: Date | string
@@ -54501,6 +64355,7 @@ export namespace Prisma {
 
   export type PurchaseOrderUncheckedCreateWithoutSupplierInput = {
     id?: number
+    branchId?: number | null
     poNumber: string
     status?: string
     orderDate?: Date | string
@@ -54568,6 +64423,7 @@ export namespace Prisma {
     sellingPrice?: FloatNullableFilter<"InventoryProduct"> | number | null
     emptyBottlePrice?: FloatNullableFilter<"InventoryProduct"> | number | null
     emptyBottlesOnHand?: IntFilter<"InventoryProduct"> | number
+    isHardLiquor?: BoolFilter<"InventoryProduct"> | boolean
     damagedQuantity?: IntFilter<"InventoryProduct"> | number
     description?: StringNullableFilter<"InventoryProduct"> | string | null
     lastSoldAt?: DateTimeNullableFilter<"InventoryProduct"> | Date | string | null
@@ -54596,6 +64452,7 @@ export namespace Prisma {
     OR?: PurchaseOrderScalarWhereInput[]
     NOT?: PurchaseOrderScalarWhereInput | PurchaseOrderScalarWhereInput[]
     id?: IntFilter<"PurchaseOrder"> | number
+    branchId?: IntNullableFilter<"PurchaseOrder"> | number | null
     poNumber?: StringFilter<"PurchaseOrder"> | string
     supplierId?: IntFilter<"PurchaseOrder"> | number
     status?: StringFilter<"PurchaseOrder"> | string
@@ -54629,6 +64486,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -54641,6 +64499,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemCreateNestedManyWithoutProductInput
     returns?: PosReturnCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseCreateNestedManyWithoutInventoryProductInput
+    branchStock?: BranchStockCreateNestedManyWithoutProductInput
   }
 
   export type InventoryProductUncheckedCreateWithoutBrandInput = {
@@ -54660,6 +64519,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -54670,6 +64530,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemUncheckedCreateNestedManyWithoutProductInput
     returns?: PosReturnUncheckedCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutInventoryProductInput
+    branchStock?: BranchStockUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type InventoryProductCreateOrConnectWithoutBrandInput = {
@@ -54712,6 +64573,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -54724,6 +64586,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemCreateNestedManyWithoutProductInput
     returns?: PosReturnCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseCreateNestedManyWithoutInventoryProductInput
+    branchStock?: BranchStockCreateNestedManyWithoutProductInput
   }
 
   export type InventoryProductUncheckedCreateWithoutCategoryInput = {
@@ -54743,6 +64606,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -54753,6 +64617,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemUncheckedCreateNestedManyWithoutProductInput
     returns?: PosReturnUncheckedCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutInventoryProductInput
+    branchStock?: BranchStockUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type InventoryProductCreateOrConnectWithoutCategoryInput = {
@@ -54929,6 +64794,7 @@ export namespace Prisma {
   }
 
   export type PosReturnCreateWithoutProductInput = {
+    branchId?: number | null
     returnNo: string
     type: string
     productName: string
@@ -54954,6 +64820,7 @@ export namespace Prisma {
 
   export type PosReturnUncheckedCreateWithoutProductInput = {
     id?: number
+    branchId?: number | null
     returnNo: string
     type: string
     productName: string
@@ -55008,6 +64875,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    isHardLiquor?: boolean
     billDiscount?: number
     purchasedAt?: Date | string
     customer: PosCustomerCreateNestedOneWithoutPurchasesInput
@@ -55039,6 +64907,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    isHardLiquor?: boolean
     billDiscount?: number
     purchasedAt?: Date | string
     receipts?: AccountReceiptUncheckedCreateNestedManyWithoutPurchaseInput
@@ -55053,6 +64922,33 @@ export namespace Prisma {
 
   export type PosCustomerPurchaseCreateManyInventoryProductInputEnvelope = {
     data: PosCustomerPurchaseCreateManyInventoryProductInput | PosCustomerPurchaseCreateManyInventoryProductInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BranchStockCreateWithoutProductInput = {
+    quantity?: number
+    damagedQuantity?: number
+    emptyBottlesOnHand?: number
+    updatedAt?: Date | string
+    branch: BranchCreateNestedOneWithoutStockInput
+  }
+
+  export type BranchStockUncheckedCreateWithoutProductInput = {
+    id?: number
+    branchId: number
+    quantity?: number
+    damagedQuantity?: number
+    emptyBottlesOnHand?: number
+    updatedAt?: Date | string
+  }
+
+  export type BranchStockCreateOrConnectWithoutProductInput = {
+    where: BranchStockWhereUniqueInput
+    create: XOR<BranchStockCreateWithoutProductInput, BranchStockUncheckedCreateWithoutProductInput>
+  }
+
+  export type BranchStockCreateManyProductInputEnvelope = {
+    data: BranchStockCreateManyProductInput | BranchStockCreateManyProductInput[]
     skipDuplicates?: boolean
   }
 
@@ -55250,6 +65146,7 @@ export namespace Prisma {
     OR?: PosReturnScalarWhereInput[]
     NOT?: PosReturnScalarWhereInput | PosReturnScalarWhereInput[]
     id?: IntFilter<"PosReturn"> | number
+    branchId?: IntNullableFilter<"PosReturn"> | number | null
     returnNo?: StringFilter<"PosReturn"> | string
     type?: StringFilter<"PosReturn"> | string
     productId?: IntNullableFilter<"PosReturn"> | number | null
@@ -55317,8 +65214,38 @@ export namespace Prisma {
     quantity?: IntFilter<"PosCustomerPurchase"> | number
     emptiesReturned?: IntFilter<"PosCustomerPurchase"> | number
     emptyDeduction?: FloatFilter<"PosCustomerPurchase"> | number
+    isHardLiquor?: BoolFilter<"PosCustomerPurchase"> | boolean
     billDiscount?: FloatFilter<"PosCustomerPurchase"> | number
     purchasedAt?: DateTimeFilter<"PosCustomerPurchase"> | Date | string
+  }
+
+  export type BranchStockUpsertWithWhereUniqueWithoutProductInput = {
+    where: BranchStockWhereUniqueInput
+    update: XOR<BranchStockUpdateWithoutProductInput, BranchStockUncheckedUpdateWithoutProductInput>
+    create: XOR<BranchStockCreateWithoutProductInput, BranchStockUncheckedCreateWithoutProductInput>
+  }
+
+  export type BranchStockUpdateWithWhereUniqueWithoutProductInput = {
+    where: BranchStockWhereUniqueInput
+    data: XOR<BranchStockUpdateWithoutProductInput, BranchStockUncheckedUpdateWithoutProductInput>
+  }
+
+  export type BranchStockUpdateManyWithWhereWithoutProductInput = {
+    where: BranchStockScalarWhereInput
+    data: XOR<BranchStockUpdateManyMutationInput, BranchStockUncheckedUpdateManyWithoutProductInput>
+  }
+
+  export type BranchStockScalarWhereInput = {
+    AND?: BranchStockScalarWhereInput | BranchStockScalarWhereInput[]
+    OR?: BranchStockScalarWhereInput[]
+    NOT?: BranchStockScalarWhereInput | BranchStockScalarWhereInput[]
+    id?: IntFilter<"BranchStock"> | number
+    branchId?: IntFilter<"BranchStock"> | number
+    productId?: IntFilter<"BranchStock"> | number
+    quantity?: IntFilter<"BranchStock"> | number
+    damagedQuantity?: IntFilter<"BranchStock"> | number
+    emptyBottlesOnHand?: IntFilter<"BranchStock"> | number
+    updatedAt?: DateTimeFilter<"BranchStock"> | Date | string
   }
 
   export type InventoryProductCreateWithoutExpensesInput = {
@@ -55335,6 +65262,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -55347,6 +65275,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemCreateNestedManyWithoutProductInput
     returns?: PosReturnCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseCreateNestedManyWithoutInventoryProductInput
+    branchStock?: BranchStockCreateNestedManyWithoutProductInput
   }
 
   export type InventoryProductUncheckedCreateWithoutExpensesInput = {
@@ -55367,6 +65296,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -55376,6 +65306,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemUncheckedCreateNestedManyWithoutProductInput
     returns?: PosReturnUncheckedCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutInventoryProductInput
+    branchStock?: BranchStockUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type InventoryProductCreateOrConnectWithoutExpensesInput = {
@@ -55408,6 +65339,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -55420,6 +65352,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemUpdateManyWithoutProductNestedInput
     returns?: PosReturnUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUpdateManyWithoutInventoryProductNestedInput
+    branchStock?: BranchStockUpdateManyWithoutProductNestedInput
   }
 
   export type InventoryProductUncheckedUpdateWithoutExpensesInput = {
@@ -55440,6 +65373,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -55449,6 +65383,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemUncheckedUpdateManyWithoutProductNestedInput
     returns?: PosReturnUncheckedUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutInventoryProductNestedInput
+    branchStock?: BranchStockUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type InventoryProductCreateWithoutImagesInput = {
@@ -55465,6 +65400,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -55477,6 +65413,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemCreateNestedManyWithoutProductInput
     returns?: PosReturnCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseCreateNestedManyWithoutInventoryProductInput
+    branchStock?: BranchStockCreateNestedManyWithoutProductInput
   }
 
   export type InventoryProductUncheckedCreateWithoutImagesInput = {
@@ -55497,6 +65434,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -55506,6 +65444,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemUncheckedCreateNestedManyWithoutProductInput
     returns?: PosReturnUncheckedCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutInventoryProductInput
+    branchStock?: BranchStockUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type InventoryProductCreateOrConnectWithoutImagesInput = {
@@ -55538,6 +65477,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -55550,6 +65490,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemUpdateManyWithoutProductNestedInput
     returns?: PosReturnUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUpdateManyWithoutInventoryProductNestedInput
+    branchStock?: BranchStockUpdateManyWithoutProductNestedInput
   }
 
   export type InventoryProductUncheckedUpdateWithoutImagesInput = {
@@ -55570,6 +65511,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -55579,6 +65521,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemUncheckedUpdateManyWithoutProductNestedInput
     returns?: PosReturnUncheckedUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutInventoryProductNestedInput
+    branchStock?: BranchStockUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type PosCustomerPurchaseCreateWithoutCustomerInput = {
@@ -55602,6 +65545,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    isHardLiquor?: boolean
     billDiscount?: number
     purchasedAt?: Date | string
     inventoryProduct?: InventoryProductCreateNestedOneWithoutCustomerPurchasesInput
@@ -55633,6 +65577,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    isHardLiquor?: boolean
     billDiscount?: number
     purchasedAt?: Date | string
     receipts?: AccountReceiptUncheckedCreateNestedManyWithoutPurchaseInput
@@ -55651,6 +65596,7 @@ export namespace Prisma {
   }
 
   export type PosCounterSaleCreateWithoutCustomerInput = {
+    branchId?: number | null
     invoiceGroupCode: string
     totalAmount: number
     emptyDeduction?: number
@@ -55678,6 +65624,7 @@ export namespace Prisma {
 
   export type PosCounterSaleUncheckedCreateWithoutCustomerInput = {
     id?: number
+    branchId?: number | null
     invoiceGroupCode: string
     totalAmount: number
     emptyDeduction?: number
@@ -55747,6 +65694,7 @@ export namespace Prisma {
   }
 
   export type PosReturnCreateWithoutCustomerInput = {
+    branchId?: number | null
     returnNo: string
     type: string
     productName: string
@@ -55772,6 +65720,7 @@ export namespace Prisma {
 
   export type PosReturnUncheckedCreateWithoutCustomerInput = {
     id?: number
+    branchId?: number | null
     returnNo: string
     type: string
     productId?: number | null
@@ -55947,6 +65896,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -55959,6 +65909,7 @@ export namespace Prisma {
     images?: InventoryProductImageCreateNestedManyWithoutProductInput
     purchaseOrderItems?: PurchaseOrderItemCreateNestedManyWithoutProductInput
     returns?: PosReturnCreateNestedManyWithoutProductInput
+    branchStock?: BranchStockCreateNestedManyWithoutProductInput
   }
 
   export type InventoryProductUncheckedCreateWithoutCustomerPurchasesInput = {
@@ -55979,6 +65930,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -55988,6 +65940,7 @@ export namespace Prisma {
     images?: InventoryProductImageUncheckedCreateNestedManyWithoutProductInput
     purchaseOrderItems?: PurchaseOrderItemUncheckedCreateNestedManyWithoutProductInput
     returns?: PosReturnUncheckedCreateNestedManyWithoutProductInput
+    branchStock?: BranchStockUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type InventoryProductCreateOrConnectWithoutCustomerPurchasesInput = {
@@ -56201,6 +66154,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -56213,6 +66167,7 @@ export namespace Prisma {
     images?: InventoryProductImageUpdateManyWithoutProductNestedInput
     purchaseOrderItems?: PurchaseOrderItemUpdateManyWithoutProductNestedInput
     returns?: PosReturnUpdateManyWithoutProductNestedInput
+    branchStock?: BranchStockUpdateManyWithoutProductNestedInput
   }
 
   export type InventoryProductUncheckedUpdateWithoutCustomerPurchasesInput = {
@@ -56233,6 +66188,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -56242,6 +66198,7 @@ export namespace Prisma {
     images?: InventoryProductImageUncheckedUpdateManyWithoutProductNestedInput
     purchaseOrderItems?: PurchaseOrderItemUncheckedUpdateManyWithoutProductNestedInput
     returns?: PosReturnUncheckedUpdateManyWithoutProductNestedInput
+    branchStock?: BranchStockUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type AccountReceiptUpsertWithWhereUniqueWithoutPurchaseInput = {
@@ -56371,6 +66328,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    isHardLiquor?: boolean
     billDiscount?: number
     purchasedAt?: Date | string
     customer: PosCustomerCreateNestedOneWithoutPurchasesInput
@@ -56403,6 +66361,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    isHardLiquor?: boolean
     billDiscount?: number
     purchasedAt?: Date | string
     receipts?: AccountReceiptUncheckedCreateNestedManyWithoutPurchaseInput
@@ -56471,6 +66430,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customer?: PosCustomerUpdateOneRequiredWithoutPurchasesNestedInput
@@ -56503,6 +66463,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     receipts?: AccountReceiptUncheckedUpdateManyWithoutPurchaseNestedInput
@@ -57347,6 +67308,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    isHardLiquor?: boolean
     billDiscount?: number
     purchasedAt?: Date | string
     customer: PosCustomerCreateNestedOneWithoutPurchasesInput
@@ -57379,6 +67341,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    isHardLiquor?: boolean
     billDiscount?: number
     purchasedAt?: Date | string
     installments?: PosInstallmentUncheckedCreateNestedManyWithoutPurchaseInput
@@ -57555,6 +67518,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customer?: PosCustomerUpdateOneRequiredWithoutPurchasesNestedInput
@@ -57587,6 +67551,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     installments?: PosInstallmentUncheckedUpdateManyWithoutPurchaseNestedInput
@@ -58263,6 +68228,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    isHardLiquor?: boolean
     billDiscount?: number
     purchasedAt?: Date | string
     customer: PosCustomerCreateNestedOneWithoutPurchasesInput
@@ -58295,6 +68261,7 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    isHardLiquor?: boolean
     billDiscount?: number
     purchasedAt?: Date | string
     receipts?: AccountReceiptUncheckedCreateNestedManyWithoutPurchaseInput
@@ -58384,6 +68351,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customer?: PosCustomerUpdateOneRequiredWithoutPurchasesNestedInput
@@ -58416,6 +68384,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     receipts?: AccountReceiptUncheckedUpdateManyWithoutPurchaseNestedInput
@@ -58927,6 +68896,7 @@ export namespace Prisma {
   }
 
   export type PosCounterSaleCreateWithoutShiftInput = {
+    branchId?: number | null
     invoiceGroupCode: string
     totalAmount: number
     emptyDeduction?: number
@@ -58954,6 +68924,7 @@ export namespace Prisma {
 
   export type PosCounterSaleUncheckedCreateWithoutShiftInput = {
     id?: number
+    branchId?: number | null
     invoiceGroupCode: string
     totalAmount: number
     emptyDeduction?: number
@@ -58990,6 +68961,7 @@ export namespace Prisma {
   }
 
   export type PosCashEntryCreateWithoutShiftInput = {
+    branchId?: number | null
     entryNo: string
     direction: string
     category: string
@@ -59014,6 +68986,7 @@ export namespace Prisma {
 
   export type PosCashEntryUncheckedCreateWithoutShiftInput = {
     id?: number
+    branchId?: number | null
     entryNo: string
     direction: string
     category: string
@@ -59047,6 +69020,7 @@ export namespace Prisma {
   }
 
   export type InventoryMovementCreateWithoutShiftInput = {
+    branchId?: number | null
     productId: number
     kind: string
     type: string
@@ -59058,6 +69032,7 @@ export namespace Prisma {
 
   export type InventoryMovementUncheckedCreateWithoutShiftInput = {
     id?: number
+    branchId?: number | null
     productId: number
     kind: string
     type: string
@@ -59078,6 +69053,7 @@ export namespace Prisma {
   }
 
   export type PosReturnCreateWithoutShiftInput = {
+    branchId?: number | null
     returnNo: string
     type: string
     productName: string
@@ -59103,6 +69079,7 @@ export namespace Prisma {
 
   export type PosReturnUncheckedCreateWithoutShiftInput = {
     id?: number
+    branchId?: number | null
     returnNo: string
     type: string
     productId?: number | null
@@ -59173,6 +69150,7 @@ export namespace Prisma {
     OR?: PosCashEntryScalarWhereInput[]
     NOT?: PosCashEntryScalarWhereInput | PosCashEntryScalarWhereInput[]
     id?: IntFilter<"PosCashEntry"> | number
+    branchId?: IntNullableFilter<"PosCashEntry"> | number | null
     entryNo?: StringFilter<"PosCashEntry"> | string
     direction?: StringFilter<"PosCashEntry"> | string
     category?: StringFilter<"PosCashEntry"> | string
@@ -59217,6 +69195,7 @@ export namespace Prisma {
     OR?: InventoryMovementScalarWhereInput[]
     NOT?: InventoryMovementScalarWhereInput | InventoryMovementScalarWhereInput[]
     id?: IntFilter<"InventoryMovement"> | number
+    branchId?: IntNullableFilter<"InventoryMovement"> | number | null
     productId?: IntFilter<"InventoryMovement"> | number
     kind?: StringFilter<"InventoryMovement"> | string
     type?: StringFilter<"InventoryMovement"> | string
@@ -59244,6 +69223,7 @@ export namespace Prisma {
   }
 
   export type PosShiftCreateWithoutCashEntriesInput = {
+    branchId?: number | null
     shiftNo: string
     status?: string
     openedById: number
@@ -59271,6 +69251,7 @@ export namespace Prisma {
 
   export type PosShiftUncheckedCreateWithoutCashEntriesInput = {
     id?: number
+    branchId?: number | null
     shiftNo: string
     status?: string
     openedById: number
@@ -59313,6 +69294,7 @@ export namespace Prisma {
   }
 
   export type PosShiftUpdateWithoutCashEntriesInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     shiftNo?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     openedById?: IntFieldUpdateOperationsInput | number
@@ -59340,6 +69322,7 @@ export namespace Prisma {
 
   export type PosShiftUncheckedUpdateWithoutCashEntriesInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     shiftNo?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     openedById?: IntFieldUpdateOperationsInput | number
@@ -59366,6 +69349,7 @@ export namespace Prisma {
   }
 
   export type PosShiftCreateWithoutMovementsInput = {
+    branchId?: number | null
     shiftNo: string
     status?: string
     openedById: number
@@ -59393,6 +69377,7 @@ export namespace Prisma {
 
   export type PosShiftUncheckedCreateWithoutMovementsInput = {
     id?: number
+    branchId?: number | null
     shiftNo: string
     status?: string
     openedById: number
@@ -59435,6 +69420,7 @@ export namespace Prisma {
   }
 
   export type PosShiftUpdateWithoutMovementsInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     shiftNo?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     openedById?: IntFieldUpdateOperationsInput | number
@@ -59462,6 +69448,7 @@ export namespace Prisma {
 
   export type PosShiftUncheckedUpdateWithoutMovementsInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     shiftNo?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     openedById?: IntFieldUpdateOperationsInput | number
@@ -59675,6 +69662,7 @@ export namespace Prisma {
   }
 
   export type PurchaseOrderCreateWithoutItemsInput = {
+    branchId?: number | null
     poNumber: string
     status?: string
     orderDate?: Date | string
@@ -59697,6 +69685,7 @@ export namespace Prisma {
 
   export type PurchaseOrderUncheckedCreateWithoutItemsInput = {
     id?: number
+    branchId?: number | null
     poNumber: string
     supplierId: number
     status?: string
@@ -59736,6 +69725,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -59748,6 +69738,7 @@ export namespace Prisma {
     images?: InventoryProductImageCreateNestedManyWithoutProductInput
     returns?: PosReturnCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseCreateNestedManyWithoutInventoryProductInput
+    branchStock?: BranchStockCreateNestedManyWithoutProductInput
   }
 
   export type InventoryProductUncheckedCreateWithoutPurchaseOrderItemsInput = {
@@ -59768,6 +69759,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -59777,6 +69769,7 @@ export namespace Prisma {
     images?: InventoryProductImageUncheckedCreateNestedManyWithoutProductInput
     returns?: PosReturnUncheckedCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutInventoryProductInput
+    branchStock?: BranchStockUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type InventoryProductCreateOrConnectWithoutPurchaseOrderItemsInput = {
@@ -59796,6 +69789,7 @@ export namespace Prisma {
   }
 
   export type PurchaseOrderUpdateWithoutItemsInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     poNumber?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     orderDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -59818,6 +69812,7 @@ export namespace Prisma {
 
   export type PurchaseOrderUncheckedUpdateWithoutItemsInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     poNumber?: StringFieldUpdateOperationsInput | string
     supplierId?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
@@ -59863,6 +69858,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -59875,6 +69871,7 @@ export namespace Prisma {
     images?: InventoryProductImageUpdateManyWithoutProductNestedInput
     returns?: PosReturnUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUpdateManyWithoutInventoryProductNestedInput
+    branchStock?: BranchStockUpdateManyWithoutProductNestedInput
   }
 
   export type InventoryProductUncheckedUpdateWithoutPurchaseOrderItemsInput = {
@@ -59895,6 +69892,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -59904,9 +69902,11 @@ export namespace Prisma {
     images?: InventoryProductImageUncheckedUpdateManyWithoutProductNestedInput
     returns?: PosReturnUncheckedUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutInventoryProductNestedInput
+    branchStock?: BranchStockUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type PurchaseOrderCreateWithoutEmailsInput = {
+    branchId?: number | null
     poNumber: string
     status?: string
     orderDate?: Date | string
@@ -59929,6 +69929,7 @@ export namespace Prisma {
 
   export type PurchaseOrderUncheckedCreateWithoutEmailsInput = {
     id?: number
+    branchId?: number | null
     poNumber: string
     supplierId: number
     status?: string
@@ -59966,6 +69967,7 @@ export namespace Prisma {
   }
 
   export type PurchaseOrderUpdateWithoutEmailsInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     poNumber?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     orderDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -59988,6 +69990,7 @@ export namespace Prisma {
 
   export type PurchaseOrderUncheckedUpdateWithoutEmailsInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     poNumber?: StringFieldUpdateOperationsInput | string
     supplierId?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
@@ -60124,6 +70127,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -60136,6 +70140,7 @@ export namespace Prisma {
     images?: InventoryProductImageCreateNestedManyWithoutProductInput
     purchaseOrderItems?: PurchaseOrderItemCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseCreateNestedManyWithoutInventoryProductInput
+    branchStock?: BranchStockCreateNestedManyWithoutProductInput
   }
 
   export type InventoryProductUncheckedCreateWithoutReturnsInput = {
@@ -60156,6 +70161,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -60165,6 +70171,7 @@ export namespace Prisma {
     images?: InventoryProductImageUncheckedCreateNestedManyWithoutProductInput
     purchaseOrderItems?: PurchaseOrderItemUncheckedCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutInventoryProductInput
+    branchStock?: BranchStockUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type InventoryProductCreateOrConnectWithoutReturnsInput = {
@@ -60221,6 +70228,7 @@ export namespace Prisma {
   }
 
   export type PosShiftCreateWithoutReturnsInput = {
+    branchId?: number | null
     shiftNo: string
     status?: string
     openedById: number
@@ -60248,6 +70256,7 @@ export namespace Prisma {
 
   export type PosShiftUncheckedCreateWithoutReturnsInput = {
     id?: number
+    branchId?: number | null
     shiftNo: string
     status?: string
     openedById: number
@@ -60303,6 +70312,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -60315,6 +70325,7 @@ export namespace Prisma {
     images?: InventoryProductImageUpdateManyWithoutProductNestedInput
     purchaseOrderItems?: PurchaseOrderItemUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUpdateManyWithoutInventoryProductNestedInput
+    branchStock?: BranchStockUpdateManyWithoutProductNestedInput
   }
 
   export type InventoryProductUncheckedUpdateWithoutReturnsInput = {
@@ -60335,6 +70346,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -60344,6 +70356,7 @@ export namespace Prisma {
     images?: InventoryProductImageUncheckedUpdateManyWithoutProductNestedInput
     purchaseOrderItems?: PurchaseOrderItemUncheckedUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutInventoryProductNestedInput
+    branchStock?: BranchStockUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type PosCustomerUpsertWithoutReturnsInput = {
@@ -60412,6 +70425,7 @@ export namespace Prisma {
   }
 
   export type PosShiftUpdateWithoutReturnsInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     shiftNo?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     openedById?: IntFieldUpdateOperationsInput | number
@@ -60439,6 +70453,7 @@ export namespace Prisma {
 
   export type PosShiftUncheckedUpdateWithoutReturnsInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     shiftNo?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     openedById?: IntFieldUpdateOperationsInput | number
@@ -60464,8 +70479,1048 @@ export namespace Prisma {
     movements?: InventoryMovementUncheckedUpdateManyWithoutShiftNestedInput
   }
 
+  export type BranchStockCreateWithoutBranchInput = {
+    quantity?: number
+    damagedQuantity?: number
+    emptyBottlesOnHand?: number
+    updatedAt?: Date | string
+    product: InventoryProductCreateNestedOneWithoutBranchStockInput
+  }
+
+  export type BranchStockUncheckedCreateWithoutBranchInput = {
+    id?: number
+    productId: number
+    quantity?: number
+    damagedQuantity?: number
+    emptyBottlesOnHand?: number
+    updatedAt?: Date | string
+  }
+
+  export type BranchStockCreateOrConnectWithoutBranchInput = {
+    where: BranchStockWhereUniqueInput
+    create: XOR<BranchStockCreateWithoutBranchInput, BranchStockUncheckedCreateWithoutBranchInput>
+  }
+
+  export type BranchStockCreateManyBranchInputEnvelope = {
+    data: BranchStockCreateManyBranchInput | BranchStockCreateManyBranchInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type GrnCreateWithoutBranchInput = {
+    grnNo: string
+    supplierId?: number | null
+    supplierName: string
+    purchaseOrderId?: number | null
+    poNumber?: string | null
+    supplierInvoiceNo?: string | null
+    invoiceDate?: Date | string | null
+    invoiceTotal?: number | null
+    notes?: string | null
+    acceptedUnits?: number
+    rejectedUnits?: number
+    totalCost?: number
+    shiftId?: number | null
+    receivedById: number
+    createdAt?: Date | string
+    items?: GrnItemCreateNestedManyWithoutGrnInput
+  }
+
+  export type GrnUncheckedCreateWithoutBranchInput = {
+    id?: number
+    grnNo: string
+    supplierId?: number | null
+    supplierName: string
+    purchaseOrderId?: number | null
+    poNumber?: string | null
+    supplierInvoiceNo?: string | null
+    invoiceDate?: Date | string | null
+    invoiceTotal?: number | null
+    notes?: string | null
+    acceptedUnits?: number
+    rejectedUnits?: number
+    totalCost?: number
+    shiftId?: number | null
+    receivedById: number
+    createdAt?: Date | string
+    items?: GrnItemUncheckedCreateNestedManyWithoutGrnInput
+  }
+
+  export type GrnCreateOrConnectWithoutBranchInput = {
+    where: GrnWhereUniqueInput
+    create: XOR<GrnCreateWithoutBranchInput, GrnUncheckedCreateWithoutBranchInput>
+  }
+
+  export type GrnCreateManyBranchInputEnvelope = {
+    data: GrnCreateManyBranchInput | GrnCreateManyBranchInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type GtnCreateWithoutFromBranchInput = {
+    gtnNo: string
+    status?: string
+    notes?: string | null
+    carriedBy?: string | null
+    sentById: number
+    sentAt?: Date | string
+    sentShiftId?: number | null
+    receivedById?: number | null
+    receivedAt?: Date | string | null
+    receivedShiftId?: number | null
+    receiveNote?: string | null
+    cancelledById?: number | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    toBranch: BranchCreateNestedOneWithoutGtnsInInput
+    items?: GtnItemCreateNestedManyWithoutGtnInput
+  }
+
+  export type GtnUncheckedCreateWithoutFromBranchInput = {
+    id?: number
+    gtnNo: string
+    toBranchId: number
+    status?: string
+    notes?: string | null
+    carriedBy?: string | null
+    sentById: number
+    sentAt?: Date | string
+    sentShiftId?: number | null
+    receivedById?: number | null
+    receivedAt?: Date | string | null
+    receivedShiftId?: number | null
+    receiveNote?: string | null
+    cancelledById?: number | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    items?: GtnItemUncheckedCreateNestedManyWithoutGtnInput
+  }
+
+  export type GtnCreateOrConnectWithoutFromBranchInput = {
+    where: GtnWhereUniqueInput
+    create: XOR<GtnCreateWithoutFromBranchInput, GtnUncheckedCreateWithoutFromBranchInput>
+  }
+
+  export type GtnCreateManyFromBranchInputEnvelope = {
+    data: GtnCreateManyFromBranchInput | GtnCreateManyFromBranchInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type GtnCreateWithoutToBranchInput = {
+    gtnNo: string
+    status?: string
+    notes?: string | null
+    carriedBy?: string | null
+    sentById: number
+    sentAt?: Date | string
+    sentShiftId?: number | null
+    receivedById?: number | null
+    receivedAt?: Date | string | null
+    receivedShiftId?: number | null
+    receiveNote?: string | null
+    cancelledById?: number | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    fromBranch: BranchCreateNestedOneWithoutGtnsOutInput
+    items?: GtnItemCreateNestedManyWithoutGtnInput
+  }
+
+  export type GtnUncheckedCreateWithoutToBranchInput = {
+    id?: number
+    gtnNo: string
+    fromBranchId: number
+    status?: string
+    notes?: string | null
+    carriedBy?: string | null
+    sentById: number
+    sentAt?: Date | string
+    sentShiftId?: number | null
+    receivedById?: number | null
+    receivedAt?: Date | string | null
+    receivedShiftId?: number | null
+    receiveNote?: string | null
+    cancelledById?: number | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    items?: GtnItemUncheckedCreateNestedManyWithoutGtnInput
+  }
+
+  export type GtnCreateOrConnectWithoutToBranchInput = {
+    where: GtnWhereUniqueInput
+    create: XOR<GtnCreateWithoutToBranchInput, GtnUncheckedCreateWithoutToBranchInput>
+  }
+
+  export type GtnCreateManyToBranchInputEnvelope = {
+    data: GtnCreateManyToBranchInput | GtnCreateManyToBranchInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BranchStockUpsertWithWhereUniqueWithoutBranchInput = {
+    where: BranchStockWhereUniqueInput
+    update: XOR<BranchStockUpdateWithoutBranchInput, BranchStockUncheckedUpdateWithoutBranchInput>
+    create: XOR<BranchStockCreateWithoutBranchInput, BranchStockUncheckedCreateWithoutBranchInput>
+  }
+
+  export type BranchStockUpdateWithWhereUniqueWithoutBranchInput = {
+    where: BranchStockWhereUniqueInput
+    data: XOR<BranchStockUpdateWithoutBranchInput, BranchStockUncheckedUpdateWithoutBranchInput>
+  }
+
+  export type BranchStockUpdateManyWithWhereWithoutBranchInput = {
+    where: BranchStockScalarWhereInput
+    data: XOR<BranchStockUpdateManyMutationInput, BranchStockUncheckedUpdateManyWithoutBranchInput>
+  }
+
+  export type GrnUpsertWithWhereUniqueWithoutBranchInput = {
+    where: GrnWhereUniqueInput
+    update: XOR<GrnUpdateWithoutBranchInput, GrnUncheckedUpdateWithoutBranchInput>
+    create: XOR<GrnCreateWithoutBranchInput, GrnUncheckedCreateWithoutBranchInput>
+  }
+
+  export type GrnUpdateWithWhereUniqueWithoutBranchInput = {
+    where: GrnWhereUniqueInput
+    data: XOR<GrnUpdateWithoutBranchInput, GrnUncheckedUpdateWithoutBranchInput>
+  }
+
+  export type GrnUpdateManyWithWhereWithoutBranchInput = {
+    where: GrnScalarWhereInput
+    data: XOR<GrnUpdateManyMutationInput, GrnUncheckedUpdateManyWithoutBranchInput>
+  }
+
+  export type GrnScalarWhereInput = {
+    AND?: GrnScalarWhereInput | GrnScalarWhereInput[]
+    OR?: GrnScalarWhereInput[]
+    NOT?: GrnScalarWhereInput | GrnScalarWhereInput[]
+    id?: IntFilter<"Grn"> | number
+    grnNo?: StringFilter<"Grn"> | string
+    branchId?: IntFilter<"Grn"> | number
+    supplierId?: IntNullableFilter<"Grn"> | number | null
+    supplierName?: StringFilter<"Grn"> | string
+    purchaseOrderId?: IntNullableFilter<"Grn"> | number | null
+    poNumber?: StringNullableFilter<"Grn"> | string | null
+    supplierInvoiceNo?: StringNullableFilter<"Grn"> | string | null
+    invoiceDate?: DateTimeNullableFilter<"Grn"> | Date | string | null
+    invoiceTotal?: FloatNullableFilter<"Grn"> | number | null
+    notes?: StringNullableFilter<"Grn"> | string | null
+    acceptedUnits?: IntFilter<"Grn"> | number
+    rejectedUnits?: IntFilter<"Grn"> | number
+    totalCost?: FloatFilter<"Grn"> | number
+    shiftId?: IntNullableFilter<"Grn"> | number | null
+    receivedById?: IntFilter<"Grn"> | number
+    createdAt?: DateTimeFilter<"Grn"> | Date | string
+  }
+
+  export type GtnUpsertWithWhereUniqueWithoutFromBranchInput = {
+    where: GtnWhereUniqueInput
+    update: XOR<GtnUpdateWithoutFromBranchInput, GtnUncheckedUpdateWithoutFromBranchInput>
+    create: XOR<GtnCreateWithoutFromBranchInput, GtnUncheckedCreateWithoutFromBranchInput>
+  }
+
+  export type GtnUpdateWithWhereUniqueWithoutFromBranchInput = {
+    where: GtnWhereUniqueInput
+    data: XOR<GtnUpdateWithoutFromBranchInput, GtnUncheckedUpdateWithoutFromBranchInput>
+  }
+
+  export type GtnUpdateManyWithWhereWithoutFromBranchInput = {
+    where: GtnScalarWhereInput
+    data: XOR<GtnUpdateManyMutationInput, GtnUncheckedUpdateManyWithoutFromBranchInput>
+  }
+
+  export type GtnScalarWhereInput = {
+    AND?: GtnScalarWhereInput | GtnScalarWhereInput[]
+    OR?: GtnScalarWhereInput[]
+    NOT?: GtnScalarWhereInput | GtnScalarWhereInput[]
+    id?: IntFilter<"Gtn"> | number
+    gtnNo?: StringFilter<"Gtn"> | string
+    fromBranchId?: IntFilter<"Gtn"> | number
+    toBranchId?: IntFilter<"Gtn"> | number
+    status?: StringFilter<"Gtn"> | string
+    notes?: StringNullableFilter<"Gtn"> | string | null
+    carriedBy?: StringNullableFilter<"Gtn"> | string | null
+    sentById?: IntFilter<"Gtn"> | number
+    sentAt?: DateTimeFilter<"Gtn"> | Date | string
+    sentShiftId?: IntNullableFilter<"Gtn"> | number | null
+    receivedById?: IntNullableFilter<"Gtn"> | number | null
+    receivedAt?: DateTimeNullableFilter<"Gtn"> | Date | string | null
+    receivedShiftId?: IntNullableFilter<"Gtn"> | number | null
+    receiveNote?: StringNullableFilter<"Gtn"> | string | null
+    cancelledById?: IntNullableFilter<"Gtn"> | number | null
+    cancelledAt?: DateTimeNullableFilter<"Gtn"> | Date | string | null
+    cancelReason?: StringNullableFilter<"Gtn"> | string | null
+  }
+
+  export type GtnUpsertWithWhereUniqueWithoutToBranchInput = {
+    where: GtnWhereUniqueInput
+    update: XOR<GtnUpdateWithoutToBranchInput, GtnUncheckedUpdateWithoutToBranchInput>
+    create: XOR<GtnCreateWithoutToBranchInput, GtnUncheckedCreateWithoutToBranchInput>
+  }
+
+  export type GtnUpdateWithWhereUniqueWithoutToBranchInput = {
+    where: GtnWhereUniqueInput
+    data: XOR<GtnUpdateWithoutToBranchInput, GtnUncheckedUpdateWithoutToBranchInput>
+  }
+
+  export type GtnUpdateManyWithWhereWithoutToBranchInput = {
+    where: GtnScalarWhereInput
+    data: XOR<GtnUpdateManyMutationInput, GtnUncheckedUpdateManyWithoutToBranchInput>
+  }
+
+  export type BranchCreateWithoutStockInput = {
+    code: string
+    name: string
+    address?: string | null
+    phone?: string | null
+    isMain?: boolean
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    grns?: GrnCreateNestedManyWithoutBranchInput
+    gtnsOut?: GtnCreateNestedManyWithoutFromBranchInput
+    gtnsIn?: GtnCreateNestedManyWithoutToBranchInput
+  }
+
+  export type BranchUncheckedCreateWithoutStockInput = {
+    id?: number
+    code: string
+    name: string
+    address?: string | null
+    phone?: string | null
+    isMain?: boolean
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    grns?: GrnUncheckedCreateNestedManyWithoutBranchInput
+    gtnsOut?: GtnUncheckedCreateNestedManyWithoutFromBranchInput
+    gtnsIn?: GtnUncheckedCreateNestedManyWithoutToBranchInput
+  }
+
+  export type BranchCreateOrConnectWithoutStockInput = {
+    where: BranchWhereUniqueInput
+    create: XOR<BranchCreateWithoutStockInput, BranchUncheckedCreateWithoutStockInput>
+  }
+
+  export type InventoryProductCreateWithoutBranchStockInput = {
+    displayId: string
+    name: string
+    partNumber?: string | null
+    compatibleWith?: string | null
+    quantity?: number
+    soldQuantity?: number
+    lowStockThreshold?: number | null
+    purchasePrice?: number | null
+    taxPaid?: number | null
+    additionalExpenses?: number | null
+    sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
+    damagedQuantity?: number
+    description?: string | null
+    lastSoldAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    brand: InventoryBrandCreateNestedOneWithoutProductsInput
+    category: InventoryCategoryCreateNestedOneWithoutProductsInput
+    supplier?: SupplierCreateNestedOneWithoutProductsInput
+    expenses?: InventoryProductExpenseCreateNestedManyWithoutProductInput
+    images?: InventoryProductImageCreateNestedManyWithoutProductInput
+    purchaseOrderItems?: PurchaseOrderItemCreateNestedManyWithoutProductInput
+    returns?: PosReturnCreateNestedManyWithoutProductInput
+    customerPurchases?: PosCustomerPurchaseCreateNestedManyWithoutInventoryProductInput
+  }
+
+  export type InventoryProductUncheckedCreateWithoutBranchStockInput = {
+    id?: number
+    displayId: string
+    brandId: number
+    categoryId: number
+    supplierId?: number | null
+    name: string
+    partNumber?: string | null
+    compatibleWith?: string | null
+    quantity?: number
+    soldQuantity?: number
+    lowStockThreshold?: number | null
+    purchasePrice?: number | null
+    taxPaid?: number | null
+    additionalExpenses?: number | null
+    sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
+    damagedQuantity?: number
+    description?: string | null
+    lastSoldAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    expenses?: InventoryProductExpenseUncheckedCreateNestedManyWithoutProductInput
+    images?: InventoryProductImageUncheckedCreateNestedManyWithoutProductInput
+    purchaseOrderItems?: PurchaseOrderItemUncheckedCreateNestedManyWithoutProductInput
+    returns?: PosReturnUncheckedCreateNestedManyWithoutProductInput
+    customerPurchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutInventoryProductInput
+  }
+
+  export type InventoryProductCreateOrConnectWithoutBranchStockInput = {
+    where: InventoryProductWhereUniqueInput
+    create: XOR<InventoryProductCreateWithoutBranchStockInput, InventoryProductUncheckedCreateWithoutBranchStockInput>
+  }
+
+  export type BranchUpsertWithoutStockInput = {
+    update: XOR<BranchUpdateWithoutStockInput, BranchUncheckedUpdateWithoutStockInput>
+    create: XOR<BranchCreateWithoutStockInput, BranchUncheckedCreateWithoutStockInput>
+    where?: BranchWhereInput
+  }
+
+  export type BranchUpdateToOneWithWhereWithoutStockInput = {
+    where?: BranchWhereInput
+    data: XOR<BranchUpdateWithoutStockInput, BranchUncheckedUpdateWithoutStockInput>
+  }
+
+  export type BranchUpdateWithoutStockInput = {
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isMain?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    grns?: GrnUpdateManyWithoutBranchNestedInput
+    gtnsOut?: GtnUpdateManyWithoutFromBranchNestedInput
+    gtnsIn?: GtnUpdateManyWithoutToBranchNestedInput
+  }
+
+  export type BranchUncheckedUpdateWithoutStockInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isMain?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    grns?: GrnUncheckedUpdateManyWithoutBranchNestedInput
+    gtnsOut?: GtnUncheckedUpdateManyWithoutFromBranchNestedInput
+    gtnsIn?: GtnUncheckedUpdateManyWithoutToBranchNestedInput
+  }
+
+  export type InventoryProductUpsertWithoutBranchStockInput = {
+    update: XOR<InventoryProductUpdateWithoutBranchStockInput, InventoryProductUncheckedUpdateWithoutBranchStockInput>
+    create: XOR<InventoryProductCreateWithoutBranchStockInput, InventoryProductUncheckedCreateWithoutBranchStockInput>
+    where?: InventoryProductWhereInput
+  }
+
+  export type InventoryProductUpdateToOneWithWhereWithoutBranchStockInput = {
+    where?: InventoryProductWhereInput
+    data: XOR<InventoryProductUpdateWithoutBranchStockInput, InventoryProductUncheckedUpdateWithoutBranchStockInput>
+  }
+
+  export type InventoryProductUpdateWithoutBranchStockInput = {
+    displayId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    partNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    compatibleWith?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    soldQuantity?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    purchasePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
+    additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
+    sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    brand?: InventoryBrandUpdateOneRequiredWithoutProductsNestedInput
+    category?: InventoryCategoryUpdateOneRequiredWithoutProductsNestedInput
+    supplier?: SupplierUpdateOneWithoutProductsNestedInput
+    expenses?: InventoryProductExpenseUpdateManyWithoutProductNestedInput
+    images?: InventoryProductImageUpdateManyWithoutProductNestedInput
+    purchaseOrderItems?: PurchaseOrderItemUpdateManyWithoutProductNestedInput
+    returns?: PosReturnUpdateManyWithoutProductNestedInput
+    customerPurchases?: PosCustomerPurchaseUpdateManyWithoutInventoryProductNestedInput
+  }
+
+  export type InventoryProductUncheckedUpdateWithoutBranchStockInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    displayId?: StringFieldUpdateOperationsInput | string
+    brandId?: IntFieldUpdateOperationsInput | number
+    categoryId?: IntFieldUpdateOperationsInput | number
+    supplierId?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: StringFieldUpdateOperationsInput | string
+    partNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    compatibleWith?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    soldQuantity?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    purchasePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
+    additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
+    sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expenses?: InventoryProductExpenseUncheckedUpdateManyWithoutProductNestedInput
+    images?: InventoryProductImageUncheckedUpdateManyWithoutProductNestedInput
+    purchaseOrderItems?: PurchaseOrderItemUncheckedUpdateManyWithoutProductNestedInput
+    returns?: PosReturnUncheckedUpdateManyWithoutProductNestedInput
+    customerPurchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutInventoryProductNestedInput
+  }
+
+  export type BranchCreateWithoutGrnsInput = {
+    code: string
+    name: string
+    address?: string | null
+    phone?: string | null
+    isMain?: boolean
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stock?: BranchStockCreateNestedManyWithoutBranchInput
+    gtnsOut?: GtnCreateNestedManyWithoutFromBranchInput
+    gtnsIn?: GtnCreateNestedManyWithoutToBranchInput
+  }
+
+  export type BranchUncheckedCreateWithoutGrnsInput = {
+    id?: number
+    code: string
+    name: string
+    address?: string | null
+    phone?: string | null
+    isMain?: boolean
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stock?: BranchStockUncheckedCreateNestedManyWithoutBranchInput
+    gtnsOut?: GtnUncheckedCreateNestedManyWithoutFromBranchInput
+    gtnsIn?: GtnUncheckedCreateNestedManyWithoutToBranchInput
+  }
+
+  export type BranchCreateOrConnectWithoutGrnsInput = {
+    where: BranchWhereUniqueInput
+    create: XOR<BranchCreateWithoutGrnsInput, BranchUncheckedCreateWithoutGrnsInput>
+  }
+
+  export type GrnItemCreateWithoutGrnInput = {
+    productId?: number | null
+    description: string
+    purchaseOrderItemId?: number | null
+    orderedQty?: number | null
+    deliveredQty: number
+    acceptedQty: number
+    rejectedQty?: number
+    rejectReason?: string | null
+    unitCost: number
+    lineTotal: number
+  }
+
+  export type GrnItemUncheckedCreateWithoutGrnInput = {
+    id?: number
+    productId?: number | null
+    description: string
+    purchaseOrderItemId?: number | null
+    orderedQty?: number | null
+    deliveredQty: number
+    acceptedQty: number
+    rejectedQty?: number
+    rejectReason?: string | null
+    unitCost: number
+    lineTotal: number
+  }
+
+  export type GrnItemCreateOrConnectWithoutGrnInput = {
+    where: GrnItemWhereUniqueInput
+    create: XOR<GrnItemCreateWithoutGrnInput, GrnItemUncheckedCreateWithoutGrnInput>
+  }
+
+  export type GrnItemCreateManyGrnInputEnvelope = {
+    data: GrnItemCreateManyGrnInput | GrnItemCreateManyGrnInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BranchUpsertWithoutGrnsInput = {
+    update: XOR<BranchUpdateWithoutGrnsInput, BranchUncheckedUpdateWithoutGrnsInput>
+    create: XOR<BranchCreateWithoutGrnsInput, BranchUncheckedCreateWithoutGrnsInput>
+    where?: BranchWhereInput
+  }
+
+  export type BranchUpdateToOneWithWhereWithoutGrnsInput = {
+    where?: BranchWhereInput
+    data: XOR<BranchUpdateWithoutGrnsInput, BranchUncheckedUpdateWithoutGrnsInput>
+  }
+
+  export type BranchUpdateWithoutGrnsInput = {
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isMain?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stock?: BranchStockUpdateManyWithoutBranchNestedInput
+    gtnsOut?: GtnUpdateManyWithoutFromBranchNestedInput
+    gtnsIn?: GtnUpdateManyWithoutToBranchNestedInput
+  }
+
+  export type BranchUncheckedUpdateWithoutGrnsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isMain?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stock?: BranchStockUncheckedUpdateManyWithoutBranchNestedInput
+    gtnsOut?: GtnUncheckedUpdateManyWithoutFromBranchNestedInput
+    gtnsIn?: GtnUncheckedUpdateManyWithoutToBranchNestedInput
+  }
+
+  export type GrnItemUpsertWithWhereUniqueWithoutGrnInput = {
+    where: GrnItemWhereUniqueInput
+    update: XOR<GrnItemUpdateWithoutGrnInput, GrnItemUncheckedUpdateWithoutGrnInput>
+    create: XOR<GrnItemCreateWithoutGrnInput, GrnItemUncheckedCreateWithoutGrnInput>
+  }
+
+  export type GrnItemUpdateWithWhereUniqueWithoutGrnInput = {
+    where: GrnItemWhereUniqueInput
+    data: XOR<GrnItemUpdateWithoutGrnInput, GrnItemUncheckedUpdateWithoutGrnInput>
+  }
+
+  export type GrnItemUpdateManyWithWhereWithoutGrnInput = {
+    where: GrnItemScalarWhereInput
+    data: XOR<GrnItemUpdateManyMutationInput, GrnItemUncheckedUpdateManyWithoutGrnInput>
+  }
+
+  export type GrnItemScalarWhereInput = {
+    AND?: GrnItemScalarWhereInput | GrnItemScalarWhereInput[]
+    OR?: GrnItemScalarWhereInput[]
+    NOT?: GrnItemScalarWhereInput | GrnItemScalarWhereInput[]
+    id?: IntFilter<"GrnItem"> | number
+    grnId?: IntFilter<"GrnItem"> | number
+    productId?: IntNullableFilter<"GrnItem"> | number | null
+    description?: StringFilter<"GrnItem"> | string
+    purchaseOrderItemId?: IntNullableFilter<"GrnItem"> | number | null
+    orderedQty?: IntNullableFilter<"GrnItem"> | number | null
+    deliveredQty?: IntFilter<"GrnItem"> | number
+    acceptedQty?: IntFilter<"GrnItem"> | number
+    rejectedQty?: IntFilter<"GrnItem"> | number
+    rejectReason?: StringNullableFilter<"GrnItem"> | string | null
+    unitCost?: FloatFilter<"GrnItem"> | number
+    lineTotal?: FloatFilter<"GrnItem"> | number
+  }
+
+  export type GrnCreateWithoutItemsInput = {
+    grnNo: string
+    supplierId?: number | null
+    supplierName: string
+    purchaseOrderId?: number | null
+    poNumber?: string | null
+    supplierInvoiceNo?: string | null
+    invoiceDate?: Date | string | null
+    invoiceTotal?: number | null
+    notes?: string | null
+    acceptedUnits?: number
+    rejectedUnits?: number
+    totalCost?: number
+    shiftId?: number | null
+    receivedById: number
+    createdAt?: Date | string
+    branch: BranchCreateNestedOneWithoutGrnsInput
+  }
+
+  export type GrnUncheckedCreateWithoutItemsInput = {
+    id?: number
+    grnNo: string
+    branchId: number
+    supplierId?: number | null
+    supplierName: string
+    purchaseOrderId?: number | null
+    poNumber?: string | null
+    supplierInvoiceNo?: string | null
+    invoiceDate?: Date | string | null
+    invoiceTotal?: number | null
+    notes?: string | null
+    acceptedUnits?: number
+    rejectedUnits?: number
+    totalCost?: number
+    shiftId?: number | null
+    receivedById: number
+    createdAt?: Date | string
+  }
+
+  export type GrnCreateOrConnectWithoutItemsInput = {
+    where: GrnWhereUniqueInput
+    create: XOR<GrnCreateWithoutItemsInput, GrnUncheckedCreateWithoutItemsInput>
+  }
+
+  export type GrnUpsertWithoutItemsInput = {
+    update: XOR<GrnUpdateWithoutItemsInput, GrnUncheckedUpdateWithoutItemsInput>
+    create: XOR<GrnCreateWithoutItemsInput, GrnUncheckedCreateWithoutItemsInput>
+    where?: GrnWhereInput
+  }
+
+  export type GrnUpdateToOneWithWhereWithoutItemsInput = {
+    where?: GrnWhereInput
+    data: XOR<GrnUpdateWithoutItemsInput, GrnUncheckedUpdateWithoutItemsInput>
+  }
+
+  export type GrnUpdateWithoutItemsInput = {
+    grnNo?: StringFieldUpdateOperationsInput | string
+    supplierId?: NullableIntFieldUpdateOperationsInput | number | null
+    supplierName?: StringFieldUpdateOperationsInput | string
+    purchaseOrderId?: NullableIntFieldUpdateOperationsInput | number | null
+    poNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    supplierInvoiceNo?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invoiceTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedUnits?: IntFieldUpdateOperationsInput | number
+    rejectedUnits?: IntFieldUpdateOperationsInput | number
+    totalCost?: FloatFieldUpdateOperationsInput | number
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    branch?: BranchUpdateOneRequiredWithoutGrnsNestedInput
+  }
+
+  export type GrnUncheckedUpdateWithoutItemsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    grnNo?: StringFieldUpdateOperationsInput | string
+    branchId?: IntFieldUpdateOperationsInput | number
+    supplierId?: NullableIntFieldUpdateOperationsInput | number | null
+    supplierName?: StringFieldUpdateOperationsInput | string
+    purchaseOrderId?: NullableIntFieldUpdateOperationsInput | number | null
+    poNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    supplierInvoiceNo?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invoiceTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedUnits?: IntFieldUpdateOperationsInput | number
+    rejectedUnits?: IntFieldUpdateOperationsInput | number
+    totalCost?: FloatFieldUpdateOperationsInput | number
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BranchCreateWithoutGtnsOutInput = {
+    code: string
+    name: string
+    address?: string | null
+    phone?: string | null
+    isMain?: boolean
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stock?: BranchStockCreateNestedManyWithoutBranchInput
+    grns?: GrnCreateNestedManyWithoutBranchInput
+    gtnsIn?: GtnCreateNestedManyWithoutToBranchInput
+  }
+
+  export type BranchUncheckedCreateWithoutGtnsOutInput = {
+    id?: number
+    code: string
+    name: string
+    address?: string | null
+    phone?: string | null
+    isMain?: boolean
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stock?: BranchStockUncheckedCreateNestedManyWithoutBranchInput
+    grns?: GrnUncheckedCreateNestedManyWithoutBranchInput
+    gtnsIn?: GtnUncheckedCreateNestedManyWithoutToBranchInput
+  }
+
+  export type BranchCreateOrConnectWithoutGtnsOutInput = {
+    where: BranchWhereUniqueInput
+    create: XOR<BranchCreateWithoutGtnsOutInput, BranchUncheckedCreateWithoutGtnsOutInput>
+  }
+
+  export type BranchCreateWithoutGtnsInInput = {
+    code: string
+    name: string
+    address?: string | null
+    phone?: string | null
+    isMain?: boolean
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stock?: BranchStockCreateNestedManyWithoutBranchInput
+    grns?: GrnCreateNestedManyWithoutBranchInput
+    gtnsOut?: GtnCreateNestedManyWithoutFromBranchInput
+  }
+
+  export type BranchUncheckedCreateWithoutGtnsInInput = {
+    id?: number
+    code: string
+    name: string
+    address?: string | null
+    phone?: string | null
+    isMain?: boolean
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stock?: BranchStockUncheckedCreateNestedManyWithoutBranchInput
+    grns?: GrnUncheckedCreateNestedManyWithoutBranchInput
+    gtnsOut?: GtnUncheckedCreateNestedManyWithoutFromBranchInput
+  }
+
+  export type BranchCreateOrConnectWithoutGtnsInInput = {
+    where: BranchWhereUniqueInput
+    create: XOR<BranchCreateWithoutGtnsInInput, BranchUncheckedCreateWithoutGtnsInInput>
+  }
+
+  export type GtnItemCreateWithoutGtnInput = {
+    productId?: number | null
+    productName: string
+    sentQty: number
+    receivedQty?: number | null
+    damagedQty?: number
+    missingQty?: number
+    unitCost?: number | null
+  }
+
+  export type GtnItemUncheckedCreateWithoutGtnInput = {
+    id?: number
+    productId?: number | null
+    productName: string
+    sentQty: number
+    receivedQty?: number | null
+    damagedQty?: number
+    missingQty?: number
+    unitCost?: number | null
+  }
+
+  export type GtnItemCreateOrConnectWithoutGtnInput = {
+    where: GtnItemWhereUniqueInput
+    create: XOR<GtnItemCreateWithoutGtnInput, GtnItemUncheckedCreateWithoutGtnInput>
+  }
+
+  export type GtnItemCreateManyGtnInputEnvelope = {
+    data: GtnItemCreateManyGtnInput | GtnItemCreateManyGtnInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BranchUpsertWithoutGtnsOutInput = {
+    update: XOR<BranchUpdateWithoutGtnsOutInput, BranchUncheckedUpdateWithoutGtnsOutInput>
+    create: XOR<BranchCreateWithoutGtnsOutInput, BranchUncheckedCreateWithoutGtnsOutInput>
+    where?: BranchWhereInput
+  }
+
+  export type BranchUpdateToOneWithWhereWithoutGtnsOutInput = {
+    where?: BranchWhereInput
+    data: XOR<BranchUpdateWithoutGtnsOutInput, BranchUncheckedUpdateWithoutGtnsOutInput>
+  }
+
+  export type BranchUpdateWithoutGtnsOutInput = {
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isMain?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stock?: BranchStockUpdateManyWithoutBranchNestedInput
+    grns?: GrnUpdateManyWithoutBranchNestedInput
+    gtnsIn?: GtnUpdateManyWithoutToBranchNestedInput
+  }
+
+  export type BranchUncheckedUpdateWithoutGtnsOutInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isMain?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stock?: BranchStockUncheckedUpdateManyWithoutBranchNestedInput
+    grns?: GrnUncheckedUpdateManyWithoutBranchNestedInput
+    gtnsIn?: GtnUncheckedUpdateManyWithoutToBranchNestedInput
+  }
+
+  export type BranchUpsertWithoutGtnsInInput = {
+    update: XOR<BranchUpdateWithoutGtnsInInput, BranchUncheckedUpdateWithoutGtnsInInput>
+    create: XOR<BranchCreateWithoutGtnsInInput, BranchUncheckedCreateWithoutGtnsInInput>
+    where?: BranchWhereInput
+  }
+
+  export type BranchUpdateToOneWithWhereWithoutGtnsInInput = {
+    where?: BranchWhereInput
+    data: XOR<BranchUpdateWithoutGtnsInInput, BranchUncheckedUpdateWithoutGtnsInInput>
+  }
+
+  export type BranchUpdateWithoutGtnsInInput = {
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isMain?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stock?: BranchStockUpdateManyWithoutBranchNestedInput
+    grns?: GrnUpdateManyWithoutBranchNestedInput
+    gtnsOut?: GtnUpdateManyWithoutFromBranchNestedInput
+  }
+
+  export type BranchUncheckedUpdateWithoutGtnsInInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isMain?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stock?: BranchStockUncheckedUpdateManyWithoutBranchNestedInput
+    grns?: GrnUncheckedUpdateManyWithoutBranchNestedInput
+    gtnsOut?: GtnUncheckedUpdateManyWithoutFromBranchNestedInput
+  }
+
+  export type GtnItemUpsertWithWhereUniqueWithoutGtnInput = {
+    where: GtnItemWhereUniqueInput
+    update: XOR<GtnItemUpdateWithoutGtnInput, GtnItemUncheckedUpdateWithoutGtnInput>
+    create: XOR<GtnItemCreateWithoutGtnInput, GtnItemUncheckedCreateWithoutGtnInput>
+  }
+
+  export type GtnItemUpdateWithWhereUniqueWithoutGtnInput = {
+    where: GtnItemWhereUniqueInput
+    data: XOR<GtnItemUpdateWithoutGtnInput, GtnItemUncheckedUpdateWithoutGtnInput>
+  }
+
+  export type GtnItemUpdateManyWithWhereWithoutGtnInput = {
+    where: GtnItemScalarWhereInput
+    data: XOR<GtnItemUpdateManyMutationInput, GtnItemUncheckedUpdateManyWithoutGtnInput>
+  }
+
+  export type GtnItemScalarWhereInput = {
+    AND?: GtnItemScalarWhereInput | GtnItemScalarWhereInput[]
+    OR?: GtnItemScalarWhereInput[]
+    NOT?: GtnItemScalarWhereInput | GtnItemScalarWhereInput[]
+    id?: IntFilter<"GtnItem"> | number
+    gtnId?: IntFilter<"GtnItem"> | number
+    productId?: IntNullableFilter<"GtnItem"> | number | null
+    productName?: StringFilter<"GtnItem"> | string
+    sentQty?: IntFilter<"GtnItem"> | number
+    receivedQty?: IntNullableFilter<"GtnItem"> | number | null
+    damagedQty?: IntFilter<"GtnItem"> | number
+    missingQty?: IntFilter<"GtnItem"> | number
+    unitCost?: FloatNullableFilter<"GtnItem"> | number | null
+  }
+
+  export type GtnCreateWithoutItemsInput = {
+    gtnNo: string
+    status?: string
+    notes?: string | null
+    carriedBy?: string | null
+    sentById: number
+    sentAt?: Date | string
+    sentShiftId?: number | null
+    receivedById?: number | null
+    receivedAt?: Date | string | null
+    receivedShiftId?: number | null
+    receiveNote?: string | null
+    cancelledById?: number | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    fromBranch: BranchCreateNestedOneWithoutGtnsOutInput
+    toBranch: BranchCreateNestedOneWithoutGtnsInInput
+  }
+
+  export type GtnUncheckedCreateWithoutItemsInput = {
+    id?: number
+    gtnNo: string
+    fromBranchId: number
+    toBranchId: number
+    status?: string
+    notes?: string | null
+    carriedBy?: string | null
+    sentById: number
+    sentAt?: Date | string
+    sentShiftId?: number | null
+    receivedById?: number | null
+    receivedAt?: Date | string | null
+    receivedShiftId?: number | null
+    receiveNote?: string | null
+    cancelledById?: number | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+  }
+
+  export type GtnCreateOrConnectWithoutItemsInput = {
+    where: GtnWhereUniqueInput
+    create: XOR<GtnCreateWithoutItemsInput, GtnUncheckedCreateWithoutItemsInput>
+  }
+
+  export type GtnUpsertWithoutItemsInput = {
+    update: XOR<GtnUpdateWithoutItemsInput, GtnUncheckedUpdateWithoutItemsInput>
+    create: XOR<GtnCreateWithoutItemsInput, GtnUncheckedCreateWithoutItemsInput>
+    where?: GtnWhereInput
+  }
+
+  export type GtnUpdateToOneWithWhereWithoutItemsInput = {
+    where?: GtnWhereInput
+    data: XOR<GtnUpdateWithoutItemsInput, GtnUncheckedUpdateWithoutItemsInput>
+  }
+
+  export type GtnUpdateWithoutItemsInput = {
+    gtnNo?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    carriedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    sentById?: IntFieldUpdateOperationsInput | number
+    sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sentShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    receivedShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receiveNote?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledById?: NullableIntFieldUpdateOperationsInput | number | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fromBranch?: BranchUpdateOneRequiredWithoutGtnsOutNestedInput
+    toBranch?: BranchUpdateOneRequiredWithoutGtnsInNestedInput
+  }
+
+  export type GtnUncheckedUpdateWithoutItemsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    gtnNo?: StringFieldUpdateOperationsInput | string
+    fromBranchId?: IntFieldUpdateOperationsInput | number
+    toBranchId?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    carriedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    sentById?: IntFieldUpdateOperationsInput | number
+    sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sentShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    receivedShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receiveNote?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledById?: NullableIntFieldUpdateOperationsInput | number | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
   export type PosCounterSaleCreateManyCashierInput = {
     id?: number
+    branchId?: number | null
     invoiceGroupCode: string
     totalAmount: number
     emptyDeduction?: number
@@ -60492,6 +71547,7 @@ export namespace Prisma {
   }
 
   export type PosCounterSaleUpdateWithoutCashierInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
@@ -60519,6 +71575,7 @@ export namespace Prisma {
 
   export type PosCounterSaleUncheckedUpdateWithoutCashierInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
@@ -60546,6 +71603,7 @@ export namespace Prisma {
 
   export type PosCounterSaleUncheckedUpdateManyWithoutCashierInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
@@ -60588,6 +71646,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -60597,6 +71656,7 @@ export namespace Prisma {
 
   export type PurchaseOrderCreateManySupplierInput = {
     id?: number
+    branchId?: number | null
     poNumber: string
     status?: string
     orderDate?: Date | string
@@ -60629,6 +71689,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -60641,6 +71702,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemUpdateManyWithoutProductNestedInput
     returns?: PosReturnUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUpdateManyWithoutInventoryProductNestedInput
+    branchStock?: BranchStockUpdateManyWithoutProductNestedInput
   }
 
   export type InventoryProductUncheckedUpdateWithoutSupplierInput = {
@@ -60660,6 +71722,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -60670,6 +71733,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemUncheckedUpdateManyWithoutProductNestedInput
     returns?: PosReturnUncheckedUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutInventoryProductNestedInput
+    branchStock?: BranchStockUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type InventoryProductUncheckedUpdateManyWithoutSupplierInput = {
@@ -60689,6 +71753,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -60697,6 +71762,7 @@ export namespace Prisma {
   }
 
   export type PurchaseOrderUpdateWithoutSupplierInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     poNumber?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     orderDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -60719,6 +71785,7 @@ export namespace Prisma {
 
   export type PurchaseOrderUncheckedUpdateWithoutSupplierInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     poNumber?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     orderDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -60741,6 +71808,7 @@ export namespace Prisma {
 
   export type PurchaseOrderUncheckedUpdateManyWithoutSupplierInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     poNumber?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     orderDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -60776,6 +71844,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -60797,6 +71866,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -60809,6 +71879,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemUpdateManyWithoutProductNestedInput
     returns?: PosReturnUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUpdateManyWithoutInventoryProductNestedInput
+    branchStock?: BranchStockUpdateManyWithoutProductNestedInput
   }
 
   export type InventoryProductUncheckedUpdateWithoutBrandInput = {
@@ -60828,6 +71899,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -60838,6 +71910,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemUncheckedUpdateManyWithoutProductNestedInput
     returns?: PosReturnUncheckedUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutInventoryProductNestedInput
+    branchStock?: BranchStockUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type InventoryProductUncheckedUpdateManyWithoutBrandInput = {
@@ -60857,6 +71930,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -60881,6 +71955,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    isHardLiquor?: boolean
     damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
@@ -60902,6 +71977,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -60914,6 +71990,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemUpdateManyWithoutProductNestedInput
     returns?: PosReturnUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUpdateManyWithoutInventoryProductNestedInput
+    branchStock?: BranchStockUpdateManyWithoutProductNestedInput
   }
 
   export type InventoryProductUncheckedUpdateWithoutCategoryInput = {
@@ -60933,6 +72010,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -60943,6 +72021,7 @@ export namespace Prisma {
     purchaseOrderItems?: PurchaseOrderItemUncheckedUpdateManyWithoutProductNestedInput
     returns?: PosReturnUncheckedUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutInventoryProductNestedInput
+    branchStock?: BranchStockUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type InventoryProductUncheckedUpdateManyWithoutCategoryInput = {
@@ -60962,6 +72041,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -60996,6 +72076,7 @@ export namespace Prisma {
 
   export type PosReturnCreateManyProductInput = {
     id?: number
+    branchId?: number | null
     returnNo: string
     type: string
     productName: string
@@ -61042,8 +72123,18 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    isHardLiquor?: boolean
     billDiscount?: number
     purchasedAt?: Date | string
+  }
+
+  export type BranchStockCreateManyProductInput = {
+    id?: number
+    branchId: number
+    quantity?: number
+    damagedQuantity?: number
+    emptyBottlesOnHand?: number
+    updatedAt?: Date | string
   }
 
   export type InventoryProductExpenseUpdateWithoutProductInput = {
@@ -61119,6 +72210,7 @@ export namespace Prisma {
   }
 
   export type PosReturnUpdateWithoutProductInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     returnNo?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     productName?: StringFieldUpdateOperationsInput | string
@@ -61144,6 +72236,7 @@ export namespace Prisma {
 
   export type PosReturnUncheckedUpdateWithoutProductInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     returnNo?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     productName?: StringFieldUpdateOperationsInput | string
@@ -61169,6 +72262,7 @@ export namespace Prisma {
 
   export type PosReturnUncheckedUpdateManyWithoutProductInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     returnNo?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     productName?: StringFieldUpdateOperationsInput | string
@@ -61213,6 +72307,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customer?: PosCustomerUpdateOneRequiredWithoutPurchasesNestedInput
@@ -61244,6 +72339,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     receipts?: AccountReceiptUncheckedUpdateManyWithoutPurchaseNestedInput
@@ -61274,8 +72370,35 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BranchStockUpdateWithoutProductInput = {
+    quantity?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    branch?: BranchUpdateOneRequiredWithoutStockNestedInput
+  }
+
+  export type BranchStockUncheckedUpdateWithoutProductInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    branchId?: IntFieldUpdateOperationsInput | number
+    quantity?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BranchStockUncheckedUpdateManyWithoutProductInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    branchId?: IntFieldUpdateOperationsInput | number
+    quantity?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type PosCustomerPurchaseCreateManyCustomerInput = {
@@ -61301,12 +72424,14 @@ export namespace Prisma {
     quantity?: number
     emptiesReturned?: number
     emptyDeduction?: number
+    isHardLiquor?: boolean
     billDiscount?: number
     purchasedAt?: Date | string
   }
 
   export type PosCounterSaleCreateManyCustomerInput = {
     id?: number
+    branchId?: number | null
     invoiceGroupCode: string
     totalAmount: number
     emptyDeduction?: number
@@ -61346,6 +72471,7 @@ export namespace Prisma {
 
   export type PosReturnCreateManyCustomerInput = {
     id?: number
+    branchId?: number | null
     returnNo: string
     type: string
     productId?: number | null
@@ -61390,6 +72516,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     inventoryProduct?: InventoryProductUpdateOneWithoutCustomerPurchasesNestedInput
@@ -61421,6 +72548,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     receipts?: AccountReceiptUncheckedUpdateManyWithoutPurchaseNestedInput
@@ -61451,11 +72579,13 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
+    isHardLiquor?: BoolFieldUpdateOperationsInput | boolean
     billDiscount?: FloatFieldUpdateOperationsInput | number
     purchasedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type PosCounterSaleUpdateWithoutCustomerInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
@@ -61483,6 +72613,7 @@ export namespace Prisma {
 
   export type PosCounterSaleUncheckedUpdateWithoutCustomerInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
@@ -61510,6 +72641,7 @@ export namespace Prisma {
 
   export type PosCounterSaleUncheckedUpdateManyWithoutCustomerInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
@@ -61571,6 +72703,7 @@ export namespace Prisma {
   }
 
   export type PosReturnUpdateWithoutCustomerInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     returnNo?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     productName?: StringFieldUpdateOperationsInput | string
@@ -61596,6 +72729,7 @@ export namespace Prisma {
 
   export type PosReturnUncheckedUpdateWithoutCustomerInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     returnNo?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     productId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -61621,6 +72755,7 @@ export namespace Prisma {
 
   export type PosReturnUncheckedUpdateManyWithoutCustomerInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     returnNo?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     productId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -62490,6 +73625,7 @@ export namespace Prisma {
 
   export type PosCounterSaleCreateManyShiftInput = {
     id?: number
+    branchId?: number | null
     invoiceGroupCode: string
     totalAmount: number
     emptyDeduction?: number
@@ -62517,6 +73653,7 @@ export namespace Prisma {
 
   export type PosCashEntryCreateManyShiftInput = {
     id?: number
+    branchId?: number | null
     entryNo: string
     direction: string
     category: string
@@ -62541,6 +73678,7 @@ export namespace Prisma {
 
   export type InventoryMovementCreateManyShiftInput = {
     id?: number
+    branchId?: number | null
     productId: number
     kind: string
     type: string
@@ -62552,6 +73690,7 @@ export namespace Prisma {
 
   export type PosReturnCreateManyShiftInput = {
     id?: number
+    branchId?: number | null
     returnNo: string
     type: string
     productId?: number | null
@@ -62576,6 +73715,7 @@ export namespace Prisma {
   }
 
   export type PosCounterSaleUpdateWithoutShiftInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
@@ -62603,6 +73743,7 @@ export namespace Prisma {
 
   export type PosCounterSaleUncheckedUpdateWithoutShiftInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
@@ -62630,6 +73771,7 @@ export namespace Prisma {
 
   export type PosCounterSaleUncheckedUpdateManyWithoutShiftInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
@@ -62656,6 +73798,7 @@ export namespace Prisma {
   }
 
   export type PosCashEntryUpdateWithoutShiftInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     entryNo?: StringFieldUpdateOperationsInput | string
     direction?: StringFieldUpdateOperationsInput | string
     category?: StringFieldUpdateOperationsInput | string
@@ -62680,6 +73823,7 @@ export namespace Prisma {
 
   export type PosCashEntryUncheckedUpdateWithoutShiftInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     entryNo?: StringFieldUpdateOperationsInput | string
     direction?: StringFieldUpdateOperationsInput | string
     category?: StringFieldUpdateOperationsInput | string
@@ -62704,6 +73848,7 @@ export namespace Prisma {
 
   export type PosCashEntryUncheckedUpdateManyWithoutShiftInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     entryNo?: StringFieldUpdateOperationsInput | string
     direction?: StringFieldUpdateOperationsInput | string
     category?: StringFieldUpdateOperationsInput | string
@@ -62727,6 +73872,7 @@ export namespace Prisma {
   }
 
   export type InventoryMovementUpdateWithoutShiftInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     productId?: IntFieldUpdateOperationsInput | number
     kind?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
@@ -62738,6 +73884,7 @@ export namespace Prisma {
 
   export type InventoryMovementUncheckedUpdateWithoutShiftInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     productId?: IntFieldUpdateOperationsInput | number
     kind?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
@@ -62749,6 +73896,7 @@ export namespace Prisma {
 
   export type InventoryMovementUncheckedUpdateManyWithoutShiftInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     productId?: IntFieldUpdateOperationsInput | number
     kind?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
@@ -62759,6 +73907,7 @@ export namespace Prisma {
   }
 
   export type PosReturnUpdateWithoutShiftInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     returnNo?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     productName?: StringFieldUpdateOperationsInput | string
@@ -62784,6 +73933,7 @@ export namespace Prisma {
 
   export type PosReturnUncheckedUpdateWithoutShiftInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     returnNo?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     productId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -62809,6 +73959,7 @@ export namespace Prisma {
 
   export type PosReturnUncheckedUpdateManyWithoutShiftInput = {
     id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     returnNo?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     productId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -62922,6 +74073,370 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type BranchStockCreateManyBranchInput = {
+    id?: number
+    productId: number
+    quantity?: number
+    damagedQuantity?: number
+    emptyBottlesOnHand?: number
+    updatedAt?: Date | string
+  }
+
+  export type GrnCreateManyBranchInput = {
+    id?: number
+    grnNo: string
+    supplierId?: number | null
+    supplierName: string
+    purchaseOrderId?: number | null
+    poNumber?: string | null
+    supplierInvoiceNo?: string | null
+    invoiceDate?: Date | string | null
+    invoiceTotal?: number | null
+    notes?: string | null
+    acceptedUnits?: number
+    rejectedUnits?: number
+    totalCost?: number
+    shiftId?: number | null
+    receivedById: number
+    createdAt?: Date | string
+  }
+
+  export type GtnCreateManyFromBranchInput = {
+    id?: number
+    gtnNo: string
+    toBranchId: number
+    status?: string
+    notes?: string | null
+    carriedBy?: string | null
+    sentById: number
+    sentAt?: Date | string
+    sentShiftId?: number | null
+    receivedById?: number | null
+    receivedAt?: Date | string | null
+    receivedShiftId?: number | null
+    receiveNote?: string | null
+    cancelledById?: number | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+  }
+
+  export type GtnCreateManyToBranchInput = {
+    id?: number
+    gtnNo: string
+    fromBranchId: number
+    status?: string
+    notes?: string | null
+    carriedBy?: string | null
+    sentById: number
+    sentAt?: Date | string
+    sentShiftId?: number | null
+    receivedById?: number | null
+    receivedAt?: Date | string | null
+    receivedShiftId?: number | null
+    receiveNote?: string | null
+    cancelledById?: number | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+  }
+
+  export type BranchStockUpdateWithoutBranchInput = {
+    quantity?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    product?: InventoryProductUpdateOneRequiredWithoutBranchStockNestedInput
+  }
+
+  export type BranchStockUncheckedUpdateWithoutBranchInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    productId?: IntFieldUpdateOperationsInput | number
+    quantity?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BranchStockUncheckedUpdateManyWithoutBranchInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    productId?: IntFieldUpdateOperationsInput | number
+    quantity?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GrnUpdateWithoutBranchInput = {
+    grnNo?: StringFieldUpdateOperationsInput | string
+    supplierId?: NullableIntFieldUpdateOperationsInput | number | null
+    supplierName?: StringFieldUpdateOperationsInput | string
+    purchaseOrderId?: NullableIntFieldUpdateOperationsInput | number | null
+    poNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    supplierInvoiceNo?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invoiceTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedUnits?: IntFieldUpdateOperationsInput | number
+    rejectedUnits?: IntFieldUpdateOperationsInput | number
+    totalCost?: FloatFieldUpdateOperationsInput | number
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: GrnItemUpdateManyWithoutGrnNestedInput
+  }
+
+  export type GrnUncheckedUpdateWithoutBranchInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    grnNo?: StringFieldUpdateOperationsInput | string
+    supplierId?: NullableIntFieldUpdateOperationsInput | number | null
+    supplierName?: StringFieldUpdateOperationsInput | string
+    purchaseOrderId?: NullableIntFieldUpdateOperationsInput | number | null
+    poNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    supplierInvoiceNo?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invoiceTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedUnits?: IntFieldUpdateOperationsInput | number
+    rejectedUnits?: IntFieldUpdateOperationsInput | number
+    totalCost?: FloatFieldUpdateOperationsInput | number
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: GrnItemUncheckedUpdateManyWithoutGrnNestedInput
+  }
+
+  export type GrnUncheckedUpdateManyWithoutBranchInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    grnNo?: StringFieldUpdateOperationsInput | string
+    supplierId?: NullableIntFieldUpdateOperationsInput | number | null
+    supplierName?: StringFieldUpdateOperationsInput | string
+    purchaseOrderId?: NullableIntFieldUpdateOperationsInput | number | null
+    poNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    supplierInvoiceNo?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invoiceTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedUnits?: IntFieldUpdateOperationsInput | number
+    rejectedUnits?: IntFieldUpdateOperationsInput | number
+    totalCost?: FloatFieldUpdateOperationsInput | number
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GtnUpdateWithoutFromBranchInput = {
+    gtnNo?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    carriedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    sentById?: IntFieldUpdateOperationsInput | number
+    sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sentShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    receivedShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receiveNote?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledById?: NullableIntFieldUpdateOperationsInput | number | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    toBranch?: BranchUpdateOneRequiredWithoutGtnsInNestedInput
+    items?: GtnItemUpdateManyWithoutGtnNestedInput
+  }
+
+  export type GtnUncheckedUpdateWithoutFromBranchInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    gtnNo?: StringFieldUpdateOperationsInput | string
+    toBranchId?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    carriedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    sentById?: IntFieldUpdateOperationsInput | number
+    sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sentShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    receivedShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receiveNote?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledById?: NullableIntFieldUpdateOperationsInput | number | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    items?: GtnItemUncheckedUpdateManyWithoutGtnNestedInput
+  }
+
+  export type GtnUncheckedUpdateManyWithoutFromBranchInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    gtnNo?: StringFieldUpdateOperationsInput | string
+    toBranchId?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    carriedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    sentById?: IntFieldUpdateOperationsInput | number
+    sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sentShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    receivedShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receiveNote?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledById?: NullableIntFieldUpdateOperationsInput | number | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type GtnUpdateWithoutToBranchInput = {
+    gtnNo?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    carriedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    sentById?: IntFieldUpdateOperationsInput | number
+    sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sentShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    receivedShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receiveNote?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledById?: NullableIntFieldUpdateOperationsInput | number | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fromBranch?: BranchUpdateOneRequiredWithoutGtnsOutNestedInput
+    items?: GtnItemUpdateManyWithoutGtnNestedInput
+  }
+
+  export type GtnUncheckedUpdateWithoutToBranchInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    gtnNo?: StringFieldUpdateOperationsInput | string
+    fromBranchId?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    carriedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    sentById?: IntFieldUpdateOperationsInput | number
+    sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sentShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    receivedShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receiveNote?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledById?: NullableIntFieldUpdateOperationsInput | number | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    items?: GtnItemUncheckedUpdateManyWithoutGtnNestedInput
+  }
+
+  export type GtnUncheckedUpdateManyWithoutToBranchInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    gtnNo?: StringFieldUpdateOperationsInput | string
+    fromBranchId?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    carriedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    sentById?: IntFieldUpdateOperationsInput | number
+    sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sentShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedById?: NullableIntFieldUpdateOperationsInput | number | null
+    receivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    receivedShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    receiveNote?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledById?: NullableIntFieldUpdateOperationsInput | number | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type GrnItemCreateManyGrnInput = {
+    id?: number
+    productId?: number | null
+    description: string
+    purchaseOrderItemId?: number | null
+    orderedQty?: number | null
+    deliveredQty: number
+    acceptedQty: number
+    rejectedQty?: number
+    rejectReason?: string | null
+    unitCost: number
+    lineTotal: number
+  }
+
+  export type GrnItemUpdateWithoutGrnInput = {
+    productId?: NullableIntFieldUpdateOperationsInput | number | null
+    description?: StringFieldUpdateOperationsInput | string
+    purchaseOrderItemId?: NullableIntFieldUpdateOperationsInput | number | null
+    orderedQty?: NullableIntFieldUpdateOperationsInput | number | null
+    deliveredQty?: IntFieldUpdateOperationsInput | number
+    acceptedQty?: IntFieldUpdateOperationsInput | number
+    rejectedQty?: IntFieldUpdateOperationsInput | number
+    rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
+    unitCost?: FloatFieldUpdateOperationsInput | number
+    lineTotal?: FloatFieldUpdateOperationsInput | number
+  }
+
+  export type GrnItemUncheckedUpdateWithoutGrnInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    productId?: NullableIntFieldUpdateOperationsInput | number | null
+    description?: StringFieldUpdateOperationsInput | string
+    purchaseOrderItemId?: NullableIntFieldUpdateOperationsInput | number | null
+    orderedQty?: NullableIntFieldUpdateOperationsInput | number | null
+    deliveredQty?: IntFieldUpdateOperationsInput | number
+    acceptedQty?: IntFieldUpdateOperationsInput | number
+    rejectedQty?: IntFieldUpdateOperationsInput | number
+    rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
+    unitCost?: FloatFieldUpdateOperationsInput | number
+    lineTotal?: FloatFieldUpdateOperationsInput | number
+  }
+
+  export type GrnItemUncheckedUpdateManyWithoutGrnInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    productId?: NullableIntFieldUpdateOperationsInput | number | null
+    description?: StringFieldUpdateOperationsInput | string
+    purchaseOrderItemId?: NullableIntFieldUpdateOperationsInput | number | null
+    orderedQty?: NullableIntFieldUpdateOperationsInput | number | null
+    deliveredQty?: IntFieldUpdateOperationsInput | number
+    acceptedQty?: IntFieldUpdateOperationsInput | number
+    rejectedQty?: IntFieldUpdateOperationsInput | number
+    rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
+    unitCost?: FloatFieldUpdateOperationsInput | number
+    lineTotal?: FloatFieldUpdateOperationsInput | number
+  }
+
+  export type GtnItemCreateManyGtnInput = {
+    id?: number
+    productId?: number | null
+    productName: string
+    sentQty: number
+    receivedQty?: number | null
+    damagedQty?: number
+    missingQty?: number
+    unitCost?: number | null
+  }
+
+  export type GtnItemUpdateWithoutGtnInput = {
+    productId?: NullableIntFieldUpdateOperationsInput | number | null
+    productName?: StringFieldUpdateOperationsInput | string
+    sentQty?: IntFieldUpdateOperationsInput | number
+    receivedQty?: NullableIntFieldUpdateOperationsInput | number | null
+    damagedQty?: IntFieldUpdateOperationsInput | number
+    missingQty?: IntFieldUpdateOperationsInput | number
+    unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
+  }
+
+  export type GtnItemUncheckedUpdateWithoutGtnInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    productId?: NullableIntFieldUpdateOperationsInput | number | null
+    productName?: StringFieldUpdateOperationsInput | string
+    sentQty?: IntFieldUpdateOperationsInput | number
+    receivedQty?: NullableIntFieldUpdateOperationsInput | number | null
+    damagedQty?: IntFieldUpdateOperationsInput | number
+    missingQty?: IntFieldUpdateOperationsInput | number
+    unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
+  }
+
+  export type GtnItemUncheckedUpdateManyWithoutGtnInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    productId?: NullableIntFieldUpdateOperationsInput | number | null
+    productName?: StringFieldUpdateOperationsInput | string
+    sentQty?: IntFieldUpdateOperationsInput | number
+    receivedQty?: NullableIntFieldUpdateOperationsInput | number | null
+    damagedQty?: IntFieldUpdateOperationsInput | number
+    missingQty?: IntFieldUpdateOperationsInput | number
+    unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
+  }
+
 
 
   /**
@@ -62983,6 +74498,18 @@ export namespace Prisma {
      * @deprecated Use PurchaseOrderCountOutputTypeDefaultArgs instead
      */
     export type PurchaseOrderCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PurchaseOrderCountOutputTypeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use BranchCountOutputTypeDefaultArgs instead
+     */
+    export type BranchCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = BranchCountOutputTypeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use GrnCountOutputTypeDefaultArgs instead
+     */
+    export type GrnCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = GrnCountOutputTypeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use GtnCountOutputTypeDefaultArgs instead
+     */
+    export type GtnCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = GtnCountOutputTypeDefaultArgs<ExtArgs>
     /**
      * @deprecated Use UserDefaultArgs instead
      */
@@ -63115,6 +74642,30 @@ export namespace Prisma {
      * @deprecated Use PosReturnDefaultArgs instead
      */
     export type PosReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PosReturnDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use BranchDefaultArgs instead
+     */
+    export type BranchArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = BranchDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use BranchStockDefaultArgs instead
+     */
+    export type BranchStockArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = BranchStockDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use GrnDefaultArgs instead
+     */
+    export type GrnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = GrnDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use GrnItemDefaultArgs instead
+     */
+    export type GrnItemArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = GrnItemDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use GtnDefaultArgs instead
+     */
+    export type GtnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = GtnDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use GtnItemDefaultArgs instead
+     */
+    export type GtnItemArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = GtnItemDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

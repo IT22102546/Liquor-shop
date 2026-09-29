@@ -84,9 +84,13 @@ export function buildDayEndReportHtml(report: ShiftReport) {
   const { shift, sales, cash, close } = report;
   const closed = shift.status === "CLOSED";
   const entries = cash.entries.filter((entry) => !entry.automatic);
-  const stockRows = report.stockBook.filter((row) => row.opening || row.received || row.sold || row.adjusted || row.closing);
+  const stockRows = report.stockBook.filter((row) => row.opening || row.received || row.sold || row.adjusted || row.returned || row.damaged || row.transferIn || row.transferOut || row.closing);
+  // Transfer columns only when stock moved between branches this shift.
+  const hasTransferCols = stockRows.some((row) => row.transferIn || row.transferOut);
   const counted = new Map((close?.stockCount ?? []).map((row) => [row.name, row]));
   const hasCount = Boolean(close?.stockCount.length);
+  // Returned / damaged columns only when something came back or was damaged this shift.
+  const hasReturnCols = stockRows.some((row) => row.returned || row.damaged);
   const diff = close?.difference ?? 0;
   const tone = Math.abs(diff) < 0.005 ? "ok" : diff > 0 ? "over" : "short";
   const toneLabel = tone === "ok" ? "Balanced" : tone === "over" ? "Over" : "Short";
@@ -112,7 +116,7 @@ export function buildDayEndReportHtml(report: ShiftReport) {
     <div>
       <div class="shop">${esc(SHOP.name)}</div>
       ${SHOP.tagline ? `<div class="tag">${esc(SHOP.tagline)}</div>` : ""}
-      <div class="addr">${esc(SHOP.address)}${SHOP.phone ? ` · Tel ${esc(SHOP.phone)}` : ""}</div>
+      <div class="addr">${shift.branch ? `<b>${esc(shift.branch.name)}</b> · ${esc(shift.branch.address ?? SHOP.address)}` : esc(SHOP.address)}${(shift.branch?.phone ?? SHOP.phone) ? ` · Tel ${esc(shift.branch?.phone ?? SHOP.phone)}` : ""}</div>
     </div>
     <div class="doc">
       <h1>${closed ? "Day End Report" : "Shift Report (in progress)"}</h1>
@@ -146,6 +150,8 @@ export function buildDayEndReportHtml(report: ShiftReport) {
         ${sales.discounts ? `<tr><td>Less: discounts</td><td class="r minus">−${amt(sales.discounts)}</td></tr>` : ""}
         ${sales.pointsValue ? `<tr><td>Less: loyalty points redeemed (${sales.pointsRedeemed})</td><td class="r minus">−${amt(sales.pointsValue)}</td></tr>` : ""}
         <tr class="total"><td>Net sales</td><td class="r">${amt(sales.netSales)}</td></tr>
+        ${sales.byType ? `<tr><td class="muted">of which hard liquor (${sales.byType.hardLiquor.units} btl)</td><td class="r muted">${amt(sales.byType.hardLiquor.amount)}</td></tr>
+        <tr><td class="muted">of which beer, wine &amp; others (${sales.byType.other.units})</td><td class="r muted">${amt(sales.byType.other.amount)}</td></tr>` : ""}
         ${sales.walletUsed ? `<tr><td>Paid from customer wallets</td><td class="r">${amt(sales.walletUsed)}</td></tr>` : ""}
         <tr><td>Received in cash</td><td class="r">${amt(sales.cashSales)}</td></tr>
         <tr><td>Received by card</td><td class="r">${amt(sales.cardSales)}</td></tr>
@@ -265,11 +271,11 @@ export function buildDayEndReportHtml(report: ShiftReport) {
   <section>
     <h2>Stock book <small>opening + received − sold${hasReturnCols ? " + returned − damaged" : ""} ± adjusted = closing${hasCount ? " · checked against the shelf count" : ""}</small></h2>
     <table>
-      <thead><tr><th>Product</th><th class="r">Opening</th><th class="r">Received</th><th class="r">Sold</th>${hasReturnCols ? `<th class="r">Returned</th><th class="r">Damaged</th>` : ""}<th class="r">Adjusted</th><th class="r">Closing</th>${hasCount ? `<th class="r">Counted</th><th class="r">Difference</th>` : ""}</tr></thead>
+      <thead><tr><th>Product</th><th class="r">Opening</th><th class="r">Received</th><th class="r">Sold</th>${hasTransferCols ? `<th class="r">From branch</th><th class="r">To branch</th>` : ""}${hasReturnCols ? `<th class="r">Returned</th><th class="r">Damaged</th>` : ""}<th class="r">Adjusted</th><th class="r">Closing</th>${hasCount ? `<th class="r">Counted</th><th class="r">Difference</th>` : ""}</tr></thead>
       ${stockRows.map((row) => {
         const count = counted.get(row.name);
         return `<tr><td>${esc(row.name)}<div class="muted">${esc([row.brand, row.size].filter(Boolean).join(" · "))}</div></td>
-          <td class="r">${row.opening}</td><td class="r">${row.received || "—"}</td><td class="r">${row.sold || "—"}</td>${hasReturnCols ? `<td class="r">${row.returned ? `+${row.returned}` : "—"}</td><td class="r">${row.damaged ? `−${row.damaged}` : "—"}</td>` : ""}<td class="r">${row.adjusted ? (row.adjusted > 0 ? `+${row.adjusted}` : row.adjusted) : "—"}</td><td class="r strong">${row.closing}</td>
+          <td class="r">${row.opening}</td><td class="r">${row.received || "—"}</td><td class="r">${row.sold || "—"}</td>${hasTransferCols ? `<td class="r">${row.transferIn ? `+${row.transferIn}` : "—"}</td><td class="r">${row.transferOut ? `−${row.transferOut}` : "—"}</td>` : ""}${hasReturnCols ? `<td class="r">${row.returned ? `+${row.returned}` : "—"}</td><td class="r">${row.damaged ? `−${row.damaged}` : "—"}</td>` : ""}<td class="r">${row.adjusted ? (row.adjusted > 0 ? `+${row.adjusted}` : row.adjusted) : "—"}</td><td class="r strong">${row.closing}</td>
           ${hasCount ? `<td class="r">${count ? count.counted : "—"}</td><td class="r ${count && count.difference ? "flag" : ""}">${count ? (count.difference ? (count.difference > 0 ? `+${count.difference}` : count.difference) : "✓") : ""}</td>` : ""}</tr>`;
       }).join("") || `<tr><td colspan="8" class="empty">No stock movements</td></tr>`}
     </table>
@@ -299,6 +305,17 @@ export function buildDayEndReportHtml(report: ShiftReport) {
     <table>
       <thead><tr><th>Time</th><th>Member</th><th>What</th><th>Bill</th><th>By</th><th class="r">Amount</th><th class="r">Wallet after</th></tr></thead>
       ${report.wallet.rows.map((row) => `<tr><td>${timeOnly(row.time)}</td><td>${esc(row.member)}<div class="muted">${esc(row.mobile)}</div></td><td>${row.type === "CREDIT" ? "Change kept" : row.type === "REFUND" ? "Refund for returned bottles" : "Spent on bill"}</td><td>${esc(row.billNo ?? "—")}</td><td>${esc(row.by)}</td><td class="r ${row.type === "DEBIT" ? "minus" : "plus"}">${row.amount == null ? "—" : `${row.amount >= 0 ? "+" : "−"}${amt(Math.abs(row.amount))}`}</td><td class="r">${amt(row.balanceAfter)}</td></tr>`).join("")}
+    </table>
+  </section>` : ""}
+
+  ${report.goods && (report.goods.grns.length || report.goods.sent.length || report.goods.received.length) ? `
+  <section>
+    <h2>Goods in &amp; out <small>supplier deliveries (GRN) and branch transfers (GTN)</small></h2>
+    <table>
+      <thead><tr><th>Time</th><th>No</th><th>What</th><th>Items</th><th>By</th><th class="r">Bottles</th></tr></thead>
+      ${report.goods.grns.map((row) => `<tr><td>${timeOnly(row.time)}</td><td>${esc(row.grnNo)}</td><td>Received from ${esc(row.supplier)}${row.poNumber ? `<div class="muted">${esc(row.poNumber)}</div>` : ""}${row.invoiceNo ? `<div class="muted">Invoice ${esc(row.invoiceNo)}${row.invoiceTotal != null ? ` · ${amt(row.invoiceTotal)}` : ""}</div>` : ""}</td><td class="muted">${esc(row.items)}</td><td>${esc(row.by)}</td><td class="r plus">+${row.accepted}${row.rejected ? `<div class="muted">${row.rejected} rejected</div>` : ""}</td></tr>`).join("")}
+      ${report.goods.sent.map((row) => `<tr><td>${timeOnly(row.time)}</td><td>${esc(row.gtnNo)}</td><td>Sent to ${esc(row.branch)}${row.status === "CANCELLED" ? `<div class="muted">Cancelled — back on the shelf</div>` : row.status === "SENT" ? `<div class="muted">In transit</div>` : ""}</td><td class="muted">${esc(row.items)}</td><td>${esc(row.by)}</td><td class="r minus">−${row.units}</td></tr>`).join("")}
+      ${report.goods.received.map((row) => `<tr><td>${timeOnly(row.time)}</td><td>${esc(row.gtnNo)}</td><td>Received from ${esc(row.branch)}${row.missing ? `<div class="flag">${row.missing} missing</div>` : ""}${row.note ? `<div class="muted">${esc(row.note)}</div>` : ""}</td><td class="muted">${esc(row.items)}</td><td>${esc(row.by)}</td><td class="r plus">+${row.units}${row.damaged ? `<div class="muted">${row.damaged} damaged</div>` : ""}</td></tr>`).join("")}
     </table>
   </section>` : ""}
 

@@ -3,6 +3,8 @@ import { prisma } from "../../database/prisma.client";
 import { AppError } from "../../common/utils/errors";
 import { EXPENSE_CATEGORIES, HOLDING_SOURCE, INCOME_CATEGORIES, SOURCE_LABELS } from "./cash-book.service";
 import { findOpenShift } from "./stock-movements";
+import { mainBranch } from "../branches/branch-context";
+import { forBranch } from "../branches/branch-stock";
 import { DISPOSAL_LABELS as RETURN_DISPOSAL_LABELS, TYPE_LABELS as RETURN_TYPE_LABELS } from "../returns/returns.service";
 
 /** Sri Lankan notes and coins counted at the till. */
@@ -49,7 +51,9 @@ export async function summarizeShift(shiftId: number) {
   const shift = await prisma.posShift.findUnique({ where: { id: shiftId } });
   if (!shift) throw AppError.notFound("Shift not found");
 
-  const [sales, entries, movements, products] = await Promise.all([
+  const branch = shift.branchId ? await prisma.branch.findUnique({ where: { id: shift.branchId } }) : await mainBranch();
+  if (!branch) throw AppError.notFound("Branch not found");
+  const [sales, entries, movements, allProducts] = await Promise.all([
     prisma.posCounterSale.findMany({
       where: { shiftId },
       orderBy: { createdAt: "asc" },
@@ -62,9 +66,11 @@ export async function summarizeShift(shiftId: number) {
       orderBy: [{ categoryId: "asc" }, { name: "asc" }],
     }),
   ]);
+  // Stock as this branch holds it (closing = its shelf count now).
+  const products = await forBranch(branch.id, allProducts);
   const lines = await prisma.posCustomerPurchase.findMany({
     where: { invoiceGroupCode: { in: sales.map((sale) => sale.invoiceGroupCode) } },
-    select: { invoiceGroupCode: true, quantity: true, finalSellingPrice: true, billDiscount: true, inventoryProduct: { select: { id: true, name: true } } },
+    select: { invoiceGroupCode: true, quantity: true, finalSellingPrice: true, billDiscount: true, isHardLiquor: true, inventoryProduct: { select: { id: true, name: true } } },
   });
   const staff = await staffNames([shift.openedById, shift.countedById, shift.closedById, ...entries.map((entry) => entry.createdById), ...entries.map((entry) => entry.voidedById)]);
 
@@ -236,13 +242,16 @@ export async function summarizeShift(shiftId: number) {
   const expectedCash = round2(shift.openingFloat + cashSales + walletKept + drawerIn - drawerOut - refundsCash);
 
   // ── Stock day book: opening + received ± adjusted − sold = closing (per product) ──
-  const stockMoves = new Map<number, { received: number; sold: number; adjusted: number; opening: number; returned: number; damaged: number }>();
+  const stockMoves = new Map<number, { received: number; sold: number; adjusted: number; opening: number; returned: number; damaged: number; transferIn: number; transferOut: number }>();
   const emptyMoves = new Map<number, { collected: number; returned: number }>();
   const damagedMoves = new Map<number, { added: number; cleared: number }>();
   movements.forEach((movement) => {
     if (movement.kind === "STOCK") {
-      const entry = stockMoves.get(movement.productId) ?? { received: 0, sold: 0, adjusted: 0, opening: 0, returned: 0, damaged: 0 };
+      const entry = stockMoves.get(movement.productId) ?? { received: 0, sold: 0, adjusted: 0, opening: 0, returned: 0, damaged: 0, transferIn: 0, transferOut: 0 };
       if (movement.type === "RECEIVED") entry.received += movement.quantity;
+      // Between branches (GTN): in from another branch / out to another branch.
+      else if (movement.type === "TRANSFER_IN") entry.transferIn += movement.quantity;
+      else if (movement.type === "TRANSFER_OUT") entry.transferOut += -movement.quantity;
       else if (movement.type === "SOLD") entry.sold += -movement.quantity;
       else if (movement.type === "OPENING") entry.opening += movement.quantity;
       // Back on the shelf: unopened bottles returned by customers, or damaged ones put back.
@@ -264,11 +273,11 @@ export async function summarizeShift(shiftId: number) {
     }
   });
   const stockBook = products.map((product) => {
-    const moves = stockMoves.get(product.id) ?? { received: 0, sold: 0, adjusted: 0, opening: 0, returned: 0, damaged: 0 };
+    const moves = stockMoves.get(product.id) ?? { received: 0, sold: 0, adjusted: 0, opening: 0, returned: 0, damaged: 0, transferIn: 0, transferOut: 0 };
     const closing = product.quantity;
     // New products added during the shift count their opening stock as "received" today.
     const received = moves.received + moves.opening;
-    const opening = closing - received - moves.adjusted - moves.returned + moves.sold + moves.damaged;
+    const opening = closing - received - moves.adjusted - moves.returned - moves.transferIn + moves.sold + moves.damaged + moves.transferOut;
     return {
       productId: product.id,
       name: product.name,
@@ -280,6 +289,8 @@ export async function summarizeShift(shiftId: number) {
       sold: moves.sold,
       returned: moves.returned,
       damaged: moves.damaged,
+      transferIn: moves.transferIn,
+      transferOut: moves.transferOut,
       adjusted: moves.adjusted,
       closing,
     };
@@ -350,6 +361,7 @@ export async function summarizeShift(shiftId: number) {
     "STOCK:CUSTOMER_RETURN": "Returned by customer (back on shelf)", "STOCK:EXCHANGED": "New bottle given for a damaged one",
     "STOCK:DAMAGED": "Found damaged in store", "STOCK:RESTORED": "Damaged stock put back on shelf",
     "DAMAGED:IN": "Into damaged stock", "DAMAGED:CLEARED": "Damaged stock cleared",
+    "STOCK:TRANSFER_IN": "Received from another branch (GTN)", "STOCK:TRANSFER_OUT": "Sent to another branch (GTN)",
   };
   const stockLog = movements
     .filter((movement) => !(movement.kind === "STOCK" && movement.type === "SOLD") && !(movement.kind === "EMPTIES" && movement.type === "COLLECTED"))
@@ -363,12 +375,40 @@ export async function summarizeShift(shiftId: number) {
       by: movement.createdById ? moverNames.get(movement.createdById)?.name ?? "—" : "—",
     }));
 
+  // ── Goods received (GRN) and branch transfers (GTN) during the shift ──
+  const [grnRows, gtnOut, gtnIn] = await Promise.all([
+    prisma.grn.findMany({ where: { shiftId }, orderBy: { createdAt: "asc" }, include: { items: { select: { description: true, acceptedQty: true, rejectedQty: true, rejectReason: true } } } }),
+    prisma.gtn.findMany({ where: { sentShiftId: shiftId }, orderBy: { sentAt: "asc" }, include: { toBranch: { select: { name: true } }, items: { select: { productName: true, sentQty: true } } } }),
+    prisma.gtn.findMany({ where: { receivedShiftId: shiftId }, orderBy: { receivedAt: "asc" }, include: { fromBranch: { select: { name: true } }, items: { select: { productName: true, sentQty: true, receivedQty: true, damagedQty: true, missingQty: true } } } }),
+  ]);
+  const goodsStaff = await staffNames([...grnRows.map((row) => row.receivedById), ...gtnOut.map((row) => row.sentById), ...gtnIn.map((row) => row.receivedById)]);
+  const goods = {
+    grns: grnRows.map((row) => ({
+      grnNo: row.grnNo, time: row.createdAt, supplier: row.supplierName, poNumber: row.poNumber, invoiceNo: row.supplierInvoiceNo,
+      invoiceTotal: row.invoiceTotal, totalCost: row.totalCost, accepted: row.acceptedUnits, rejected: row.rejectedUnits,
+      items: row.items.map((item) => `${item.acceptedQty} × ${item.description}${item.rejectedQty ? ` (${item.rejectedQty} rejected: ${item.rejectReason ?? ""})` : ""}`).join(", "),
+      by: goodsStaff.get(row.receivedById)?.name ?? "—",
+    })),
+    sent: gtnOut.map((row) => ({
+      gtnNo: row.gtnNo, time: row.sentAt, branch: row.toBranch.name, status: row.status, units: row.items.reduce((sum, item) => sum + item.sentQty, 0),
+      items: row.items.map((item) => `${item.sentQty} × ${item.productName}`).join(", "), by: goodsStaff.get(row.sentById)?.name ?? "—",
+    })),
+    received: gtnIn.map((row) => ({
+      gtnNo: row.gtnNo, time: row.receivedAt ?? row.sentAt, branch: row.fromBranch.name, units: row.items.reduce((sum, item) => sum + (item.receivedQty ?? 0), 0),
+      damaged: row.items.reduce((sum, item) => sum + item.damagedQty, 0), missing: row.items.reduce((sum, item) => sum + item.missingQty, 0),
+      items: row.items.map((item) => `${item.receivedQty ?? 0}/${item.sentQty} × ${item.productName}`).join(", "), note: row.receiveNote,
+      by: row.receivedById ? goodsStaff.get(row.receivedById)?.name ?? "—" : "—",
+    })),
+  };
+
   // ── Shift journal: everything else done while the shift was open (prices, purchase orders, settings, sign-ins…) ──
   // Sales and cash book entries are already listed above, so they're left out here.
   const journalRows = await prisma.activityLog.findMany({
     where: {
       createdAt: { gte: shift.openedAt, lte: shift.closedAt ?? new Date() },
-      NOT: [{ action: "sale.checkout" }, { category: "CASHBOOK" }, { category: "RETURN" }],
+      // This branch's actions, plus company-wide ones (prices, settings…) made meanwhile.
+      OR: [{ branchId: shift.branchId }, { branchId: null }],
+      NOT: [{ action: "sale.checkout" }, { category: "CASHBOOK" }, { category: "RETURN" }, { category: "GOODS" }],
     },
     orderBy: { createdAt: "asc" },
     take: 300,
@@ -380,6 +420,7 @@ export async function summarizeShift(shiftId: number) {
     shift: {
       id: shift.id,
       shiftNo: shift.shiftNo,
+      branch: { id: branch.id, code: branch.code, name: branch.name, address: branch.address, phone: branch.phone },
       status: shift.status,
       openedAt: shift.openedAt,
       openedBy: staff.get(shift.openedById)?.name ?? "—",
@@ -412,6 +453,11 @@ export async function summarizeShift(shiftId: number) {
       loyalty,
       byStaff: [...byStaffMap.values()].sort((a, b) => b.total - a.total),
       byProduct: [...byProductMap.values()].sort((a, b) => b.amount - a.amount),
+      /** Hard liquor (ticked on the product; counts toward the bill limit) vs everything else. */
+      byType: {
+        hardLiquor: { units: lines.filter((line) => line.isHardLiquor).reduce((sum, line) => sum + line.quantity, 0), amount: round2(lines.filter((line) => line.isHardLiquor).reduce((sum, line) => sum + line.finalSellingPrice, 0)) },
+        other: { units: lines.filter((line) => !line.isHardLiquor).reduce((sum, line) => sum + line.quantity, 0), amount: round2(lines.filter((line) => !line.isHardLiquor).reduce((sum, line) => sum + line.finalSellingPrice, 0)) },
+      },
       billList: bills,
     },
     cash: {
@@ -431,6 +477,7 @@ export async function summarizeShift(shiftId: number) {
     wallet,
     returns,
     damagedStock,
+    goods,
     stockLog,
     journal,
   };
@@ -443,17 +490,19 @@ async function nextShiftNo(db: Prisma.TransactionClient) {
   return `SH-${String(count + 1).padStart(5, "0")}`;
 }
 
-export async function getCurrentShift() {
-  const open = await findOpenShift();
-  const lastClosed = await prisma.posShift.findFirst({ where: { status: "CLOSED" }, orderBy: { closedAt: "desc" }, select: { floatLeft: true, shiftNo: true, closedAt: true } });
+export async function getCurrentShift(branchId: number) {
+  const open = await findOpenShift(prisma, branchId);
+  const lastClosed = await prisma.posShift.findFirst({ where: { status: "CLOSED", branchId }, orderBy: { closedAt: "desc" }, select: { floatLeft: true, shiftNo: true, closedAt: true } });
   return { open: open ? { id: open.id, shiftNo: open.shiftNo, openedAt: open.openedAt, openingFloat: open.openingFloat, counted: open.countedAt != null } : null, suggestedFloat: lastClosed?.floatLeft ?? 0, lastClosed };
 }
 
-export async function openShift(openingFloat: number, actorId: number) {
+export async function openShift(openingFloat: number, actorId: number, branchId: number) {
   return prisma.$transaction(async (tx) => {
-    const open = await findOpenShift(tx);
-    if (open) throw new AppError(`Shift ${open.shiftNo} is already open — close it first`, 409);
-    return tx.posShift.create({ data: { shiftNo: await nextShiftNo(tx), openedById: actorId, openingFloat: round2(openingFloat) } });
+    // One open till per branch; the advisory lock stops two tills opening at once.
+    await tx.$executeRawUnsafe("SELECT pg_advisory_xact_lock(740303)");
+    const open = await findOpenShift(tx, branchId);
+    if (open) throw new AppError(`Shift ${open.shiftNo} is already open at this branch — close it first`, 409);
+    return tx.posShift.create({ data: { shiftNo: await nextShiftNo(tx), openedById: actorId, openingFloat: round2(openingFloat), branchId } });
   });
 }
 
@@ -598,6 +647,7 @@ export async function closeShift(shiftId: number, dto: CloseShiftDto, actorId: n
           note: receipt.note,
           reference: shift.shiftNo,
           shiftId,
+          branchId: shift.branchId,
           automatic: true,
           createdById: actorId,
           entryDate: closedAt,
@@ -608,11 +658,14 @@ export async function closeShift(shiftId: number, dto: CloseShiftDto, actorId: n
   });
 }
 
-export async function listShifts(page: number, limit: number) {
-  const [shifts, total] = await Promise.all([
-    prisma.posShift.findMany({ orderBy: { openedAt: "desc" }, skip: (page - 1) * limit, take: limit }),
-    prisma.posShift.count(),
+export async function listShifts(page: number, limit: number, branchId: number | null) {
+  const where = branchId ? { branchId } : {};
+  const [shifts, total, branches] = await Promise.all([
+    prisma.posShift.findMany({ where, orderBy: { openedAt: "desc" }, skip: (page - 1) * limit, take: limit }),
+    prisma.posShift.count({ where }),
+    prisma.branch.findMany({ select: { id: true, name: true } }),
   ]);
+  const branchName = new Map(branches.map((branch) => [branch.id, branch.name]));
   const staff = await staffNames(shifts.flatMap((shift) => [shift.openedById, shift.closedById]));
   return {
     shifts: shifts.map((shift) => {
@@ -621,6 +674,7 @@ export async function listShifts(page: number, limit: number) {
         id: shift.id,
         shiftNo: shift.shiftNo,
         status: shift.status,
+        branch: shift.branchId ? branchName.get(shift.branchId) ?? null : null,
         openedAt: shift.openedAt,
         openedBy: staff.get(shift.openedById)?.name ?? "—",
         closedAt: shift.closedAt,
@@ -663,6 +717,7 @@ export async function getShiftReport(shiftId: number, revealCash: boolean) {
         walletKept: null,
         byStaff: summary.sales.byStaff.map((row) => ({ name: row.name, bills: row.bills, cash: null, card: row.card, transfer: row.transfer, wallet: row.wallet, total: null })),
         byProduct: summary.sales.byProduct.map((row) => ({ name: row.name, units: row.units, amount: null })),
+        byType: { hardLiquor: { units: summary.sales.byType.hardLiquor.units, amount: null }, other: { units: summary.sales.byType.other.units, amount: null } },
         billList: summary.sales.billList.map((bill) => ({ ...bill, payment: bill.payment.replace(/\s*[\d][\d,.]*/g, "").replace(/\s+/g, " ").trim(), emptyDeduction: null, discount: null, discountAmount: null, pointsValue: null, total: null })),
         // Who gave discounts and which members used points stay visible; the rupee amounts wait for the count.
         loyalty: {

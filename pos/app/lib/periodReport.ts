@@ -6,11 +6,18 @@ import { discountText } from "./bookPrint";
 /** Mirrors /api/pos/reports/period. */
 export type PeriodReport = {
   period: { from: string; to: string; days: number; grouping: "HOUR" | "DAY" | "MONTH" };
+  /** The branch reported on; null = all branches together (older servers leave it out). */
+  branch?: { id: number; name: string; code: string } | null;
   sales: {
     bills: number; units: number; grossSales: number; emptyDeduction: number; emptiesReturned: number; discounts: number; pointsValue: number;
-    netSales: number; averageBill: number; cash: number; card: number; transfer: number; cashBills: number; cardBills: number; transferBills: number; memberBills: number;
+    netSales: number; byType?: { hardLiquor: { units: number; amount: number }; other: { units: number; amount: number } }; refunds?: number; netAfterReturns?: number; averageBill: number; cash: number; card: number; transfer: number; cashBills: number; cardBills: number; transferBills: number; memberBills: number;
   };
-  profit: { costOfSales: number; grossProfit: number; margin: number; operatingExpenses: number; netProfit: number };
+  profit: { costOfSales: number; grossProfit: number; margin: number; operatingExpenses: number; damageLoss?: number; netProfit: number };
+  /** Returns & damages in the period (older servers don't send it). */
+  returns?: {
+    refunds: number; refundBills: number; refundUnits: number; refundsCash: number; refundsWallet: number; returnedToShelf: number; returnedDamaged: number;
+    exchanged: number; storeDamaged: number; toSupplier: number; writtenOff: number; restored: number; damageLoss: number; damagedNow: number; damagedValueNow: number;
+  };
   trend: Array<{ key: string; bills: number; netSales: number; cash: number; card: number; transfer: number; grossProfit: number; expenses: number }>;
   byStaff: Array<{ name: string; bills: number; cash: number; card: number; transfer: number; total: number }>;
   byProduct: Array<{ name: string; detail: string; category: string; units: number; amount: number; cost: number; profit: number }>;
@@ -25,7 +32,7 @@ export type PeriodReport = {
     count: number; over: number; short: number; net: number; withDifference: number;
     rows: Array<{ shiftNo: string; openedAt: string; closedAt: string | null; openedBy: string; closedBy: string; bills: number; netSales: number; cashDifference: number; differenceReason: string | null; cardDifference: number | null; cashBanked: number }>;
   };
-  stock: { rows: Array<{ name: string; detail: string; received: number; sold: number; adjusted: number; collected: number; returned: number; receivedValue: number; onHand: number }>; stockValueNow: number };
+  stock: { rows: Array<{ name: string; detail: string; received: number; sold: number; customerReturns?: number; damaged?: number; transferIn?: number; transferOut?: number; adjusted: number; collected: number; returned: number; receivedValue: number; onHand: number }>; stockValueNow: number };
   discounts: {
     bills: number; amount: number; percent: { bills: number; amount: number }; fixed: { bills: number; amount: number };
     byStaff: Array<{ name: string; bills: number; amount: number }>;
@@ -129,6 +136,8 @@ export function buildPeriodReportHtml(report: PeriodReport, kind: PeriodKind) {
   const otherIncomeCounted = cashBook.otherIncome.filter((row) => row.category !== "OWNER_CASH_IN").reduce((sum, row) => sum + row.amount, 0);
   const profitTone = profit.netProfit >= 0 ? "profit" : "loss";
   const bucketName = period.grouping === "HOUR" ? "Hour" : period.grouping === "DAY" ? "Day" : "Month";
+  const stockReturnCols = stock.rows.some((row) => row.customerReturns || row.damaged);
+  const stockTransferCols = stock.rows.some((row) => row.transferIn || row.transferOut);
 
   return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(periodFileName(kind, period.from, period.to))}</title><style>${REPORT_CSS}${EXTRA_CSS}</style></head><body><div class="sheet">
 
@@ -140,7 +149,7 @@ export function buildPeriodReportHtml(report: PeriodReport, kind: PeriodKind) {
     </div>
     <div class="doc">
       <h1>${esc(title)}</h1>
-      <div class="sub">${esc(label)}</div>
+      <div class="sub">${esc(label)}${report.branch !== undefined ? ` · ${esc(report.branch?.name ?? "All branches")}` : ""}</div>
       <div class="stamp closed">${period.days} DAY${period.days === 1 ? "" : "S"} · ${shifts.count} SHIFT${shifts.count === 1 ? "" : "S"}</div>
     </div>
   </div>
@@ -172,15 +181,21 @@ export function buildPeriodReportHtml(report: PeriodReport, kind: PeriodKind) {
         <tr><td>Card (${sales.cardBills} bills)</td><td class="r">${amt(sales.card)}</td></tr>
         <tr><td>Bank transfer / QR (${sales.transferBills} bills)</td><td class="r">${amt(sales.transfer)}</td></tr>
         <tr><td>Loyalty member bills</td><td class="r">${sales.memberBills}</td></tr>
+        ${sales.byType ? `<tr><td>Hard liquor (${sales.byType.hardLiquor.units} bottles)</td><td class="r">${amt(sales.byType.hardLiquor.amount)}</td></tr>
+        <tr><td>Beer, wine &amp; others (${sales.byType.other.units})</td><td class="r">${amt(sales.byType.other.amount)}</td></tr>` : ""}
+        ${sales.refunds ? `<tr><td>Less: refunds for returned bottles</td><td class="r minus">−${amt(sales.refunds)}</td></tr>
+        <tr class="total"><td>Net sales after returns</td><td class="r">${amt(sales.netAfterReturns ?? sales.netSales)}</td></tr>` : ""}
       </table>
     </section>
     <section class="keep">
       <h2>Profit &amp; loss</h2>
       <table class="ledger">
         <tr><td>Net sales</td><td class="r">${amt(sales.netSales)}</td></tr>
-        <tr><td>Less: cost of bottles sold</td><td class="r minus">−${amt(profit.costOfSales)}</td></tr>
+        ${sales.refunds ? `<tr><td>Less: refunds for returned bottles</td><td class="r minus">−${amt(sales.refunds)}</td></tr>` : ""}
+        <tr><td>Less: cost of bottles sold${sales.refunds ? " (less bottles back on the shelf)" : ""}</td><td class="r minus">−${amt(profit.costOfSales)}</td></tr>
         <tr class="total"><td>Gross profit (${profit.margin}%)</td><td class="r">${amt(profit.grossProfit)}</td></tr>
         <tr><td>Less: running expenses</td><td class="r minus">−${amt(profit.operatingExpenses)}</td></tr>
+        ${profit.damageLoss ? `<tr><td>Less: damaged bottles (at cost)</td><td class="r minus">−${amt(profit.damageLoss)}</td></tr>` : ""}
         ${otherIncomeCounted ? `<tr><td>Add: other income</td><td class="r plus">+${amt(otherIncomeCounted)}</td></tr>` : ""}
         <tr class="total"><td>Net profit</td><td class="r ${profit.netProfit < 0 ? "minus" : ""}">${amt(profit.netProfit)}</td></tr>
       </table>
@@ -256,11 +271,37 @@ export function buildPeriodReportHtml(report: PeriodReport, kind: PeriodKind) {
     </table>
   </section>
 
+  ${report.returns && (report.returns.refunds || report.returns.exchanged || report.returns.storeDamaged || report.returns.damagedNow || report.returns.toSupplier || report.returns.writtenOff) ? `
+  <div class="cols">
+    <section class="keep">
+      <h2>Returns &amp; refunds</h2>
+      <table class="ledger">
+        <tr><td>Refunds (${report.returns.refundBills}) · ${report.returns.refundUnits} bottle(s)</td><td class="r">${amt(report.returns.refunds)}</td></tr>
+        <tr><td>Paid back in cash</td><td class="r">${amt(report.returns.refundsCash)}</td></tr>
+        <tr><td>Paid into member wallets</td><td class="r">${amt(report.returns.refundsWallet)}</td></tr>
+        <tr><td>Bottles back on the shelf</td><td class="r">${report.returns.returnedToShelf}</td></tr>
+        <tr><td>Returned bottles kept aside as damaged</td><td class="r">${report.returns.returnedDamaged}</td></tr>
+      </table>
+    </section>
+    <section class="keep">
+      <h2>Damaged stock</h2>
+      <table class="ledger">
+        <tr><td>Damaged bottles exchanged for new</td><td class="r">${report.returns.exchanged}</td></tr>
+        <tr><td>Found damaged in store</td><td class="r">${report.returns.storeDamaged}</td></tr>
+        <tr><td>Sent back to supplier</td><td class="r">${report.returns.toSupplier}</td></tr>
+        <tr><td>Thrown away (written off)</td><td class="r">${report.returns.writtenOff}</td></tr>
+        ${report.returns.restored ? `<tr><td>Put back on the shelf</td><td class="r">${report.returns.restored}</td></tr>` : ""}
+        <tr class="total"><td>Damage loss at cost</td><td class="r">${amt(report.returns.damageLoss)}</td></tr>
+        <tr><td>Damaged stock kept aside now</td><td class="r">${report.returns.damagedNow} · ${amt(report.returns.damagedValueNow)}</td></tr>
+      </table>
+    </section>
+  </div>` : ""}
+
   <section>
     <h2>Stock movement <small>stock on hand now worth ${rs(stock.stockValueNow)} at cost</small></h2>
     <table>
-      <thead><tr><th>Product</th><th class="r">Received</th><th class="r">Received value</th><th class="r">Sold</th><th class="r">Adjusted</th><th class="r">Empties in</th><th class="r">Empties out</th><th class="r">On hand now</th></tr></thead>
-      ${stock.rows.map((row) => `<tr><td>${esc(row.name)}${row.detail ? `<div class="muted">${esc(row.detail)}</div>` : ""}</td><td class="r">${row.received || "—"}</td><td class="r">${row.receivedValue ? amt(row.receivedValue) : "—"}</td><td class="r">${row.sold || "—"}</td><td class="r">${row.adjusted ? (row.adjusted > 0 ? `+${row.adjusted}` : row.adjusted) : "—"}</td><td class="r">${row.collected || "—"}</td><td class="r">${row.returned || "—"}</td><td class="r strong">${row.onHand}</td></tr>`).join("") || `<tr><td colspan="8" class="empty">No stock movements</td></tr>`}
+      <thead><tr><th>Product</th><th class="r">Received</th><th class="r">Received value</th><th class="r">Sold</th>${stockTransferCols ? `<th class="r">From branch</th><th class="r">To branch</th>` : ""}${stockReturnCols ? `<th class="r">Returned</th><th class="r">Damaged</th>` : ""}<th class="r">Adjusted</th><th class="r">Empties in</th><th class="r">Empties out</th><th class="r">On hand now</th></tr></thead>
+      ${stock.rows.map((row) => `<tr><td>${esc(row.name)}${row.detail ? `<div class="muted">${esc(row.detail)}</div>` : ""}</td><td class="r">${row.received || "—"}</td><td class="r">${row.receivedValue ? amt(row.receivedValue) : "—"}</td><td class="r">${row.sold || "—"}</td>${stockTransferCols ? `<td class="r">${row.transferIn ? `+${row.transferIn}` : "—"}</td><td class="r">${row.transferOut ? `−${row.transferOut}` : "—"}</td>` : ""}${stockReturnCols ? `<td class="r">${row.customerReturns ? `+${row.customerReturns}` : "—"}</td><td class="r">${row.damaged ? `−${row.damaged}` : "—"}</td>` : ""}<td class="r">${row.adjusted ? (row.adjusted > 0 ? `+${row.adjusted}` : row.adjusted) : "—"}</td><td class="r">${row.collected || "—"}</td><td class="r">${row.returned || "—"}</td><td class="r strong">${row.onHand}</td></tr>`).join("") || `<tr><td colspan="10" class="empty">No stock movements</td></tr>`}
     </table>
   </section>
 

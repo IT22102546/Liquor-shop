@@ -113,22 +113,28 @@ model User {
 }
 
 model PosAdmin {
-  id           Int              @id @default(autoincrement())
-  name         String
-  email        String           @unique
-  passwordHash String
-  role         PosAdminRole     @default(ADMIN)
-  isActive     Boolean          @default(true)
-  lastLoginAt  DateTime?
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
-  counterSales PosCounterSale[]
+  id             Int              @id @default(autoincrement())
+  /// Fixed branch (cashiers); null = can work in any branch and switch between them.
+  branchId       Int?
+  /// Branch someone without a fixed branch is working in right now.
+  activeBranchId Int?
+  name           String
+  email          String           @unique
+  passwordHash   String
+  role           PosAdminRole     @default(ADMIN)
+  isActive       Boolean          @default(true)
+  lastLoginAt    DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  counterSales   PosCounterSale[]
 
   @@map("pos_admins")
 }
 
 model PosCounterSale {
   id               Int           @id @default(autoincrement())
+  /// Branch this belongs to (every till, drawer and stock count is per branch).
+  branchId         Int?
   invoiceGroupCode String        @unique
   totalAmount      Float
   /// Total deducted for empty bottles returned (already subtracted from totalAmount).
@@ -171,6 +177,7 @@ model PosCounterSale {
   @@index([customerId])
   @@index([shiftId])
   @@index([createdAt])
+  @@index([branchId])
   @@map("pos_counter_sales")
 }
 
@@ -237,6 +244,8 @@ model InventoryProduct {
   emptyBottlePrice   Float?
   /// Empty bottles collected at the counter and not yet returned to the supplier.
   emptyBottlesOnHand Int                       @default(0)
+  /// Counts toward the hard liquor limit per bill (Sri Lankan law). Ticked on the product; beer is not.
+  isHardLiquor       Boolean                   @default(false)
   /// Damaged bottles kept aside (not for sale) until sent back to the supplier or thrown away.
   damagedQuantity    Int                       @default(0)
   description        String?
@@ -248,6 +257,7 @@ model InventoryProduct {
   purchaseOrderItems PurchaseOrderItem[]
   returns            PosReturn[]
   customerPurchases  PosCustomerPurchase[]
+  branchStock        BranchStock[]
 
   @@index([brandId])
   @@index([categoryId])
@@ -336,6 +346,8 @@ model PosCustomerPurchase {
   /// Empty bottles handed back on this line and the amount deducted for them.
   emptiesReturned          Int                 @default(0)
   emptyDeduction           Float               @default(0)
+  /// Whether this product counted as hard liquor when it was sold (kept even if the product is changed later).
+  isHardLiquor             Boolean             @default(false)
   /// This line's share of the bill discount and redeemed points (already taken off finalSellingPrice).
   billDiscount             Float               @default(0)
   purchasedAt              DateTime            @default(now())
@@ -598,6 +610,8 @@ model AccountDepositItem {
 
 model ActivityLog {
   id         Int      @id @default(autoincrement())
+  /// Branch this belongs to (every till, drawer and stock count is per branch).
+  branchId   Int?
   actorId    Int?
   actorName  String?
   actorEmail String?
@@ -617,6 +631,7 @@ model ActivityLog {
   @@index([createdAt])
   @@index([actorId])
   @@index([category])
+  @@index([branchId])
   @@map("activity_logs")
 }
 
@@ -637,6 +652,8 @@ model PosSetting {
 /// A till session: opened with a float, closed with a blind cash count and a locked Z report.
 model PosShift {
   id                   Int                 @id @default(autoincrement())
+  /// Branch this belongs to (every till, drawer and stock count is per branch).
+  branchId             Int?
   shiftNo              String              @unique
   status               String              @default("OPEN") // OPEN | CLOSED
   openedById           Int
@@ -667,12 +684,15 @@ model PosShift {
 
   @@index([status])
   @@index([openedAt])
+  @@index([branchId])
   @@map("pos_shifts")
 }
 
 /// Cash book entry: money in (receipt, RCP-) or money out (voucher/expense, VCH-).
 model PosCashEntry {
   id            Int       @id @default(autoincrement())
+  /// Branch this belongs to (every till, drawer and stock count is per branch).
+  branchId      Int?
   entryNo       String    @unique
   direction     String // IN | OUT
   category      String
@@ -703,12 +723,15 @@ model PosCashEntry {
   @@index([direction, entryDate])
   @@index([bankStatus])
   @@index([shiftId])
+  @@index([branchId])
   @@map("pos_cash_entries")
 }
 
 /// Every change to a product's stock or empties, for the stock day book.
 model InventoryMovement {
   id          Int       @id @default(autoincrement())
+  /// Branch this belongs to (every till, drawer and stock count is per branch).
+  branchId    Int?
   productId   Int
   /// STOCK (bottles for sale) or EMPTIES (empty bottles on hand).
   kind        String
@@ -724,12 +747,15 @@ model InventoryMovement {
 
   @@index([productId, createdAt])
   @@index([shiftId])
+  @@index([branchId])
   @@map("inventory_movements")
 }
 
 /// Purchase order to a supplier: DRAFT → SENT (emailed) → PARTIAL / RECEIVED, or CANCELLED.
 model PurchaseOrder {
   id            Int                  @id @default(autoincrement())
+  /// Branch the goods are delivered to (received there on a GRN).
+  branchId      Int?
   poNumber      String               @unique
   supplierId    Int
   supplier      Supplier             @relation(fields: [supplierId], references: [id])
@@ -753,6 +779,7 @@ model PurchaseOrder {
 
   @@index([supplierId])
   @@index([status])
+  @@index([branchId])
   @@map("purchase_orders")
 }
 
@@ -819,6 +846,8 @@ model PosWalletTransaction {
 ///   DAMAGE_CLEARED damaged stock sent back to the supplier, thrown away, or put back on the shelf
 model PosReturn {
   id               Int               @id @default(autoincrement())
+  /// Branch this belongs to (every till, drawer and stock count is per branch).
+  branchId         Int?
   returnNo         String
   type             String
   productId        Int?
@@ -858,5 +887,140 @@ model PosReturn {
   @@index([invoiceGroupCode])
   @@index([productId])
   @@index([customerId])
+  @@index([branchId])
   @@map("pos_returns")
+}
+
+/// A shop branch. Each branch has its own stock, tills (shifts), Day End and cash drawer.
+model Branch {
+  id        Int           @id @default(autoincrement())
+  code      String        @unique
+  name      String
+  address   String?
+  phone     String?
+  /// The first branch; existing stock and records were moved here when branches were added.
+  isMain    Boolean       @default(false)
+  isActive  Boolean       @default(true)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  stock     BranchStock[]
+  grns      Grn[]
+  gtnsOut   Gtn[]         @relation("GtnFrom")
+  gtnsIn    Gtn[]         @relation("GtnTo")
+
+  @@map("branches")
+}
+
+/// Stock of one product in one branch. The product's own quantity / damaged / empties are the totals of all branches.
+model BranchStock {
+  id                 Int              @id @default(autoincrement())
+  branchId           Int
+  branch             Branch           @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  productId          Int
+  product            InventoryProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity           Int              @default(0)
+  damagedQuantity    Int              @default(0)
+  emptyBottlesOnHand Int              @default(0)
+  updatedAt          DateTime         @updatedAt
+
+  @@unique([branchId, productId])
+  @@index([productId])
+  @@map("branch_stock")
+}
+
+/// GRN (Goods Received Note): goods delivered by a supplier into a branch, checked against the supplier's invoice.
+model Grn {
+  id                Int       @id @default(autoincrement())
+  grnNo             String    @unique
+  branchId          Int
+  branch            Branch    @relation(fields: [branchId], references: [id])
+  supplierId        Int?
+  supplierName      String
+  purchaseOrderId   Int?
+  poNumber          String?
+  supplierInvoiceNo String?
+  invoiceDate       DateTime?
+  /// Total on the supplier's invoice, to check against what was accepted.
+  invoiceTotal      Float?
+  notes             String?
+  acceptedUnits     Int       @default(0)
+  rejectedUnits     Int       @default(0)
+  /// Value of the accepted goods at the cost entered.
+  totalCost         Float     @default(0)
+  shiftId           Int?
+  receivedById      Int
+  createdAt         DateTime  @default(now())
+  items             GrnItem[]
+
+  @@index([branchId, createdAt])
+  @@index([supplierId])
+  @@index([purchaseOrderId])
+  @@map("grns")
+}
+
+model GrnItem {
+  id                  Int     @id @default(autoincrement())
+  grnId               Int
+  grn                 Grn     @relation(fields: [grnId], references: [id], onDelete: Cascade)
+  productId           Int?
+  description         String
+  purchaseOrderItemId Int?
+  /// Still due on the purchase order when the delivery came (null without an order).
+  orderedQty          Int?
+  /// Delivered = accepted (into stock) + rejected (sent back with the driver).
+  deliveredQty        Int
+  acceptedQty         Int
+  rejectedQty         Int     @default(0)
+  rejectReason        String?
+  unitCost            Float
+  lineTotal           Float
+
+  @@index([grnId])
+  @@map("grn_items")
+}
+
+/// GTN (Goods Transfer Note): stock sent from one branch to another. SENT (in transit) → RECEIVED, or CANCELLED.
+model Gtn {
+  id              Int       @id @default(autoincrement())
+  gtnNo           String    @unique
+  fromBranchId    Int
+  fromBranch      Branch    @relation("GtnFrom", fields: [fromBranchId], references: [id])
+  toBranchId      Int
+  toBranch        Branch    @relation("GtnTo", fields: [toBranchId], references: [id])
+  status          String    @default("SENT")
+  notes           String?
+  /// Who carried it (driver / staff member), as written on the note.
+  carriedBy       String?
+  sentById        Int
+  sentAt          DateTime  @default(now())
+  sentShiftId     Int?
+  receivedById    Int?
+  receivedAt      DateTime?
+  receivedShiftId Int?
+  receiveNote     String?
+  cancelledById   Int?
+  cancelledAt     DateTime?
+  cancelReason    String?
+  items           GtnItem[]
+
+  @@index([fromBranchId, sentAt])
+  @@index([toBranchId, status])
+  @@map("gtns")
+}
+
+model GtnItem {
+  id          Int    @id @default(autoincrement())
+  gtnId       Int
+  gtn         Gtn    @relation(fields: [gtnId], references: [id], onDelete: Cascade)
+  productId   Int?
+  productName String
+  sentQty     Int
+  /// Filled in on receiving: good (to the shelf) + damaged (kept aside) + missing = sent.
+  receivedQty Int?
+  damagedQty  Int    @default(0)
+  missingQty  Int    @default(0)
+  unitCost    Float?
+
+  @@index([gtnId])
+  @@map("gtn_items")
 }

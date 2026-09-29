@@ -17,11 +17,13 @@ export const ROLE_HOME: Record<PosAdminRole, string> = {
 const ROLE_PATHS: Record<PosAdminRole, string[]> = {
   ADMIN: ["/dashboard"],
   // Product Setup is read-only for cashiers except "Returned to supplier" for empties.
-  CASHIER: ["/dashboard/inventory/sold", "/dashboard/inventory/manage", "/dashboard/sales", "/dashboard/day-end", "/dashboard/returns"],
+  CASHIER: ["/dashboard/inventory/sold", "/dashboard/inventory/manage", "/dashboard/sales", "/dashboard/day-end", "/dashboard/returns", "/dashboard/grn", "/dashboard/transfers"],
   INVENTORY_MANAGER: [
     "/dashboard/inventory/manage",
     "/dashboard/suppliers",
     "/dashboard/purchasing-requests",
+    "/dashboard/grn",
+    "/dashboard/transfers",
   ],
   ACCOUNTANT: [
     "/dashboard/accounts",
@@ -29,6 +31,8 @@ const ROLE_PATHS: Record<PosAdminRole, string[]> = {
     "/dashboard/reports",
     "/dashboard/invoices",
     "/dashboard/sales",
+    "/dashboard/grn",
+    "/dashboard/transfers",
   ],
 };
 

@@ -4,6 +4,7 @@ import { AppError } from "../../common/utils/errors";
 import { loyaltyPointsFor } from "../../config/loyalty";
 import { assertHardLiquorLimit, getSettings } from "../settings/settings.service";
 import { findOpenShift, recordMovements } from "../book/stock-movements";
+import { changeStock, countsAt, forBranch } from "../branches/branch-stock";
 import type {
   CreateInvoiceAccountDto,
   CreateInvoiceTermDto,
@@ -643,7 +644,7 @@ export async function deletePosUser(id: number) {
   });
 }
 
-export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cashierRole = "CASHIER") {
+export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cashierRole: string, branchId: number) {
   const mergedItems = Array.from(
     dto.items.reduce((items, item) => {
       const existing = items.get(item.productId);
@@ -660,22 +661,23 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
 
   const products = await prisma.inventoryProduct.findMany({
     where: { id: { in: mergedItems.map((item) => item.productId) } },
-    select: { id: true, name: true, displayId: true, quantity: true, emptyBottlePrice: true, categoryId: true },
+    select: { id: true, name: true, displayId: true, quantity: true, emptyBottlePrice: true, categoryId: true, isHardLiquor: true },
   });
   if (products.length !== mergedItems.length) {
     throw AppError.validation({ items: ["One or more products no longer exist"] });
   }
   // Sri Lankan rule: only so many bottles of hard liquor on one bill (beer doesn't count).
   await assertHardLiquorLimit(mergedItems.map((item) => ({
-    categoryId: products.find((product) => product.id === item.productId)!.categoryId,
+    isHardLiquor: products.find((product) => product.id === item.productId)!.isHardLiquor,
     quantity: item.quantity,
   })));
-  const productById = new Map(products.map((product) => [product.id, product]));
+  // Sold from this branch's shelf.
+  const productById = new Map((await forBranch(branchId, products.map((product) => ({ ...product, damagedQuantity: 0, emptyBottlesOnHand: 0 })))).map((product) => [product.id, product]));
   for (const item of mergedItems) {
     const product = productById.get(item.productId)!;
     if (item.quantity > product.quantity) {
       throw AppError.validation({
-        items: [`Only ${product.quantity} unit(s) of ${product.name} are available`],
+        items: [`Only ${product.quantity} unit(s) of ${product.name} are available at this branch`],
       });
     }
     if (item.emptiesReturned > 0 && !(product.emptyBottlePrice && product.emptyBottlePrice > 0)) {
@@ -719,9 +721,9 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
   const settings = await getSettings();
 
   // Every sale belongs to the open till shift (for book balancing / the Z report).
-  const shift = await findOpenShift();
+  const shift = await findOpenShift(prisma, branchId);
   if (!shift) {
-    throw AppError.validation({ shift: ["Start a shift before selling — open Day End or use “Start shift” on the counter"] });
+    throw AppError.validation({ shift: ["Start a shift at this branch before selling — open Day End or use “Start shift” on the counter"] });
   }
 
   // ── Bill discount (switched on/off in Shop Settings; cashiers are capped) ──
@@ -849,18 +851,9 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
     for (const [lineIndex, item] of lines.entries()) {
       const product = productById.get(item.productId)!;
       const billDiscount = lineShares[lineIndex];
-      const updated = await tx.inventoryProduct.updateMany({
-        where: { id: item.productId, quantity: { gte: item.quantity } },
-        data: {
-          quantity: { decrement: item.quantity },
-          soldQuantity: { increment: item.quantity },
-          emptyBottlesOnHand: { increment: item.emptiesReturned },
-          lastSoldAt: new Date(),
-        },
-      });
-      if (updated.count !== 1) {
-        throw new AppError(`${product.name} does not have enough stock`, 409);
-      }
+      // Off this branch's shelf (fails if another till sold them a moment ago); empties handed in stay here.
+      await changeStock(tx, branchId, item.productId, { quantity: -item.quantity, empties: item.emptiesReturned });
+      await tx.inventoryProduct.update({ where: { id: item.productId }, data: { soldQuantity: { increment: item.quantity }, lastSoldAt: new Date() } });
 
       const lineTotal = roundCurrency(item.lineTotal - billDiscount);
       const purchase = await tx.posCustomerPurchase.create({
@@ -870,6 +863,8 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
           purchaseMode: lines.length > 1 ? "BULK" : "SINGLE",
           invoiceGroupCode,
           inventoryProductId: item.productId,
+          // Recorded on the line, so reports keep what counted at the time of sale.
+          isHardLiquor: products.find((row) => row.id === item.productId)?.isHardLiquor ?? false,
           quantity: item.quantity,
           emptiesReturned: item.emptiesReturned,
           emptyDeduction: item.emptyDeduction,
@@ -951,13 +946,14 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
         { productId: line.productId, kind: "STOCK" as const, type: "SOLD" as const, quantity: -line.quantity, reference: invoiceGroupCode, createdById: cashierId },
         { productId: line.productId, kind: "EMPTIES" as const, type: "COLLECTED" as const, quantity: line.emptiesReturned, reference: invoiceGroupCode, createdById: cashierId },
       ]),
-      shift.id,
+      { branchId, shiftId: shift.id },
     );
 
     const counterSale = await tx.posCounterSale.create({
       data: {
         invoiceGroupCode,
         shiftId: shift.id,
+        branchId,
         customerId: member?.id ?? null,
         pointsEarned,
         pointsRate: member ? settings.loyaltyRupeesPerPoint : null,
@@ -1139,6 +1135,7 @@ async function createInstallmentScheduleAndApplyDownPayment(
 export async function createPurchase(
   customerId: number,
   dto: CreatePurchaseDto,
+  branchId: number,
 ) {
   const customer = await prisma.posCustomer.findUnique({
     where: { id: customerId },
@@ -1214,9 +1211,10 @@ export async function createPurchase(
     });
 
     if (!product) throw AppError.notFound("Selected inventory product not found");
-    if ((dto.quantity ?? 1) > product.quantity) {
+    const hereQuantity = (await countsAt(branchId, productId)).quantity;
+    if ((dto.quantity ?? 1) > hereQuantity) {
       throw AppError.validation({
-        quantity: [`Only ${product.quantity} item(s) available`],
+        quantity: [`Only ${hereQuantity} item(s) available at this branch`],
       });
     }
 
@@ -1255,10 +1253,10 @@ export async function createPurchase(
         );
       }
 
+      await changeStock(tx, branchId, productId, { quantity: -(dto.quantity ?? 1) });
       await tx.inventoryProduct.update({
         where: { id: productId },
         data: {
-          quantity: { decrement: dto.quantity ?? 1 },
           soldQuantity: { increment: dto.quantity ?? 1 },
           lastSoldAt: new Date(),
           sellingPrice: dto.finalSellingPrice,

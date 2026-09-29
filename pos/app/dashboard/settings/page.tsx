@@ -185,7 +185,7 @@ export default function ShopSettingsPage() {
           <div className="lx-setting-icon" style={{ ["--kpi-color" as string]: "var(--c6)" }}><IconBottle /></div>
           <div className="lx-setting-body">
             <h3>Hard liquor limit per bill {saved("hardLiquorLimitEnabled")}{saved("hardLiquorLimit")}{saved("hardLiquorCategoryIds")}</h3>
-            <p>Sri Lankan law: one bill may have at most <strong>{settings.hardLiquorLimit} bottles of hard liquor</strong>. The counter stops at the limit and the server refuses bigger bills. <strong>Beer is not counted.</strong></p>
+            <p>Sri Lankan law: one bill may have at most <strong>{settings.hardLiquorLimit} bottles of hard liquor</strong>. The counter stops at the limit and the server refuses bigger bills. Each product is marked <strong>Hard liquor</strong> or <strong>Not hard liquor</strong> in Product Setup — <strong>beer, wine, champagne and other drinks are not counted.</strong></p>
             {settings.hardLiquorLimitEnabled && (
               <div className="lx-setting-extra">
                 <form className="lx-setting-input" onSubmit={(event) => { event.preventDefault(); const value = Math.floor(Number(hardLimit)); if (value >= 1) void update("hardLiquorLimit", value); }}>
@@ -193,7 +193,7 @@ export default function ShopSettingsPage() {
                   <input id="hard-limit" className="bm-input" type="number" min={1} step="1" value={hardLimit} onChange={(event) => setHardLimit(event.target.value)} />
                   <button type="submit" className="btn-outline" disabled={saving !== null || Math.floor(Number(hardLimit)) === settings.hardLiquorLimit || !(Number(hardLimit) >= 1)}>Save</button>
                 </form>
-                <label>Categories counted as hard liquor</label>
+                <label>New products in these categories start as hard liquor</label>
                 <div className="bulk-cats" style={{ paddingLeft: 0 }}>
                   {categories.map((category) => {
                     const on = effectiveHard.has(category.id);
@@ -208,8 +208,8 @@ export default function ShopSettingsPage() {
                 </div>
                 <small>
                   {settings.hardLiquorCategoryIds === null
-                    ? "Chosen automatically from category names (arrack, whisky, brandy, rum, gin, vodka…). Tap a category to change it."
-                    : "Chosen by you. "}
+                    ? "Chosen automatically from category names (arrack, whisky, brandy, rum, gin, vodka…). Tap a category to change it. This only sets the starting choice on the product form — each product's own tick decides."
+                    : "Chosen by you. This only sets the starting choice on the product form — each product's own tick decides. "}
                   {settings.hardLiquorCategoryIds !== null && <button type="button" className="lx-link-btn" onClick={() => void update("hardLiquorCategoryIds", null)}>Go back to automatic</button>}
                 </small>
               </div>

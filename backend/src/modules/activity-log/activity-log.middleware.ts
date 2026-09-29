@@ -3,6 +3,7 @@ import { getSettings } from "../settings/settings.service";
 import { prisma } from "../../database/prisma.client";
 import { describePosChange } from "./activity-describe";
 import { logActivity, requestMeta } from "./activity-log.service";
+import { branchOfUser } from "../branches/branch-context";
 
 // Sign-in/out are logged explicitly by the pos-auth controller (with failed attempts too).
 const SKIP_PATHS = new Set(["/auth/login", "/auth/logout"]);
@@ -82,14 +83,20 @@ export async function recordPosActivity(req: Request, res: Response, next: NextF
         details: { facts: [{ label: "Result", value: "Not allowed for this role — nothing was changed" }] },
       };
     }
-    void logActivity({
+    // Which branch it happened at: the actor's branch, except company-wide changes (catalogue, prices, settings…).
+    const companyWide = /^\/(settings|inventory-management\/(product-brands|product-categories|suppliers|products\/bulk-price)|branches|auth\/staff|user-management\/(?!checkout))/.test(path);
+    void (async () => {
+      const branchId = user?.id && !companyWide ? (await branchOfUser(user.id).catch(() => null))?.id ?? null : null;
+      await logActivity({
       ...described,
+      branchId,
       details: described.details,
       actorId: user?.id ?? null,
       actorEmail: user?.email ?? null,
       actorRole: user?.role ?? null,
       ...requestMeta(req),
-    });
+      });
+    })();
   });
 
   next();

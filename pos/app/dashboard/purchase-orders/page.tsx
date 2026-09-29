@@ -202,9 +202,10 @@ function OrderEditor({ order, suppliers, products, api, onClose, onSaved }: {
   const [error, setError] = useState<string | null>(null);
   const supplier = suppliers.find((row) => String(row.id) === supplierId);
   const supplierOf = (product: Product) => product.supplierId ?? product.supplier?.id ?? null;
-  // The chosen supplier's products are listed first.
+  // Only the chosen supplier's products are listed; others only when asked for (e.g. a product with no supplier set).
+  const [showOthers, setShowOthers] = useState(false);
   const ownProducts = products.filter((product) => supplierId && String(supplierOf(product)) === supplierId);
-  const otherProducts = products.filter((product) => !(supplierId && String(supplierOf(product)) === supplierId));
+  const otherProducts = showOthers ? products.filter((product) => !(supplierId && String(supplierOf(product)) === supplierId)) : [];
   const label = (product: Product) => `${product.name}${product.compatibleWith ? ` · ${product.compatibleWith}` : ""} (${product.brand.name}) — ${product.quantity} in stock`;
   const total = lines.reduce((sum, line) => sum + (Number(line.quantity) || 0) * (Number(line.unitCost) || 0), 0);
 
@@ -267,10 +268,19 @@ function OrderEditor({ order, suppliers, products, api, onClose, onSaved }: {
             <div key={line.key} className="po-line">
               <div className="po-line-product">
                 <select id={`po-product-${line.key}`} className="bm-input" value={line.productId} onChange={(event) => pickProduct(line.key, event.target.value)} aria-label={`Line ${index + 1} product`}>
-                  <option value="">Other item (type below)</option>
+                  <option value="">{supplierId ? "Other item (type below)" : "Choose the supplier first"}</option>
                   {ownProducts.length > 0 && <optgroup label={`${supplier?.name ?? "Supplier"}'s products`}>{ownProducts.map((product) => <option key={product.id} value={product.id}>{label(product)}</option>)}</optgroup>}
-                  <optgroup label={ownProducts.length ? "Other products" : "Products"}>{otherProducts.map((product) => <option key={product.id} value={product.id}>{label(product)}</option>)}</optgroup>
+                  {otherProducts.length > 0 && <optgroup label="Other suppliers' products">{otherProducts.map((product) => <option key={product.id} value={product.id}>{label(product)}</option>)}</optgroup>}
+                  {/* Keep a product already on the line visible even if it isn't this supplier's. */}
+                  {line.productId && !ownProducts.some((product) => String(product.id) === line.productId) && !otherProducts.some((product) => String(product.id) === line.productId) && (() => {
+                    const current = products.find((product) => String(product.id) === line.productId);
+                    return current ? <option value={current.id}>{label(current)}</option> : null;
+                  })()}
                 </select>
+                {line.productId && supplierId && (() => {
+                  const current = products.find((product) => String(product.id) === line.productId);
+                  return current && String(supplierOf(current)) !== supplierId ? <small className="lx-warn-text">Not {supplier?.name}&apos;s product</small> : null;
+                })()}
                 {!line.productId && <input id={`po-desc-${line.key}`} className="bm-input" value={line.description} onChange={(event) => setLine(line.key, { description: event.target.value })} placeholder="Describe the item, e.g. Ice cubes 5kg bags" />}
               </div>
               <input id={`po-qty-${line.key}`} className="bm-input" type="number" min={1} step="1" value={line.quantity} onChange={(event) => setLine(line.key, { quantity: event.target.value })} aria-label={`Line ${index + 1} quantity`} />
@@ -279,6 +289,12 @@ function OrderEditor({ order, suppliers, products, api, onClose, onSaved }: {
               <button type="button" className="po-line-remove" onClick={() => setLines((current) => (current.length > 1 ? current.filter((row) => row.key !== line.key) : [blankLine()]))} aria-label={`Remove line ${index + 1}`}><IconClose /></button>
             </div>
           ))}
+          {supplierId && (
+            <div className="po-supplier-note">
+              {ownProducts.length === 0 ? <span>{supplier?.name} has no products yet — set the supplier on the product in Product Setup, or show other suppliers&apos; products.</span> : <span>Showing {supplier?.name}&apos;s {ownProducts.length} product(s).</span>}
+              <label className="lx-check"><input type="checkbox" checked={showOthers} onChange={(event) => setShowOthers(event.target.checked)} /> Show other suppliers&apos; products</label>
+            </div>
+          )}
           <div className="po-lines-foot">
             <button type="button" className="btn-outline btn-sm" onClick={() => setLines((current) => [...current, blankLine()])}><IconPlus /> Add item</button>
             <span>Total <strong>{money(total)}</strong></span>
@@ -307,7 +323,8 @@ function OrderView({ order, api, mailReady, startWithSend, shopName, onPrint, pr
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mail, setMail] = useState({ to: order.emailDefaults.to, cc: "", subject: order.emailDefaults.subject, message: order.emailDefaults.message });
-  const [receive, setReceive] = useState<Record<number, { quantity: string; unitCost: string }>>({});
+  const [receive, setReceive] = useState<Record<number, { quantity: string; unitCost: string; rejected?: string; reason?: string }>>({});
+  const [invoice, setInvoice] = useState({ no: "", date: "", total: "" });
   const [reason, setReason] = useState("");
   const open = order.status !== "CANCELLED" && order.status !== "RECEIVED";
   const sentOk = order.emails.some((email) => email.status === "SENT");
@@ -336,8 +353,19 @@ function OrderView({ order, api, mailReady, startWithSend, shopName, onPrint, pr
   const send = () => run(() => api<PurchaseOrder>(`/purchase-orders/${order.id}/send`, { method: "POST", body: JSON.stringify({ to: mail.to.trim(), cc: mail.cc.trim(), subject: mail.subject.trim(), message: mail.message }) }), `${order.poNumber} emailed to ${mail.to.trim()}`);
   const doReceive = () => run(() => api<PurchaseOrder>(`/purchase-orders/${order.id}/receive`, {
     method: "POST",
-    body: JSON.stringify({ lines: order.items.filter((item) => item.remaining > 0).map((item) => ({ itemId: item.id, quantity: Math.floor(Number(receive[item.id]?.quantity || 0)), unitCost: Number(receive[item.id]?.unitCost || item.unitCost) })) }),
-  }), `Stock received for ${order.poNumber}`);
+    body: JSON.stringify({
+      supplierInvoiceNo: invoice.no || null,
+      invoiceDate: invoice.date || null,
+      invoiceTotal: invoice.total ? Number(invoice.total) : null,
+      lines: order.items.filter((item) => item.remaining > 0).map((item) => ({
+        itemId: item.id,
+        quantity: Math.floor(Number(receive[item.id]?.quantity || 0)),
+        rejected: Math.floor(Number(receive[item.id]?.rejected || 0)),
+        rejectReason: receive[item.id]?.reason || null,
+        unitCost: Number(receive[item.id]?.unitCost || item.unitCost),
+      })),
+    }),
+  }), `Stock received for ${order.poNumber} — GRN saved`);
   const cancel = () => run(() => api<PurchaseOrder>(`/purchase-orders/${order.id}/cancel`, { method: "POST", body: JSON.stringify({ reason: reason.trim() }) }), `${order.poNumber} cancelled`);
 
   return (
@@ -346,7 +374,7 @@ function OrderView({ order, api, mailReady, startWithSend, shopName, onPrint, pr
         <div className="po-modal-head">
           <div>
             <h3 className="bm-modal-title">{order.poNumber} <span className={`po-status ${order.status}`}>{order.statusLabel}</span></h3>
-            <p className="lx-card-sub">{order.supplier.name}{order.supplier.email ? ` · ${order.supplier.email}` : " · no email address"} · ordered {day(order.orderDate)}{order.expectedDate ? ` · deliver by ${day(order.expectedDate)}` : ""}</p>
+            <p className="lx-card-sub">{order.supplier.name}{order.supplier.email ? ` · ${order.supplier.email}` : " · no email address"} · ordered {day(order.orderDate)}{order.expectedDate ? ` · deliver by ${day(order.expectedDate)}` : ""}{order.deliverTo ? ` · to ${order.deliverTo.name}` : ""}</p>
           </div>
           <button type="button" className="po-close" onClick={onClose} aria-label="Close"><IconClose /></button>
         </div>
@@ -386,10 +414,15 @@ function OrderView({ order, api, mailReady, startWithSend, shopName, onPrint, pr
 
         {panel === "receive" && (
           <form className="po-panel" onSubmit={(event) => { event.preventDefault(); void doReceive(); }}>
-            <h4>Receive the delivery into stock</h4>
-            <p className="lx-card-sub">Enter what actually arrived. Stock and cost prices update straight away, and the Day End stock book shows it as received against {order.poNumber}. If the rest won&apos;t come, cancel the order to close it.</p>
+            <h4>Receive the delivery into stock (GRN)</h4>
+            <p className="lx-card-sub">Enter what was accepted, and anything rejected (broken, wrong or short-dated — it goes back with the driver). A GRN is saved{order.deliverTo ? ` at ${order.deliverTo.name}` : ""}, stock and cost prices update straight away, and the Day End book shows it. If the rest won&apos;t come, cancel the order to close it.</p>
+            <div className="lx-member-grid" style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
+              <label>Supplier invoice no.<input className="bm-input" value={invoice.no} onChange={(event) => setInvoice({ ...invoice, no: event.target.value })} placeholder="e.g. INV-2045" /></label>
+              <label>Invoice date<input className="bm-input" type="date" value={invoice.date} onChange={(event) => setInvoice({ ...invoice, date: event.target.value })} /></label>
+              <label>Invoice total (Rs.)<input className="bm-input" type="number" min={0} step="0.01" value={invoice.total} onChange={(event) => setInvoice({ ...invoice, total: event.target.value })} /></label>
+            </div>
             <div className="po-lines">
-              <div className="po-line receive head"><span>Item</span><span>Ordered</span><span>Still due</span><span>Arrived</span><span>Unit price</span></div>
+              <div className="po-line receive head"><span>Item</span><span>Ordered</span><span>Still due</span><span>Accepted</span><span>Unit price</span></div>
               {order.items.map((item) => (
                 <div key={item.id} className="po-line receive">
                   <span><strong>{item.description}</strong>{!item.productId && <em className="td-muted"> · not a stock item, only marked as delivered</em>}</span>
@@ -397,6 +430,12 @@ function OrderView({ order, api, mailReady, startWithSend, shopName, onPrint, pr
                   <span>{item.remaining}</span>
                   <input className="bm-input" type="number" min={0} max={item.remaining} step="1" disabled={item.remaining === 0} value={receive[item.id]?.quantity ?? ""} onChange={(event) => setReceive({ ...receive, [item.id]: { ...(receive[item.id] ?? { unitCost: String(item.unitCost) }), quantity: event.target.value } })} aria-label={`${item.description} arrived`} />
                   <input className="bm-input" type="number" min={0} step="0.01" disabled={item.remaining === 0} value={receive[item.id]?.unitCost ?? ""} onChange={(event) => setReceive({ ...receive, [item.id]: { ...(receive[item.id] ?? { quantity: "0" }), unitCost: event.target.value } })} aria-label={`${item.description} unit price`} />
+                  {item.remaining > 0 && (
+                    <div className="po-reject">
+                      <label>Rejected<input className="bm-input" type="number" min={0} value={receive[item.id]?.rejected ?? ""} placeholder="0" onChange={(event) => setReceive({ ...receive, [item.id]: { ...(receive[item.id] ?? { quantity: "0", unitCost: String(item.unitCost) }), rejected: event.target.value } })} aria-label={`${item.description} rejected`} /></label>
+                      {Number(receive[item.id]?.rejected) > 0 && <input className="bm-input" value={receive[item.id]?.reason ?? ""} placeholder="Why rejected? e.g. broken in the crate" onChange={(event) => setReceive({ ...receive, [item.id]: { ...(receive[item.id] ?? { quantity: "0", unitCost: String(item.unitCost) }), reason: event.target.value } })} aria-label={`${item.description} reject reason`} />}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -447,6 +486,9 @@ function OrderView({ order, api, mailReady, startWithSend, shopName, onPrint, pr
                 <b>{email.status === "SENT" ? "Emailed" : "Email failed"}</b> to {email.toEmail}{email.ccEmail ? ` (copy ${email.ccEmail})` : ""} by {email.sentBy} · {when(email.createdAt)}
                 {email.error && <div className="td-muted">{email.error}</div>}
               </li>
+            ))}
+            {(order.grns ?? []).map((grn) => (
+              <li key={grn.id} className="sent"><b>{grn.grnNo}</b> · {grn.acceptedUnits} accepted{grn.rejectedUnits ? `, ${grn.rejectedUnits} rejected` : ""}{grn.supplierInvoiceNo ? ` · invoice ${grn.supplierInvoiceNo}` : ""} · {when(grn.createdAt)}</li>
             ))}
             {order.receivedAt && <li className="sent"><b>Fully received</b> by {order.receivedBy} · {when(order.receivedAt)}</li>}
             {order.status === "PARTIAL" && <li><b>Part received</b> · {order.items.reduce((sum, item) => sum + item.receivedQty, 0)} of {order.items.reduce((sum, item) => sum + item.quantity, 0)} units in</li>}

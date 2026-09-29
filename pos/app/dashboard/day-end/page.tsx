@@ -15,7 +15,7 @@ type CurrentShift = {
   denominations: number[];
 };
 type ShiftRow = { id: number; shiftNo: string; status: string; openedAt: string; openedBy: string; closedAt: string | null; closedBy: string | null; openingFloat: number; netSales: number | null; bills: number | null; cashDifference: number | null; cashBanked: number | null };
-type ShiftTab = "bills" | "payments" | "wallets" | "staff" | "items" | "offers" | "cash" | "stock" | "stockin" | "journal";
+type ShiftTab = "bills" | "payments" | "wallets" | "returns" | "goods" | "staff" | "items" | "offers" | "cash" | "stock" | "stockin" | "journal";
 type CountResult = { countedCash: number; expectedCash: number; difference: number; cardSales: number; recounts: number };
 
 const money = (value: number | null | undefined) => (value == null ? "—" : `Rs. ${value.toLocaleString("en-LK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
@@ -154,13 +154,13 @@ export default function DayEndPage() {
               <div><span>Bills</span><strong>{report.sales.bills}</strong><em>{report.sales.units} units sold</em></div>
               <div><span>Net sales</span><strong>{blind ? "Hidden" : money(report.sales.netSales)}</strong><em>{blind ? "shown after the drawer count" : `cash ${money(report.sales.cashSales)} · card ${money(report.sales.cardSales)}${report.sales.transferSales ? ` · QR ${money(report.sales.transferSales)}` : ""}`}</em></div>
               <div><span>Paid out</span><strong>{money(entries.filter((e) => e.direction === "OUT" && !e.voided).reduce((sum, e) => sum + e.amount, 0))}</strong><em>{entries.filter((e) => e.direction === "OUT" && !e.voided).length} expense(s) this shift</em></div>
-              <div><span>Expected in drawer</span><strong>{blind ? "Hidden" : money(report.cash.expectedCash)}</strong><em>{blind ? "blind count — count first" : report.cash.walletKept ? "float + cash sales + wallet change + in − out" : "float + cash sales + in − out"}</em></div>
+              <div><span>Expected in drawer</span><strong>{blind ? "Hidden" : money(report.cash.expectedCash)}</strong><em>{blind ? "blind count — count first" : `float + cash sales${report.cash.walletKept ? " + wallet change" : ""} + in − out${report.cash.refundsCash ? " − refunds" : ""}`}</em></div>
             </div>
           </section>
 
           <section className="lx-card lx-log-card">
             <div className="lx-seg-plain" role="tablist" style={{ margin: "0.4rem 0.4rem 0.6rem" }}>
-              {([["bills", `Sales (${report.sales.bills})`], ["payments", `Payments${report.payments?.splitBills.length ? ` · ${report.payments.splitBills.length} split` : ""}`], ["wallets", `Customer wallets (${report.wallet?.rows.length ?? 0})`], ["staff", "By staff"], ["items", "Items sold"], ["offers", `Discounts & loyalty (${report.sales.loyalty?.rows.length ?? 0})`], ["cash", `Expenses & cash in (${entries.length})`], ["stock", "Stock book"], ["stockin", `Stock in & changes (${report.stockLog?.length ?? 0})`], ["journal", `Shift journal (${report.journal?.length ?? 0})`]] as const).map(([key, label]) => (
+              {([["bills", `Sales (${report.sales.bills})`], ["payments", `Payments${report.payments?.splitBills.length ? ` · ${report.payments.splitBills.length} split` : ""}`], ["wallets", `Customer wallets (${report.wallet?.rows.length ?? 0})`], ["returns", `Returns & damages (${report.returns?.rows.length ?? 0})`], ["goods", `Goods in & out (${(report.goods?.grns.length ?? 0) + (report.goods?.sent.length ?? 0) + (report.goods?.received.length ?? 0)})`], ["staff", "By staff"], ["items", "Items sold"], ["offers", `Discounts & loyalty (${report.sales.loyalty?.rows.length ?? 0})`], ["cash", `Expenses & cash in (${entries.length})`], ["stock", "Stock book"], ["stockin", `Stock in & changes (${report.stockLog?.length ?? 0})`], ["journal", `Shift journal (${report.journal?.length ?? 0})`]] as const).map(([key, label]) => (
                 <button key={key} type="button" className={tab === key ? "active" : ""} onClick={() => setTab(key)}>{label}</button>
               ))}
             </div>
@@ -265,13 +265,22 @@ function ShiftTables({ report, tab }: { report: ShiftReport; tab: ShiftTab }) {
     );
   }
   if (tab === "items") {
+    const byType = report.sales.byType;
     return (
+      <>
+      {byType && (
+        <div className="lx-book-totals" style={{ padding: "0 0.4rem 0.75rem" }}>
+          <span>Hard liquor<b>{byType.hardLiquor.units} btl{byType.hardLiquor.amount != null ? ` · ${money(byType.hardLiquor.amount)}` : ""}</b></span>
+          <span>Beer, wine &amp; others<b>{byType.other.units}{byType.other.amount != null ? ` · ${money(byType.other.amount)}` : ""}</b></span>
+        </div>
+      )}
       <div className="data-table-wrap"><table className="data-table">
         <thead><tr><th>Item</th><th style={{ textAlign: "right" }}>Sold</th><th style={{ textAlign: "right" }}>Amount</th></tr></thead>
         <tbody>{report.sales.byProduct.map((row) => (
           <tr key={row.name}><td>{row.name}</td><td style={{ textAlign: "right" }}>{row.units}</td><td style={{ textAlign: "right" }}>{money(row.amount)}</td></tr>
         ))}{report.sales.byProduct.length === 0 && <tr><td colSpan={3} className="bm-table-empty">Nothing sold yet.</td></tr>}</tbody>
       </table></div>
+      </>
     );
   }
   if (tab === "payments") {
@@ -318,6 +327,7 @@ function ShiftTables({ report, tab }: { report: ShiftReport; tab: ShiftTab }) {
         <div className="lx-book-totals" style={{ padding: "0 0.4rem 0.75rem" }}>
           <span>Change kept in wallets<b>{money(wallet.kept)}</b></span>
           <span>Spent from wallets<b>{money(wallet.used)}</b></span>
+          {wallet.refunded ? <span>Refunds into wallets<b>{money(wallet.refunded)}</b></span> : null}
           <span>Members<b>{new Set(wallet.rows.map((row) => row.mobile)).size}</b></span>
         </div>
         {wallet.rows.length === 0 ? <div className="lx-empty">No wallet activity in this shift.</div> : (
@@ -327,14 +337,82 @@ function ShiftTables({ report, tab }: { report: ShiftReport; tab: ShiftTab }) {
               <tr key={`${row.billNo}-${row.type}-${index}`}>
                 <td className="td-muted">{new Date(row.time).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</td>
                 <td><strong>{row.member}</strong><div className="td-muted">{row.mobile}</div></td>
-                <td>{row.type === "CREDIT" ? "Change kept" : "Spent on bill"}</td>
+                <td>{row.type === "CREDIT" ? "Change kept" : row.type === "REFUND" ? "Refund for returned bottles" : "Spent on bill"}</td>
                 <td className="td-muted">{row.billNo ?? "—"}</td>
                 <td>{row.by}</td>
-                <td style={{ textAlign: "right" }} className={row.type === "CREDIT" ? "lx-amount-in" : "lx-amount-out"}>{row.amount == null ? "Hidden" : `${row.amount >= 0 ? "+" : "−"}${money(Math.abs(row.amount))}`}</td>
+                <td style={{ textAlign: "right" }} className={row.type === "DEBIT" ? "lx-amount-out" : "lx-amount-in"}>{row.amount == null ? "Hidden" : `${row.amount >= 0 ? "+" : "−"}${money(Math.abs(row.amount))}`}</td>
                 <td style={{ textAlign: "right" }}>{money(row.balanceAfter)}</td>
               </tr>
             ))}</tbody>
           </table></div>
+        )}
+      </>
+    );
+  }
+  if (tab === "goods") {
+    const goods = report.goods;
+    const rows = goods ? [
+      ...goods.grns.map((row) => ({ key: row.grnNo, time: row.time, no: row.grnNo, what: `Received from ${row.supplier}`, sub: [row.poNumber, row.invoiceNo ? `invoice ${row.invoiceNo}` : null, row.rejected ? `${row.rejected} rejected` : null].filter(Boolean).join(" · "), items: row.items, by: row.by, units: row.accepted, sign: 1 })),
+      ...goods.sent.map((row) => ({ key: `s${row.gtnNo}`, time: row.time, no: row.gtnNo, what: `Sent to ${row.branch}`, sub: row.status === "CANCELLED" ? "Cancelled — back on the shelf" : row.status === "SENT" ? "In transit" : "Received there", items: row.items, by: row.by, units: row.units, sign: -1 })),
+      ...goods.received.map((row) => ({ key: `r${row.gtnNo}`, time: row.time, no: row.gtnNo, what: `Received from ${row.branch}`, sub: [row.damaged ? `${row.damaged} damaged` : null, row.missing ? `${row.missing} MISSING` : null, row.note].filter(Boolean).join(" · "), items: row.items, by: row.by, units: row.units, sign: 1 })),
+    ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()) : [];
+    return rows.length === 0 ? <div className="lx-empty">No supplier deliveries or branch transfers in this shift.</div> : (
+      <div className="data-table-wrap"><table className="data-table">
+        <thead><tr><th>Time</th><th>No</th><th>What</th><th>Items</th><th>By</th><th style={{ textAlign: "right" }}>Bottles</th></tr></thead>
+        <tbody>{rows.map((row) => (
+          <tr key={row.key}>
+            <td className="td-muted">{new Date(row.time).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</td>
+            <td><strong>{row.no}</strong></td>
+            <td>{row.what}{row.sub && <div className={row.sub.includes("MISSING") ? "lx-amount-out" : "td-muted"}>{row.sub}</div>}</td>
+            <td className="td-muted">{row.items}</td>
+            <td>{row.by}</td>
+            <td style={{ textAlign: "right" }} className={row.sign > 0 ? "lx-amount-in" : "lx-amount-out"}>{row.sign > 0 ? "+" : "−"}{row.units}</td>
+          </tr>
+        ))}</tbody>
+      </table></div>
+    );
+  }
+  if (tab === "returns") {
+    const returns = report.returns;
+    if (!returns) return <div className="lx-empty">This shift&apos;s report has no returns detail.</div>;
+    return (
+      <>
+        <div className="lx-book-totals" style={{ padding: "0 0.4rem 0.75rem" }}>
+          <span>Returned &amp; refunded<b>{returns.refundUnits} btl · {returns.refundsTotal == null ? "Hidden" : money(returns.refundsTotal)}</b></span>
+          <span>Cash paid back<b>{money(returns.refundsCash)}</b></span>
+          <span>Into wallets<b>{money(returns.refundsWallet)}</b></span>
+          <span>Damaged bottles exchanged<b>{returns.exchangedUnits}</b></span>
+          <span>Damaged in store<b>{returns.storeDamagedUnits}</b></span>
+          <span>Damaged stock cleared<b>{returns.clearedUnits}</b></span>
+        </div>
+        {returns.rows.length === 0 ? <div className="lx-empty">No returns, exchanges or damages in this shift.</div> : (
+          <div className="data-table-wrap"><table className="data-table">
+            <thead><tr><th>Time</th><th>No</th><th>What</th><th>Product</th><th style={{ textAlign: "right" }}>Qty</th><th>Bill / customer</th><th>Reason</th><th>By</th><th style={{ textAlign: "right" }}>Paid back</th></tr></thead>
+            <tbody>{[...returns.rows].reverse().map((row, index) => (
+              <tr key={`${row.returnNo}-${index}`}>
+                <td className="td-muted">{new Date(row.time).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</td>
+                <td className="td-muted">{row.returnNo}</td>
+                <td><strong>{row.what}</strong>{row.condition && <div className="td-muted">{row.condition === "SHELF" ? "Back on the shelf" : "Kept aside as damaged"}</div>}{row.disposal && <div className="td-muted">{row.disposal}</div>}</td>
+                <td>{row.product}</td>
+                <td style={{ textAlign: "right" }}>{row.quantity}</td>
+                <td className="td-muted">{row.billNo ?? "—"}{row.customer && <div>{row.customer}</div>}</td>
+                <td>{row.reason}{row.note && <div className="td-muted">{row.note}</div>}</td>
+                <td>{row.by}</td>
+                <td style={{ textAlign: "right" }}>{row.type === "REFUND" ? <><span className="lx-amount-out">{row.refund == null ? "Hidden" : `−${money(row.refund)}`}</span><div className="td-muted">{row.refundMethod === "WALLET" ? "to wallet" : "cash"}{row.pointsReversed ? ` · −${row.pointsReversed} pts` : ""}</div></> : "—"}</td>
+              </tr>
+            ))}</tbody>
+          </table></div>
+        )}
+        {report.damagedStock && report.damagedStock.length > 0 && (
+          <>
+            <div className="lx-card-head" style={{ margin: "1rem 0.4rem 0.4rem" }}><div><div className="lx-card-title">Damaged stock kept aside</div><div className="lx-card-sub">Not for sale — sent back to the supplier or thrown away from Returns &amp; Damages</div></div></div>
+            <div className="data-table-wrap"><table className="data-table">
+              <thead><tr><th>Product</th><th style={{ textAlign: "right" }}>Added this shift</th><th style={{ textAlign: "right" }}>Cleared this shift</th><th style={{ textAlign: "right" }}>On hand</th></tr></thead>
+              <tbody>{report.damagedStock.map((row) => (
+                <tr key={row.name}><td><strong>{row.name}</strong></td><td style={{ textAlign: "right" }}>{row.added || "—"}</td><td style={{ textAlign: "right" }}>{row.cleared || "—"}</td><td style={{ textAlign: "right" }}><strong>{row.onHand}</strong></td></tr>
+              ))}</tbody>
+            </table></div>
+          </>
         )}
       </>
     );
@@ -429,12 +507,14 @@ function ShiftTables({ report, tab }: { report: ShiftReport; tab: ShiftTab }) {
       </table></div>
     );
   }
-  const rows = report.stockBook.filter((row) => row.opening || row.received || row.sold || row.adjusted || row.closing);
+  const rows = report.stockBook.filter((row) => row.opening || row.received || row.sold || row.adjusted || row.returned || row.damaged || row.transferIn || row.transferOut || row.closing);
+  const returnCols = rows.some((row) => row.returned || row.damaged);
+  const transferCols = rows.some((row) => row.transferIn || row.transferOut);
   return (
     <div className="data-table-wrap"><table className="data-table">
-      <thead><tr><th>Product</th><th style={{ textAlign: "right" }}>Opening</th><th style={{ textAlign: "right" }}>+ Received</th><th style={{ textAlign: "right" }}>− Sold</th><th style={{ textAlign: "right" }}>± Adjusted</th><th style={{ textAlign: "right" }}>Closing</th></tr></thead>
+      <thead><tr><th>Product</th><th style={{ textAlign: "right" }}>Opening</th><th style={{ textAlign: "right" }}>+ Received</th><th style={{ textAlign: "right" }}>− Sold</th>{transferCols && <><th style={{ textAlign: "right" }}>+ From branch</th><th style={{ textAlign: "right" }}>− To branch</th></>}{returnCols && <><th style={{ textAlign: "right" }}>+ Returned</th><th style={{ textAlign: "right" }}>− Damaged</th></>}<th style={{ textAlign: "right" }}>± Adjusted</th><th style={{ textAlign: "right" }}>Closing</th></tr></thead>
       <tbody>{rows.map((row) => (
-        <tr key={row.productId}><td><strong>{row.name}</strong><div className="td-muted">{row.brand}{row.size ? ` · ${row.size}` : ""}</div></td><td style={{ textAlign: "right" }}>{row.opening}</td><td style={{ textAlign: "right" }}>{row.received || "—"}</td><td style={{ textAlign: "right" }}>{row.sold || "—"}</td><td style={{ textAlign: "right" }}>{row.adjusted || "—"}</td><td style={{ textAlign: "right" }}><strong>{row.closing}</strong></td></tr>
+        <tr key={row.productId}><td><strong>{row.name}</strong><div className="td-muted">{row.brand}{row.size ? ` · ${row.size}` : ""}</div></td><td style={{ textAlign: "right" }}>{row.opening}</td><td style={{ textAlign: "right" }}>{row.received || "—"}</td><td style={{ textAlign: "right" }}>{row.sold || "—"}</td>{transferCols && <><td style={{ textAlign: "right" }}>{row.transferIn || "—"}</td><td style={{ textAlign: "right" }}>{row.transferOut || "—"}</td></>}{returnCols && <><td style={{ textAlign: "right" }}>{row.returned || "—"}</td><td style={{ textAlign: "right" }}>{row.damaged || "—"}</td></>}<td style={{ textAlign: "right" }}>{row.adjusted || "—"}</td><td style={{ textAlign: "right" }}><strong>{row.closing}</strong></td></tr>
       ))}</tbody>
     </table></div>
   );

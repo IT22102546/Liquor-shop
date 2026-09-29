@@ -1,3 +1,4 @@
+import { prisma } from "../../database/prisma.client";
 import { Router, type Request } from "express";
 import { z } from "zod";
 import { authenticatePosAdmin, authorizePosRoles } from "../../common/middleware/pos-auth.middleware";
@@ -5,11 +6,20 @@ import { AppError, validate } from "../../common/utils/errors";
 import { sendCreated, sendSuccess } from "../../common/utils/response";
 import { createCashEntry, listCashEntries, markBanked, unmarkBanked, voidCashEntry } from "./cash-book.service";
 import { getPeriodReport } from "./period-report.service";
+import { requestBranch, requestBranchScope } from "../branches/branch-context";
 import { closeShift, countShift, DENOMINATIONS, getCurrentShift, getShiftReport, listShifts, openShift } from "./shift.service";
 
 const user = (req: Request) => (req as unknown as { user: { id: number; role: string } }).user;
 const money = z.number().min(0).max(100_000_000);
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+
+/** Staff fixed to one branch may only see and work that branch's shifts. */
+async function assertShiftAccess(req: Request, shiftId: number) {
+  const branch = await requestBranch(req);
+  if (!branch.fixed) return;
+  const shift = await prisma.posShift.findUnique({ where: { id: shiftId }, select: { branchId: true } });
+  if (shift && shift.branchId !== branch.id) throw AppError.forbidden("That shift belongs to another branch");
+}
 
 // ── Shifts (Day End) ─────────────────────────────────────────────────────────
 export const shiftRouter = Router();
@@ -17,27 +27,28 @@ shiftRouter.use(authenticatePosAdmin);
 const tillStaff = authorizePosRoles("ADMIN", "CASHIER");
 const bookReaders = authorizePosRoles("ADMIN", "CASHIER", "ACCOUNTANT");
 
-shiftRouter.get("/current", bookReaders, async (_req, res, next) => {
-  try { return sendSuccess(res, { ...(await getCurrentShift()), denominations: DENOMINATIONS }); } catch (error) { return next(error); }
+shiftRouter.get("/current", bookReaders, async (req, res, next) => {
+  try { return sendSuccess(res, { ...(await getCurrentShift((await requestBranch(req)).id)), denominations: DENOMINATIONS }); } catch (error) { return next(error); }
 });
 shiftRouter.get("/", bookReaders, async (req, res, next) => {
   try {
     const q = validate(z.object({ page: z.coerce.number().int().min(1).default(1), limit: z.coerce.number().int().min(1).max(100).default(20) }), req.query);
-    return sendSuccess(res, await listShifts(q.page, q.limit));
+    return sendSuccess(res, await listShifts(q.page, q.limit, await requestBranchScope(req)));
   } catch (error) { return next(error); }
 });
 shiftRouter.post("/open", tillStaff, async (req, res, next) => {
   try {
     const dto = validate(z.object({ openingFloat: money }), req.body);
-    return sendCreated(res, await openShift(dto.openingFloat, user(req).id));
+    return sendCreated(res, await openShift(dto.openingFloat, user(req).id, (await requestBranch(req)).id));
   } catch (error) { return next(error); }
 });
 shiftRouter.get("/:id/report", bookReaders, async (req, res, next) => {
-  try { return sendSuccess(res, await getShiftReport(Number(req.params.id), user(req).role !== "CASHIER")); } catch (error) { return next(error); }
+  try { await assertShiftAccess(req, Number(req.params.id)); return sendSuccess(res, await getShiftReport(Number(req.params.id), user(req).role !== "CASHIER")); } catch (error) { return next(error); }
 });
 shiftRouter.post("/:id/count", tillStaff, async (req, res, next) => {
   try {
     const dto = validate(z.object({ counts: z.record(z.string(), z.number().int().min(0).max(100_000)) }), req.body);
+    await assertShiftAccess(req, Number(req.params.id));
     return sendSuccess(res, await countShift(Number(req.params.id), dto.counts, user(req).id));
   } catch (error) { return next(error); }
 });
@@ -51,6 +62,7 @@ shiftRouter.post("/:id/close", tillStaff, async (req, res, next) => {
       notes: z.string().trim().max(1000).optional(),
       stockCounts: z.array(z.object({ productId: z.number().int().positive(), counted: z.number().int().min(0).max(1_000_000) })).max(2000).optional(),
     }), req.body);
+    await assertShiftAccess(req, Number(req.params.id));
     return sendSuccess(res, await closeShift(Number(req.params.id), dto, user(req).id));
   } catch (error) { return next(error); }
 });
@@ -73,7 +85,7 @@ cashBookRouter.get("/", bookReaders, async (req, res, next) => {
       shiftId: z.coerce.number().int().positive().optional(),
       bankStatus: z.enum(["PENDING", "BANKED"]).optional(),
     }), req.query);
-    return sendSuccess(res, await listCashEntries(q));
+    return sendSuccess(res, await listCashEntries({ ...q, branchId: await requestBranchScope(req) }));
   } catch (error) { return next(error); }
 });
 cashBookRouter.post("/", bookReaders, async (req, res, next) => {
@@ -92,7 +104,7 @@ cashBookRouter.post("/", bookReaders, async (req, res, next) => {
     if (user(req).role === "CASHIER" && dto.source !== "DRAWER") {
       throw AppError.forbidden("Cashiers can only record cash going in or out of the drawer");
     }
-    return sendCreated(res, await createCashEntry(dto, user(req).id));
+    return sendCreated(res, await createCashEntry(dto, user(req).id, (await requestBranch(req)).id));
   } catch (error) { return next(error); }
 });
 // Deposit slip: mark one or more shift takings as banked (cash deposited / card & QR money received).
@@ -121,7 +133,7 @@ export const reportRouter = Router();
 reportRouter.use(authenticatePosAdmin);
 reportRouter.get("/period", authorizePosRoles("ADMIN", "ACCOUNTANT"), async (req, res, next) => {
   try {
-    const q = validate(z.object({ from: date, to: date }), req.query);
-    return sendSuccess(res, await getPeriodReport(q.from, q.to));
+    const q = validate(z.object({ from: date, to: date, branch: z.string().optional(), branchId: z.string().optional() }), req.query);
+    return sendSuccess(res, await getPeriodReport(q.from, q.to, await requestBranchScope(req)));
   } catch (error) { return next(error); }
 });
