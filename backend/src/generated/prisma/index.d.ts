@@ -37108,6 +37108,8 @@ export namespace Prisma {
     unitCost: number | null
     lineTotal: number | null
     receivedQty: number | null
+    freeQty: number | null
+    freeReceived: number | null
   }
 
   export type PurchaseOrderItemSumAggregateOutputType = {
@@ -37118,6 +37120,8 @@ export namespace Prisma {
     unitCost: number | null
     lineTotal: number | null
     receivedQty: number | null
+    freeQty: number | null
+    freeReceived: number | null
   }
 
   export type PurchaseOrderItemMinAggregateOutputType = {
@@ -37129,6 +37133,8 @@ export namespace Prisma {
     unitCost: number | null
     lineTotal: number | null
     receivedQty: number | null
+    freeQty: number | null
+    freeReceived: number | null
   }
 
   export type PurchaseOrderItemMaxAggregateOutputType = {
@@ -37140,6 +37146,8 @@ export namespace Prisma {
     unitCost: number | null
     lineTotal: number | null
     receivedQty: number | null
+    freeQty: number | null
+    freeReceived: number | null
   }
 
   export type PurchaseOrderItemCountAggregateOutputType = {
@@ -37151,6 +37159,8 @@ export namespace Prisma {
     unitCost: number
     lineTotal: number
     receivedQty: number
+    freeQty: number
+    freeReceived: number
     _all: number
   }
 
@@ -37163,6 +37173,8 @@ export namespace Prisma {
     unitCost?: true
     lineTotal?: true
     receivedQty?: true
+    freeQty?: true
+    freeReceived?: true
   }
 
   export type PurchaseOrderItemSumAggregateInputType = {
@@ -37173,6 +37185,8 @@ export namespace Prisma {
     unitCost?: true
     lineTotal?: true
     receivedQty?: true
+    freeQty?: true
+    freeReceived?: true
   }
 
   export type PurchaseOrderItemMinAggregateInputType = {
@@ -37184,6 +37198,8 @@ export namespace Prisma {
     unitCost?: true
     lineTotal?: true
     receivedQty?: true
+    freeQty?: true
+    freeReceived?: true
   }
 
   export type PurchaseOrderItemMaxAggregateInputType = {
@@ -37195,6 +37211,8 @@ export namespace Prisma {
     unitCost?: true
     lineTotal?: true
     receivedQty?: true
+    freeQty?: true
+    freeReceived?: true
   }
 
   export type PurchaseOrderItemCountAggregateInputType = {
@@ -37206,6 +37224,8 @@ export namespace Prisma {
     unitCost?: true
     lineTotal?: true
     receivedQty?: true
+    freeQty?: true
+    freeReceived?: true
     _all?: true
   }
 
@@ -37304,6 +37324,8 @@ export namespace Prisma {
     unitCost: number
     lineTotal: number
     receivedQty: number
+    freeQty: number
+    freeReceived: number
     _count: PurchaseOrderItemCountAggregateOutputType | null
     _avg: PurchaseOrderItemAvgAggregateOutputType | null
     _sum: PurchaseOrderItemSumAggregateOutputType | null
@@ -37334,6 +37356,8 @@ export namespace Prisma {
     unitCost?: boolean
     lineTotal?: boolean
     receivedQty?: boolean
+    freeQty?: boolean
+    freeReceived?: boolean
     order?: boolean | PurchaseOrderDefaultArgs<ExtArgs>
     product?: boolean | PurchaseOrderItem$productArgs<ExtArgs>
   }, ExtArgs["result"]["purchaseOrderItem"]>
@@ -37347,6 +37371,8 @@ export namespace Prisma {
     unitCost?: boolean
     lineTotal?: boolean
     receivedQty?: boolean
+    freeQty?: boolean
+    freeReceived?: boolean
     order?: boolean | PurchaseOrderDefaultArgs<ExtArgs>
     product?: boolean | PurchaseOrderItem$productArgs<ExtArgs>
   }, ExtArgs["result"]["purchaseOrderItem"]>
@@ -37360,6 +37386,8 @@ export namespace Prisma {
     unitCost?: boolean
     lineTotal?: boolean
     receivedQty?: boolean
+    freeQty?: boolean
+    freeReceived?: boolean
   }
 
   export type PurchaseOrderItemInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -37389,6 +37417,11 @@ export namespace Prisma {
       unitCost: number
       lineTotal: number
       receivedQty: number
+      /**
+       * Free issue agreed with the supplier on this line (e.g. 10 + 2 free), and how many free have arrived.
+       */
+      freeQty: number
+      freeReceived: number
     }, ExtArgs["result"]["purchaseOrderItem"]>
     composites: {}
   }
@@ -37792,6 +37825,8 @@ export namespace Prisma {
     readonly unitCost: FieldRef<"PurchaseOrderItem", 'Float'>
     readonly lineTotal: FieldRef<"PurchaseOrderItem", 'Float'>
     readonly receivedQty: FieldRef<"PurchaseOrderItem", 'Int'>
+    readonly freeQty: FieldRef<"PurchaseOrderItem", 'Int'>
+    readonly freeReceived: FieldRef<"PurchaseOrderItem", 'Int'>
   }
     
 
@@ -41578,6 +41613,7 @@ export namespace Prisma {
     name: string | null
     address: string | null
     phone: string | null
+    email: string | null
     isMain: boolean | null
     isActive: boolean | null
     createdAt: Date | null
@@ -41590,6 +41626,7 @@ export namespace Prisma {
     name: string | null
     address: string | null
     phone: string | null
+    email: string | null
     isMain: boolean | null
     isActive: boolean | null
     createdAt: Date | null
@@ -41602,6 +41639,7 @@ export namespace Prisma {
     name: number
     address: number
     phone: number
+    email: number
     isMain: number
     isActive: number
     createdAt: number
@@ -41624,6 +41662,7 @@ export namespace Prisma {
     name?: true
     address?: true
     phone?: true
+    email?: true
     isMain?: true
     isActive?: true
     createdAt?: true
@@ -41636,6 +41675,7 @@ export namespace Prisma {
     name?: true
     address?: true
     phone?: true
+    email?: true
     isMain?: true
     isActive?: true
     createdAt?: true
@@ -41648,6 +41688,7 @@ export namespace Prisma {
     name?: true
     address?: true
     phone?: true
+    email?: true
     isMain?: true
     isActive?: true
     createdAt?: true
@@ -41747,6 +41788,7 @@ export namespace Prisma {
     name: string
     address: string | null
     phone: string | null
+    email: string | null
     isMain: boolean
     isActive: boolean
     createdAt: Date
@@ -41778,6 +41820,7 @@ export namespace Prisma {
     name?: boolean
     address?: boolean
     phone?: boolean
+    email?: boolean
     isMain?: boolean
     isActive?: boolean
     createdAt?: boolean
@@ -41795,6 +41838,7 @@ export namespace Prisma {
     name?: boolean
     address?: boolean
     phone?: boolean
+    email?: boolean
     isMain?: boolean
     isActive?: boolean
     createdAt?: boolean
@@ -41807,6 +41851,7 @@ export namespace Prisma {
     name?: boolean
     address?: boolean
     phone?: boolean
+    email?: boolean
     isMain?: boolean
     isActive?: boolean
     createdAt?: boolean
@@ -41836,6 +41881,10 @@ export namespace Prisma {
       name: string
       address: string | null
       phone: string | null
+      /**
+       * The branch's own email: shown on its purchase orders, and supplier replies go here.
+       */
+      email: string | null
       /**
        * The first branch; existing stock and records were moved here when branches were added.
        */
@@ -42245,6 +42294,7 @@ export namespace Prisma {
     readonly name: FieldRef<"Branch", 'String'>
     readonly address: FieldRef<"Branch", 'String'>
     readonly phone: FieldRef<"Branch", 'String'>
+    readonly email: FieldRef<"Branch", 'String'>
     readonly isMain: FieldRef<"Branch", 'Boolean'>
     readonly isActive: FieldRef<"Branch", 'Boolean'>
     readonly createdAt: FieldRef<"Branch", 'DateTime'>
@@ -43694,6 +43744,8 @@ export namespace Prisma {
     invoiceTotal: number | null
     acceptedUnits: number | null
     rejectedUnits: number | null
+    freeUnits: number | null
+    freeValue: number | null
     totalCost: number | null
     shiftId: number | null
     receivedById: number | null
@@ -43707,6 +43759,8 @@ export namespace Prisma {
     invoiceTotal: number | null
     acceptedUnits: number | null
     rejectedUnits: number | null
+    freeUnits: number | null
+    freeValue: number | null
     totalCost: number | null
     shiftId: number | null
     receivedById: number | null
@@ -43726,6 +43780,8 @@ export namespace Prisma {
     notes: string | null
     acceptedUnits: number | null
     rejectedUnits: number | null
+    freeUnits: number | null
+    freeValue: number | null
     totalCost: number | null
     shiftId: number | null
     receivedById: number | null
@@ -43746,6 +43802,8 @@ export namespace Prisma {
     notes: string | null
     acceptedUnits: number | null
     rejectedUnits: number | null
+    freeUnits: number | null
+    freeValue: number | null
     totalCost: number | null
     shiftId: number | null
     receivedById: number | null
@@ -43766,6 +43824,8 @@ export namespace Prisma {
     notes: number
     acceptedUnits: number
     rejectedUnits: number
+    freeUnits: number
+    freeValue: number
     totalCost: number
     shiftId: number
     receivedById: number
@@ -43782,6 +43842,8 @@ export namespace Prisma {
     invoiceTotal?: true
     acceptedUnits?: true
     rejectedUnits?: true
+    freeUnits?: true
+    freeValue?: true
     totalCost?: true
     shiftId?: true
     receivedById?: true
@@ -43795,6 +43857,8 @@ export namespace Prisma {
     invoiceTotal?: true
     acceptedUnits?: true
     rejectedUnits?: true
+    freeUnits?: true
+    freeValue?: true
     totalCost?: true
     shiftId?: true
     receivedById?: true
@@ -43814,6 +43878,8 @@ export namespace Prisma {
     notes?: true
     acceptedUnits?: true
     rejectedUnits?: true
+    freeUnits?: true
+    freeValue?: true
     totalCost?: true
     shiftId?: true
     receivedById?: true
@@ -43834,6 +43900,8 @@ export namespace Prisma {
     notes?: true
     acceptedUnits?: true
     rejectedUnits?: true
+    freeUnits?: true
+    freeValue?: true
     totalCost?: true
     shiftId?: true
     receivedById?: true
@@ -43854,6 +43922,8 @@ export namespace Prisma {
     notes?: true
     acceptedUnits?: true
     rejectedUnits?: true
+    freeUnits?: true
+    freeValue?: true
     totalCost?: true
     shiftId?: true
     receivedById?: true
@@ -43961,6 +44031,8 @@ export namespace Prisma {
     notes: string | null
     acceptedUnits: number
     rejectedUnits: number
+    freeUnits: number
+    freeValue: number
     totalCost: number
     shiftId: number | null
     receivedById: number
@@ -44000,6 +44072,8 @@ export namespace Prisma {
     notes?: boolean
     acceptedUnits?: boolean
     rejectedUnits?: boolean
+    freeUnits?: boolean
+    freeValue?: boolean
     totalCost?: boolean
     shiftId?: boolean
     receivedById?: boolean
@@ -44023,6 +44097,8 @@ export namespace Prisma {
     notes?: boolean
     acceptedUnits?: boolean
     rejectedUnits?: boolean
+    freeUnits?: boolean
+    freeValue?: boolean
     totalCost?: boolean
     shiftId?: boolean
     receivedById?: boolean
@@ -44044,6 +44120,8 @@ export namespace Prisma {
     notes?: boolean
     acceptedUnits?: boolean
     rejectedUnits?: boolean
+    freeUnits?: boolean
+    freeValue?: boolean
     totalCost?: boolean
     shiftId?: boolean
     receivedById?: boolean
@@ -44082,6 +44160,11 @@ export namespace Prisma {
       notes: string | null
       acceptedUnits: number
       rejectedUnits: number
+      /**
+       * Free-issue bottles received, and what they would have cost at the unit prices entered.
+       */
+      freeUnits: number
+      freeValue: number
       /**
        * Value of the accepted goods at the cost entered.
        */
@@ -44497,6 +44580,8 @@ export namespace Prisma {
     readonly notes: FieldRef<"Grn", 'String'>
     readonly acceptedUnits: FieldRef<"Grn", 'Int'>
     readonly rejectedUnits: FieldRef<"Grn", 'Int'>
+    readonly freeUnits: FieldRef<"Grn", 'Int'>
+    readonly freeValue: FieldRef<"Grn", 'Float'>
     readonly totalCost: FieldRef<"Grn", 'Float'>
     readonly shiftId: FieldRef<"Grn", 'Int'>
     readonly receivedById: FieldRef<"Grn", 'Int'>
@@ -44874,6 +44959,7 @@ export namespace Prisma {
     deliveredQty: number | null
     acceptedQty: number | null
     rejectedQty: number | null
+    freeQty: number | null
     unitCost: number | null
     lineTotal: number | null
   }
@@ -44887,6 +44973,7 @@ export namespace Prisma {
     deliveredQty: number | null
     acceptedQty: number | null
     rejectedQty: number | null
+    freeQty: number | null
     unitCost: number | null
     lineTotal: number | null
   }
@@ -44902,6 +44989,7 @@ export namespace Prisma {
     acceptedQty: number | null
     rejectedQty: number | null
     rejectReason: string | null
+    freeQty: number | null
     unitCost: number | null
     lineTotal: number | null
   }
@@ -44917,6 +45005,7 @@ export namespace Prisma {
     acceptedQty: number | null
     rejectedQty: number | null
     rejectReason: string | null
+    freeQty: number | null
     unitCost: number | null
     lineTotal: number | null
   }
@@ -44932,6 +45021,7 @@ export namespace Prisma {
     acceptedQty: number
     rejectedQty: number
     rejectReason: number
+    freeQty: number
     unitCost: number
     lineTotal: number
     _all: number
@@ -44947,6 +45037,7 @@ export namespace Prisma {
     deliveredQty?: true
     acceptedQty?: true
     rejectedQty?: true
+    freeQty?: true
     unitCost?: true
     lineTotal?: true
   }
@@ -44960,6 +45051,7 @@ export namespace Prisma {
     deliveredQty?: true
     acceptedQty?: true
     rejectedQty?: true
+    freeQty?: true
     unitCost?: true
     lineTotal?: true
   }
@@ -44975,6 +45067,7 @@ export namespace Prisma {
     acceptedQty?: true
     rejectedQty?: true
     rejectReason?: true
+    freeQty?: true
     unitCost?: true
     lineTotal?: true
   }
@@ -44990,6 +45083,7 @@ export namespace Prisma {
     acceptedQty?: true
     rejectedQty?: true
     rejectReason?: true
+    freeQty?: true
     unitCost?: true
     lineTotal?: true
   }
@@ -45005,6 +45099,7 @@ export namespace Prisma {
     acceptedQty?: true
     rejectedQty?: true
     rejectReason?: true
+    freeQty?: true
     unitCost?: true
     lineTotal?: true
     _all?: true
@@ -45107,6 +45202,7 @@ export namespace Prisma {
     acceptedQty: number
     rejectedQty: number
     rejectReason: string | null
+    freeQty: number
     unitCost: number
     lineTotal: number
     _count: GrnItemCountAggregateOutputType | null
@@ -45141,6 +45237,7 @@ export namespace Prisma {
     acceptedQty?: boolean
     rejectedQty?: boolean
     rejectReason?: boolean
+    freeQty?: boolean
     unitCost?: boolean
     lineTotal?: boolean
     grn?: boolean | GrnDefaultArgs<ExtArgs>
@@ -45157,6 +45254,7 @@ export namespace Prisma {
     acceptedQty?: boolean
     rejectedQty?: boolean
     rejectReason?: boolean
+    freeQty?: boolean
     unitCost?: boolean
     lineTotal?: boolean
     grn?: boolean | GrnDefaultArgs<ExtArgs>
@@ -45173,6 +45271,7 @@ export namespace Prisma {
     acceptedQty?: boolean
     rejectedQty?: boolean
     rejectReason?: boolean
+    freeQty?: boolean
     unitCost?: boolean
     lineTotal?: boolean
   }
@@ -45206,7 +45305,14 @@ export namespace Prisma {
       acceptedQty: number
       rejectedQty: number
       rejectReason: string | null
+      /**
+       * Free issue: extra bottles the supplier gave at no charge. They go into stock and lower the average cost.
+       */
+      freeQty: number
       unitCost: number
+      /**
+       * Accepted (paid) × unit cost — what is owed; free bottles add nothing.
+       */
       lineTotal: number
     }, ExtArgs["result"]["grnItem"]>
     composites: {}
@@ -45612,6 +45718,7 @@ export namespace Prisma {
     readonly acceptedQty: FieldRef<"GrnItem", 'Int'>
     readonly rejectedQty: FieldRef<"GrnItem", 'Int'>
     readonly rejectReason: FieldRef<"GrnItem", 'String'>
+    readonly freeQty: FieldRef<"GrnItem", 'Int'>
     readonly unitCost: FieldRef<"GrnItem", 'Float'>
     readonly lineTotal: FieldRef<"GrnItem", 'Float'>
   }
@@ -48714,7 +48821,9 @@ export namespace Prisma {
     quantity: 'quantity',
     unitCost: 'unitCost',
     lineTotal: 'lineTotal',
-    receivedQty: 'receivedQty'
+    receivedQty: 'receivedQty',
+    freeQty: 'freeQty',
+    freeReceived: 'freeReceived'
   };
 
   export type PurchaseOrderItemScalarFieldEnum = (typeof PurchaseOrderItemScalarFieldEnum)[keyof typeof PurchaseOrderItemScalarFieldEnum]
@@ -48789,6 +48898,7 @@ export namespace Prisma {
     name: 'name',
     address: 'address',
     phone: 'phone',
+    email: 'email',
     isMain: 'isMain',
     isActive: 'isActive',
     createdAt: 'createdAt',
@@ -48825,6 +48935,8 @@ export namespace Prisma {
     notes: 'notes',
     acceptedUnits: 'acceptedUnits',
     rejectedUnits: 'rejectedUnits',
+    freeUnits: 'freeUnits',
+    freeValue: 'freeValue',
     totalCost: 'totalCost',
     shiftId: 'shiftId',
     receivedById: 'receivedById',
@@ -48845,6 +48957,7 @@ export namespace Prisma {
     acceptedQty: 'acceptedQty',
     rejectedQty: 'rejectedQty',
     rejectReason: 'rejectReason',
+    freeQty: 'freeQty',
     unitCost: 'unitCost',
     lineTotal: 'lineTotal'
   };
@@ -52064,6 +52177,8 @@ export namespace Prisma {
     unitCost?: FloatFilter<"PurchaseOrderItem"> | number
     lineTotal?: FloatFilter<"PurchaseOrderItem"> | number
     receivedQty?: IntFilter<"PurchaseOrderItem"> | number
+    freeQty?: IntFilter<"PurchaseOrderItem"> | number
+    freeReceived?: IntFilter<"PurchaseOrderItem"> | number
     order?: XOR<PurchaseOrderRelationFilter, PurchaseOrderWhereInput>
     product?: XOR<InventoryProductNullableRelationFilter, InventoryProductWhereInput> | null
   }
@@ -52077,6 +52192,8 @@ export namespace Prisma {
     unitCost?: SortOrder
     lineTotal?: SortOrder
     receivedQty?: SortOrder
+    freeQty?: SortOrder
+    freeReceived?: SortOrder
     order?: PurchaseOrderOrderByWithRelationInput
     product?: InventoryProductOrderByWithRelationInput
   }
@@ -52093,6 +52210,8 @@ export namespace Prisma {
     unitCost?: FloatFilter<"PurchaseOrderItem"> | number
     lineTotal?: FloatFilter<"PurchaseOrderItem"> | number
     receivedQty?: IntFilter<"PurchaseOrderItem"> | number
+    freeQty?: IntFilter<"PurchaseOrderItem"> | number
+    freeReceived?: IntFilter<"PurchaseOrderItem"> | number
     order?: XOR<PurchaseOrderRelationFilter, PurchaseOrderWhereInput>
     product?: XOR<InventoryProductNullableRelationFilter, InventoryProductWhereInput> | null
   }, "id">
@@ -52106,6 +52225,8 @@ export namespace Prisma {
     unitCost?: SortOrder
     lineTotal?: SortOrder
     receivedQty?: SortOrder
+    freeQty?: SortOrder
+    freeReceived?: SortOrder
     _count?: PurchaseOrderItemCountOrderByAggregateInput
     _avg?: PurchaseOrderItemAvgOrderByAggregateInput
     _max?: PurchaseOrderItemMaxOrderByAggregateInput
@@ -52125,6 +52246,8 @@ export namespace Prisma {
     unitCost?: FloatWithAggregatesFilter<"PurchaseOrderItem"> | number
     lineTotal?: FloatWithAggregatesFilter<"PurchaseOrderItem"> | number
     receivedQty?: IntWithAggregatesFilter<"PurchaseOrderItem"> | number
+    freeQty?: IntWithAggregatesFilter<"PurchaseOrderItem"> | number
+    freeReceived?: IntWithAggregatesFilter<"PurchaseOrderItem"> | number
   }
 
   export type PurchaseOrderEmailWhereInput = {
@@ -52463,6 +52586,7 @@ export namespace Prisma {
     name?: StringFilter<"Branch"> | string
     address?: StringNullableFilter<"Branch"> | string | null
     phone?: StringNullableFilter<"Branch"> | string | null
+    email?: StringNullableFilter<"Branch"> | string | null
     isMain?: BoolFilter<"Branch"> | boolean
     isActive?: BoolFilter<"Branch"> | boolean
     createdAt?: DateTimeFilter<"Branch"> | Date | string
@@ -52479,6 +52603,7 @@ export namespace Prisma {
     name?: SortOrder
     address?: SortOrderInput | SortOrder
     phone?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
     isMain?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -52498,6 +52623,7 @@ export namespace Prisma {
     name?: StringFilter<"Branch"> | string
     address?: StringNullableFilter<"Branch"> | string | null
     phone?: StringNullableFilter<"Branch"> | string | null
+    email?: StringNullableFilter<"Branch"> | string | null
     isMain?: BoolFilter<"Branch"> | boolean
     isActive?: BoolFilter<"Branch"> | boolean
     createdAt?: DateTimeFilter<"Branch"> | Date | string
@@ -52514,6 +52640,7 @@ export namespace Prisma {
     name?: SortOrder
     address?: SortOrderInput | SortOrder
     phone?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
     isMain?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -52534,6 +52661,7 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Branch"> | string
     address?: StringNullableWithAggregatesFilter<"Branch"> | string | null
     phone?: StringNullableWithAggregatesFilter<"Branch"> | string | null
+    email?: StringNullableWithAggregatesFilter<"Branch"> | string | null
     isMain?: BoolWithAggregatesFilter<"Branch"> | boolean
     isActive?: BoolWithAggregatesFilter<"Branch"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"Branch"> | Date | string
@@ -52628,6 +52756,8 @@ export namespace Prisma {
     notes?: StringNullableFilter<"Grn"> | string | null
     acceptedUnits?: IntFilter<"Grn"> | number
     rejectedUnits?: IntFilter<"Grn"> | number
+    freeUnits?: IntFilter<"Grn"> | number
+    freeValue?: FloatFilter<"Grn"> | number
     totalCost?: FloatFilter<"Grn"> | number
     shiftId?: IntNullableFilter<"Grn"> | number | null
     receivedById?: IntFilter<"Grn"> | number
@@ -52650,6 +52780,8 @@ export namespace Prisma {
     notes?: SortOrderInput | SortOrder
     acceptedUnits?: SortOrder
     rejectedUnits?: SortOrder
+    freeUnits?: SortOrder
+    freeValue?: SortOrder
     totalCost?: SortOrder
     shiftId?: SortOrderInput | SortOrder
     receivedById?: SortOrder
@@ -52675,6 +52807,8 @@ export namespace Prisma {
     notes?: StringNullableFilter<"Grn"> | string | null
     acceptedUnits?: IntFilter<"Grn"> | number
     rejectedUnits?: IntFilter<"Grn"> | number
+    freeUnits?: IntFilter<"Grn"> | number
+    freeValue?: FloatFilter<"Grn"> | number
     totalCost?: FloatFilter<"Grn"> | number
     shiftId?: IntNullableFilter<"Grn"> | number | null
     receivedById?: IntFilter<"Grn"> | number
@@ -52697,6 +52831,8 @@ export namespace Prisma {
     notes?: SortOrderInput | SortOrder
     acceptedUnits?: SortOrder
     rejectedUnits?: SortOrder
+    freeUnits?: SortOrder
+    freeValue?: SortOrder
     totalCost?: SortOrder
     shiftId?: SortOrderInput | SortOrder
     receivedById?: SortOrder
@@ -52725,6 +52861,8 @@ export namespace Prisma {
     notes?: StringNullableWithAggregatesFilter<"Grn"> | string | null
     acceptedUnits?: IntWithAggregatesFilter<"Grn"> | number
     rejectedUnits?: IntWithAggregatesFilter<"Grn"> | number
+    freeUnits?: IntWithAggregatesFilter<"Grn"> | number
+    freeValue?: FloatWithAggregatesFilter<"Grn"> | number
     totalCost?: FloatWithAggregatesFilter<"Grn"> | number
     shiftId?: IntNullableWithAggregatesFilter<"Grn"> | number | null
     receivedById?: IntWithAggregatesFilter<"Grn"> | number
@@ -52745,6 +52883,7 @@ export namespace Prisma {
     acceptedQty?: IntFilter<"GrnItem"> | number
     rejectedQty?: IntFilter<"GrnItem"> | number
     rejectReason?: StringNullableFilter<"GrnItem"> | string | null
+    freeQty?: IntFilter<"GrnItem"> | number
     unitCost?: FloatFilter<"GrnItem"> | number
     lineTotal?: FloatFilter<"GrnItem"> | number
     grn?: XOR<GrnRelationFilter, GrnWhereInput>
@@ -52761,6 +52900,7 @@ export namespace Prisma {
     acceptedQty?: SortOrder
     rejectedQty?: SortOrder
     rejectReason?: SortOrderInput | SortOrder
+    freeQty?: SortOrder
     unitCost?: SortOrder
     lineTotal?: SortOrder
     grn?: GrnOrderByWithRelationInput
@@ -52780,6 +52920,7 @@ export namespace Prisma {
     acceptedQty?: IntFilter<"GrnItem"> | number
     rejectedQty?: IntFilter<"GrnItem"> | number
     rejectReason?: StringNullableFilter<"GrnItem"> | string | null
+    freeQty?: IntFilter<"GrnItem"> | number
     unitCost?: FloatFilter<"GrnItem"> | number
     lineTotal?: FloatFilter<"GrnItem"> | number
     grn?: XOR<GrnRelationFilter, GrnWhereInput>
@@ -52796,6 +52937,7 @@ export namespace Prisma {
     acceptedQty?: SortOrder
     rejectedQty?: SortOrder
     rejectReason?: SortOrderInput | SortOrder
+    freeQty?: SortOrder
     unitCost?: SortOrder
     lineTotal?: SortOrder
     _count?: GrnItemCountOrderByAggregateInput
@@ -52819,6 +52961,7 @@ export namespace Prisma {
     acceptedQty?: IntWithAggregatesFilter<"GrnItem"> | number
     rejectedQty?: IntWithAggregatesFilter<"GrnItem"> | number
     rejectReason?: StringNullableWithAggregatesFilter<"GrnItem"> | string | null
+    freeQty?: IntWithAggregatesFilter<"GrnItem"> | number
     unitCost?: FloatWithAggregatesFilter<"GrnItem"> | number
     lineTotal?: FloatWithAggregatesFilter<"GrnItem"> | number
   }
@@ -56146,6 +56289,8 @@ export namespace Prisma {
     unitCost: number
     lineTotal: number
     receivedQty?: number
+    freeQty?: number
+    freeReceived?: number
     order: PurchaseOrderCreateNestedOneWithoutItemsInput
     product?: InventoryProductCreateNestedOneWithoutPurchaseOrderItemsInput
   }
@@ -56159,6 +56304,8 @@ export namespace Prisma {
     unitCost: number
     lineTotal: number
     receivedQty?: number
+    freeQty?: number
+    freeReceived?: number
   }
 
   export type PurchaseOrderItemUpdateInput = {
@@ -56167,6 +56314,8 @@ export namespace Prisma {
     unitCost?: FloatFieldUpdateOperationsInput | number
     lineTotal?: FloatFieldUpdateOperationsInput | number
     receivedQty?: IntFieldUpdateOperationsInput | number
+    freeQty?: IntFieldUpdateOperationsInput | number
+    freeReceived?: IntFieldUpdateOperationsInput | number
     order?: PurchaseOrderUpdateOneRequiredWithoutItemsNestedInput
     product?: InventoryProductUpdateOneWithoutPurchaseOrderItemsNestedInput
   }
@@ -56180,6 +56329,8 @@ export namespace Prisma {
     unitCost?: FloatFieldUpdateOperationsInput | number
     lineTotal?: FloatFieldUpdateOperationsInput | number
     receivedQty?: IntFieldUpdateOperationsInput | number
+    freeQty?: IntFieldUpdateOperationsInput | number
+    freeReceived?: IntFieldUpdateOperationsInput | number
   }
 
   export type PurchaseOrderItemCreateManyInput = {
@@ -56191,6 +56342,8 @@ export namespace Prisma {
     unitCost: number
     lineTotal: number
     receivedQty?: number
+    freeQty?: number
+    freeReceived?: number
   }
 
   export type PurchaseOrderItemUpdateManyMutationInput = {
@@ -56199,6 +56352,8 @@ export namespace Prisma {
     unitCost?: FloatFieldUpdateOperationsInput | number
     lineTotal?: FloatFieldUpdateOperationsInput | number
     receivedQty?: IntFieldUpdateOperationsInput | number
+    freeQty?: IntFieldUpdateOperationsInput | number
+    freeReceived?: IntFieldUpdateOperationsInput | number
   }
 
   export type PurchaseOrderItemUncheckedUpdateManyInput = {
@@ -56210,6 +56365,8 @@ export namespace Prisma {
     unitCost?: FloatFieldUpdateOperationsInput | number
     lineTotal?: FloatFieldUpdateOperationsInput | number
     receivedQty?: IntFieldUpdateOperationsInput | number
+    freeQty?: IntFieldUpdateOperationsInput | number
+    freeReceived?: IntFieldUpdateOperationsInput | number
   }
 
   export type PurchaseOrderEmailCreateInput = {
@@ -56581,6 +56738,7 @@ export namespace Prisma {
     name: string
     address?: string | null
     phone?: string | null
+    email?: string | null
     isMain?: boolean
     isActive?: boolean
     createdAt?: Date | string
@@ -56597,6 +56755,7 @@ export namespace Prisma {
     name: string
     address?: string | null
     phone?: string | null
+    email?: string | null
     isMain?: boolean
     isActive?: boolean
     createdAt?: Date | string
@@ -56612,6 +56771,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     address?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
     isMain?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -56628,6 +56788,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     address?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
     isMain?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -56644,6 +56805,7 @@ export namespace Prisma {
     name: string
     address?: string | null
     phone?: string | null
+    email?: string | null
     isMain?: boolean
     isActive?: boolean
     createdAt?: Date | string
@@ -56655,6 +56817,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     address?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
     isMain?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -56667,6 +56830,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     address?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
     isMain?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -56750,6 +56914,8 @@ export namespace Prisma {
     notes?: string | null
     acceptedUnits?: number
     rejectedUnits?: number
+    freeUnits?: number
+    freeValue?: number
     totalCost?: number
     shiftId?: number | null
     receivedById: number
@@ -56772,6 +56938,8 @@ export namespace Prisma {
     notes?: string | null
     acceptedUnits?: number
     rejectedUnits?: number
+    freeUnits?: number
+    freeValue?: number
     totalCost?: number
     shiftId?: number | null
     receivedById: number
@@ -56791,6 +56959,8 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     acceptedUnits?: IntFieldUpdateOperationsInput | number
     rejectedUnits?: IntFieldUpdateOperationsInput | number
+    freeUnits?: IntFieldUpdateOperationsInput | number
+    freeValue?: FloatFieldUpdateOperationsInput | number
     totalCost?: FloatFieldUpdateOperationsInput | number
     shiftId?: NullableIntFieldUpdateOperationsInput | number | null
     receivedById?: IntFieldUpdateOperationsInput | number
@@ -56813,6 +56983,8 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     acceptedUnits?: IntFieldUpdateOperationsInput | number
     rejectedUnits?: IntFieldUpdateOperationsInput | number
+    freeUnits?: IntFieldUpdateOperationsInput | number
+    freeValue?: FloatFieldUpdateOperationsInput | number
     totalCost?: FloatFieldUpdateOperationsInput | number
     shiftId?: NullableIntFieldUpdateOperationsInput | number | null
     receivedById?: IntFieldUpdateOperationsInput | number
@@ -56834,6 +57006,8 @@ export namespace Prisma {
     notes?: string | null
     acceptedUnits?: number
     rejectedUnits?: number
+    freeUnits?: number
+    freeValue?: number
     totalCost?: number
     shiftId?: number | null
     receivedById: number
@@ -56852,6 +57026,8 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     acceptedUnits?: IntFieldUpdateOperationsInput | number
     rejectedUnits?: IntFieldUpdateOperationsInput | number
+    freeUnits?: IntFieldUpdateOperationsInput | number
+    freeValue?: FloatFieldUpdateOperationsInput | number
     totalCost?: FloatFieldUpdateOperationsInput | number
     shiftId?: NullableIntFieldUpdateOperationsInput | number | null
     receivedById?: IntFieldUpdateOperationsInput | number
@@ -56872,6 +57048,8 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     acceptedUnits?: IntFieldUpdateOperationsInput | number
     rejectedUnits?: IntFieldUpdateOperationsInput | number
+    freeUnits?: IntFieldUpdateOperationsInput | number
+    freeValue?: FloatFieldUpdateOperationsInput | number
     totalCost?: FloatFieldUpdateOperationsInput | number
     shiftId?: NullableIntFieldUpdateOperationsInput | number | null
     receivedById?: IntFieldUpdateOperationsInput | number
@@ -56887,6 +57065,7 @@ export namespace Prisma {
     acceptedQty: number
     rejectedQty?: number
     rejectReason?: string | null
+    freeQty?: number
     unitCost: number
     lineTotal: number
     grn: GrnCreateNestedOneWithoutItemsInput
@@ -56903,6 +57082,7 @@ export namespace Prisma {
     acceptedQty: number
     rejectedQty?: number
     rejectReason?: string | null
+    freeQty?: number
     unitCost: number
     lineTotal: number
   }
@@ -56916,6 +57096,7 @@ export namespace Prisma {
     acceptedQty?: IntFieldUpdateOperationsInput | number
     rejectedQty?: IntFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
+    freeQty?: IntFieldUpdateOperationsInput | number
     unitCost?: FloatFieldUpdateOperationsInput | number
     lineTotal?: FloatFieldUpdateOperationsInput | number
     grn?: GrnUpdateOneRequiredWithoutItemsNestedInput
@@ -56932,6 +57113,7 @@ export namespace Prisma {
     acceptedQty?: IntFieldUpdateOperationsInput | number
     rejectedQty?: IntFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
+    freeQty?: IntFieldUpdateOperationsInput | number
     unitCost?: FloatFieldUpdateOperationsInput | number
     lineTotal?: FloatFieldUpdateOperationsInput | number
   }
@@ -56947,6 +57129,7 @@ export namespace Prisma {
     acceptedQty: number
     rejectedQty?: number
     rejectReason?: string | null
+    freeQty?: number
     unitCost: number
     lineTotal: number
   }
@@ -56960,6 +57143,7 @@ export namespace Prisma {
     acceptedQty?: IntFieldUpdateOperationsInput | number
     rejectedQty?: IntFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
+    freeQty?: IntFieldUpdateOperationsInput | number
     unitCost?: FloatFieldUpdateOperationsInput | number
     lineTotal?: FloatFieldUpdateOperationsInput | number
   }
@@ -56975,6 +57159,7 @@ export namespace Prisma {
     acceptedQty?: IntFieldUpdateOperationsInput | number
     rejectedQty?: IntFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
+    freeQty?: IntFieldUpdateOperationsInput | number
     unitCost?: FloatFieldUpdateOperationsInput | number
     lineTotal?: FloatFieldUpdateOperationsInput | number
   }
@@ -59937,6 +60122,8 @@ export namespace Prisma {
     unitCost?: SortOrder
     lineTotal?: SortOrder
     receivedQty?: SortOrder
+    freeQty?: SortOrder
+    freeReceived?: SortOrder
   }
 
   export type PurchaseOrderItemAvgOrderByAggregateInput = {
@@ -59947,6 +60134,8 @@ export namespace Prisma {
     unitCost?: SortOrder
     lineTotal?: SortOrder
     receivedQty?: SortOrder
+    freeQty?: SortOrder
+    freeReceived?: SortOrder
   }
 
   export type PurchaseOrderItemMaxOrderByAggregateInput = {
@@ -59958,6 +60147,8 @@ export namespace Prisma {
     unitCost?: SortOrder
     lineTotal?: SortOrder
     receivedQty?: SortOrder
+    freeQty?: SortOrder
+    freeReceived?: SortOrder
   }
 
   export type PurchaseOrderItemMinOrderByAggregateInput = {
@@ -59969,6 +60160,8 @@ export namespace Prisma {
     unitCost?: SortOrder
     lineTotal?: SortOrder
     receivedQty?: SortOrder
+    freeQty?: SortOrder
+    freeReceived?: SortOrder
   }
 
   export type PurchaseOrderItemSumOrderByAggregateInput = {
@@ -59979,6 +60172,8 @@ export namespace Prisma {
     unitCost?: SortOrder
     lineTotal?: SortOrder
     receivedQty?: SortOrder
+    freeQty?: SortOrder
+    freeReceived?: SortOrder
   }
 
   export type PurchaseOrderEmailCountOrderByAggregateInput = {
@@ -60227,6 +60422,7 @@ export namespace Prisma {
     name?: SortOrder
     address?: SortOrder
     phone?: SortOrder
+    email?: SortOrder
     isMain?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -60243,6 +60439,7 @@ export namespace Prisma {
     name?: SortOrder
     address?: SortOrder
     phone?: SortOrder
+    email?: SortOrder
     isMain?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -60255,6 +60452,7 @@ export namespace Prisma {
     name?: SortOrder
     address?: SortOrder
     phone?: SortOrder
+    email?: SortOrder
     isMain?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -60347,6 +60545,8 @@ export namespace Prisma {
     notes?: SortOrder
     acceptedUnits?: SortOrder
     rejectedUnits?: SortOrder
+    freeUnits?: SortOrder
+    freeValue?: SortOrder
     totalCost?: SortOrder
     shiftId?: SortOrder
     receivedById?: SortOrder
@@ -60361,6 +60561,8 @@ export namespace Prisma {
     invoiceTotal?: SortOrder
     acceptedUnits?: SortOrder
     rejectedUnits?: SortOrder
+    freeUnits?: SortOrder
+    freeValue?: SortOrder
     totalCost?: SortOrder
     shiftId?: SortOrder
     receivedById?: SortOrder
@@ -60380,6 +60582,8 @@ export namespace Prisma {
     notes?: SortOrder
     acceptedUnits?: SortOrder
     rejectedUnits?: SortOrder
+    freeUnits?: SortOrder
+    freeValue?: SortOrder
     totalCost?: SortOrder
     shiftId?: SortOrder
     receivedById?: SortOrder
@@ -60400,6 +60604,8 @@ export namespace Prisma {
     notes?: SortOrder
     acceptedUnits?: SortOrder
     rejectedUnits?: SortOrder
+    freeUnits?: SortOrder
+    freeValue?: SortOrder
     totalCost?: SortOrder
     shiftId?: SortOrder
     receivedById?: SortOrder
@@ -60414,6 +60620,8 @@ export namespace Prisma {
     invoiceTotal?: SortOrder
     acceptedUnits?: SortOrder
     rejectedUnits?: SortOrder
+    freeUnits?: SortOrder
+    freeValue?: SortOrder
     totalCost?: SortOrder
     shiftId?: SortOrder
     receivedById?: SortOrder
@@ -60435,6 +60643,7 @@ export namespace Prisma {
     acceptedQty?: SortOrder
     rejectedQty?: SortOrder
     rejectReason?: SortOrder
+    freeQty?: SortOrder
     unitCost?: SortOrder
     lineTotal?: SortOrder
   }
@@ -60448,6 +60657,7 @@ export namespace Prisma {
     deliveredQty?: SortOrder
     acceptedQty?: SortOrder
     rejectedQty?: SortOrder
+    freeQty?: SortOrder
     unitCost?: SortOrder
     lineTotal?: SortOrder
   }
@@ -60463,6 +60673,7 @@ export namespace Prisma {
     acceptedQty?: SortOrder
     rejectedQty?: SortOrder
     rejectReason?: SortOrder
+    freeQty?: SortOrder
     unitCost?: SortOrder
     lineTotal?: SortOrder
   }
@@ -60478,6 +60689,7 @@ export namespace Prisma {
     acceptedQty?: SortOrder
     rejectedQty?: SortOrder
     rejectReason?: SortOrder
+    freeQty?: SortOrder
     unitCost?: SortOrder
     lineTotal?: SortOrder
   }
@@ -60491,6 +60703,7 @@ export namespace Prisma {
     deliveredQty?: SortOrder
     acceptedQty?: SortOrder
     rejectedQty?: SortOrder
+    freeQty?: SortOrder
     unitCost?: SortOrder
     lineTotal?: SortOrder
   }
@@ -64770,6 +64983,8 @@ export namespace Prisma {
     unitCost: number
     lineTotal: number
     receivedQty?: number
+    freeQty?: number
+    freeReceived?: number
     order: PurchaseOrderCreateNestedOneWithoutItemsInput
   }
 
@@ -64781,6 +64996,8 @@ export namespace Prisma {
     unitCost: number
     lineTotal: number
     receivedQty?: number
+    freeQty?: number
+    freeReceived?: number
   }
 
   export type PurchaseOrderItemCreateOrConnectWithoutProductInput = {
@@ -65123,6 +65340,8 @@ export namespace Prisma {
     unitCost?: FloatFilter<"PurchaseOrderItem"> | number
     lineTotal?: FloatFilter<"PurchaseOrderItem"> | number
     receivedQty?: IntFilter<"PurchaseOrderItem"> | number
+    freeQty?: IntFilter<"PurchaseOrderItem"> | number
+    freeReceived?: IntFilter<"PurchaseOrderItem"> | number
   }
 
   export type PosReturnUpsertWithWhereUniqueWithoutProductInput = {
@@ -69514,6 +69733,8 @@ export namespace Prisma {
     unitCost: number
     lineTotal: number
     receivedQty?: number
+    freeQty?: number
+    freeReceived?: number
     product?: InventoryProductCreateNestedOneWithoutPurchaseOrderItemsInput
   }
 
@@ -69525,6 +69746,8 @@ export namespace Prisma {
     unitCost: number
     lineTotal: number
     receivedQty?: number
+    freeQty?: number
+    freeReceived?: number
   }
 
   export type PurchaseOrderItemCreateOrConnectWithoutOrderInput = {
@@ -70518,6 +70741,8 @@ export namespace Prisma {
     notes?: string | null
     acceptedUnits?: number
     rejectedUnits?: number
+    freeUnits?: number
+    freeValue?: number
     totalCost?: number
     shiftId?: number | null
     receivedById: number
@@ -70538,6 +70763,8 @@ export namespace Prisma {
     notes?: string | null
     acceptedUnits?: number
     rejectedUnits?: number
+    freeUnits?: number
+    freeValue?: number
     totalCost?: number
     shiftId?: number | null
     receivedById: number
@@ -70702,6 +70929,8 @@ export namespace Prisma {
     notes?: StringNullableFilter<"Grn"> | string | null
     acceptedUnits?: IntFilter<"Grn"> | number
     rejectedUnits?: IntFilter<"Grn"> | number
+    freeUnits?: IntFilter<"Grn"> | number
+    freeValue?: FloatFilter<"Grn"> | number
     totalCost?: FloatFilter<"Grn"> | number
     shiftId?: IntNullableFilter<"Grn"> | number | null
     receivedById?: IntFilter<"Grn"> | number
@@ -70768,6 +70997,7 @@ export namespace Prisma {
     name: string
     address?: string | null
     phone?: string | null
+    email?: string | null
     isMain?: boolean
     isActive?: boolean
     createdAt?: Date | string
@@ -70783,6 +71013,7 @@ export namespace Prisma {
     name: string
     address?: string | null
     phone?: string | null
+    email?: string | null
     isMain?: boolean
     isActive?: boolean
     createdAt?: Date | string
@@ -70879,6 +71110,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     address?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
     isMain?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -70894,6 +71126,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     address?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
     isMain?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -70980,6 +71213,7 @@ export namespace Prisma {
     name: string
     address?: string | null
     phone?: string | null
+    email?: string | null
     isMain?: boolean
     isActive?: boolean
     createdAt?: Date | string
@@ -70995,6 +71229,7 @@ export namespace Prisma {
     name: string
     address?: string | null
     phone?: string | null
+    email?: string | null
     isMain?: boolean
     isActive?: boolean
     createdAt?: Date | string
@@ -71018,6 +71253,7 @@ export namespace Prisma {
     acceptedQty: number
     rejectedQty?: number
     rejectReason?: string | null
+    freeQty?: number
     unitCost: number
     lineTotal: number
   }
@@ -71032,6 +71268,7 @@ export namespace Prisma {
     acceptedQty: number
     rejectedQty?: number
     rejectReason?: string | null
+    freeQty?: number
     unitCost: number
     lineTotal: number
   }
@@ -71062,6 +71299,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     address?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
     isMain?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -71077,6 +71315,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     address?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
     isMain?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -71116,6 +71355,7 @@ export namespace Prisma {
     acceptedQty?: IntFilter<"GrnItem"> | number
     rejectedQty?: IntFilter<"GrnItem"> | number
     rejectReason?: StringNullableFilter<"GrnItem"> | string | null
+    freeQty?: IntFilter<"GrnItem"> | number
     unitCost?: FloatFilter<"GrnItem"> | number
     lineTotal?: FloatFilter<"GrnItem"> | number
   }
@@ -71132,6 +71372,8 @@ export namespace Prisma {
     notes?: string | null
     acceptedUnits?: number
     rejectedUnits?: number
+    freeUnits?: number
+    freeValue?: number
     totalCost?: number
     shiftId?: number | null
     receivedById: number
@@ -71153,6 +71395,8 @@ export namespace Prisma {
     notes?: string | null
     acceptedUnits?: number
     rejectedUnits?: number
+    freeUnits?: number
+    freeValue?: number
     totalCost?: number
     shiftId?: number | null
     receivedById: number
@@ -71187,6 +71431,8 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     acceptedUnits?: IntFieldUpdateOperationsInput | number
     rejectedUnits?: IntFieldUpdateOperationsInput | number
+    freeUnits?: IntFieldUpdateOperationsInput | number
+    freeValue?: FloatFieldUpdateOperationsInput | number
     totalCost?: FloatFieldUpdateOperationsInput | number
     shiftId?: NullableIntFieldUpdateOperationsInput | number | null
     receivedById?: IntFieldUpdateOperationsInput | number
@@ -71208,6 +71454,8 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     acceptedUnits?: IntFieldUpdateOperationsInput | number
     rejectedUnits?: IntFieldUpdateOperationsInput | number
+    freeUnits?: IntFieldUpdateOperationsInput | number
+    freeValue?: FloatFieldUpdateOperationsInput | number
     totalCost?: FloatFieldUpdateOperationsInput | number
     shiftId?: NullableIntFieldUpdateOperationsInput | number | null
     receivedById?: IntFieldUpdateOperationsInput | number
@@ -71219,6 +71467,7 @@ export namespace Prisma {
     name: string
     address?: string | null
     phone?: string | null
+    email?: string | null
     isMain?: boolean
     isActive?: boolean
     createdAt?: Date | string
@@ -71234,6 +71483,7 @@ export namespace Prisma {
     name: string
     address?: string | null
     phone?: string | null
+    email?: string | null
     isMain?: boolean
     isActive?: boolean
     createdAt?: Date | string
@@ -71253,6 +71503,7 @@ export namespace Prisma {
     name: string
     address?: string | null
     phone?: string | null
+    email?: string | null
     isMain?: boolean
     isActive?: boolean
     createdAt?: Date | string
@@ -71268,6 +71519,7 @@ export namespace Prisma {
     name: string
     address?: string | null
     phone?: string | null
+    email?: string | null
     isMain?: boolean
     isActive?: boolean
     createdAt?: Date | string
@@ -71329,6 +71581,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     address?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
     isMain?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -71344,6 +71597,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     address?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
     isMain?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -71369,6 +71623,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     address?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
     isMain?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -71384,6 +71639,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     address?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
     isMain?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -72072,6 +72328,8 @@ export namespace Prisma {
     unitCost: number
     lineTotal: number
     receivedQty?: number
+    freeQty?: number
+    freeReceived?: number
   }
 
   export type PosReturnCreateManyProductInput = {
@@ -72186,6 +72444,8 @@ export namespace Prisma {
     unitCost?: FloatFieldUpdateOperationsInput | number
     lineTotal?: FloatFieldUpdateOperationsInput | number
     receivedQty?: IntFieldUpdateOperationsInput | number
+    freeQty?: IntFieldUpdateOperationsInput | number
+    freeReceived?: IntFieldUpdateOperationsInput | number
     order?: PurchaseOrderUpdateOneRequiredWithoutItemsNestedInput
   }
 
@@ -72197,6 +72457,8 @@ export namespace Prisma {
     unitCost?: FloatFieldUpdateOperationsInput | number
     lineTotal?: FloatFieldUpdateOperationsInput | number
     receivedQty?: IntFieldUpdateOperationsInput | number
+    freeQty?: IntFieldUpdateOperationsInput | number
+    freeReceived?: IntFieldUpdateOperationsInput | number
   }
 
   export type PurchaseOrderItemUncheckedUpdateManyWithoutProductInput = {
@@ -72207,6 +72469,8 @@ export namespace Prisma {
     unitCost?: FloatFieldUpdateOperationsInput | number
     lineTotal?: FloatFieldUpdateOperationsInput | number
     receivedQty?: IntFieldUpdateOperationsInput | number
+    freeQty?: IntFieldUpdateOperationsInput | number
+    freeReceived?: IntFieldUpdateOperationsInput | number
   }
 
   export type PosReturnUpdateWithoutProductInput = {
@@ -73991,6 +74255,8 @@ export namespace Prisma {
     unitCost: number
     lineTotal: number
     receivedQty?: number
+    freeQty?: number
+    freeReceived?: number
   }
 
   export type PurchaseOrderEmailCreateManyOrderInput = {
@@ -74012,6 +74278,8 @@ export namespace Prisma {
     unitCost?: FloatFieldUpdateOperationsInput | number
     lineTotal?: FloatFieldUpdateOperationsInput | number
     receivedQty?: IntFieldUpdateOperationsInput | number
+    freeQty?: IntFieldUpdateOperationsInput | number
+    freeReceived?: IntFieldUpdateOperationsInput | number
     product?: InventoryProductUpdateOneWithoutPurchaseOrderItemsNestedInput
   }
 
@@ -74023,6 +74291,8 @@ export namespace Prisma {
     unitCost?: FloatFieldUpdateOperationsInput | number
     lineTotal?: FloatFieldUpdateOperationsInput | number
     receivedQty?: IntFieldUpdateOperationsInput | number
+    freeQty?: IntFieldUpdateOperationsInput | number
+    freeReceived?: IntFieldUpdateOperationsInput | number
   }
 
   export type PurchaseOrderItemUncheckedUpdateManyWithoutOrderInput = {
@@ -74033,6 +74303,8 @@ export namespace Prisma {
     unitCost?: FloatFieldUpdateOperationsInput | number
     lineTotal?: FloatFieldUpdateOperationsInput | number
     receivedQty?: IntFieldUpdateOperationsInput | number
+    freeQty?: IntFieldUpdateOperationsInput | number
+    freeReceived?: IntFieldUpdateOperationsInput | number
   }
 
   export type PurchaseOrderEmailUpdateWithoutOrderInput = {
@@ -74095,6 +74367,8 @@ export namespace Prisma {
     notes?: string | null
     acceptedUnits?: number
     rejectedUnits?: number
+    freeUnits?: number
+    freeValue?: number
     totalCost?: number
     shiftId?: number | null
     receivedById: number
@@ -74177,6 +74451,8 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     acceptedUnits?: IntFieldUpdateOperationsInput | number
     rejectedUnits?: IntFieldUpdateOperationsInput | number
+    freeUnits?: IntFieldUpdateOperationsInput | number
+    freeValue?: FloatFieldUpdateOperationsInput | number
     totalCost?: FloatFieldUpdateOperationsInput | number
     shiftId?: NullableIntFieldUpdateOperationsInput | number | null
     receivedById?: IntFieldUpdateOperationsInput | number
@@ -74197,6 +74473,8 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     acceptedUnits?: IntFieldUpdateOperationsInput | number
     rejectedUnits?: IntFieldUpdateOperationsInput | number
+    freeUnits?: IntFieldUpdateOperationsInput | number
+    freeValue?: FloatFieldUpdateOperationsInput | number
     totalCost?: FloatFieldUpdateOperationsInput | number
     shiftId?: NullableIntFieldUpdateOperationsInput | number | null
     receivedById?: IntFieldUpdateOperationsInput | number
@@ -74217,6 +74495,8 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     acceptedUnits?: IntFieldUpdateOperationsInput | number
     rejectedUnits?: IntFieldUpdateOperationsInput | number
+    freeUnits?: IntFieldUpdateOperationsInput | number
+    freeValue?: FloatFieldUpdateOperationsInput | number
     totalCost?: FloatFieldUpdateOperationsInput | number
     shiftId?: NullableIntFieldUpdateOperationsInput | number | null
     receivedById?: IntFieldUpdateOperationsInput | number
@@ -74349,6 +74629,7 @@ export namespace Prisma {
     acceptedQty: number
     rejectedQty?: number
     rejectReason?: string | null
+    freeQty?: number
     unitCost: number
     lineTotal: number
   }
@@ -74362,6 +74643,7 @@ export namespace Prisma {
     acceptedQty?: IntFieldUpdateOperationsInput | number
     rejectedQty?: IntFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
+    freeQty?: IntFieldUpdateOperationsInput | number
     unitCost?: FloatFieldUpdateOperationsInput | number
     lineTotal?: FloatFieldUpdateOperationsInput | number
   }
@@ -74376,6 +74658,7 @@ export namespace Prisma {
     acceptedQty?: IntFieldUpdateOperationsInput | number
     rejectedQty?: IntFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
+    freeQty?: IntFieldUpdateOperationsInput | number
     unitCost?: FloatFieldUpdateOperationsInput | number
     lineTotal?: FloatFieldUpdateOperationsInput | number
   }
@@ -74390,6 +74673,7 @@ export namespace Prisma {
     acceptedQty?: IntFieldUpdateOperationsInput | number
     rejectedQty?: IntFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
+    freeQty?: IntFieldUpdateOperationsInput | number
     unitCost?: FloatFieldUpdateOperationsInput | number
     lineTotal?: FloatFieldUpdateOperationsInput | number
   }

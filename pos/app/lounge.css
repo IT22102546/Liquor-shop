@@ -1396,7 +1396,7 @@ html:not([data-theme="dark"]) .sidebar .nav-section-divider { background: #efe4c
 .po-close { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; color: var(--text-soft); border: 1px solid var(--panel-border); background: var(--panel-2); }
 .po-close:hover { color: var(--text); }
 .po-lines { display: grid; gap: 0.4rem; }
-.po-line { display: grid; grid-template-columns: minmax(0, 1fr) 5.5rem 8rem 8rem 2.2rem; gap: 0.5rem; align-items: start; }
+.po-line { display: grid; grid-template-columns: minmax(0, 1fr) 6.5rem 8rem 8rem 2.2rem; gap: 0.5rem; align-items: start; }
 .po-line.head { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-xsoft); align-items: end; }
 .po-line-product { display: grid; gap: 0.35rem; min-width: 0; }
 .po-line-product select { width: 100%; }
@@ -1613,7 +1613,7 @@ html:not([data-theme="dark"]) .sidebar .nav-section-divider { background: #efe4c
 .gd-status.CANCELLED { color: var(--text-soft); background: var(--panel-2); border: 1px solid var(--panel-border); }
 .gd-lines { display: grid; gap: 0.4rem; }
 .gd-line { display: grid; gap: 0.5rem; align-items: center; padding: 0.55rem 0.7rem; border-radius: 12px; background: var(--panel-2); border: 1px solid var(--panel-border); }
-.gd-line.grn { grid-template-columns: minmax(0, 1fr) 5.5rem 5.5rem 5.5rem minmax(0, 0.8fr) 7.5rem 2.2rem; }
+.gd-line.grn { grid-template-columns: minmax(0, 1fr) 5.5rem 5.5rem 5.5rem 7rem minmax(0, 0.8fr) 7.5rem 2.2rem; }
 .gd-line.gtn { grid-template-columns: minmax(0, 1fr) 7rem 6rem 2.2rem; }
 .gd-line.rcv { grid-template-columns: minmax(0, 1fr) 5rem 6rem 6rem 5rem; }
 .gd-line.head { background: transparent; border-color: transparent; padding-top: 0; padding-bottom: 0; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-xsoft); }
@@ -1651,7 +1651,7 @@ html:not([data-theme="dark"]) .sidebar .nav-section-divider { background: #efe4c
   .gd-line.head { display: none; }
 }
 /* Rejected bottles on a purchase-order delivery (spans the whole line). */
-.po-reject { grid-column: 1 / -1; display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: 0.5rem; align-items: end; padding-left: 1rem; }
+.po-reject { grid-column: 1 / -1; display: grid; grid-template-columns: 11rem 9rem minmax(0, 1fr); gap: 0.5rem; align-items: end; padding-left: 1rem; }
 .po-reject label { display: grid; gap: 0.2rem; font-size: 0.7rem; font-weight: 700; color: var(--text-soft); }
 /* Product form: hard liquor or not (drives the bill limit) */
 .pf-hard { grid-column: 1 / -1; }
@@ -1664,3 +1664,10 @@ html:not([data-theme="dark"]) .sidebar .nav-section-divider { background: #efe4c
 .hl-badge { display: inline-block; margin-left: 0.35rem; padding: 0.05rem 0.4rem; border-radius: 6px; font-size: 0.64rem; font-weight: 800; letter-spacing: 0.04em; background: var(--soft-gold); color: var(--soft-gold-text); border: 1px solid var(--soft-gold-border); vertical-align: middle; }
 /* "Showing <supplier>'s products" line on purchase order / GRN forms */
 .po-supplier-note { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; font-size: 0.78rem; color: var(--text-soft); padding: 0.1rem 0.2rem; }
+/* Ordering branch on the purchase order list */
+.po-branch { display: inline-block; padding: 0.14rem 0.55rem; border-radius: 999px; font-size: 0.74rem; font-weight: 700; white-space: nowrap; color: var(--soft-gold-text); background: var(--soft-gold); border: 1px solid var(--soft-gold-border); }
+
+/* Free issue (bonus bottles) on GRN / purchase order lines */
+.gd-free { border-color: color-mix(in srgb, var(--success) 45%, var(--panel-border)) !important; }
+.gd-free-note { display: block; font-size: 0.68rem; font-weight: 700; color: var(--success); white-space: nowrap; }
+.po-qty-free { display: grid; gap: 0.3rem; }

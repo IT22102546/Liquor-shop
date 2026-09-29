@@ -11,6 +11,7 @@ const branchSchema = z.object({
   name: z.string().trim().min(2, "Name the branch").max(80),
   address: z.string().trim().max(300).nullable().optional(),
   phone: z.string().trim().max(30).nullable().optional(),
+  email: z.union([z.string().trim().email("Enter a valid email address").max(120), z.literal(""), z.null()]).optional(),
 });
 
 const router = Router();

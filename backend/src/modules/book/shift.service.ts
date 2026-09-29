@@ -377,7 +377,7 @@ export async function summarizeShift(shiftId: number) {
 
   // ── Goods received (GRN) and branch transfers (GTN) during the shift ──
   const [grnRows, gtnOut, gtnIn] = await Promise.all([
-    prisma.grn.findMany({ where: { shiftId }, orderBy: { createdAt: "asc" }, include: { items: { select: { description: true, acceptedQty: true, rejectedQty: true, rejectReason: true } } } }),
+    prisma.grn.findMany({ where: { shiftId }, orderBy: { createdAt: "asc" }, include: { items: { select: { description: true, acceptedQty: true, rejectedQty: true, rejectReason: true, freeQty: true } } } }),
     prisma.gtn.findMany({ where: { sentShiftId: shiftId }, orderBy: { sentAt: "asc" }, include: { toBranch: { select: { name: true } }, items: { select: { productName: true, sentQty: true } } } }),
     prisma.gtn.findMany({ where: { receivedShiftId: shiftId }, orderBy: { receivedAt: "asc" }, include: { fromBranch: { select: { name: true } }, items: { select: { productName: true, sentQty: true, receivedQty: true, damagedQty: true, missingQty: true } } } }),
   ]);
@@ -386,7 +386,8 @@ export async function summarizeShift(shiftId: number) {
     grns: grnRows.map((row) => ({
       grnNo: row.grnNo, time: row.createdAt, supplier: row.supplierName, poNumber: row.poNumber, invoiceNo: row.supplierInvoiceNo,
       invoiceTotal: row.invoiceTotal, totalCost: row.totalCost, accepted: row.acceptedUnits, rejected: row.rejectedUnits,
-      items: row.items.map((item) => `${item.acceptedQty} × ${item.description}${item.rejectedQty ? ` (${item.rejectedQty} rejected: ${item.rejectReason ?? ""})` : ""}`).join(", "),
+      free: row.freeUnits, freeValue: row.freeValue,
+      items: row.items.map((item) => `${item.acceptedQty}${item.freeQty ? ` + ${item.freeQty} free` : ""} × ${item.description}${item.rejectedQty ? ` (${item.rejectedQty} rejected: ${item.rejectReason ?? ""})` : ""}`).join(", "),
       by: goodsStaff.get(row.receivedById)?.name ?? "—",
     })),
     sent: gtnOut.map((row) => ({

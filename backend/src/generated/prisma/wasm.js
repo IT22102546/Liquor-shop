@@ -569,7 +569,9 @@ exports.Prisma.PurchaseOrderItemScalarFieldEnum = {
   quantity: 'quantity',
   unitCost: 'unitCost',
   lineTotal: 'lineTotal',
-  receivedQty: 'receivedQty'
+  receivedQty: 'receivedQty',
+  freeQty: 'freeQty',
+  freeReceived: 'freeReceived'
 };
 
 exports.Prisma.PurchaseOrderEmailScalarFieldEnum = {
@@ -632,6 +634,7 @@ exports.Prisma.BranchScalarFieldEnum = {
   name: 'name',
   address: 'address',
   phone: 'phone',
+  email: 'email',
   isMain: 'isMain',
   isActive: 'isActive',
   createdAt: 'createdAt',
@@ -662,6 +665,8 @@ exports.Prisma.GrnScalarFieldEnum = {
   notes: 'notes',
   acceptedUnits: 'acceptedUnits',
   rejectedUnits: 'rejectedUnits',
+  freeUnits: 'freeUnits',
+  freeValue: 'freeValue',
   totalCost: 'totalCost',
   shiftId: 'shiftId',
   receivedById: 'receivedById',
@@ -679,6 +684,7 @@ exports.Prisma.GrnItemScalarFieldEnum = {
   acceptedQty: 'acceptedQty',
   rejectedQty: 'rejectedQty',
   rejectReason: 'rejectReason',
+  freeQty: 'freeQty',
   unitCost: 'unitCost',
   lineTotal: 'lineTotal'
 };

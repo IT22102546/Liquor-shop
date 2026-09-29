@@ -10,20 +10,20 @@ import { IconBoxInNav, IconCheck, IconClose, IconPlus, IconPrinter } from "../..
 
 type Row = {
   id: number; grnNo: string; createdAt: string; branch: string; supplierName: string; poNumber: string | null; supplierInvoiceNo: string | null;
-  invoiceTotal: number | null; totalCost: number; acceptedUnits: number; rejectedUnits: number; lines: number; receivedBy: string;
+  invoiceTotal: number | null; totalCost: number; acceptedUnits: number; rejectedUnits: number; freeUnits?: number; lines: number; receivedBy: string;
 };
 type Setup = {
   suppliers: Array<{ id: number; name: string; code: string }>;
-  orders: Array<{ id: number; poNumber: string; supplierId: number; status: string; orderDate: string; expectedDate: string | null; items: Array<{ id: number; productId: number | null; description: string; ordered: number; received: number; remaining: number; unitCost: number }> }>;
+  orders: Array<{ id: number; poNumber: string; supplierId: number; status: string; orderDate: string; expectedDate: string | null; items: Array<{ id: number; productId: number | null; description: string; ordered: number; received: number; remaining: number; unitCost: number; freeQty?: number; freeDue?: number }> }>;
 };
 type Product = { id: number; name: string; compatibleWith: string | null; partNumber: string | null; purchasePrice: number | null; brand: { name: string }; supplierId?: number | null; supplier?: { id: number } | null };
-type Line = { key: number; productId: string; purchaseOrderItemId: number | null; description: string; due: number | null; delivered: string; rejected: string; rejectReason: string; unitCost: string };
+type Line = { key: number; productId: string; purchaseOrderItemId: number | null; description: string; due: number | null; freeDue: number | null; delivered: string; rejected: string; rejectReason: string; free: string; unitCost: string };
 type Api = <T>(path: string, init?: RequestInit) => Promise<T>;
 
 const money = (value: number | null | undefined) => (value == null ? "—" : `Rs. ${value.toLocaleString("en-LK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
 const when = (value: string) => new Date(value).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 let lineKey = 1;
-const blankLine = (): Line => ({ key: lineKey++, productId: "", purchaseOrderItemId: null, description: "", due: null, delivered: "", rejected: "", rejectReason: "", unitCost: "" });
+const blankLine = (): Line => ({ key: lineKey++, productId: "", purchaseOrderItemId: null, description: "", due: null, freeDue: null, delivered: "", rejected: "", rejectReason: "", free: "", unitCost: "" });
 
 export default function GrnPage() {
   const { token, admin, logout } = useAdmin();
@@ -108,7 +108,7 @@ export default function GrnPage() {
                   <td>{row.supplierName}</td>
                   <td className="td-muted">{row.poNumber ?? "—"}</td>
                   <td className="td-muted">{row.supplierInvoiceNo ?? "—"}{row.invoiceTotal != null && Math.abs(row.invoiceTotal - row.totalCost) >= 0.005 && <div className="lx-warn-text">Invoice {money(row.invoiceTotal)}</div>}</td>
-                  <td style={{ textAlign: "right" }}>{row.acceptedUnits}</td>
+                  <td style={{ textAlign: "right" }}>{row.acceptedUnits}{row.freeUnits ? <div className="lx-amount-in">+{row.freeUnits} free</div> : null}</td>
                   <td style={{ textAlign: "right" }} className={row.rejectedUnits ? "lx-amount-out" : ""}>{row.rejectedUnits || "—"}</td>
                   <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>{money(row.totalCost)}</td>
                   <td>{row.receivedBy}</td>
@@ -169,7 +169,7 @@ function NewGrnModal({ api, branchName, onClose, onSaved }: { api: Api; branchNa
     setOrderId(id);
     const order = setup?.orders.find((item) => String(item.id) === id);
     setLines(order
-      ? order.items.map((item) => ({ ...blankLine(), productId: item.productId ? String(item.productId) : "", purchaseOrderItemId: item.id, description: item.description, due: item.remaining, delivered: String(item.remaining), unitCost: String(item.unitCost) }))
+      ? order.items.map((item) => ({ ...blankLine(), productId: item.productId ? String(item.productId) : "", purchaseOrderItemId: item.id, description: item.description, due: item.remaining, delivered: String(item.remaining), freeDue: item.freeDue ?? 0, free: item.freeDue ? String(item.freeDue) : "", unitCost: String(item.unitCost) }))
       : [blankLine()]);
   };
   const setLine = (key: number, change: Partial<Line>) => setLines((current) => current.map((line) => (line.key === key ? { ...line, ...change } : line)));
@@ -181,8 +181,14 @@ function NewGrnModal({ api, branchName, onClose, onSaved }: { api: Api; branchNa
   const counted = lines.map((line) => {
     const delivered = Math.max(0, Math.floor(Number(line.delivered) || 0));
     const rejected = Math.min(delivered, Math.max(0, Math.floor(Number(line.rejected) || 0)));
-    return { ...line, deliveredN: delivered, rejectedN: rejected, accepted: delivered - rejected, amount: Math.round((delivered - rejected) * (Number(line.unitCost) || 0) * 100) / 100 };
+    const free = Math.max(0, Math.floor(Number(line.free) || 0));
+    const amount = Math.round((delivered - rejected) * (Number(line.unitCost) || 0) * 100) / 100;
+    // With a free issue, what's paid is spread over every bottle received.
+    const costEach = delivered - rejected + free > 0 ? Math.round((amount / (delivered - rejected + free)) * 100) / 100 : 0;
+    return { ...line, deliveredN: delivered, rejectedN: rejected, freeN: free, accepted: delivered - rejected, amount, costEach };
   });
+  const freeTotal = counted.reduce((sum, line) => sum + line.freeN, 0);
+  const freeValue = Math.round(counted.reduce((sum, line) => sum + line.freeN * (Number(line.unitCost) || 0), 0) * 100) / 100;
   const acceptedTotal = counted.reduce((sum, line) => sum + line.amount, 0);
   const invoiceNumber = invoiceTotal ? Number(invoiceTotal) : null;
   const invoiceDiff = invoiceNumber != null ? Math.round((invoiceNumber - acceptedTotal) * 100) / 100 : null;
@@ -200,12 +206,13 @@ function NewGrnModal({ api, branchName, onClose, onSaved }: { api: Api; branchNa
           invoiceDate: invoiceDate || null,
           invoiceTotal: invoiceNumber,
           notes: notes || null,
-          lines: counted.filter((line) => line.deliveredN > 0).map((line) => ({
+          lines: counted.filter((line) => line.deliveredN > 0 || line.freeN > 0).map((line) => ({
             productId: line.productId ? Number(line.productId) : null,
             purchaseOrderItemId: line.purchaseOrderItemId,
             description: line.description || undefined,
             delivered: line.deliveredN,
             rejected: line.rejectedN,
+            free: line.freeN,
             rejectReason: line.rejectReason || null,
             unitCost: Number(line.unitCost) || 0,
           })),
@@ -242,11 +249,11 @@ function NewGrnModal({ api, branchName, onClose, onSaved }: { api: Api; branchNa
         </div>
 
         <div className="gd-lines">
-          <div className="gd-line grn head"><span>Item</span><span className="num">Delivered</span><span className="num">Rejected</span><span className="num">Accepted</span><span>Why rejected</span><span className="num">Unit cost (Rs.)</span><span /></div>
+          <div className="gd-line grn head"><span>Item</span><span className="num">Delivered</span><span className="num">Rejected</span><span className="num">Free</span><span className="num">Into stock</span><span>Why rejected</span><span className="num">Unit cost (Rs.)</span><span /></div>
           {counted.map((line) => (
             <div key={line.key} className="gd-line grn">
               <div>
-                {line.purchaseOrderItemId ? <><strong>{line.description}</strong><small>{line.due} still due on the order</small></> : (
+                {line.purchaseOrderItemId ? <><strong>{line.description}</strong><small>{line.due} still due on the order{line.freeDue ? ` + ${line.freeDue} free` : ""}</small></> : (
                   <select className="bm-input" value={line.productId} onChange={(event) => pickProduct(line.key, event.target.value)} aria-label="Product" disabled={!supplierId}>
                     <option value="">{supplierId ? "Choose a product…" : "Choose the supplier first"}</option>
                     {listed.map((product) => <option key={product.id} value={product.id}>{[product.name, product.compatibleWith].filter(Boolean).join(" · ")} — {product.brand.name}</option>)}
@@ -259,7 +266,8 @@ function NewGrnModal({ api, branchName, onClose, onSaved }: { api: Api; branchNa
               </div>
               <input className="bm-input" type="number" min={0} value={line.delivered} onChange={(event) => setLine(line.key, { delivered: event.target.value })} aria-label="Delivered" />
               <input className="bm-input" type="number" min={0} value={line.rejected} placeholder="0" onChange={(event) => setLine(line.key, { rejected: event.target.value })} aria-label="Rejected" />
-              <span className="num"><strong>{line.accepted}</strong></span>
+              <input className="bm-input gd-free" type="number" min={0} value={line.free} placeholder="0" onChange={(event) => setLine(line.key, { free: event.target.value })} aria-label="Free issue" title="Bottles given free (e.g. buy 10 get 2 free → 2)" />
+              <span className="num"><strong>{line.accepted + line.freeN}</strong>{line.freeN > 0 && <small className="gd-free-note">{line.accepted} + {line.freeN} free · {money(line.costEach)} each</small>}{line.freeDue != null && line.freeDue > 0 && line.freeN < line.freeDue && <small className="lx-warn-text">{line.freeDue - line.freeN} free short</small>}</span>
               <input className="bm-input" value={line.rejectReason} disabled={!line.rejectedN} placeholder={line.rejectedN ? "Broken, leaking, short-dated…" : ""} onChange={(event) => setLine(line.key, { rejectReason: event.target.value })} aria-label="Why rejected" />
               <input className="bm-input" type="number" min={0} step="0.01" value={line.unitCost} onChange={(event) => setLine(line.key, { unitCost: event.target.value })} aria-label="Unit cost" />
               <button type="button" className="po-line-remove" onClick={() => setLines((current) => current.length > 1 ? current.filter((item) => item.key !== line.key) : current)} aria-label="Remove line"><IconClose /></button>
@@ -274,7 +282,7 @@ function NewGrnModal({ api, branchName, onClose, onSaved }: { api: Api; branchNa
           <div><button type="button" className="btn-outline" onClick={() => setLines((current) => [...current, blankLine()])}><IconPlus /> Add item</button></div>
         </div>
         <div className="gd-foot">
-          <span className="lx-card-sub">{counted.reduce((sum, line) => sum + line.accepted, 0)} unit(s) go into {branchName}&apos;s stock{counted.some((line) => line.rejectedN) ? ` · ${counted.reduce((sum, line) => sum + line.rejectedN, 0)} rejected` : ""}</span>
+          <span className="lx-card-sub">{counted.reduce((sum, line) => sum + line.accepted + line.freeN, 0)} unit(s) go into {branchName}&apos;s stock{freeTotal ? ` (incl. ${freeTotal} free, worth ${money(freeValue)})` : ""}{counted.some((line) => line.rejectedN) ? ` · ${counted.reduce((sum, line) => sum + line.rejectedN, 0)} rejected` : ""}</span>
           <span>Accepted value <b>{money(acceptedTotal)}</b></span>
         </div>
         {invoiceDiff != null && (Math.abs(invoiceDiff) < 0.005

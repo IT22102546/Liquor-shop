@@ -159,6 +159,9 @@ export async function getPeriodReport(fromText: string, toText: string, branchId
   const discounts = round2(sales.reduce((sum, sale) => sum + sale.discountAmount, 0));
   const pointsValue = round2(sales.reduce((sum, sale) => sum + sale.pointsValue, 0));
 
+  // ── Free issues from suppliers (bonus bottles on GRNs) ──
+  const freeIssues = await prisma.grn.aggregate({ where: { createdAt: { gte: from, lte: to }, freeUnits: { gt: 0 }, ...inBranch }, _sum: { freeUnits: true, freeValue: true }, _count: true });
+
   // ── Returns & damages in the period ──
   const returnRows = await prisma.posReturn.findMany({ where: { createdAt: { gte: from, lte: to }, ...inBranch } });
   const costOf = (row: { unitCost: number | null; quantity: number }) => (row.unitCost ?? 0) * row.quantity;
@@ -326,7 +329,12 @@ export async function getPeriodReport(fromText: string, toText: string, branchId
       withDifference: shiftRows.filter((row) => Math.abs(row.cashDifference) > 0.004).length,
       rows: shiftRows,
     },
-    stock: { rows: stockRows, stockValueNow },
+    stock: {
+      rows: stockRows,
+      stockValueNow,
+      /** Bonus bottles suppliers gave free, and what they'd have cost — money saved by the deals. */
+      freeIssues: { grns: freeIssues._count, units: freeIssues._sum.freeUnits ?? 0, value: round2(freeIssues._sum.freeValue ?? 0) },
+    },
     returns,
     discounts: discountSummary(sales),
     loyalty: {

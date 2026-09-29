@@ -30,11 +30,11 @@ export async function listBranches(includeInactive = false) {
   });
 }
 
-export type BranchInput = { code: string; name: string; address?: string | null; phone?: string | null };
+export type BranchInput = { code: string; name: string; address?: string | null; phone?: string | null; email?: string | null };
 
 export async function createBranch(dto: BranchInput) {
   try {
-    return await prisma.branch.create({ data: { code: dto.code.trim().toUpperCase(), name: dto.name.trim(), address: dto.address?.trim() || null, phone: dto.phone?.trim() || null } });
+    return await prisma.branch.create({ data: { code: dto.code.trim().toUpperCase(), name: dto.name.trim(), address: dto.address?.trim() || null, phone: dto.phone?.trim() || null, email: dto.email?.trim().toLowerCase() || null } });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") throw AppError.conflict(`Branch code ${dto.code.toUpperCase()} is already used`);
     throw error;
@@ -65,6 +65,7 @@ export async function updateBranch(id: number, dto: Partial<BranchInput> & { isA
         ...(dto.name !== undefined ? { name: dto.name.trim() } : {}),
         ...(dto.address !== undefined ? { address: dto.address?.trim() || null } : {}),
         ...(dto.phone !== undefined ? { phone: dto.phone?.trim() || null } : {}),
+        ...(dto.email !== undefined ? { email: dto.email?.trim().toLowerCase() || null } : {}),
         ...(dto.isActive !== undefined ? { isActive: dto.isActive } : {}),
       },
     });

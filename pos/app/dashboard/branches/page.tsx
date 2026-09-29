@@ -7,10 +7,10 @@ import { switchBranch, useBranch } from "../../lib/useBranch";
 import { IconBranch, IconCheck, IconClose, IconPlus } from "../../lib/icons";
 
 type BranchRow = {
-  id: number; code: string; name: string; address: string | null; phone: string | null; isMain: boolean; isActive: boolean;
+  id: number; code: string; name: string; address: string | null; phone: string | null; email: string | null; isMain: boolean; isActive: boolean;
   units: number; damaged: number; stockValue: number; staff: number; openShift: string | null; transfersToReceive: number;
 };
-type Form = { code: string; name: string; address: string; phone: string };
+type Form = { code: string; name: string; address: string; phone: string; email: string };
 
 const money = (value: number) => `Rs. ${value.toLocaleString("en-LK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -21,7 +21,7 @@ export default function BranchesPage() {
   const [branches, setBranches] = useState<BranchRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<BranchRow | "new" | null>(null);
-  const [form, setForm] = useState<Form>({ code: "", name: "", address: "", phone: "" });
+  const [form, setForm] = useState<Form>({ code: "", name: "", address: "", phone: "", email: "" });
   const [formError, setFormError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -42,12 +42,12 @@ export default function BranchesPage() {
   const openForm = (row: BranchRow | "new") => {
     setEditing(row);
     setFormError(null);
-    setForm(row === "new" ? { code: "", name: "", address: "", phone: "" } : { code: row.code, name: row.name, address: row.address ?? "", phone: row.phone ?? "" });
+    setForm(row === "new" ? { code: "", name: "", address: "", phone: "", email: "" } : { code: row.code, name: row.name, address: row.address ?? "", phone: row.phone ?? "", email: row.email ?? "" });
   };
   const save = async () => {
     setBusy(true); setFormError(null);
     try {
-      const body = JSON.stringify({ code: form.code, name: form.name, address: form.address || null, phone: form.phone || null });
+      const body = JSON.stringify({ code: form.code, name: form.name, address: form.address || null, phone: form.phone || null, email: form.email.trim() || null });
       if (editing === "new") await api("/branches", { method: "POST", body });
       else if (editing) await api(`/branches/${editing.id}`, { method: "PATCH", body });
       flash(editing === "new" ? `${form.name} added` : `${form.name} saved`);
@@ -79,7 +79,7 @@ export default function BranchesPage() {
         {branches?.map((row) => (
           <section key={row.id} className={`br-card${row.id === current?.id ? " current" : ""}${row.isActive ? "" : " closed"}`}>
             <h3>{row.name} <span className="code">{row.code}</span></h3>
-            <p>{row.address || "No address"}{row.phone ? ` · ${row.phone}` : ""}</p>
+            <p>{row.address || "No address"}{row.phone ? ` · ${row.phone}` : ""}{row.email ? ` · ${row.email}` : ""}</p>
             <div className="br-tags">
               {row.isMain && <span>Main branch</span>}
               {row.id === current?.id && <span className="live">You are working here</span>}
@@ -116,6 +116,7 @@ export default function BranchesPage() {
               <label>Short code *<input className="bm-input" value={form.code} onChange={(event) => setForm({ ...form, code: event.target.value.toUpperCase() })} placeholder="e.g. KDY" maxLength={10} required /><small>Printed on transfer notes</small></label>
               <label className="wide">Address<input className="bm-input" value={form.address} onChange={(event) => setForm({ ...form, address: event.target.value })} /></label>
               <label>Phone<input className="bm-input" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} inputMode="tel" /></label>
+              <label>Branch email<input className="bm-input" type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} placeholder="e.g. kandy@yourshop.lk" /><small>Printed on this branch&apos;s purchase orders. Supplier replies come here.</small></label>
             </div>
             {editing === "new" && <p className="po-note">A new branch starts with no stock. Send it stock from another branch with a GTN, or receive supplier deliveries there with a GRN. Assign its cashiers under Staff &amp; Roles.</p>}
             {formError && <div className="bm-alert bm-alert-error">{formError}</div>}

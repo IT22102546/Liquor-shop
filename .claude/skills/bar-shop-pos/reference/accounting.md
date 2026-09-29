@@ -95,6 +95,17 @@ netProfit     = grossProfit − running expenses − damageLoss + other income (
   - Missing bottles are only recorded, with a note, and are lost.
 - **When it's cancelled**, the stock goes back to the sender (TRANSFER_IN with a "cancelled" reference).
 
+## Free issues (bonus bottles, e.g. buy 10 get 2 free)
+
+- **Purchase order:** a line has `freeQty`, the free bottles agreed with the supplier. The order total counts only the paid quantity.
+- **GRN line:** `freeQty` sits next to delivered and rejected.
+  - Restock quantity = accepted + free, and the batch cost = accepted × unit cost.
+  - So the price paid is spread over every bottle received: cost per bottle = paid ÷ (paid + free). The weighted-average cost goes down.
+  - A GRN of free bottles only (paid 0) lowers the average cost of stock already on hand.
+- **What's owed and the invoice check:** `lineTotal` and `totalCost` count only the paid bottles.
+- **Recorded free issue:** `Grn.freeUnits` and `freeValue` (free × unit cost), shown in reports as "worth".
+- **The order's status** follows the paid quantity. The free issue is tracked separately as `freeReceived` / `freeDue`, and a short free issue is flagged, not blocked.
+
 ## Goods received (GRN)
 
 - Accepted = delivered − rejected. Only accepted bottles are restocked at the GRN's branch, with the cost blended as a weighted average over the company stock.

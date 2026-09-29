@@ -230,9 +230,10 @@ export function describePosChange(method: string, path: string, body: Body, resp
     const no = str(data.grnNo);
     if (!no) return { action: "grn.create", category: "GOODS", entityType: "GRN", summary: "Tried to record goods received" };
     const rejected = Number(data.rejectedUnits ?? 0);
+    const free = Number(data.freeUnits ?? 0);
     return {
       action: "grn.create", category: "GOODS", entityType: "GRN", entityId: no,
-      summary: `Received goods ${no} from ${str(data.supplierName)} at ${str(obj(data.branch).name)}: ${str(data.acceptedUnits)} unit(s) · ${money(data.totalCost)}${data.poNumber ? ` · ${str(data.poNumber)}` : ""}${data.supplierInvoiceNo ? ` · invoice ${str(data.supplierInvoiceNo)}` : ""}${rejected ? ` · ${rejected} rejected` : ""}`,
+      summary: `Received goods ${no} from ${str(data.supplierName)} at ${str(obj(data.branch).name)}: ${str(data.acceptedUnits)} unit(s) · ${money(data.totalCost)}${data.poNumber ? ` · ${str(data.poNumber)}` : ""}${data.supplierInvoiceNo ? ` · invoice ${str(data.supplierInvoiceNo)}` : ""}${rejected ? ` · ${rejected} rejected` : ""}${free ? ` · ${free} FREE issue (worth ${money(data.freeValue)})` : ""}`,
       details: {
         facts: [
           fact("Supplier", data.supplierName), fact("Branch", obj(data.branch).name),
@@ -240,7 +241,8 @@ export function describePosChange(method: string, path: string, body: Body, resp
           ...(data.supplierInvoiceNo ? [fact("Supplier invoice", data.supplierInvoiceNo)] : []),
           ...(data.invoiceTotal != null ? [fact("Invoice total", money(data.invoiceTotal))] : []),
           fact("Accepted value", money(data.totalCost)),
-          ...items.map((item) => fact(str(item.description), `${str(item.acceptedQty)} accepted${Number(item.rejectedQty) ? ` · ${str(item.rejectedQty)} rejected (${str(item.rejectReason)})` : ""} × ${money(item.unitCost)}`)),
+          ...(free ? [fact("Free issue", `${free} bottle(s), worth ${money(data.freeValue)} at cost — spread over the cost price`)] : []),
+          ...items.map((item) => fact(str(item.description), `${str(item.acceptedQty)} accepted${Number(item.freeQty) ? ` + ${str(item.freeQty)} free` : ""}${Number(item.rejectedQty) ? ` · ${str(item.rejectedQty)} rejected (${str(item.rejectReason)})` : ""} × ${money(item.unitCost)}`)),
         ],
       },
     };

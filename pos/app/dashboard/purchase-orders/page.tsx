@@ -5,6 +5,7 @@ import { useAdmin } from "../../components/AdminContext";
 import TablePagination from "../../components/TablePagination";
 import { API_URL } from "../../lib/constants";
 import { useShopSettings } from "../../lib/useShopSettings";
+import { useBranch } from "../../lib/useBranch";
 import { buildPurchaseOrderHtml, printPurchaseOrder, type PurchaseOrder } from "../../lib/purchaseOrderPrint";
 import { IconCheck, IconClose, IconInvoice, IconPlus, IconPrinter, IconRefresh } from "../../lib/icons";
 
@@ -12,7 +13,7 @@ type Status = PurchaseOrder["status"];
 type Supplier = { id: number; name: string; code: string; email: string | null; contactPerson: string | null };
 type Product = { id: number; name: string; compatibleWith: string | null; purchasePrice: number | null; quantity: number; supplierId?: number | null; supplier?: { id: number } | null; brand: { name: string } };
 type Row = {
-  id: number; poNumber: string; supplier: { id: number; name: string; email: string | null }; status: Status; statusLabel: string;
+  id: number; poNumber: string; supplier: { id: number; name: string; email: string | null }; branch: { id: number; name: string; code: string } | null; status: Status; statusLabel: string;
   orderDate: string; expectedDate: string | null; total: number; lines: number; units: number; receivedUnits: number;
   lastEmail: { status: "SENT" | "FAILED"; toEmail: string; createdAt: string } | null; createdBy: string;
 };
@@ -32,6 +33,9 @@ const when = (value: string | null) => (value ? new Date(value).toLocaleString("
 
 export default function PurchaseOrdersPage() {
   const { token, logout } = useAdmin();
+  // Where the admin is working: from the main branch they can order for any branch.
+  const { branch: working } = useBranch(token);
+  const [branches, setBranches] = useState<Array<{ id: number; name: string; code: string }>>([]);
   const { settings } = useShopSettings(token);
   const headers = useMemo(() => ({ Authorization: `Bearer ${token}`, "Content-Type": "application/json" }), [token]);
   const [data, setData] = useState<ListData | null>(null);
@@ -40,6 +44,8 @@ export default function PurchaseOrdersPage() {
   const [mail, setMail] = useState<{ configured: boolean; sender: string | null } | null>(null);
   const [status, setStatus] = useState<Status | "">("");
   const [supplierFilter, setSupplierFilter] = useState("");
+  // Main branch only: see one branch's orders (a sub branch always sees just its own).
+  const [branchFilter, setBranchFilter] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
@@ -61,6 +67,7 @@ export default function PurchaseOrdersPage() {
     const params = new URLSearchParams({ page: String(page), limit: String(pageSize) });
     if (status) params.set("status", status);
     if (supplierFilter) params.set("supplierId", supplierFilter);
+    if (branchFilter) params.set("branchId", branchFilter);
     if (search.trim()) params.set("search", search.trim());
     try {
       setData(await api<ListData>(`/purchase-orders?${params}`));
@@ -68,11 +75,12 @@ export default function PurchaseOrdersPage() {
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Could not load purchase orders");
     }
-  }, [api, page, pageSize, search, status, supplierFilter]);
+  }, [api, page, pageSize, search, status, supplierFilter, branchFilter]);
 
   useEffect(() => { void load(); }, [load]);
   useEffect(() => {
     void api<Supplier[]>("/inventory-management/suppliers").then(setSuppliers).catch(() => setSuppliers([]));
+    void api<Array<{ id: number; name: string; code: string }>>("/branches").then(setBranches).catch(() => setBranches([]));
     void api<{ products: Product[] }>("/inventory-management/products?limit=5000").then((result) => setProducts(result.products)).catch(() => setProducts([]));
     void api<{ configured: boolean; sender: string | null }>("/purchase-orders/email-status").then(setMail).catch(() => setMail(null));
   }, [api]);
@@ -91,7 +99,7 @@ export default function PurchaseOrdersPage() {
           <div className="page-title-icon"><IconInvoice /></div>
           <div>
             <h2 className="page-title">Purchase Orders</h2>
-            <p className="page-subtitle">Order stock from suppliers, email the order, and receive the delivery into stock. Every step is recorded.</p>
+            <p className="page-subtitle">Order stock from suppliers, email the order, and receive the delivery into stock. Every step is recorded.{working && !working.isMain ? ` Showing ${working.name}'s orders only.` : ""}</p>
           </div>
         </div>
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
@@ -118,6 +126,12 @@ export default function PurchaseOrdersPage() {
             ))}
           </div>
           <div className="po-filters">
+            {working?.isMain && branches.length > 1 && (
+              <select id="po-branch-filter" className="bm-input" value={branchFilter} onChange={(event) => { setBranchFilter(event.target.value); setPage(1); }} aria-label="Branch">
+                <option value="">All branches</option>
+                {branches.map((row) => <option key={row.id} value={row.id}>{row.name}</option>)}
+              </select>
+            )}
             <select id="po-supplier-filter" className="bm-input" value={supplierFilter} onChange={(event) => { setSupplierFilter(event.target.value); setPage(1); }}>
               <option value="">All suppliers</option>
               {suppliers.map((supplier) => <option key={supplier.id} value={supplier.id}>{supplier.name}</option>)}
@@ -129,14 +143,15 @@ export default function PurchaseOrdersPage() {
         <div className="data-table-wrap">
           <table className="data-table">
             <thead>
-              <tr><th>PO no</th><th>Supplier</th><th>Order date</th><th>Deliver by</th><th style={{ textAlign: "right" }}>Items</th><th style={{ textAlign: "right" }}>Total</th><th>Status</th><th>Email</th></tr>
+              <tr><th>PO no</th><th>Branch</th><th>Supplier</th><th>Order date</th><th>Deliver by</th><th style={{ textAlign: "right" }}>Items</th><th style={{ textAlign: "right" }}>Total</th><th>Status</th><th>Email</th></tr>
             </thead>
             <tbody>
-              {!data && <tr><td colSpan={8} className="bm-table-empty">Loading…</td></tr>}
-              {data?.orders.length === 0 && <tr><td colSpan={8} className="bm-table-empty">{status || supplierFilter || search ? "No purchase orders match." : "No purchase orders yet. Create one with New purchase order."}</td></tr>}
+              {!data && <tr><td colSpan={9} className="bm-table-empty">Loading…</td></tr>}
+              {data?.orders.length === 0 && <tr><td colSpan={9} className="bm-table-empty">{status || supplierFilter || branchFilter || search ? "No purchase orders match." : "No purchase orders yet. Create one with New purchase order."}</td></tr>}
               {data?.orders.map((row) => (
                 <tr key={row.id} className="po-row" onClick={() => void openOrder(row.id)} tabIndex={0} onKeyDown={(event) => { if (event.key === "Enter") void openOrder(row.id); }}>
                   <td><strong>{row.poNumber}</strong><div className="td-muted">by {row.createdBy}</div></td>
+                  <td><span className="po-branch">{row.branch?.name ?? "—"}</span></td>
                   <td>{row.supplier.name}</td>
                   <td className="td-muted" style={{ whiteSpace: "nowrap" }}>{day(row.orderDate)}</td>
                   <td className="td-muted" style={{ whiteSpace: "nowrap" }}>{day(row.expectedDate)}</td>
@@ -157,6 +172,8 @@ export default function PurchaseOrdersPage() {
       {editing && (
         <OrderEditor
           order={editing === "new" ? null : editing}
+          working={working ? { id: working.id, name: working.name, isMain: working.isMain } : null}
+          branches={branches}
           suppliers={suppliers}
           products={products}
           api={api}
@@ -184,19 +201,25 @@ export default function PurchaseOrdersPage() {
 }
 
 type Api = <T>(path: string, init?: RequestInit) => Promise<T>;
-type Line = { key: number; productId: string; description: string; quantity: string; unitCost: string };
+type Line = { key: number; productId: string; description: string; quantity: string; free: string; unitCost: string };
 let lineKey = 1;
-const blankLine = (): Line => ({ key: lineKey++, productId: "", description: "", quantity: "1", unitCost: "" });
+const blankLine = (): Line => ({ key: lineKey++, productId: "", description: "", quantity: "1", free: "", unitCost: "" });
 
-function OrderEditor({ order, suppliers, products, api, onClose, onSaved }: {
-  order: PurchaseOrder | null; suppliers: Supplier[]; products: Product[]; api: Api;
+function OrderEditor({ order, working, branches, suppliers, products, api, onClose, onSaved }: {
+  order: PurchaseOrder | null; working: { id: number; name: string; isMain: boolean } | null; branches: Array<{ id: number; name: string; code: string }>;
+  suppliers: Supplier[]; products: Product[]; api: Api;
   onClose: () => void; onSaved: (order: PurchaseOrder, andSend: boolean) => void;
 }) {
   const [supplierId, setSupplierId] = useState(order ? String(order.supplier.id) : "");
+  // Only the main branch can order for another branch; elsewhere the order is for the branch you're in.
+  const canChooseBranch = working?.isMain === true;
+  const [branchId, setBranchId] = useState(String(order?.branchId ?? order?.deliverTo?.id ?? working?.id ?? ""));
+  useEffect(() => { if (!branchId && working) setBranchId(String(working.id)); }, [branchId, working]);
+  const forBranch = branches.find((row) => String(row.id) === branchId) ?? (working && String(working.id) === branchId ? working : null);
   const [expectedDate, setExpectedDate] = useState(order?.expectedDate ? order.expectedDate.slice(0, 10) : "");
   const [notes, setNotes] = useState(order?.notes ?? "");
   const [lines, setLines] = useState<Line[]>(() => order
-    ? order.items.map((item) => ({ key: lineKey++, productId: item.productId ? String(item.productId) : "", description: item.description, quantity: String(item.quantity), unitCost: String(item.unitCost) }))
+    ? order.items.map((item) => ({ key: lineKey++, productId: item.productId ? String(item.productId) : "", description: item.description, quantity: String(item.quantity), free: item.freeQty ? String(item.freeQty) : "", unitCost: String(item.unitCost) }))
     : [blankLine()]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -223,13 +246,13 @@ function OrderEditor({ order, suppliers, products, api, onClose, onSaved }: {
     if (!supplierId) { setError("Choose a supplier"); return; }
     const items = lines
       .filter((line) => line.productId || line.description.trim())
-      .map((line) => ({ productId: line.productId ? Number(line.productId) : null, description: line.description.trim() || undefined, quantity: Math.floor(Number(line.quantity)), unitCost: Number(line.unitCost || 0) }));
+      .map((line) => ({ productId: line.productId ? Number(line.productId) : null, description: line.description.trim() || undefined, quantity: Math.floor(Number(line.quantity)), freeQty: Math.max(0, Math.floor(Number(line.free) || 0)), unitCost: Number(line.unitCost || 0) }));
     if (items.length === 0) { setError("Add at least one item"); return; }
     if (items.some((item) => !(item.quantity >= 1))) { setError("Every line needs a quantity of at least 1"); return; }
     setSaving(true);
     setError(null);
     try {
-      const body = JSON.stringify({ supplierId: Number(supplierId), expectedDate: expectedDate || null, notes: notes.trim() || null, items });
+      const body = JSON.stringify({ supplierId: Number(supplierId), branchId: branchId ? Number(branchId) : null, expectedDate: expectedDate || null, notes: notes.trim() || null, items });
       const saved = order
         ? await api<PurchaseOrder>(`/purchase-orders/${order.id}`, { method: "PATCH", body })
         : await api<PurchaseOrder>("/purchase-orders", { method: "POST", body });
@@ -257,13 +280,23 @@ function OrderEditor({ order, suppliers, products, api, onClose, onSaved }: {
             {supplier && !supplier.email && <small className="lx-warn-text">This supplier has no email address. Add it under Suppliers to email the order.</small>}
             {supplier?.email && <small>Will be emailed to {supplier.email}</small>}
           </label>
+          <label>Order for branch *
+            {canChooseBranch ? (
+              <select id="po-branch" className="bm-input" value={branchId} onChange={(event) => setBranchId(event.target.value)}>
+                {branches.map((row) => <option key={row.id} value={row.id}>{row.name}{row.id === working?.id ? " (this branch)" : ""}</option>)}
+              </select>
+            ) : (
+              <input className="bm-input" value={forBranch?.name ?? working?.name ?? ""} readOnly aria-readonly="true" />
+            )}
+            <small>{canChooseBranch ? "The goods go to this branch, and it receives them on a GRN." : "Orders from this branch are for this branch. The main branch can order for any branch."}</small>
+          </label>
           <label>Deliver by
             <input id="po-expected" className="bm-input" type="date" value={expectedDate} min={new Date().toLocaleDateString("en-CA")} onChange={(event) => setExpectedDate(event.target.value)} />
           </label>
         </div>
 
         <div className="po-lines">
-          <div className="po-line head"><span>Product</span><span>Qty</span><span>Unit price (Rs.)</span><span>Amount</span><span /></div>
+          <div className="po-line head"><span>Product</span><span>Qty + free</span><span>Unit price (Rs.)</span><span>Amount</span><span /></div>
           {lines.map((line, index) => (
             <div key={line.key} className="po-line">
               <div className="po-line-product">
@@ -283,7 +316,10 @@ function OrderEditor({ order, suppliers, products, api, onClose, onSaved }: {
                 })()}
                 {!line.productId && <input id={`po-desc-${line.key}`} className="bm-input" value={line.description} onChange={(event) => setLine(line.key, { description: event.target.value })} placeholder="Describe the item, e.g. Ice cubes 5kg bags" />}
               </div>
-              <input id={`po-qty-${line.key}`} className="bm-input" type="number" min={1} step="1" value={line.quantity} onChange={(event) => setLine(line.key, { quantity: event.target.value })} aria-label={`Line ${index + 1} quantity`} />
+              <div className="po-qty-free">
+                <input id={`po-qty-${line.key}`} className="bm-input" type="number" min={1} step="1" value={line.quantity} onChange={(event) => setLine(line.key, { quantity: event.target.value })} aria-label={`Line ${index + 1} quantity`} />
+                <input id={`po-free-${line.key}`} className="bm-input gd-free" type="number" min={0} step="1" value={line.free} placeholder="+ free" onChange={(event) => setLine(line.key, { free: event.target.value })} aria-label={`Line ${index + 1} free issue`} title="Free issue from the supplier, e.g. buy 10 get 2 free → 2" />
+              </div>
               <input id={`po-cost-${line.key}`} className="bm-input" type="number" min={0} step="0.01" value={line.unitCost} onChange={(event) => setLine(line.key, { unitCost: event.target.value })} placeholder="0.00" aria-label={`Line ${index + 1} unit price`} />
               <strong className="po-line-amount">{money((Number(line.quantity) || 0) * (Number(line.unitCost) || 0))}</strong>
               <button type="button" className="po-line-remove" onClick={() => setLines((current) => (current.length > 1 ? current.filter((row) => row.key !== line.key) : [blankLine()]))} aria-label={`Remove line ${index + 1}`}><IconClose /></button>
@@ -323,7 +359,7 @@ function OrderView({ order, api, mailReady, startWithSend, shopName, onPrint, pr
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mail, setMail] = useState({ to: order.emailDefaults.to, cc: "", subject: order.emailDefaults.subject, message: order.emailDefaults.message });
-  const [receive, setReceive] = useState<Record<number, { quantity: string; unitCost: string; rejected?: string; reason?: string }>>({});
+  const [receive, setReceive] = useState<Record<number, { quantity: string; unitCost: string; rejected?: string; reason?: string; free?: string }>>({});
   const [invoice, setInvoice] = useState({ no: "", date: "", total: "" });
   const [reason, setReason] = useState("");
   const open = order.status !== "CANCELLED" && order.status !== "RECEIVED";
@@ -331,7 +367,7 @@ function OrderView({ order, api, mailReady, startWithSend, shopName, onPrint, pr
 
   useEffect(() => {
     setMail({ to: order.emailDefaults.to, cc: "", subject: order.emailDefaults.subject, message: order.emailDefaults.message });
-    setReceive(Object.fromEntries(order.items.map((item) => [item.id, { quantity: String(item.remaining), unitCost: String(item.unitCost) }])));
+    setReceive(Object.fromEntries(order.items.map((item) => [item.id, { quantity: String(item.remaining), unitCost: String(item.unitCost), free: item.freeDue ? String(item.freeDue) : "" }])));
   }, [order]);
 
   const run = async (action: () => Promise<PurchaseOrder>, message: string) => {
@@ -357,10 +393,11 @@ function OrderView({ order, api, mailReady, startWithSend, shopName, onPrint, pr
       supplierInvoiceNo: invoice.no || null,
       invoiceDate: invoice.date || null,
       invoiceTotal: invoice.total ? Number(invoice.total) : null,
-      lines: order.items.filter((item) => item.remaining > 0).map((item) => ({
+      lines: order.items.filter((item) => item.remaining > 0 || (item.freeDue ?? 0) > 0).map((item) => ({
         itemId: item.id,
         quantity: Math.floor(Number(receive[item.id]?.quantity || 0)),
         rejected: Math.floor(Number(receive[item.id]?.rejected || 0)),
+        free: Math.floor(Number(receive[item.id]?.free || 0)),
         rejectReason: receive[item.id]?.reason || null,
         unitCost: Number(receive[item.id]?.unitCost || item.unitCost),
       })),
@@ -430,8 +467,9 @@ function OrderView({ order, api, mailReady, startWithSend, shopName, onPrint, pr
                   <span>{item.remaining}</span>
                   <input className="bm-input" type="number" min={0} max={item.remaining} step="1" disabled={item.remaining === 0} value={receive[item.id]?.quantity ?? ""} onChange={(event) => setReceive({ ...receive, [item.id]: { ...(receive[item.id] ?? { unitCost: String(item.unitCost) }), quantity: event.target.value } })} aria-label={`${item.description} arrived`} />
                   <input className="bm-input" type="number" min={0} step="0.01" disabled={item.remaining === 0} value={receive[item.id]?.unitCost ?? ""} onChange={(event) => setReceive({ ...receive, [item.id]: { ...(receive[item.id] ?? { quantity: "0" }), unitCost: event.target.value } })} aria-label={`${item.description} unit price`} />
-                  {item.remaining > 0 && (
+                  {(item.remaining > 0 || (item.freeDue ?? 0) > 0) && (
                     <div className="po-reject">
+                      <label>Free issue{item.freeQty ? ` (${item.freeDue} of ${item.freeQty} due)` : ""}<input className="bm-input gd-free" type="number" min={0} value={receive[item.id]?.free ?? ""} placeholder="0" onChange={(event) => setReceive({ ...receive, [item.id]: { ...(receive[item.id] ?? { quantity: "0", unitCost: String(item.unitCost) }), free: event.target.value } })} aria-label={`${item.description} free issue`} /></label>
                       <label>Rejected<input className="bm-input" type="number" min={0} value={receive[item.id]?.rejected ?? ""} placeholder="0" onChange={(event) => setReceive({ ...receive, [item.id]: { ...(receive[item.id] ?? { quantity: "0", unitCost: String(item.unitCost) }), rejected: event.target.value } })} aria-label={`${item.description} rejected`} /></label>
                       {Number(receive[item.id]?.rejected) > 0 && <input className="bm-input" value={receive[item.id]?.reason ?? ""} placeholder="Why rejected? e.g. broken in the crate" onChange={(event) => setReceive({ ...receive, [item.id]: { ...(receive[item.id] ?? { quantity: "0", unitCost: String(item.unitCost) }), reason: event.target.value } })} aria-label={`${item.description} reject reason`} />}
                     </div>
@@ -465,10 +503,10 @@ function OrderView({ order, api, mailReady, startWithSend, shopName, onPrint, pr
               {order.items.map((item) => (
                 <tr key={item.id}>
                   <td><strong>{item.description}</strong>{item.product && <div className="td-muted">{item.product.quantity} in stock now</div>}</td>
-                  <td style={{ textAlign: "right" }}>{item.quantity}</td>
+                  <td style={{ textAlign: "right" }}>{item.quantity}{item.freeQty ? <div className="lx-amount-in">+ {item.freeQty} free</div> : null}</td>
                   <td style={{ textAlign: "right" }}>{money(item.unitCost)}</td>
                   <td style={{ textAlign: "right" }}>{money(item.lineTotal)}</td>
-                  <td style={{ textAlign: "right" }} className={item.receivedQty >= item.quantity ? "lx-ok-text" : ""}>{item.receivedQty} / {item.quantity}</td>
+                  <td style={{ textAlign: "right" }} className={item.receivedQty >= item.quantity ? "lx-ok-text" : ""}>{item.receivedQty} / {item.quantity}{item.freeQty ? <div className={(item.freeReceived ?? 0) >= item.freeQty ? "lx-amount-in" : "lx-warn-text"}>free {item.freeReceived ?? 0} / {item.freeQty}</div> : null}</td>
                 </tr>
               ))}
               <tr className="po-total-row"><td colSpan={3}>Total</td><td style={{ textAlign: "right" }}>{money(order.total)}</td><td /></tr>

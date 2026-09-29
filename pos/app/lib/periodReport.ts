@@ -32,7 +32,7 @@ export type PeriodReport = {
     count: number; over: number; short: number; net: number; withDifference: number;
     rows: Array<{ shiftNo: string; openedAt: string; closedAt: string | null; openedBy: string; closedBy: string; bills: number; netSales: number; cashDifference: number; differenceReason: string | null; cardDifference: number | null; cashBanked: number }>;
   };
-  stock: { rows: Array<{ name: string; detail: string; received: number; sold: number; customerReturns?: number; damaged?: number; transferIn?: number; transferOut?: number; adjusted: number; collected: number; returned: number; receivedValue: number; onHand: number }>; stockValueNow: number };
+  stock: { freeIssues?: { grns: number; units: number; value: number }; rows: Array<{ name: string; detail: string; received: number; sold: number; customerReturns?: number; damaged?: number; transferIn?: number; transferOut?: number; adjusted: number; collected: number; returned: number; receivedValue: number; onHand: number }>; stockValueNow: number };
   discounts: {
     bills: number; amount: number; percent: { bills: number; amount: number }; fixed: { bills: number; amount: number };
     byStaff: Array<{ name: string; bills: number; amount: number }>;
@@ -298,7 +298,7 @@ export function buildPeriodReportHtml(report: PeriodReport, kind: PeriodKind) {
   </div>` : ""}
 
   <section>
-    <h2>Stock movement <small>stock on hand now worth ${rs(stock.stockValueNow)} at cost</small></h2>
+    <h2>Stock movement <small>stock on hand now worth ${rs(stock.stockValueNow)} at cost${stock.freeIssues?.units ? ` · ${stock.freeIssues.units} free-issue bottle(s) received, worth ${rs(stock.freeIssues.value)}` : ""}</small></h2>
     <table>
       <thead><tr><th>Product</th><th class="r">Received</th><th class="r">Received value</th><th class="r">Sold</th>${stockTransferCols ? `<th class="r">From branch</th><th class="r">To branch</th>` : ""}${stockReturnCols ? `<th class="r">Returned</th><th class="r">Damaged</th>` : ""}<th class="r">Adjusted</th><th class="r">Empties in</th><th class="r">Empties out</th><th class="r">On hand now</th></tr></thead>
       ${stock.rows.map((row) => `<tr><td>${esc(row.name)}${row.detail ? `<div class="muted">${esc(row.detail)}</div>` : ""}</td><td class="r">${row.received || "—"}</td><td class="r">${row.receivedValue ? amt(row.receivedValue) : "—"}</td><td class="r">${row.sold || "—"}</td>${stockTransferCols ? `<td class="r">${row.transferIn ? `+${row.transferIn}` : "—"}</td><td class="r">${row.transferOut ? `−${row.transferOut}` : "—"}</td>` : ""}${stockReturnCols ? `<td class="r">${row.customerReturns ? `+${row.customerReturns}` : "—"}</td><td class="r">${row.damaged ? `−${row.damaged}` : "—"}</td>` : ""}<td class="r">${row.adjusted ? (row.adjusted > 0 ? `+${row.adjusted}` : row.adjusted) : "—"}</td><td class="r">${row.collected || "—"}</td><td class="r">${row.returned || "—"}</td><td class="r strong">${row.onHand}</td></tr>`).join("") || `<tr><td colspan="10" class="empty">No stock movements</td></tr>`}

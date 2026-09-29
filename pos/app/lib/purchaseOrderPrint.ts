@@ -13,7 +13,7 @@ export type PurchaseOrder = {
   notes: string | null;
   total: number;
   supplier: { id: number; name: string; code: string; contactPerson: string | null; telephone: string | null; address: string | null; email: string | null };
-  items: Array<{ id: number; productId: number | null; description: string; quantity: number; unitCost: number; lineTotal: number; receivedQty: number; remaining: number; product: { id: number; name: string; quantity: number; partNumber: string | null } | null }>;
+  items: Array<{ id: number; productId: number | null; description: string; quantity: number; freeQty?: number; freeReceived?: number; freeDue?: number; unitCost: number; lineTotal: number; receivedQty: number; remaining: number; product: { id: number; name: string; quantity: number; partNumber: string | null } | null }>;
   emails: Array<{ id: number; toEmail: string; ccEmail: string | null; subject: string; status: "SENT" | "FAILED"; error: string | null; createdAt: string; sentBy: string }>;
   createdAt: string;
   createdBy: string;
@@ -24,8 +24,12 @@ export type PurchaseOrder = {
   cancelledAt: string | null;
   cancelledBy: string | null;
   cancelReason: string | null;
+  /** The branch the order is for. */
+  branchId?: number | null;
   /** Branch the goods are delivered to, and the GRNs that received them. */
-  deliverTo?: { id: number; name: string; code: string; address: string | null } | null;
+  deliverTo?: { id: number; name: string; code: string; address: string | null; phone?: string | null; email?: string | null } | null;
+  /** Who the order is from: the ordering branch's details (falling back to the shop's). */
+  contact?: { shopName: string; branchName: string | null; fullName: string; address: string; phone: string; email: string };
   grns?: Array<{ id: number; grnNo: string; createdAt: string; supplierInvoiceNo: string | null; acceptedUnits: number; rejectedUnits: number; totalCost: number }>;
   emailDefaults: { to: string; subject: string; message: string };
 };
@@ -44,12 +48,14 @@ const EXTRA = `
 `;
 
 export function buildPurchaseOrderHtml(order: PurchaseOrder, shop: ShopSettings) {
+  const from = order.contact ?? { shopName: shop.businessName, branchName: null, fullName: shop.businessName, address: shop.businessAddress, phone: shop.businessPhone, email: shop.businessEmail };
   return `<!doctype html><html><head><meta charset="utf-8"><title>Purchase-Order_${esc(order.poNumber)}</title><style>${REPORT_CSS}${EXTRA}</style></head><body><div class="sheet">
   <div class="top">
     <div>
-      <div class="shop">${esc(shop.businessName)}</div>
-      <div class="addr">${esc(shop.businessAddress)}</div>
-      <div class="addr">${[shop.businessPhone && `Tel ${esc(shop.businessPhone)}`, shop.businessEmail && esc(shop.businessEmail)].filter(Boolean).join(" · ")}</div>
+      <div class="shop">${esc(from.shopName)}</div>
+      ${from.branchName ? `<div class="addr"><b>${esc(from.branchName)}</b></div>` : ""}
+      <div class="addr">${esc(from.address)}</div>
+      <div class="addr">${[from.phone && `Tel ${esc(from.phone)}`, from.email && esc(from.email)].filter(Boolean).join(" · ")}</div>
     </div>
     <div class="doc">
       <h1>Purchase Order</h1>
@@ -67,14 +73,14 @@ export function buildPurchaseOrderHtml(order: PurchaseOrder, shop: ShopSettings)
     <div class="party"><span class="label">Order</span>
       <div>Order date: <b style="display:inline">${longDate(order.orderDate)}</b></div>
       <div>Deliver by: <b style="display:inline">${order.expectedDate ? longDate(order.expectedDate) : "As soon as possible"}</b></div>
-      <div>Deliver to: ${esc(shop.businessAddress)}</div>
+      <div>Deliver to: <b style="display:inline">${esc(from.branchName ?? from.shopName)}</b>, ${esc(from.address)}</div>
       <div>Prepared by: ${esc(order.createdBy)}</div>
     </div>
   </div>
 
   <table>
     <thead><tr><th>#</th><th>Item</th><th class="r">Quantity</th><th class="r">Unit price</th><th class="r">Amount</th></tr></thead>
-    ${order.items.map((item, index) => `<tr><td>${index + 1}</td><td>${esc(item.description)}${item.product?.partNumber ? `<div class="muted">Barcode ${esc(item.product.partNumber)}</div>` : ""}</td><td class="r">${item.quantity}</td><td class="r">${amt(item.unitCost)}</td><td class="r">${amt(item.lineTotal)}</td></tr>`).join("")}
+    ${order.items.map((item, index) => `<tr><td>${index + 1}</td><td>${esc(item.description)}${item.product?.partNumber ? `<div class="muted">Barcode ${esc(item.product.partNumber)}</div>` : ""}</td><td class="r">${item.quantity}${item.freeQty ? `<div class="plus" style="font-weight:700">+ ${item.freeQty} free</div>` : ""}</td><td class="r">${amt(item.unitCost)}</td><td class="r">${amt(item.lineTotal)}</td></tr>`).join("")}
     <tr class="total grand"><td colspan="4">Total (Rs.)</td><td class="r">${amt(order.total)}</td></tr>
   </table>
 
@@ -86,7 +92,7 @@ export function buildPurchaseOrderHtml(order: PurchaseOrder, shop: ShopSettings)
     <div><b>Approved by</b>Signature &amp; date</div>
     <div><b>Received by (supplier)</b>Signature &amp; date</div>
   </div>
-  <div class="foot"><span>${esc(shop.businessName)} · ${esc(order.poNumber)}</span><span>Printed ${new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span></div>
+  <div class="foot"><span>${esc(from.fullName)} · ${esc(order.poNumber)}</span><span>Printed ${new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span></div>
   </div></body></html>`;
 }
 

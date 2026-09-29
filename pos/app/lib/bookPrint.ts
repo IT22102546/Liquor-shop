@@ -76,7 +76,7 @@ export type ShiftReport = {
   };
   /** Supplier deliveries (GRN) and branch transfers (GTN) during the shift. */
   goods?: {
-    grns: Array<{ grnNo: string; time: string; supplier: string; poNumber: string | null; invoiceNo: string | null; invoiceTotal: number | null; totalCost: number; accepted: number; rejected: number; items: string; by: string }>;
+    grns: Array<{ grnNo: string; time: string; supplier: string; poNumber: string | null; invoiceNo: string | null; invoiceTotal: number | null; totalCost: number; accepted: number; rejected: number; free?: number; freeValue?: number; items: string; by: string }>;
     sent: Array<{ gtnNo: string; time: string; branch: string; status: string; units: number; items: string; by: string }>;
     received: Array<{ gtnNo: string; time: string; branch: string; units: number; damaged: number; missing: number; items: string; note: string | null; by: string }>;
   };
@@ -186,7 +186,7 @@ export function buildZReportHtml(report: ShiftReport) {
       <div class="row small"><span>Change given back</span><span>${amt(report.payments.changeGiven)}</span></div>` : ""}
     ${report.goods && (report.goods.grns.length || report.goods.sent.length || report.goods.received.length) ? `
       <div class="head">Goods in &amp; out</div>
-      ${report.goods.grns.map((row) => `<div class="row small"><span>${esc(row.grnNo)} ${esc(row.supplier)}${row.invoiceNo ? ` inv ${esc(row.invoiceNo)}` : ""}${row.rejected ? ` (${row.rejected} rej)` : ""}</span><span>+${row.accepted}</span></div>`).join("")}
+      ${report.goods.grns.map((row) => `<div class="row small"><span>${esc(row.grnNo)} ${esc(row.supplier)}${row.invoiceNo ? ` inv ${esc(row.invoiceNo)}` : ""}${row.rejected ? ` (${row.rejected} rej)` : ""}${row.free ? ` (+${row.free} free)` : ""}</span><span>+${row.accepted + (row.free ?? 0)}</span></div>`).join("")}
       ${report.goods.sent.map((row) => `<div class="row small"><span>${esc(row.gtnNo)} to ${esc(row.branch)}</span><span>−${row.units}</span></div>`).join("")}
       ${report.goods.received.map((row) => `<div class="row small"><span>${esc(row.gtnNo)} from ${esc(row.branch)}${row.missing ? ` · ${row.missing} MISSING` : ""}</span><span>+${row.units}</span></div>`).join("")}` : ""}
     ${report.stockLog?.length || report.journal?.length ? `

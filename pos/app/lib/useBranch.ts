@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { API_URL } from "./constants";
 import { readApiData } from "./api";
 
-export type Branch = { id: number; code: string; name: string; address: string | null; phone: string | null; isMain: boolean };
+export type Branch = { id: number; code: string; name: string; address: string | null; phone: string | null; email?: string | null; isMain: boolean };
 export type BranchState = { branch: Branch & { fixed: boolean }; canSwitch: boolean; branches: Array<{ id: number; code: string; name: string }> };
 
 /** The branch the signed-in person is working in (stock, tills and Day End all follow it). */

@@ -784,17 +784,20 @@ model PurchaseOrder {
 }
 
 model PurchaseOrderItem {
-  id          Int               @id @default(autoincrement())
-  orderId     Int
-  order       PurchaseOrder     @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId   Int?
-  product     InventoryProduct? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  id           Int               @id @default(autoincrement())
+  orderId      Int
+  order        PurchaseOrder     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    Int?
+  product      InventoryProduct? @relation(fields: [productId], references: [id], onDelete: SetNull)
   /// Product name and size as ordered (kept even if the product is renamed or removed).
-  description String
-  quantity    Int
-  unitCost    Float
-  lineTotal   Float
-  receivedQty Int               @default(0)
+  description  String
+  quantity     Int
+  unitCost     Float
+  lineTotal    Float
+  receivedQty  Int               @default(0)
+  /// Free issue agreed with the supplier on this line (e.g. 10 + 2 free), and how many free have arrived.
+  freeQty      Int               @default(0)
+  freeReceived Int               @default(0)
 
   @@index([orderId])
   @@map("purchase_order_items")
@@ -898,6 +901,8 @@ model Branch {
   name      String
   address   String?
   phone     String?
+  /// The branch's own email: shown on its purchase orders, and supplier replies go here.
+  email     String?
   /// The first branch; existing stock and records were moved here when branches were added.
   isMain    Boolean       @default(false)
   isActive  Boolean       @default(true)
@@ -945,6 +950,9 @@ model Grn {
   notes             String?
   acceptedUnits     Int       @default(0)
   rejectedUnits     Int       @default(0)
+  /// Free-issue bottles received, and what they would have cost at the unit prices entered.
+  freeUnits         Int       @default(0)
+  freeValue         Float     @default(0)
   /// Value of the accepted goods at the cost entered.
   totalCost         Float     @default(0)
   shiftId           Int?
@@ -972,7 +980,10 @@ model GrnItem {
   acceptedQty         Int
   rejectedQty         Int     @default(0)
   rejectReason        String?
+  /// Free issue: extra bottles the supplier gave at no charge. They go into stock and lower the average cost.
+  freeQty             Int     @default(0)
   unitCost            Float
+  /// Accepted (paid) × unit cost — what is owed; free bottles add nothing.
   lineTotal           Float
 
   @@index([grnId])

@@ -94,9 +94,21 @@ Numbered RT-00001 and so on. Each return prints an 80mm slip with signature line
 - Draft → Sent (by email) → Partly received / Received, or Cancelled.
 - **Email** goes out over SMTP using `common/utils/mailer.ts` (nodemailer), set up with the `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` and `MAIL_FROM` settings. Every attempt is logged, including failures.
 - **A4 print and preview.**
-- **Delivery branch.** Each order is for the branch that created it. Receiving it creates a GRN at that branch, with invoice number, rejected quantities and reasons.
+- **Branch details.** Each order is from, and delivered to, the branch that created it.
+  - The printed order and the email show "BAR SHOP — <branch>", with the branch's address, phone and email. Anything the branch hasn't set falls back to Shop Settings.
+  - The email is sent from the shop's one Gmail address. Supplier replies go to the branch's email (Reply-To).
+  - Branch email is set on the Branches page.
+- **Which branch an order is for:**
+  - Working at the Main branch, an admin chooses any open branch ("Order for branch").
+  - Working at any other branch, orders are only for that branch.
+  - The server enforces this for new orders and for edits to drafts.
+  - The list shows each order's branch.
+  - A sub branch sees only its own orders. Another branch's order is blocked (403) for opening, editing, sending, receiving and cancelling.
+  - The Main branch sees all orders, with a branch filter. Receiving it creates a GRN at that branch, with invoice number, rejected quantities and reasons.
 
 ## Goods Received — GRN (`/dashboard/grn`)
+
+- **Free issues:** a Free column (for example 10 + 2 free). The free bottles go into stock and lower the cost per bottle. Nothing extra is owed. The form shows the cost per bottle after the free issue, and flags when fewer free bottles arrived than the order agreed.
 
 - **Where from:** a supplier delivery, with or without a purchase order.
 - **What's recorded:** the supplier's invoice number, date and total.

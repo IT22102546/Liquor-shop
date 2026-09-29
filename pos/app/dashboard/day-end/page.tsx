@@ -352,7 +352,7 @@ function ShiftTables({ report, tab }: { report: ShiftReport; tab: ShiftTab }) {
   if (tab === "goods") {
     const goods = report.goods;
     const rows = goods ? [
-      ...goods.grns.map((row) => ({ key: row.grnNo, time: row.time, no: row.grnNo, what: `Received from ${row.supplier}`, sub: [row.poNumber, row.invoiceNo ? `invoice ${row.invoiceNo}` : null, row.rejected ? `${row.rejected} rejected` : null].filter(Boolean).join(" · "), items: row.items, by: row.by, units: row.accepted, sign: 1 })),
+      ...goods.grns.map((row) => ({ key: row.grnNo, time: row.time, no: row.grnNo, what: `Received from ${row.supplier}`, sub: [row.poNumber, row.invoiceNo ? `invoice ${row.invoiceNo}` : null, row.free ? `${row.free} free issue` : null, row.rejected ? `${row.rejected} rejected` : null].filter(Boolean).join(" · "), items: row.items, by: row.by, units: row.accepted + (row.free ?? 0), sign: 1 })),
       ...goods.sent.map((row) => ({ key: `s${row.gtnNo}`, time: row.time, no: row.gtnNo, what: `Sent to ${row.branch}`, sub: row.status === "CANCELLED" ? "Cancelled — back on the shelf" : row.status === "SENT" ? "In transit" : "Received there", items: row.items, by: row.by, units: row.units, sign: -1 })),
       ...goods.received.map((row) => ({ key: `r${row.gtnNo}`, time: row.time, no: row.gtnNo, what: `Received from ${row.branch}`, sub: [row.damaged ? `${row.damaged} damaged` : null, row.missing ? `${row.missing} MISSING` : null, row.note].filter(Boolean).join(" · "), items: row.items, by: row.by, units: row.units, sign: 1 })),
     ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()) : [];

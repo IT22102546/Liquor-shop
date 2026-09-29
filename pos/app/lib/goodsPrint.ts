@@ -9,8 +9,8 @@ export type GrnRecord = {
   id: number; grnNo: string; createdAt: string; branch: BranchInfo;
   supplierId: number | null; supplierName: string; supplier: { name: string; code: string; telephone: string | null; address: string | null } | null;
   purchaseOrderId: number | null; poNumber: string | null; supplierInvoiceNo: string | null; invoiceDate: string | null; invoiceTotal: number | null; invoiceDifference: number | null;
-  notes: string | null; acceptedUnits: number; rejectedUnits: number; totalCost: number; receivedBy: string; shiftNo: string | null;
-  items: Array<{ id: number; productId: number | null; description: string; orderedQty: number | null; deliveredQty: number; acceptedQty: number; rejectedQty: number; rejectReason: string | null; unitCost: number; lineTotal: number }>;
+  notes: string | null; acceptedUnits: number; rejectedUnits: number; freeUnits?: number; freeValue?: number; totalCost: number; receivedBy: string; shiftNo: string | null;
+  items: Array<{ id: number; productId: number | null; description: string; orderedQty: number | null; deliveredQty: number; acceptedQty: number; rejectedQty: number; rejectReason: string | null; freeQty?: number; unitCost: number; lineTotal: number }>;
 };
 
 /** Mirrors GET /api/pos/gtns/:id */
@@ -44,8 +44,9 @@ const header = (title: string, number: string, stamp: string, branch: BranchInfo
 /** A4 Goods Received Note: what the supplier delivered, what was accepted or rejected, checked against the invoice. */
 export function buildGrnHtml(grn: GrnRecord) {
   const diff = grn.invoiceDifference;
+  const free = grn.freeUnits ?? 0;
   return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(grn.grnNo)}</title><style>${REPORT_CSS}</style></head><body><div class="sheet">
-  ${header("Goods Received Note", grn.grnNo, grn.rejectedUnits ? `${grn.rejectedUnits} REJECTED` : "ALL ACCEPTED", grn.branch)}
+  ${header("Goods Received Note", grn.grnNo, grn.rejectedUnits ? `${grn.rejectedUnits} REJECTED` : free ? `+${free} FREE ISSUE` : "ALL ACCEPTED", grn.branch)}
   <div class="facts">
     <div><span>Supplier</span><b>${esc(grn.supplierName)}</b>${grn.supplier?.telephone ? `<span style="letter-spacing:0;text-transform:none;font-weight:500">${esc(grn.supplier.telephone)}</span>` : ""}</div>
     <div><span>Received</span><b>${when(grn.createdAt)}</b><span style="letter-spacing:0;text-transform:none;font-weight:500">by ${esc(grn.receivedBy)}</span></div>
@@ -55,11 +56,12 @@ export function buildGrnHtml(grn: GrnRecord) {
   <section>
     <h2>Items delivered <small>${grn.items.length} line(s)</small></h2>
     <table>
-      <thead><tr><th>#</th><th>Item</th>${grn.poNumber ? `<th class="r">Due on PO</th>` : ""}<th class="r">Delivered</th><th class="r">Rejected</th><th class="r">Accepted</th><th class="r">Unit cost</th><th class="r">Amount</th></tr></thead>
-      ${grn.items.map((item, index) => `<tr><td>${index + 1}</td><td>${esc(item.description)}${item.rejectedQty ? `<div class="muted">Rejected: ${esc(item.rejectReason ?? "")}</div>` : ""}</td>${grn.poNumber ? `<td class="r">${item.orderedQty ?? "—"}</td>` : ""}<td class="r">${item.deliveredQty}</td><td class="r ${item.rejectedQty ? "flag" : ""}">${item.rejectedQty || "—"}</td><td class="r strong">${item.acceptedQty}</td><td class="r">${amt(item.unitCost)}</td><td class="r">${amt(item.lineTotal)}</td></tr>`).join("")}
-      <tr class="total"><td colspan="${grn.poNumber ? 3 : 2}">Total</td><td class="r">${grn.acceptedUnits + grn.rejectedUnits}</td><td class="r">${grn.rejectedUnits || "—"}</td><td class="r">${grn.acceptedUnits}</td><td></td><td class="r">${amt(grn.totalCost)}</td></tr>
+      <thead><tr><th>#</th><th>Item</th>${grn.poNumber ? `<th class="r">Due on PO</th>` : ""}<th class="r">Delivered</th><th class="r">Rejected</th><th class="r">Accepted</th>${free ? `<th class="r">Free</th>` : ""}<th class="r">Unit cost</th><th class="r">Amount</th>${free ? `<th class="r">Cost each after free</th>` : ""}</tr></thead>
+      ${grn.items.map((item, index) => `<tr><td>${index + 1}</td><td>${esc(item.description)}${item.rejectedQty ? `<div class="muted">Rejected: ${esc(item.rejectReason ?? "")}</div>` : ""}</td>${grn.poNumber ? `<td class="r">${item.orderedQty ?? "—"}</td>` : ""}<td class="r">${item.deliveredQty}</td><td class="r ${item.rejectedQty ? "flag" : ""}">${item.rejectedQty || "—"}</td><td class="r strong">${item.acceptedQty}</td>${free ? `<td class="r plus">${item.freeQty ? `+${item.freeQty}` : "—"}</td>` : ""}<td class="r">${amt(item.unitCost)}</td><td class="r">${amt(item.lineTotal)}</td>${free ? `<td class="r">${item.acceptedQty + (item.freeQty ?? 0) > 0 ? amt(item.lineTotal / (item.acceptedQty + (item.freeQty ?? 0))) : "—"}</td>` : ""}</tr>`).join("")}
+      <tr class="total"><td colspan="${grn.poNumber ? 3 : 2}">Total</td><td class="r">${grn.acceptedUnits + grn.rejectedUnits}</td><td class="r">${grn.rejectedUnits || "—"}</td><td class="r">${grn.acceptedUnits}</td>${free ? `<td class="r plus">+${free}</td>` : ""}<td></td><td class="r">${amt(grn.totalCost)}</td>${free ? "<td></td>" : ""}</tr>
     </table>
     ${grn.invoiceTotal != null ? `<div class="result ${diff != null && Math.abs(diff) < 0.005 ? "ok" : "over"}"><span>${diff != null && Math.abs(diff) < 0.005 ? "SUPPLIER INVOICE MATCHES" : `SUPPLIER INVOICE ${amt(grn.invoiceTotal)} · DIFFERENCE`}</span><span>${diff != null && Math.abs(diff) >= 0.005 ? `${diff > 0 ? "+" : "−"}${amt(Math.abs(diff))}` : amt(grn.invoiceTotal)}</span></div>` : ""}
+    ${free ? `<div class="reason"><b>Free issue:</b> ${free} bottle(s) given free by the supplier (worth ${amt(grn.freeValue ?? 0)} at the unit prices). They are in stock, and what was paid is spread over every bottle, so the cost price per bottle goes down.</div>` : ""}
     ${grn.rejectedUnits ? `<div class="reason"><b>Rejected goods</b> were handed back to the supplier's driver and are not in stock.</div>` : ""}
     ${grn.notes ? `<div class="reason"><b>Notes:</b> ${esc(grn.notes)}</div>` : ""}
   </section>

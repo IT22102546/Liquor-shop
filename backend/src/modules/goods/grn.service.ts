@@ -19,6 +19,8 @@ export type GrnLineInput = {
   delivered: number;
   rejected?: number;
   rejectReason?: string | null;
+  /** Free issue: extra bottles given at no charge (e.g. buy 10 get 2 free → delivered 10, free 2). */
+  free?: number;
   unitCost: number;
 };
 export type GrnInput = {
@@ -53,7 +55,7 @@ export async function createGrn(dto: GrnInput, actorId: number, branchId: number
     }
   }
 
-  const lines = dto.lines.filter((line) => line.delivered > 0);
+  const lines = dto.lines.filter((line) => line.delivered > 0 || (line.free ?? 0) > 0);
   if (lines.length === 0) throw AppError.validation({ lines: ["Enter what was delivered"] });
   const productIds = [...new Set(lines.map((line) => line.productId).filter((id): id is number => Boolean(id)))];
   const products = new Map((await prisma.inventoryProduct.findMany({ where: { id: { in: productIds } }, select: { id: true, name: true, compatibleWith: true } })).map((product) => [product.id, product]));
@@ -64,6 +66,7 @@ export async function createGrn(dto: GrnInput, actorId: number, branchId: number
     if (rejected > line.delivered) throw AppError.validation({ lines: [`Line ${index + 1}: rejected can't be more than delivered`] });
     if (rejected > 0 && !line.rejectReason?.trim()) throw AppError.validation({ lines: [`Line ${index + 1}: say why ${rejected} were rejected`] });
     const accepted = line.delivered - rejected;
+    const free = Math.max(0, Math.floor(line.free ?? 0));
     const orderItem = line.purchaseOrderItemId ? orderItems.get(line.purchaseOrderItemId) : undefined;
     if (line.purchaseOrderItemId && !orderItem) throw AppError.validation({ lines: [`Line ${index + 1}: that item is not on ${order?.poNumber ?? "the order"}`] });
     const productId = orderItem?.productId ?? line.productId ?? null;
@@ -77,6 +80,8 @@ export async function createGrn(dto: GrnInput, actorId: number, branchId: number
     return {
       productId, description, purchaseOrderItemId: orderItem?.id ?? null, orderedQty: remaining,
       deliveredQty: line.delivered, acceptedQty: accepted, rejectedQty: rejected, rejectReason: rejected ? line.rejectReason!.trim() : null,
+      freeQty: free,
+      // Only the paid bottles are owed; the free ones are spread over the cost when stocked.
       unitCost, lineTotal: round2(accepted * unitCost),
     };
   });
@@ -94,6 +99,8 @@ export async function createGrn(dto: GrnInput, actorId: number, branchId: number
         notes: dto.notes?.trim() || null,
         acceptedUnits: built.reduce((sum, line) => sum + line.acceptedQty, 0),
         rejectedUnits: built.reduce((sum, line) => sum + line.rejectedQty, 0),
+        freeUnits: built.reduce((sum, line) => sum + line.freeQty, 0),
+        freeValue: round2(built.reduce((sum, line) => sum + line.freeQty * line.unitCost, 0)),
         totalCost: round2(built.reduce((sum, line) => sum + line.lineTotal, 0)),
         shiftId: shift?.id ?? null,
         receivedById: actorId,
@@ -102,12 +109,13 @@ export async function createGrn(dto: GrnInput, actorId: number, branchId: number
     });
     const reference = [grnNo, supplier.name, order?.poNumber, dto.supplierInvoiceNo?.trim() ? `inv ${dto.supplierInvoiceNo.trim()}` : null].filter(Boolean).join(" · ");
     for (const line of built) {
-      // Accepted stock products go on this branch's shelf; other lines (ice, supplies) are only recorded.
-      if (line.productId && line.acceptedQty > 0) {
-        await restockProduct(line.productId, { quantity: line.acceptedQty, purchasePrice: line.lineTotal }, actorId, branchId, reference, tx);
+      // Accepted + free bottles go on this branch's shelf for the price paid for the accepted ones, so the
+      // free issue lowers the average cost. Other lines (ice, supplies) are only recorded.
+      if (line.productId && line.acceptedQty + line.freeQty > 0) {
+        await restockProduct(line.productId, { quantity: line.acceptedQty + line.freeQty, purchasePrice: line.lineTotal }, actorId, branchId, line.freeQty ? `${reference} · incl. ${line.freeQty} free` : reference, tx);
       }
-      if (line.purchaseOrderItemId && line.acceptedQty > 0) {
-        await tx.purchaseOrderItem.update({ where: { id: line.purchaseOrderItemId }, data: { receivedQty: { increment: line.acceptedQty } } });
+      if (line.purchaseOrderItemId && line.acceptedQty + line.freeQty > 0) {
+        await tx.purchaseOrderItem.update({ where: { id: line.purchaseOrderItemId }, data: { receivedQty: { increment: line.acceptedQty }, freeReceived: { increment: line.freeQty } } });
       }
     }
     if (order) {
@@ -140,8 +148,13 @@ export async function grnSetup(branchId: number) {
       .map((order) => ({
         id: order.id, poNumber: order.poNumber, supplierId: order.supplierId, status: order.status, orderDate: order.orderDate, expectedDate: order.expectedDate,
         items: order.items
-          .map((item) => ({ id: item.id, productId: item.productId, description: item.description, ordered: item.quantity, received: item.receivedQty, remaining: Math.max(0, item.quantity - item.receivedQty), unitCost: item.unitCost }))
-          .filter((item) => item.remaining > 0),
+          .map((item) => ({
+            id: item.id, productId: item.productId, description: item.description, ordered: item.quantity, received: item.receivedQty,
+            remaining: Math.max(0, item.quantity - item.receivedQty), unitCost: item.unitCost,
+            // Free issue agreed on the order and still to come.
+            freeQty: item.freeQty, freeDue: Math.max(0, item.freeQty - item.freeReceived),
+          }))
+          .filter((item) => item.remaining > 0 || item.freeDue > 0),
       }))
       .filter((order) => order.items.length > 0),
   };
@@ -190,7 +203,7 @@ export async function listGrns(q: { page: number; limit: number; search?: string
     rows: rows.map((row) => ({
       id: row.id, grnNo: row.grnNo, createdAt: row.createdAt, branch: row.branch.name, supplierName: row.supplierName, poNumber: row.poNumber,
       supplierInvoiceNo: row.supplierInvoiceNo, invoiceTotal: row.invoiceTotal, totalCost: row.totalCost,
-      acceptedUnits: row.acceptedUnits, rejectedUnits: row.rejectedUnits, lines: row._count.items, receivedBy: names.get(row.receivedById) ?? "—",
+      acceptedUnits: row.acceptedUnits, rejectedUnits: row.rejectedUnits, freeUnits: row.freeUnits, lines: row._count.items, receivedBy: names.get(row.receivedById) ?? "—",
     })),
     total,
     totals: { cost: round2(sums._sum.totalCost ?? 0), accepted: sums._sum.acceptedUnits ?? 0, rejected: sums._sum.rejectedUnits ?? 0 },

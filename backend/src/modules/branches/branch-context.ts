@@ -4,8 +4,8 @@ import { prisma } from "../../database/prisma.client";
 import { AppError } from "../../common/utils/errors";
 
 type Db = Prisma.TransactionClient | typeof prisma;
-export type BranchInfo = { id: number; code: string; name: string; address: string | null; phone: string | null; isMain: boolean };
-const BRANCH_SELECT = { id: true, code: true, name: true, address: true, phone: true, isMain: true } as const;
+export type BranchInfo = { id: number; code: string; name: string; address: string | null; phone: string | null; email: string | null; isMain: boolean };
+const BRANCH_SELECT = { id: true, code: true, name: true, address: true, phone: true, email: true, isMain: true } as const;
 
 /** The main branch (created on first use, so a fresh install always has one). */
 export async function mainBranch(db: Db = prisma): Promise<BranchInfo> {

@@ -43,6 +43,7 @@ grnRouter.post("/", handlers, async (req, res, next) => {
         purchaseOrderItemId: z.number().int().positive().nullable().optional(),
         description: z.string().trim().max(200).optional(),
         delivered: z.number().int().min(0).max(1_000_000),
+        free: z.number().int().min(0).max(1_000_000).optional(),
         rejected: z.number().int().min(0).max(1_000_000).optional(),
         rejectReason: z.string().trim().max(200).nullable().optional(),
         unitCost: z.number().min(0).max(100_000_000),

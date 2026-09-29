@@ -245,6 +245,15 @@ export default function ReportsPage() {
               )}
             </section>
 
+            {report.stock.freeIssues && report.stock.freeIssues.units > 0 && (
+              <section className="lx-card">
+                <div className="lx-card-head"><div><div className="lx-card-title">Free issues from suppliers</div><div className="lx-card-sub">Bonus bottles on {report.stock.freeIssues.grns} delivery(ies) — they lower the cost price of the stock</div></div></div>
+                <div className="lx-book-totals">
+                  <span>Free bottles received<b>{report.stock.freeIssues.units}</b></span>
+                  <span>Worth at the unit prices<b>{money(report.stock.freeIssues.value)}</b></span>
+                </div>
+              </section>
+            )}
             {report.returns && (
               <section className="lx-card">
                 <div className="lx-card-head"><div><div className="lx-card-title">Returns &amp; damages</div><div className="lx-card-sub">{report.returns.refundBills} refund(s) · {report.returns.exchanged} exchanged · {report.returns.storeDamaged} damaged in store</div></div></div>
