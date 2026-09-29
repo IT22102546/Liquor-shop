@@ -53,7 +53,7 @@ export async function listSales(query: SalesQueryDto) {
       take: query.limit,
       include: {
         cashier: { select: { name: true, role: true } },
-        customer: { select: { id: true, firstName: true, lastName: true, mobileNumber: true, loyaltyPoints: true } },
+        customer: { select: { id: true, firstName: true, lastName: true, mobileNumber: true, loyaltyPoints: true, walletBalance: true } },
       },
     }),
     prisma.posCounterSale.count({ where }),
@@ -94,6 +94,11 @@ export async function listSales(query: SalesQueryDto) {
         soldAt: sale.createdAt,
         paymentMethod: sale.paymentMethod,
         paymentReference: sale.paymentReference,
+        cashPaid: sale.cashPaid,
+        cardPaid: sale.cardPaid,
+        transferPaid: sale.transferPaid,
+        walletUsed: sale.walletUsed,
+        walletCredit: sale.walletCredit,
         subtotal: round2(sale.totalAmount + sale.emptyDeduction + sale.discountAmount + sale.pointsValue),
         emptyDeduction: sale.emptyDeduction,
         discount: sale.discountType ? { type: sale.discountType, value: sale.discountValue, amount: sale.discountAmount } : null,
@@ -105,7 +110,7 @@ export async function listSales(query: SalesQueryDto) {
         changeGiven: sale.changeGiven,
         cashier: sale.cashier,
         customer: sale.customer
-          ? { id: sale.customer.id, name: fullName(sale.customer), mobileNumber: sale.customer.mobileNumber, pointsBalance: sale.customer.loyaltyPoints }
+          ? { id: sale.customer.id, name: fullName(sale.customer), mobileNumber: sale.customer.mobileNumber, pointsBalance: sale.customer.loyaltyPoints, walletBalance: sale.customer.walletBalance }
           : null,
         pointsEarned: sale.pointsEarned,
         units: items.reduce((sum, item) => sum + item.quantity, 0),
@@ -177,7 +182,7 @@ async function periodFigures(from: Date, to: Date) {
     }),
     prisma.posCounterSale.findMany({
       where: { createdAt: { gte: from, lte: to } },
-      select: { totalAmount: true, paymentMethod: true, customerId: true, createdAt: true, discountAmount: true, pointsValue: true, pointsRedeemed: true, cashier: { select: { id: true, name: true } } },
+      select: { totalAmount: true, paymentMethod: true, cashPaid: true, cardPaid: true, transferPaid: true, customerId: true, createdAt: true, discountAmount: true, pointsValue: true, pointsRedeemed: true, cashier: { select: { id: true, name: true } } },
     }),
   ]);
 
@@ -303,8 +308,9 @@ export async function getDashboardSummary(query: DashboardQueryDto) {
     byStaff.set(bill.cashier.id, entry);
   });
 
-  const cashTotal = current.bills.filter((bill) => bill.paymentMethod === "CASH").reduce((sum, bill) => sum + bill.totalAmount, 0);
-  const cardTotal = current.bills.filter((bill) => bill.paymentMethod !== "CASH").reduce((sum, bill) => sum + bill.totalAmount, 0);
+  // What was actually paid each way (split bills count toward both).
+  const cashTotal = current.bills.reduce((sum, bill) => sum + bill.cashPaid, 0);
+  const cardTotal = current.bills.reduce((sum, bill) => sum + bill.cardPaid + bill.transferPaid, 0);
 
   const stockWatch = products
     .filter((product) => product.quantity <= 0 || ((product.lowStockThreshold ?? 0) > 0 && product.quantity <= (product.lowStockThreshold ?? 0)))

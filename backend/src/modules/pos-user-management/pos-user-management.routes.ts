@@ -29,6 +29,7 @@ router.get("/dashboard", management, controller.getDashboard);
 // Loyalty members: cashiers can look up and register members at the counter; only admins edit/delete.
 router.get("/", sales, controller.getPosUsers);
 router.get("/:id/purchases", finance, controller.getPurchasesByUser);
+router.get("/:id/history", authorizePosRoles("ADMIN", "CASHIER", "ACCOUNTANT"), controller.getMemberHistory);
 router.get("/:id", management, controller.getPosUser);
 router.post("/", sales, controller.createPosUser);
 router.patch("/:id", management, controller.updatePosUser);

@@ -15,6 +15,7 @@ type CurrentShift = {
   denominations: number[];
 };
 type ShiftRow = { id: number; shiftNo: string; status: string; openedAt: string; openedBy: string; closedAt: string | null; closedBy: string | null; openingFloat: number; netSales: number | null; bills: number | null; cashDifference: number | null; cashBanked: number | null };
+type ShiftTab = "bills" | "payments" | "wallets" | "staff" | "items" | "offers" | "cash" | "stock" | "stockin" | "journal";
 type CountResult = { countedCash: number; expectedCash: number; difference: number; cardSales: number; recounts: number };
 
 const money = (value: number | null | undefined) => (value == null ? "—" : `Rs. ${value.toLocaleString("en-LK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
@@ -33,7 +34,7 @@ export default function DayEndPage() {
   const [floatInput, setFloatInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [entryModal, setEntryModal] = useState<"IN" | "OUT" | null>(null);
-  const [tab, setTab] = useState<"bills" | "staff" | "items" | "offers" | "cash" | "stock">("bills");
+  const [tab, setTab] = useState<ShiftTab>("bills");
   const [closing, setClosing] = useState(false);
   const [viewing, setViewing] = useState<ShiftReport | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -153,13 +154,13 @@ export default function DayEndPage() {
               <div><span>Bills</span><strong>{report.sales.bills}</strong><em>{report.sales.units} units sold</em></div>
               <div><span>Net sales</span><strong>{blind ? "Hidden" : money(report.sales.netSales)}</strong><em>{blind ? "shown after the drawer count" : `cash ${money(report.sales.cashSales)} · card ${money(report.sales.cardSales)}${report.sales.transferSales ? ` · QR ${money(report.sales.transferSales)}` : ""}`}</em></div>
               <div><span>Paid out</span><strong>{money(entries.filter((e) => e.direction === "OUT" && !e.voided).reduce((sum, e) => sum + e.amount, 0))}</strong><em>{entries.filter((e) => e.direction === "OUT" && !e.voided).length} expense(s) this shift</em></div>
-              <div><span>Expected in drawer</span><strong>{blind ? "Hidden" : money(report.cash.expectedCash)}</strong><em>{blind ? "blind count — count first" : "float + cash sales + in − out"}</em></div>
+              <div><span>Expected in drawer</span><strong>{blind ? "Hidden" : money(report.cash.expectedCash)}</strong><em>{blind ? "blind count — count first" : report.cash.walletKept ? "float + cash sales + wallet change + in − out" : "float + cash sales + in − out"}</em></div>
             </div>
           </section>
 
           <section className="lx-card lx-log-card">
             <div className="lx-seg-plain" role="tablist" style={{ margin: "0.4rem 0.4rem 0.6rem" }}>
-              {([["bills", `Sales (${report.sales.bills})`], ["staff", "By staff"], ["items", "Items sold"], ["offers", `Discounts & loyalty (${report.sales.loyalty?.rows.length ?? 0})`], ["cash", `Expenses & cash in (${entries.length})`], ["stock", "Stock book"]] as const).map(([key, label]) => (
+              {([["bills", `Sales (${report.sales.bills})`], ["payments", `Payments${report.payments?.splitBills.length ? ` · ${report.payments.splitBills.length} split` : ""}`], ["wallets", `Customer wallets (${report.wallet?.rows.length ?? 0})`], ["staff", "By staff"], ["items", "Items sold"], ["offers", `Discounts & loyalty (${report.sales.loyalty?.rows.length ?? 0})`], ["cash", `Expenses & cash in (${entries.length})`], ["stock", "Stock book"], ["stockin", `Stock in & changes (${report.stockLog?.length ?? 0})`], ["journal", `Shift journal (${report.journal?.length ?? 0})`]] as const).map(([key, label]) => (
                 <button key={key} type="button" className={tab === key ? "active" : ""} onClick={() => setTab(key)}>{label}</button>
               ))}
             </div>
@@ -234,7 +235,7 @@ export default function DayEndPage() {
   );
 }
 
-function ShiftTables({ report, tab }: { report: ShiftReport; tab: "bills" | "staff" | "items" | "offers" | "cash" | "stock" }) {
+function ShiftTables({ report, tab }: { report: ShiftReport; tab: ShiftTab }) {
   if (tab === "bills") {
     return report.sales.billList.length === 0 ? <div className="lx-empty">No sales yet in this shift.</div> : (
       <div className="data-table-wrap"><table className="data-table">
@@ -270,6 +271,104 @@ function ShiftTables({ report, tab }: { report: ShiftReport; tab: "bills" | "sta
         <tbody>{report.sales.byProduct.map((row) => (
           <tr key={row.name}><td>{row.name}</td><td style={{ textAlign: "right" }}>{row.units}</td><td style={{ textAlign: "right" }}>{money(row.amount)}</td></tr>
         ))}{report.sales.byProduct.length === 0 && <tr><td colSpan={3} className="bm-table-empty">Nothing sold yet.</td></tr>}</tbody>
+      </table></div>
+    );
+  }
+  if (tab === "payments") {
+    const payments = report.payments;
+    if (!payments) return <div className="lx-empty">This shift's report has no payment breakdown.</div>;
+    return (
+      <>
+        <div className="data-table-wrap"><table className="data-table">
+          <thead><tr><th>Paid by</th><th style={{ textAlign: "right" }}>Bills</th><th style={{ textAlign: "right" }}>Amount</th></tr></thead>
+          <tbody>
+            {payments.rows.map((row) => <tr key={row.method}><td><strong>{row.method}</strong></td><td style={{ textAlign: "right" }}>{row.bills}</td><td style={{ textAlign: "right" }}>{money(row.amount)}</td></tr>)}
+            {payments.wallet && payments.wallet.amount > 0 && <tr><td><strong>Part paid from customer wallets</strong></td><td style={{ textAlign: "right" }}>{payments.wallet.bills}</td><td style={{ textAlign: "right" }}>{money(payments.wallet.amount)}</td></tr>}
+            <tr><td className="td-muted">Money actually received</td><td /><td style={{ textAlign: "right" }} className="td-muted">cash {money(report.sales.cashSales)} · card {money(report.sales.cardSales)} · QR {money(report.sales.transferSales ?? 0)}</td></tr>
+            {(report.sales.walletKept ?? 0) !== 0 && <tr><td className="td-muted">Change kept in customer wallets (stayed in the drawer)</td><td /><td style={{ textAlign: "right" }} className="td-muted">{money(report.sales.walletKept)}</td></tr>}
+            <tr><td className="td-muted">Change given back</td><td /><td style={{ textAlign: "right" }} className="td-muted">{money(payments.changeGiven)}</td></tr>
+          </tbody>
+        </table></div>
+        <div className="lx-card-head" style={{ margin: "1rem 0.4rem 0.4rem" }}><div><div className="lx-card-title">Split bills</div><div className="lx-card-sub">Bills paid partly in cash and partly by card or QR</div></div></div>
+        {payments.splitBills.length === 0 ? <div className="lx-empty">No split bills in this shift.</div> : (
+          <div className="data-table-wrap"><table className="data-table">
+            <thead><tr><th>Time</th><th>Bill</th><th>Sold by</th><th style={{ textAlign: "right" }}>Total</th><th style={{ textAlign: "right" }}>Cash</th><th style={{ textAlign: "right" }}>Card</th><th style={{ textAlign: "right" }}>QR</th><th>Approval / ref</th></tr></thead>
+            <tbody>{[...payments.splitBills].reverse().map((row) => (
+              <tr key={row.billNo}>
+                <td className="td-muted">{new Date(row.time).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</td>
+                <td className="td-muted">{row.billNo}</td>
+                <td><strong>{row.cashier}</strong></td>
+                <td style={{ textAlign: "right" }}>{money(row.total)}</td>
+                <td style={{ textAlign: "right" }}>{money(row.cash)}</td>
+                <td style={{ textAlign: "right" }}>{row.card ? money(row.card) : "—"}</td>
+                <td style={{ textAlign: "right" }}>{row.transfer ? money(row.transfer) : "—"}</td>
+                <td className="td-muted">{row.reference ?? "—"}</td>
+              </tr>
+            ))}</tbody>
+          </table></div>
+        )}
+      </>
+    );
+  }
+  if (tab === "wallets") {
+    const wallet = report.wallet;
+    if (!wallet) return <div className="lx-empty">This shift's report has no wallet detail.</div>;
+    return (
+      <>
+        <div className="lx-book-totals" style={{ padding: "0 0.4rem 0.75rem" }}>
+          <span>Change kept in wallets<b>{money(wallet.kept)}</b></span>
+          <span>Spent from wallets<b>{money(wallet.used)}</b></span>
+          <span>Members<b>{new Set(wallet.rows.map((row) => row.mobile)).size}</b></span>
+        </div>
+        {wallet.rows.length === 0 ? <div className="lx-empty">No wallet activity in this shift.</div> : (
+          <div className="data-table-wrap"><table className="data-table">
+            <thead><tr><th>Time</th><th>Member</th><th>What</th><th>Bill</th><th>Served by</th><th style={{ textAlign: "right" }}>Amount</th><th style={{ textAlign: "right" }}>Wallet after</th></tr></thead>
+            <tbody>{[...wallet.rows].reverse().map((row, index) => (
+              <tr key={`${row.billNo}-${row.type}-${index}`}>
+                <td className="td-muted">{new Date(row.time).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</td>
+                <td><strong>{row.member}</strong><div className="td-muted">{row.mobile}</div></td>
+                <td>{row.type === "CREDIT" ? "Change kept" : "Spent on bill"}</td>
+                <td className="td-muted">{row.billNo ?? "—"}</td>
+                <td>{row.by}</td>
+                <td style={{ textAlign: "right" }} className={row.type === "CREDIT" ? "lx-amount-in" : "lx-amount-out"}>{row.amount == null ? "Hidden" : `${row.amount >= 0 ? "+" : "−"}${money(Math.abs(row.amount))}`}</td>
+                <td style={{ textAlign: "right" }}>{money(row.balanceAfter)}</td>
+              </tr>
+            ))}</tbody>
+          </table></div>
+        )}
+      </>
+    );
+  }
+  if (tab === "stockin") {
+    const rows = report.stockLog ?? [];
+    return rows.length === 0 ? <div className="lx-empty">No stock received, corrected or returned in this shift.</div> : (
+      <div className="data-table-wrap"><table className="data-table">
+        <thead><tr><th>Time</th><th>What</th><th>Product</th><th style={{ textAlign: "right" }}>Qty</th><th>From / reference</th><th>By</th></tr></thead>
+        <tbody>{[...rows].reverse().map((row, index) => (
+          <tr key={`${row.time}-${index}`}>
+            <td className="td-muted">{new Date(row.time).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</td>
+            <td><strong>{row.what}</strong></td>
+            <td>{row.product}</td>
+            <td style={{ textAlign: "right" }} className={row.quantity < 0 ? "lx-amount-out" : "lx-amount-in"}>{row.quantity > 0 ? `+${row.quantity}` : row.quantity}</td>
+            <td className="td-muted">{row.reference ?? "—"}</td>
+            <td>{row.by}</td>
+          </tr>
+        ))}</tbody>
+      </table></div>
+    );
+  }
+  if (tab === "journal") {
+    const rows = report.journal ?? [];
+    return rows.length === 0 ? <div className="lx-empty">Nothing else was done during this shift.</div> : (
+      <div className="data-table-wrap"><table className="data-table">
+        <thead><tr><th>Time</th><th>Who</th><th>What happened</th></tr></thead>
+        <tbody>{[...rows].reverse().map((row, index) => (
+          <tr key={`${row.time}-${index}`}>
+            <td className="td-muted" style={{ whiteSpace: "nowrap" }}>{new Date(row.time).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</td>
+            <td><strong>{row.by}</strong></td>
+            <td className={row.summary.startsWith("Blocked") ? "lx-amount-out" : ""}>{row.summary}</td>
+          </tr>
+        ))}</tbody>
       </table></div>
     );
   }

@@ -124,10 +124,22 @@ export const checkoutSaleSchema = z.object({
     )
     .min(1, "Add at least one product")
     .max(100),
-  paymentMethod: z.enum(["CASH", "CHEQUE", "BANK_TRANSFER", "CARD"]).default("CASH"),
+  paymentMethod: z.enum(["CASH", "CHEQUE", "BANK_TRANSFER", "CARD", "SPLIT"]).default("CASH"),
   /** Card approval code from the card slip, or the bank transfer / QR reference. */
   paymentReference: z.string().trim().max(60).optional(),
+  /** Cash handed over (cash sales, and the cash part of a split bill). */
   amountReceived: z.number().min(0).optional(),
+  /** Loyalty members only: rupees taken from their wallet to pay part (or all) of the bill. */
+  walletUse: z.number().min(0).max(100_000_000).optional(),
+  /** Loyalty members only: how much of the cash change to keep in their wallet instead of handing it back. */
+  changeToWallet: z.number().min(0).max(100_000_000).optional(),
+  /** SPLIT only: the parts paid by card and by transfer / QR; the rest of the total is paid in cash. */
+  split: z
+    .object({
+      card: z.number().min(0).max(100_000_000).default(0),
+      transfer: z.number().min(0).max(100_000_000).default(0),
+    })
+    .optional(),
   /** Loyalty member buying; leave out for a walk-in customer. */
   customerId: z.number().int().positive().optional(),
   /** Bill discount (only when discounts are switched on in Shop Settings). */

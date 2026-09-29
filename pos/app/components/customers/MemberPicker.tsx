@@ -10,6 +10,8 @@ export type LoyaltyMember = {
   lastName: string;
   mobileNumber: string;
   loyaltyPoints: number;
+  /** Change the member kept at the shop; can pay later bills. */
+  walletBalance?: number;
   visits: number;
   totalSpent?: number;
   lastVisitAt?: string | null;
@@ -129,6 +131,7 @@ export function MemberPicker({ token, member, pointValue, onChange, onAuthExpire
           </div>
           <div className="pos-member-stats">
             <div><span>Points</span><strong>{member.loyaltyPoints.toLocaleString()}</strong><em>= {money(member.loyaltyPoints * pointValue)}</em></div>
+            <div className={(member.walletBalance ?? 0) > 0 ? "wallet" : ""}><span>Wallet</span><strong>{money(member.walletBalance ?? 0).replace(".00", "")}</strong><em>{(member.walletBalance ?? 0) > 0 ? "can pay this bill" : "change kept"}</em></div>
             <div><span>Visits</span><strong>{member.visits}</strong><em>{member.lastVisitAt ? `last ${new Date(member.lastVisitAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : "first visit"}</em></div>
             <div><span>Spent</span><strong>{money(member.totalSpent ?? 0).replace(".00", "")}</strong><em>all time</em></div>
           </div>
@@ -188,7 +191,7 @@ export function MemberPicker({ token, member, pointValue, onChange, onAuthExpire
                   <button key={result.id} type="button" onClick={() => pick(result)}>
                     <span className="pos-member-avatar">{result.firstName.charAt(0).toUpperCase()}</span>
                     <span><strong>{memberName(result)}</strong><em>{result.mobileNumber}</em></span>
-                    <span className="pos-member-points">{result.loyaltyPoints} pts</span>
+                    <span className="pos-member-points">{result.loyaltyPoints} pts{(result.walletBalance ?? 0) > 0 ? ` · ${money(result.walletBalance ?? 0).replace(".00", "")}` : ""}</span>
                   </button>
                 ))}
                 {query.trim().length >= 2 && !searching && results.length === 0 && <p>No member found.</p>}

@@ -28,6 +28,11 @@ type Sale = {
   soldAt: string;
   paymentMethod: SaleReceipt["paymentMethod"];
   paymentReference?: string | null;
+  cashPaid?: number;
+  cardPaid?: number;
+  transferPaid?: number;
+  walletUsed?: number;
+  walletCredit?: number;
   subtotal: number;
   emptyDeduction: number;
   emptiesReturned: number;
@@ -35,7 +40,7 @@ type Sale = {
   amountReceived: number;
   changeGiven: number;
   cashier: { name: string; role: PosAdminRole };
-  customer: { id: number; name: string | null; mobileNumber: string; pointsBalance: number } | null;
+  customer: { id: number; name: string | null; mobileNumber: string; pointsBalance: number; walletBalance?: number } | null;
   pointsEarned: number;
   discount: { type: "PERCENT" | "AMOUNT"; value: number; amount: number } | null;
   pointsRedeemed: number;
@@ -55,13 +60,18 @@ function saleToReceipt(sale: Sale): SaleReceipt {
     cashierName: sale.cashier.name,
     cashierRole: ROLE_LABELS[sale.cashier.role] ?? sale.cashier.role,
     member: sale.customer
-      ? { name: sale.customer.name ?? "Member", mobileNumber: sale.customer.mobileNumber, pointsEarned: sale.pointsEarned, pointsRedeemed: sale.pointsRedeemed, pointsBalance: sale.customer.pointsBalance }
+      ? { name: sale.customer.name ?? "Member", mobileNumber: sale.customer.mobileNumber, pointsEarned: sale.pointsEarned, pointsRedeemed: sale.pointsRedeemed, pointsBalance: sale.customer.pointsBalance, walletBalance: sale.customer.walletBalance }
       : null,
     discount: sale.discount,
     pointsRedeemed: sale.pointsRedeemed,
     pointsValue: sale.pointsValue,
     paymentMethod: sale.paymentMethod,
     paymentReference: sale.paymentReference,
+    cashPaid: sale.cashPaid,
+    cardPaid: sale.cardPaid,
+    transferPaid: sale.transferPaid,
+    walletUsed: sale.walletUsed,
+    walletCredit: sale.walletCredit,
     lines: sale.items.map((item) => ({
       name: item.name,
       detail: [item.brand, item.size].filter(Boolean).join(" · ") || undefined,
@@ -189,11 +199,13 @@ export default function SalesBillsPage() {
                     {sale.emptiesReturned > 0 && <> · <IconBottle /> {sale.emptiesReturned} empt{sale.emptiesReturned === 1 ? "y" : "ies"}</>}
                     {sale.discount && sale.discount.amount > 0 && <> · <b className="discount">−{money(sale.discount.amount)} discount</b></>}
                     {sale.pointsRedeemed > 0 && <> · <b className="member">{sale.pointsRedeemed} pts used</b></>}
+                    {(sale.walletUsed ?? 0) > 0 && <> · <b className="member">−{money(sale.walletUsed ?? 0)} from wallet</b></>}
+                    {(sale.walletCredit ?? 0) > 0 && <> · <b className="member">+{money(sale.walletCredit ?? 0)} to wallet</b></>}
                   </em>
                 </span>
                 <span className={`lx-bill-pay ${sale.paymentMethod === "CASH" ? "cash" : "card"}`}>
                   {sale.paymentMethod === "CASH" ? <IconCash size={14} /> : <IconCard size={14} />}
-                  {sale.paymentMethod === "CASH" ? "Cash" : sale.paymentMethod === "CARD" ? "Card" : "Transfer / QR"}
+                  {sale.paymentMethod === "CASH" ? "Cash" : sale.paymentMethod === "CARD" ? "Card" : sale.paymentMethod === "SPLIT" ? "Split" : "Transfer / QR"}
                 </span>
                 <span className="lx-bill-total">{money(sale.total)}</span>
                 <span className="lx-bill-print" aria-hidden="true"><IconPrinter size={16} /></span>

@@ -15,18 +15,38 @@ type Member = {
   nic: string | null;
   address: string | null;
   loyaltyPoints: number;
+  walletBalance: number;
   totalSpent: number;
   visits: number;
   lastVisitAt: string | null;
   createdAt: string;
 };
 type MemberBill = { id: number; billNo: string; soldAt: string; total: number; pointsEarned: number; units: number; items: Array<{ name: string; quantity: number }> };
+type MemberHistory = {
+  wallet: { balance: number; added: number; addedBills: number; spent: number; spentBills: number };
+  points: { balance: number; balanceValue: number; earned: number; earnedBills: number; used: number; usedValue: number; rupeesPerPoint: number; pointValue: number };
+  bills: Array<{
+    id: number; time: string; billNo: string; shiftNo: string | null; by: string; billTotal: number; discount: number;
+    paid: { cash: number; card: number; transfer: number; wallet: number };
+    cashReceived: number; changeGiven: number; walletAdded: number; walletSpent: number; walletAfter: number;
+    pointsEarned: number; pointsRate: number | null; pointsUsed: number; pointsUsedValue: number; pointsAfter: number;
+  }>;
+};
+type HistoryTab = "money" | "points";
 type FormState = { firstName: string; lastName: string; mobileNumber: string; email: string; nic: string; address: string };
 
 const EMPTY_FORM: FormState = { firstName: "", lastName: "", mobileNumber: "", email: "", nic: "", address: "" };
 const PAGE_SIZE = 25;
 const money = (value: number) => `Rs. ${value.toLocaleString("en-LK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const fullName = (member: Pick<Member, "firstName" | "lastName">) => [member.firstName, member.lastName].filter(Boolean).join(" ");
+/** "Rs 1,700.00 paid ÷ Rs 100 per point = 17 points" — how a bill's points were worked out. */
+function pointsWorking(bill: MemberHistory["bills"][number]) {
+  const paid = money(bill.billTotal);
+  if (bill.pointsRate == null) return `${paid} bill → ${bill.pointsEarned} point${bill.pointsEarned === 1 ? "" : "s"}`;
+  const rate = money(bill.pointsRate);
+  if (bill.pointsEarned === 0) return `${paid} paid — under ${rate}, so no points`;
+  return `${paid} paid ÷ ${rate} per point = ${bill.pointsEarned} point${bill.pointsEarned === 1 ? "" : "s"}`;
+}
 const shortDate = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—");
 
 export default function LoyaltyCustomersPage() {
@@ -48,6 +68,22 @@ export default function LoyaltyCustomersPage() {
   const [deleting, setDeleting] = useState<Member | null>(null);
   const [billsFor, setBillsFor] = useState<Member | null>(null);
   const [bills, setBills] = useState<MemberBill[] | null>(null);
+  const [walletFor, setWalletFor] = useState<Member | null>(null);
+  const [history, setHistory] = useState<MemberHistory | null>(null);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [historyTab, setHistoryTab] = useState<HistoryTab>("money");
+  useEffect(() => {
+    if (!walletFor) return;
+    setHistory(null);
+    setHistoryError(null);
+    void fetch(`${base}/${walletFor.id}/history`, { headers: auth, cache: "no-store" })
+      .then(async (res) => {
+        const json = (await res.json()) as { data?: MemberHistory; message?: string };
+        if (!res.ok || !json.data) throw new Error(json.message ?? "Could not load this member's history");
+        setHistory(json.data);
+      })
+      .catch((err: Error) => setHistoryError(err.message));
+  }, [auth, base, walletFor]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -119,7 +155,8 @@ export default function LoyaltyCustomersPage() {
     const response = await fetch(`${base}/${deleting.id}`, { method: "DELETE", headers: auth }).catch(() => null);
     setSaving(false);
     if (!response?.ok) {
-      setError("Could not delete the member");
+      const payload = (await response?.json().catch(() => null)) as { message?: string } | null;
+      setError(payload?.message ?? "Could not delete the member");
     }
     setDeleting(null);
     void load();
@@ -162,6 +199,7 @@ export default function LoyaltyCustomersPage() {
               <tr>
                 <th>Member</th>
                 <th style={{ textAlign: "right" }}>Points</th>
+                <th style={{ textAlign: "right" }}>Wallet</th>
                 <th style={{ textAlign: "right" }}>Visits</th>
                 <th style={{ textAlign: "right" }}>Total spent</th>
                 <th>Last visit</th>
@@ -170,9 +208,9 @@ export default function LoyaltyCustomersPage() {
               </tr>
             </thead>
             <tbody>
-              {loading && members.length === 0 && <tr><td colSpan={7} className="bm-table-empty">Loading members…</td></tr>}
+              {loading && members.length === 0 && <tr><td colSpan={8} className="bm-table-empty">Loading members…</td></tr>}
               {!loading && members.length === 0 && (
-                <tr><td colSpan={7} className="bm-table-empty">{appliedSearch ? "No member matches this search." : "No loyalty members yet. Add one here or from the counter while billing."}</td></tr>
+                <tr><td colSpan={8} className="bm-table-empty">{appliedSearch ? "No member matches this search." : "No loyalty members yet. Add one here or from the counter while billing."}</td></tr>
               )}
               {members.map((member) => (
                 <tr key={member.id}>
@@ -186,12 +224,16 @@ export default function LoyaltyCustomersPage() {
                     <span className="lx-points">{member.loyaltyPoints.toLocaleString()}</span>
                     <div className="td-muted" style={{ fontSize: "0.7rem", marginTop: 2 }}>= {money(member.loyaltyPoints * settings.loyaltyPointValue)}</div>
                   </td>
+                  <td style={{ textAlign: "right" }}>
+                    <span className={member.walletBalance > 0 ? "lx-wallet" : "td-muted"}>{money(member.walletBalance ?? 0)}</span>
+                  </td>
                   <td style={{ textAlign: "right" }}>{member.visits}</td>
                   <td style={{ textAlign: "right" }}>{money(member.totalSpent)}</td>
                   <td className="td-muted">{shortDate(member.lastVisitAt)}</td>
                   <td className="td-muted">{shortDate(member.createdAt)}</td>
                   <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
                     <button type="button" className="btn-outline lx-row-btn" onClick={() => setBillsFor(member)}>Bills</button>
+                    <button type="button" className="btn-outline lx-row-btn" onClick={() => { setHistoryTab("money"); setWalletFor(member); }}>Wallet &amp; points</button>
                     <button type="button" className="btn-outline lx-row-btn" onClick={() => openForm(member)}>Edit</button>
                     <button type="button" className="btn-outline lx-row-btn" onClick={() => setDeleting(member)}>Delete</button>
                   </td>
@@ -236,6 +278,7 @@ export default function LoyaltyCustomersPage() {
             <h3 className="bm-modal-title">Delete {fullName(deleting)}?</h3>
             <p className="bm-modal-body">
               Their {deleting.loyaltyPoints} loyalty points will be lost. Their past sales stay in the sales records as walk-in sales.
+              {deleting.walletBalance > 0 && <> They still have <b>{money(deleting.walletBalance)}</b> in their wallet, so they can&apos;t be deleted until it&apos;s spent.</>}
             </p>
             <div className="bm-modal-actions">
               <button type="button" className="btn-outline" onClick={() => setDeleting(null)}>Keep member</button>
@@ -245,11 +288,86 @@ export default function LoyaltyCustomersPage() {
         </div>
       )}
 
+      {walletFor && (
+        <div className="bm-modal-backdrop" onClick={() => setWalletFor(null)}>
+          <div className="bm-modal lx-member-modal wallet-modal" onClick={(event) => event.stopPropagation()}>
+            <h3 className="bm-modal-title">{fullName(walletFor)} — wallet &amp; points</h3>
+            <p className="lx-card-sub">Money added to the wallet and spent from it, and every point earned or used. Each line shows the bill, the shift and who served.</p>
+            <div className="wallet-summary six">
+              <div className="balance"><span>Wallet now</span><strong>{history ? money(history.wallet.balance) : "…"}</strong></div>
+              <div><span>Money added ({history?.wallet.addedBills ?? 0})</span><strong>{history ? `+${money(history.wallet.added)}` : "…"}</strong></div>
+              <div><span>Wallet spent ({history?.wallet.spentBills ?? 0})</span><strong>{history ? `−${money(history.wallet.spent)}` : "…"}</strong></div>
+              <div className="points"><span>Points now</span><strong>{history ? `${history.points.balance.toLocaleString()} pts` : "…"}</strong>{history && <em>worth {money(history.points.balanceValue)}</em>}</div>
+              <div><span>Points rewarded ({history?.points.earnedBills ?? 0})</span><strong>{history ? `+${history.points.earned.toLocaleString()}` : "…"}</strong></div>
+              <div><span>Points used</span><strong>{history ? `−${history.points.used.toLocaleString()}` : "…"}</strong>{history && history.points.used > 0 && <em>{money(history.points.usedValue)} off bills</em>}</div>
+            </div>
+            {history && (
+              <div className="points-rule">
+                <b>How points are earned:</b> 1 point for every {money(history.points.rupeesPerPoint)} paid on a bill (whole points only — the bill total ÷ {history.points.rupeesPerPoint.toLocaleString()}, rounded down). 1 point = {money(history.points.pointValue)} off a later bill.
+              </div>
+            )}
+            <div className="lx-seg-plain" role="tablist">
+              <button type="button" className={historyTab === "money" ? "active" : ""} onClick={() => setHistoryTab("money")}>Money added &amp; spent</button>
+              <button type="button" className={historyTab === "points" ? "active" : ""} onClick={() => setHistoryTab("points")}>Points rewarded &amp; used</button>
+            </div>
+            <div className="data-table-wrap" style={{ maxHeight: "44vh", overflowY: "auto" }}>
+              {historyTab === "money" ? (
+                <table className="data-table">
+                  <thead><tr><th>Date</th><th>Bill · shift</th><th>How</th><th>By</th><th style={{ textAlign: "right" }}>Added</th><th style={{ textAlign: "right" }}>Spent</th><th style={{ textAlign: "right" }}>Wallet after</th></tr></thead>
+                  <tbody>
+                    {!history && <tr><td colSpan={7} className="bm-table-empty">{historyError ?? "Loading…"}</td></tr>}
+                    {history && !history.bills.some((bill) => bill.walletAdded || bill.walletSpent) && <tr><td colSpan={7} className="bm-table-empty">No wallet money yet. At the counter, cash change can be kept in the wallet.</td></tr>}
+                    {history?.bills.filter((bill) => bill.walletAdded || bill.walletSpent).map((bill) => (
+                      <tr key={bill.id}>
+                        <td className="td-muted" style={{ whiteSpace: "nowrap" }}>{new Date(bill.time).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</td>
+                        <td className="td-muted">{bill.billNo}{bill.shiftNo ? ` · ${bill.shiftNo}` : ""}</td>
+                        <td>
+                          {bill.walletSpent > 0 && <div>Paid {money(bill.walletSpent)} of a {money(bill.billTotal)} bill</div>}
+                          {bill.walletAdded > 0 && <div>Change kept: gave {money(bill.cashReceived)} cash for {money(bill.paid.cash)}{bill.changeGiven > 0 ? `, took ${money(bill.changeGiven)} back` : ""}</div>}
+                        </td>
+                        <td>{bill.by}</td>
+                        <td style={{ textAlign: "right", whiteSpace: "nowrap" }} className="lx-amount-in">{bill.walletAdded ? `+${money(bill.walletAdded)}` : "—"}</td>
+                        <td style={{ textAlign: "right", whiteSpace: "nowrap" }} className="lx-amount-out">{bill.walletSpent ? `−${money(bill.walletSpent)}` : "—"}</td>
+                        <td style={{ textAlign: "right", whiteSpace: "nowrap" }}><strong>{money(bill.walletAfter)}</strong></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <table className="data-table">
+                  <thead><tr><th>Date</th><th>Bill · shift</th><th>How the points were worked out</th><th>By</th><th style={{ textAlign: "right" }}>Rewarded</th><th style={{ textAlign: "right" }}>Used</th><th style={{ textAlign: "right" }}>Points after</th></tr></thead>
+                  <tbody>
+                    {!history && <tr><td colSpan={7} className="bm-table-empty">{historyError ?? "Loading…"}</td></tr>}
+                    {history?.bills.length === 0 && <tr><td colSpan={7} className="bm-table-empty">No bills yet. Points are rewarded on every member bill at the counter.</td></tr>}
+                    {history?.bills.map((bill) => (
+                      <tr key={bill.id}>
+                        <td className="td-muted" style={{ whiteSpace: "nowrap" }}>{new Date(bill.time).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</td>
+                        <td className="td-muted">{bill.billNo}{bill.shiftNo ? ` · ${bill.shiftNo}` : ""}</td>
+                        <td>
+                          <div>{pointsWorking(bill)}</div>
+                          {bill.pointsUsed > 0 && <div className="td-muted">Used {bill.pointsUsed.toLocaleString()} pts = {money(bill.pointsUsedValue)} off this bill</div>}
+                          {bill.discount > 0 && <div className="td-muted">Bill discount {money(bill.discount)} (before points)</div>}
+                        </td>
+                        <td>{bill.by}</td>
+                        <td style={{ textAlign: "right", whiteSpace: "nowrap" }} className="lx-amount-in">{bill.pointsEarned ? `+${bill.pointsEarned.toLocaleString()}` : "0"}</td>
+                        <td style={{ textAlign: "right", whiteSpace: "nowrap" }} className="lx-amount-out">{bill.pointsUsed ? `−${bill.pointsUsed.toLocaleString()}` : "—"}</td>
+                        <td style={{ textAlign: "right", whiteSpace: "nowrap" }}><strong>{bill.pointsAfter.toLocaleString()}</strong></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+            <div className="bm-modal-actions"><button type="button" className="btn-accent" onClick={() => setWalletFor(null)}>Close</button></div>
+          </div>
+        </div>
+      )}
+
       {billsFor && (
         <div className="bm-modal-backdrop" onClick={() => setBillsFor(null)}>
           <div className="bm-modal lx-member-modal" onClick={(event) => event.stopPropagation()}>
             <h3 className="bm-modal-title">{fullName(billsFor)}</h3>
-            <p className="lx-card-sub">{billsFor.mobileNumber} · {billsFor.loyaltyPoints} points · {billsFor.visits} visits · {money(billsFor.totalSpent)} spent</p>
+            <p className="lx-card-sub">{billsFor.mobileNumber} · {billsFor.loyaltyPoints} points · wallet {money(billsFor.walletBalance ?? 0)} · {billsFor.visits} visits · {money(billsFor.totalSpent)} spent</p>
             <div className="lx-bill-list" style={{ maxHeight: "50vh", overflowY: "auto" }}>
               {bills === null && <div className="lx-skel" style={{ height: 56 }} />}
               {bills?.length === 0 && <div className="lx-empty">No bills yet.</div>}

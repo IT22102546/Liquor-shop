@@ -3,14 +3,37 @@ import { prisma } from "../../database/prisma.client";
 import { AppError } from "../../common/utils/errors";
 import { EXPENSE_CATEGORIES, HOLDING_SOURCE, INCOME_CATEGORIES, SOURCE_LABELS } from "./cash-book.service";
 import { findOpenShift } from "./stock-movements";
+import { DISPOSAL_LABELS as RETURN_DISPOSAL_LABELS, TYPE_LABELS as RETURN_TYPE_LABELS } from "../returns/returns.service";
 
 /** Sri Lankan notes and coins counted at the till. */
 export const DENOMINATIONS = [5000, 2000, 1000, 500, 100, 50, 20, 10, 5, 2, 1] as const;
 
 const round2 = (value: number) => Math.round(value * 100) / 100;
-const PAYMENT_LABELS: Record<string, string> = { CASH: "Cash", CARD: "Card", BANK_TRANSFER: "Transfer / QR", CHEQUE: "Cheque" };
-/** Card = card machine; everything else that isn't cash (bank transfer, QR, cheque) is checked in the bank. */
-const kindOf = (method: string) => (method === "CASH" ? "cash" : method === "CARD" ? "card" : "transfer");
+const PAYMENT_LABELS: Record<string, string> = { CASH: "Cash", CARD: "Card", BANK_TRANSFER: "Transfer / QR", CHEQUE: "Cheque", SPLIT: "Split" };
+/** The amount paid each way. Card = card machine; transfer = bank transfer / QR / cheque (checked in the bank). */
+type Paid = { cashPaid: number; cardPaid: number; transferPaid: number; walletUsed: number; walletCredit: number; paymentMethod: string };
+/**
+ * How a bill was paid, e.g. "Split: cash 1,000 + card 2,650", "Wallet 500 + cash 320",
+ * with "· 80 change to wallet" when the member kept change.
+ */
+const paymentLabel = (sale: Paid) => {
+  const kept = sale.walletCredit > 0 ? ` · ${sale.walletCredit.toLocaleString("en-LK")} change to wallet` : "";
+  if (sale.walletUsed > 0) {
+    const rest = [
+      sale.cashPaid > 0 ? `cash ${sale.cashPaid.toLocaleString("en-LK")}` : "",
+      sale.cardPaid > 0 ? `card ${sale.cardPaid.toLocaleString("en-LK")}` : "",
+      sale.transferPaid > 0 ? `QR ${sale.transferPaid.toLocaleString("en-LK")}` : "",
+    ].filter(Boolean);
+    return `Wallet ${sale.walletUsed.toLocaleString("en-LK")}${rest.length ? ` + ${rest.join(" + ")}` : ""}${kept}`;
+  }
+  if (sale.paymentMethod !== "SPLIT") return `${PAYMENT_LABELS[sale.paymentMethod] ?? sale.paymentMethod}${kept}`;
+  const parts = [
+    sale.cashPaid > 0 ? `cash ${sale.cashPaid.toLocaleString("en-LK")}` : "",
+    sale.cardPaid > 0 ? `card ${sale.cardPaid.toLocaleString("en-LK")}` : "",
+    sale.transferPaid > 0 ? `QR ${sale.transferPaid.toLocaleString("en-LK")}` : "",
+  ].filter(Boolean);
+  return `Split: ${parts.join(" + ")}${kept}`;
+};
 
 async function staffNames(ids: Array<number | null | undefined>) {
   const unique = [...new Set(ids.filter((id): id is number => Boolean(id)))];
@@ -35,7 +58,7 @@ export async function summarizeShift(shiftId: number) {
     prisma.posCashEntry.findMany({ where: { shiftId }, orderBy: { entryDate: "asc" } }),
     prisma.inventoryMovement.findMany({ where: { shiftId } }),
     prisma.inventoryProduct.findMany({
-      select: { id: true, name: true, compatibleWith: true, quantity: true, emptyBottlesOnHand: true, sellingPrice: true, brand: { select: { name: true } }, category: { select: { name: true } } },
+      select: { id: true, name: true, compatibleWith: true, quantity: true, emptyBottlesOnHand: true, damagedQuantity: true, sellingPrice: true, brand: { select: { name: true } }, category: { select: { name: true } } },
       orderBy: [{ categoryId: "asc" }, { name: "asc" }],
     }),
   ]);
@@ -53,7 +76,7 @@ export async function summarizeShift(shiftId: number) {
       time: sale.createdAt,
       cashier: sale.cashier.name,
       customer: sale.customer ? [sale.customer.firstName, sale.customer.lastName].filter(Boolean).join(" ") : "Walk-in",
-      payment: PAYMENT_LABELS[sale.paymentMethod] ?? sale.paymentMethod,
+      payment: paymentLabel(sale),
       reference: sale.paymentReference,
       items: items.map((line) => `${line.quantity} × ${line.inventoryProduct?.name ?? "Item"}`).join(", "),
       units: items.reduce((sum, line) => sum + line.quantity, 0),
@@ -98,15 +121,24 @@ export async function summarizeShift(shiftId: number) {
     redeemBills: sales.filter((sale) => sale.pointsRedeemed > 0).length,
     rows: adjustments,
   };
-  const cashSales = round2(sales.filter((sale) => sale.paymentMethod === "CASH").reduce((sum, sale) => sum + sale.totalAmount, 0));
-  const cardSales = round2(sales.filter((sale) => kindOf(sale.paymentMethod) === "card").reduce((sum, sale) => sum + sale.totalAmount, 0));
-  const transferSales = round2(sales.filter((sale) => kindOf(sale.paymentMethod) === "transfer").reduce((sum, sale) => sum + sale.totalAmount, 0));
-  const netSales = round2(cashSales + cardSales + transferSales);
+  // Amounts actually paid each way (a split bill adds to more than one).
+  const cashSales = round2(sales.reduce((sum, sale) => sum + sale.cashPaid, 0));
+  const cardSales = round2(sales.reduce((sum, sale) => sum + sale.cardPaid, 0));
+  const transferSales = round2(sales.reduce((sum, sale) => sum + sale.transferPaid, 0));
+  // Wallet: bill parts paid from members' wallets (received on earlier bills) and change they kept today.
+  const walletUsedTotal = round2(sales.reduce((sum, sale) => sum + sale.walletUsed, 0));
+  const walletKept = round2(sales.reduce((sum, sale) => sum + sale.walletCredit, 0));
+  const netSales = round2(cashSales + cardSales + transferSales + walletUsedTotal);
   // Non-cash payments are recorded automatically at the till; listed so they can be ticked off
-  // against the card machine settlement slip and the bank app.
+  // against the card machine settlement slip and the bank app. A split bill lists only its card / QR part.
   const paymentList = (kind: "card" | "transfer") => sales
-    .filter((sale) => kindOf(sale.paymentMethod) === kind)
-    .map((sale) => ({ billNo: sale.invoiceGroupCode, time: sale.createdAt, cashier: sale.cashier.name, amount: sale.totalAmount, reference: sale.paymentReference, method: PAYMENT_LABELS[sale.paymentMethod] ?? sale.paymentMethod }));
+    .filter((sale) => (kind === "card" ? sale.cardPaid : sale.transferPaid) > 0)
+    .map((sale) => ({
+      billNo: sale.invoiceGroupCode, time: sale.createdAt, cashier: sale.cashier.name,
+      amount: kind === "card" ? sale.cardPaid : sale.transferPaid,
+      reference: sale.paymentReference,
+      method: sale.paymentMethod === "SPLIT" ? `Split (of ${sale.totalAmount.toLocaleString("en-LK")})` : PAYMENT_LABELS[sale.paymentMethod] ?? sale.paymentMethod,
+    }));
   const cardPayments = paymentList("card");
   const transferPayments = paymentList("transfer");
   const emptyDeduction = round2(sales.reduce((sum, sale) => sum + sale.emptyDeduction, 0));
@@ -115,13 +147,15 @@ export async function summarizeShift(shiftId: number) {
   const pointsRedeemed = sales.reduce((sum, sale) => sum + sale.pointsRedeemed, 0);
   const grossSales = round2(netSales + emptyDeduction + discounts + pointsValue);
 
-  const byStaffMap = new Map<string, { name: string; bills: number; cash: number; card: number; transfer: number; total: number }>();
+  const byStaffMap = new Map<string, { name: string; bills: number; cash: number; card: number; transfer: number; wallet: number; total: number }>();
   sales.forEach((sale) => {
-    const entry = byStaffMap.get(sale.cashier.name) ?? { name: sale.cashier.name, bills: 0, cash: 0, card: 0, transfer: 0, total: 0 };
+    const entry = byStaffMap.get(sale.cashier.name) ?? { name: sale.cashier.name, bills: 0, cash: 0, card: 0, transfer: 0, wallet: 0, total: 0 };
     entry.bills += 1;
+    entry.wallet = round2(entry.wallet + sale.walletUsed);
     entry.total = round2(entry.total + sale.totalAmount);
-    const kind = kindOf(sale.paymentMethod);
-    entry[kind] = round2(entry[kind] + sale.totalAmount);
+    entry.cash = round2(entry.cash + sale.cashPaid);
+    entry.card = round2(entry.card + sale.cardPaid);
+    entry.transfer = round2(entry.transfer + sale.transferPaid);
     byStaffMap.set(sale.cashier.name, entry);
   });
 
@@ -156,19 +190,72 @@ export async function summarizeShift(shiftId: number) {
   const drawerIn = round2(live.filter((entry) => entry.fromDrawer && entry.direction === "IN").reduce((sum, entry) => sum + entry.amount, 0));
   const drawerOut = round2(live.filter((entry) => entry.fromDrawer && entry.direction === "OUT").reduce((sum, entry) => sum + entry.amount, 0));
   const expensesAll = round2(live.filter((entry) => entry.direction === "OUT").reduce((sum, entry) => sum + entry.amount, 0));
-  const expectedCash = round2(shift.openingFloat + cashSales + drawerIn - drawerOut);
+  // ── Returns & damages: exchanges, refunds, store damage and damaged stock cleared during the shift ──
+  const returnRows = await prisma.posReturn.findMany({ where: { shiftId }, orderBy: [{ createdAt: "asc" }, { id: "asc" }] });
+  const returnStaff = await staffNames(returnRows.map((row) => row.createdById));
+  const refundRows = returnRows.filter((row) => row.type === "REFUND");
+  const refundsCash = round2(refundRows.filter((row) => row.refundMethod === "CASH").reduce((sum, row) => sum + row.refundAmount, 0));
+  const refundsWallet = round2(refundRows.filter((row) => row.refundMethod === "WALLET").reduce((sum, row) => sum + row.refundAmount, 0));
+  const unitsOf = (type: string) => returnRows.filter((row) => row.type === type).reduce((sum, row) => sum + row.quantity, 0);
+  const returns = {
+    refunds: new Set(refundRows.map((row) => row.returnNo)).size,
+    refundUnits: unitsOf("REFUND"),
+    refundsCash,
+    refundsWallet,
+    refundsTotal: round2(refundsCash + refundsWallet),
+    pointsReversed: refundRows.reduce((sum, row) => sum + row.pointsReversed, 0),
+    exchangedUnits: unitsOf("EXCHANGE"),
+    storeDamagedUnits: unitsOf("STORE_DAMAGE"),
+    clearedUnits: unitsOf("DAMAGE_CLEARED"),
+    // Cost of bottles that became damaged this shift (exchanged, found damaged, or returned damaged).
+    damageCost: round2(returnRows
+      .filter((row) => row.type === "EXCHANGE" || row.type === "STORE_DAMAGE" || (row.type === "REFUND" && row.condition === "DAMAGED"))
+      .reduce((sum, row) => sum + (row.unitCost ?? 0) * row.quantity, 0)),
+    rows: returnRows.map((row) => ({
+      returnNo: row.returnNo,
+      time: row.createdAt,
+      type: row.type,
+      what: RETURN_TYPE_LABELS[row.type] ?? row.type,
+      product: row.productName,
+      quantity: row.quantity,
+      condition: row.condition,
+      disposal: row.disposal ? RETURN_DISPOSAL_LABELS[row.disposal] ?? row.disposal : null,
+      billNo: row.invoiceGroupCode,
+      customer: row.customerName,
+      refund: row.refundAmount,
+      refundMethod: row.refundMethod,
+      pointsReversed: row.pointsReversed,
+      reason: row.reason,
+      note: row.note,
+      reference: row.reference,
+      by: returnStaff.get(row.createdById)?.name ?? "—",
+    })),
+  };
+
+  // Change kept in wallets stayed in the drawer, so it is expected there too; cash refunds came out of it.
+  const expectedCash = round2(shift.openingFloat + cashSales + walletKept + drawerIn - drawerOut - refundsCash);
 
   // ── Stock day book: opening + received ± adjusted − sold = closing (per product) ──
-  const stockMoves = new Map<number, { received: number; sold: number; adjusted: number; opening: number }>();
+  const stockMoves = new Map<number, { received: number; sold: number; adjusted: number; opening: number; returned: number; damaged: number }>();
   const emptyMoves = new Map<number, { collected: number; returned: number }>();
+  const damagedMoves = new Map<number, { added: number; cleared: number }>();
   movements.forEach((movement) => {
     if (movement.kind === "STOCK") {
-      const entry = stockMoves.get(movement.productId) ?? { received: 0, sold: 0, adjusted: 0, opening: 0 };
+      const entry = stockMoves.get(movement.productId) ?? { received: 0, sold: 0, adjusted: 0, opening: 0, returned: 0, damaged: 0 };
       if (movement.type === "RECEIVED") entry.received += movement.quantity;
       else if (movement.type === "SOLD") entry.sold += -movement.quantity;
       else if (movement.type === "OPENING") entry.opening += movement.quantity;
+      // Back on the shelf: unopened bottles returned by customers, or damaged ones put back.
+      else if (movement.type === "CUSTOMER_RETURN" || movement.type === "RESTORED") entry.returned += movement.quantity;
+      // Off the shelf into damaged stock: new bottles given in exchange, or damage found in the store.
+      else if (movement.type === "EXCHANGED" || movement.type === "DAMAGED") entry.damaged += -movement.quantity;
       else entry.adjusted += movement.quantity;
       stockMoves.set(movement.productId, entry);
+    } else if (movement.kind === "DAMAGED") {
+      const entry = damagedMoves.get(movement.productId) ?? { added: 0, cleared: 0 };
+      if (movement.quantity > 0) entry.added += movement.quantity;
+      else entry.cleared += -movement.quantity;
+      damagedMoves.set(movement.productId, entry);
     } else {
       const entry = emptyMoves.get(movement.productId) ?? { collected: 0, returned: 0 };
       if (movement.type === "COLLECTED") entry.collected += movement.quantity;
@@ -177,11 +264,11 @@ export async function summarizeShift(shiftId: number) {
     }
   });
   const stockBook = products.map((product) => {
-    const moves = stockMoves.get(product.id) ?? { received: 0, sold: 0, adjusted: 0, opening: 0 };
+    const moves = stockMoves.get(product.id) ?? { received: 0, sold: 0, adjusted: 0, opening: 0, returned: 0, damaged: 0 };
     const closing = product.quantity;
     // New products added during the shift count their opening stock as "received" today.
     const received = moves.received + moves.opening;
-    const opening = closing - received - moves.adjusted + moves.sold;
+    const opening = closing - received - moves.adjusted - moves.returned + moves.sold + moves.damaged;
     return {
       productId: product.id,
       name: product.name,
@@ -191,16 +278,103 @@ export async function summarizeShift(shiftId: number) {
       opening,
       received,
       sold: moves.sold,
+      returned: moves.returned,
+      damaged: moves.damaged,
       adjusted: moves.adjusted,
       closing,
     };
   });
+  // Damaged bottles kept aside: added this shift, cleared this shift, and on hand now.
+  const damagedStock = products
+    .map((product) => {
+      const moves = damagedMoves.get(product.id) ?? { added: 0, cleared: 0 };
+      return { name: [product.name, product.compatibleWith].filter(Boolean).join(" · "), added: moves.added, cleared: moves.cleared, onHand: product.damagedQuantity };
+    })
+    .filter((row) => row.added || row.cleared || row.onHand);
   const empties = products
     .map((product) => {
       const moves = emptyMoves.get(product.id) ?? { collected: 0, returned: 0 };
       return { name: product.name, collected: moves.collected, returned: moves.returned, onHand: product.emptyBottlesOnHand };
     })
     .filter((row) => row.collected || row.returned || row.onHand);
+
+  // ── Payments: how the takings came in, with every split bill spelled out ──
+  const splitSales = sales.filter((sale) => sale.paymentMethod === "SPLIT");
+  const payments = {
+    rows: [
+      { method: "Cash", bills: sales.filter((sale) => sale.paymentMethod === "CASH").length, amount: round2(sales.filter((sale) => sale.paymentMethod === "CASH").reduce((sum, sale) => sum + sale.totalAmount, 0)) },
+      { method: "Card", bills: sales.filter((sale) => sale.paymentMethod === "CARD").length, amount: round2(sales.filter((sale) => sale.paymentMethod === "CARD").reduce((sum, sale) => sum + sale.totalAmount, 0)) },
+      { method: "Transfer / QR", bills: sales.filter((sale) => sale.paymentMethod === "BANK_TRANSFER" || sale.paymentMethod === "CHEQUE").length, amount: round2(sales.filter((sale) => sale.paymentMethod === "BANK_TRANSFER" || sale.paymentMethod === "CHEQUE").reduce((sum, sale) => sum + sale.totalAmount, 0)) },
+      { method: "Split (cash + card / QR)", bills: splitSales.length, amount: round2(splitSales.reduce((sum, sale) => sum + sale.totalAmount, 0)) },
+    ],
+    /** Wallet part of bills (paid with money kept on earlier bills — not new money today). */
+    wallet: { bills: sales.filter((sale) => sale.walletUsed > 0).length, amount: walletUsedTotal },
+    splitBills: splitSales.map((sale) => ({
+      billNo: sale.invoiceGroupCode, time: sale.createdAt, cashier: sale.cashier.name,
+      total: sale.totalAmount, cash: sale.cashPaid, card: sale.cardPaid, transfer: sale.transferPaid,
+      reference: sale.paymentReference, change: sale.changeGiven,
+    })),
+    changeGiven: round2(sales.reduce((sum, sale) => sum + sale.changeGiven, 0)),
+  };
+
+  // ── Customer wallets: change kept and wallet money spent during the shift, member by member ──
+  const walletRows = await prisma.posWalletTransaction.findMany({
+    where: { shiftId },
+    orderBy: { createdAt: "asc" },
+    include: { customer: { select: { firstName: true, lastName: true, mobileNumber: true } } },
+  });
+  const walletStaff = await staffNames(walletRows.map((row) => row.createdById));
+  const wallet = {
+    kept: walletKept,
+    used: walletUsedTotal,
+    /** Money put in members' wallets as refunds for returned bottles. */
+    refunded: refundsWallet,
+    rows: walletRows.map((row) => ({
+      time: row.createdAt,
+      member: [row.customer.firstName, row.customer.lastName].filter(Boolean).join(" "),
+      mobile: row.customer.mobileNumber,
+      type: row.type,
+      amount: row.amount,
+      balanceAfter: row.balanceAfter,
+      billNo: row.invoiceGroupCode,
+      by: walletStaff.get(row.createdById)?.name ?? "—",
+    })),
+  };
+
+  // ── Stock in & changes: every stock movement other than sales, with where it came from and who did it ──
+  const productNames = new Map(products.map((product) => [product.id, [product.name, product.compatibleWith].filter(Boolean).join(" · ")]));
+  const moverNames = await staffNames(movements.map((movement) => movement.createdById));
+  const MOVE_LABELS: Record<string, string> = {
+    "STOCK:OPENING": "New product (opening stock)", "STOCK:RECEIVED": "Stock received", "STOCK:ADJUSTED": "Stock corrected",
+    "EMPTIES:RETURNED": "Empties returned to supplier", "EMPTIES:ADJUSTED": "Empties corrected",
+    "STOCK:CUSTOMER_RETURN": "Returned by customer (back on shelf)", "STOCK:EXCHANGED": "New bottle given for a damaged one",
+    "STOCK:DAMAGED": "Found damaged in store", "STOCK:RESTORED": "Damaged stock put back on shelf",
+    "DAMAGED:IN": "Into damaged stock", "DAMAGED:CLEARED": "Damaged stock cleared",
+  };
+  const stockLog = movements
+    .filter((movement) => !(movement.kind === "STOCK" && movement.type === "SOLD") && !(movement.kind === "EMPTIES" && movement.type === "COLLECTED"))
+    .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+    .map((movement) => ({
+      time: movement.createdAt,
+      product: productNames.get(movement.productId) ?? "Deleted product",
+      what: MOVE_LABELS[`${movement.kind}:${movement.type}`] ?? `${movement.kind} ${movement.type}`,
+      quantity: movement.quantity,
+      reference: movement.reference,
+      by: movement.createdById ? moverNames.get(movement.createdById)?.name ?? "—" : "—",
+    }));
+
+  // ── Shift journal: everything else done while the shift was open (prices, purchase orders, settings, sign-ins…) ──
+  // Sales and cash book entries are already listed above, so they're left out here.
+  const journalRows = await prisma.activityLog.findMany({
+    where: {
+      createdAt: { gte: shift.openedAt, lte: shift.closedAt ?? new Date() },
+      NOT: [{ action: "sale.checkout" }, { category: "CASHBOOK" }, { category: "RETURN" }],
+    },
+    orderBy: { createdAt: "asc" },
+    take: 300,
+    select: { createdAt: true, actorName: true, actorRole: true, category: true, summary: true },
+  });
+  const journal = journalRows.map((row) => ({ time: row.createdAt, by: row.actorName ?? "—", category: row.category, summary: row.summary }));
 
   return {
     shift: {
@@ -228,6 +402,11 @@ export async function summarizeShift(shiftId: number) {
       cashSales,
       cardSales,
       transferSales,
+      walletUsed: walletUsedTotal,
+      walletKept,
+      /** Paid back for returned bottles (cash + wallet), and net sales after that. */
+      refunds: returns.refundsTotal,
+      netAfterReturns: round2(netSales - returns.refundsTotal),
       cardPayments,
       transferPayments,
       loyalty,
@@ -238,14 +417,22 @@ export async function summarizeShift(shiftId: number) {
     cash: {
       openingFloat: shift.openingFloat,
       cashSales,
+      walletKept,
       drawerIn,
       drawerOut,
+      refundsCash,
       expectedCash,
       expensesAll,
       entries: cashEntries,
     },
     stockBook,
     empties,
+    payments,
+    wallet,
+    returns,
+    damagedStock,
+    stockLog,
+    journal,
   };
 }
 
@@ -463,14 +650,20 @@ export async function getShiftReport(shiftId: number, revealCash: boolean) {
     blind: true,
     report: {
       ...summary,
-      cash: { ...summary.cash, cashSales: null, expectedCash: null, drawerIn: null, drawerOut: null },
+      cash: { ...summary.cash, cashSales: null, walletKept: null, expectedCash: null, drawerIn: null, drawerOut: null, refundsCash: null },
+      // What came back and why stays visible; cash paid back out of the drawer waits for the count.
+      returns: {
+        ...summary.returns, refundsCash: null, refundsTotal: null,
+        rows: summary.returns.rows.map((row) => (row.refundMethod === "CASH" ? { ...row, refund: null } : row)),
+      },
       sales: {
         ...summary.sales,
-        grossSales: null, emptyDeduction: null, discounts: null, pointsValue: null, netSales: null, cashSales: null,
+        grossSales: null, emptyDeduction: null, discounts: null, pointsValue: null, netSales: null, cashSales: null, refunds: null, netAfterReturns: null,
         // Card and transfer figures stay visible: they don't reveal the cash in the drawer.
-        byStaff: summary.sales.byStaff.map((row) => ({ name: row.name, bills: row.bills, cash: null, card: row.card, transfer: row.transfer, total: null })),
+        walletKept: null,
+        byStaff: summary.sales.byStaff.map((row) => ({ name: row.name, bills: row.bills, cash: null, card: row.card, transfer: row.transfer, wallet: row.wallet, total: null })),
         byProduct: summary.sales.byProduct.map((row) => ({ name: row.name, units: row.units, amount: null })),
-        billList: summary.sales.billList.map((bill) => ({ ...bill, emptyDeduction: null, discount: null, discountAmount: null, pointsValue: null, total: null })),
+        billList: summary.sales.billList.map((bill) => ({ ...bill, payment: bill.payment.replace(/\s*[\d][\d,.]*/g, "").replace(/\s+/g, " ").trim(), emptyDeduction: null, discount: null, discountAmount: null, pointsValue: null, total: null })),
         // Who gave discounts and which members used points stay visible; the rupee amounts wait for the count.
         loyalty: {
           ...summary.sales.loyalty,
@@ -478,6 +671,15 @@ export async function getShiftReport(shiftId: number, revealCash: boolean) {
           rows: summary.sales.loyalty.rows.map((row) => ({ ...row, billBefore: null, discountAmount: null, pointsValue: null, total: null })),
         },
       },
+      // Bill counts stay; rupee amounts that would reveal the cash wait for the count.
+      payments: {
+        rows: summary.payments.rows.map((row) => ({ ...row, amount: row.method === "Card" || row.method === "Transfer / QR" ? row.amount : null })),
+        splitBills: summary.payments.splitBills.map((row) => ({ ...row, total: null, cash: null })),
+        changeGiven: null,
+        wallet: summary.payments.wallet,
+      },
+      // Change kept in wallets went into the drawer, so its amount waits for the count; names and wallet spending stay visible.
+      wallet: { ...summary.wallet, kept: null, rows: summary.wallet.rows.map((row) => (row.type === "CREDIT" ? { ...row, amount: null } : row)) },
     },
   };
 }

@@ -32,7 +32,7 @@ const ROLE_NAMES: Record<string, string> = {
   INVENTORY_MANAGER: "Inventory Manager",
   ACCOUNTANT: "Accountant",
 };
-const PAYMENT_NAMES: Record<string, string> = { CASH: "Cash", CARD: "Card", BANK_TRANSFER: "Bank transfer / QR", CHEQUE: "Cheque" };
+const PAYMENT_NAMES: Record<string, string> = { CASH: "Cash", CARD: "Card", BANK_TRANSFER: "Bank transfer / QR", CHEQUE: "Cheque", SPLIT: "Split (cash + card)" };
 const role = (value: unknown) => ROLE_NAMES[str(value)] ?? str(value);
 const payment = (value: unknown) => PAYMENT_NAMES[str(value)] ?? str(value);
 
@@ -146,7 +146,7 @@ export function describePosChange(method: string, path: string, body: Body, resp
       category: "SALE",
       entityType: "sale",
       entityId: str(data.invoiceGroupCode),
-      summary: `Sold ${soldText || `${itemCount} items`} for ${money(data.total)} · ${payment(data.paymentMethod)}${empties > 0 ? ` · ${empties} empt${empties === 1 ? "y" : "ies"} returned` : ""}${member.name ? ` · ${str(member.name)}` : ""}${obj(data.discount).amount ? ` · discount −${money(obj(data.discount).amount)}` : ""}${Number(data.pointsRedeemed) > 0 ? ` · ${str(data.pointsRedeemed)} points used` : ""}`,
+      summary: `Sold ${soldText || `${itemCount} items`} for ${money(data.total)} · ${str(data.paymentMethod) === "SPLIT" ? `split: ${[Number(data.cashPaid) > 0 ? `cash ${money(data.cashPaid)}` : "", Number(data.cardPaid) > 0 ? `card ${money(data.cardPaid)}` : "", Number(data.transferPaid) > 0 ? `QR ${money(data.transferPaid)}` : ""].filter(Boolean).join(" + ")}` : payment(data.paymentMethod)}${empties > 0 ? ` · ${empties} empt${empties === 1 ? "y" : "ies"} returned` : ""}${member.name ? ` · ${str(member.name)}` : ""}${obj(data.discount).amount ? ` · discount −${money(obj(data.discount).amount)}` : ""}${Number(data.pointsRedeemed) > 0 ? ` · ${str(data.pointsRedeemed)} points used` : ""}${Number(data.walletUsed) > 0 ? ` · ${money(data.walletUsed)} from wallet` : ""}${Number(data.walletCredit) > 0 ? ` · ${money(data.walletCredit)} change kept in wallet` : ""}`,
       details: {
         items: lines.map((line) => ({
           name: str(line.name),
@@ -166,7 +166,17 @@ export function describePosChange(method: string, path: string, body: Body, resp
           ...(obj(data.discount).amount ? [fact("Discount", `${obj(data.discount).type === "PERCENT" ? `${str(obj(data.discount).value)}% · ` : ""}− ${money(obj(data.discount).amount)}`)] : []),
           ...(Number(data.pointsRedeemed) > 0 ? [fact("Points used", `${str(data.pointsRedeemed)} (− ${money(data.pointsValue)})`)] : []),
           fact("Total", money(data.total)),
-          ...(str(data.paymentMethod) === "CASH" ? [fact("Cash received", money(data.amountReceived)), fact("Change given", money(data.changeGiven))] : []),
+          ...(str(data.paymentMethod) === "SPLIT"
+            ? [
+                ...(Number(data.cashPaid) > 0 ? [fact("Paid in cash", money(data.cashPaid))] : []),
+                ...(Number(data.cardPaid) > 0 ? [fact("Paid by card", money(data.cardPaid))] : []),
+                ...(Number(data.transferPaid) > 0 ? [fact("Paid by transfer / QR", money(data.transferPaid))] : []),
+              ]
+            : []),
+          ...(Number(data.walletUsed) > 0 ? [fact("Paid from wallet", money(data.walletUsed))] : []),
+          ...(Number(data.cashPaid) > 0 ? [fact("Cash received", money(data.cashTendered ?? data.amountReceived)), fact("Change given", money(data.changeGiven))] : []),
+          ...(Number(data.walletCredit) > 0 ? [fact("Change kept in wallet", money(data.walletCredit))] : []),
+          ...(Number(data.walletUsed) > 0 || Number(data.walletCredit) > 0 ? [fact("Wallet balance now", money(obj(data.member).walletBalance))] : []),
         ],
       },
     };
@@ -209,6 +219,49 @@ export function describePosChange(method: string, path: string, body: Body, resp
             ...shelfCountFacts(close.stockCount),
           ],
         },
+      };
+    }
+  }
+
+  // ── Returns & damages ────────────────────────────────────────────────────
+  if (module === "returns" && method === "POST") {
+    const lines = Array.isArray(data.lines) ? (data.lines as Body[]) : [];
+    const what = lines.map((line) => `${str(line.quantity)} × ${str(line.product)}`).join(", ");
+    const no = str(data.returnNo);
+    // Blocked attempts have no result to describe.
+    if (!no) {
+      const attempt = { refund: "take back bottles and refund", exchange: "exchange a damaged bottle", damage: "mark stock as damaged", clear: "clear damaged stock" }[resource] ?? "record a return";
+      return { action: `return.${resource}`, category: "RETURN", entityType: "return", summary: `Tried to ${attempt}` };
+    }
+    const common =[fact("Number", no), ...lines.map((line) => fact(str(line.product), `${str(line.quantity)} bottle(s)`)), fact("Reason", data.reason), ...(data.note ? [fact("Note", data.note)] : [])];
+    if (resource === "refund") {
+      const toWallet = str(data.refundMethod) === "WALLET";
+      const kept = lines.filter((line) => str(line.condition) === "DAMAGED").reduce((sum, line) => sum + Number(line.quantity ?? 0), 0);
+      return {
+        action: "return.refund", category: "RETURN", entityType: "return", entityId: no,
+        summary: `Took back ${what} from bill ${str(data.billNo)} and paid back ${money(data.refund)} ${toWallet ? `into ${str(data.customer)}'s wallet` : "in cash"}${Number(data.pointsReversed) > 0 ? ` · ${str(data.pointsReversed)} points taken back` : ""}${kept ? ` · ${kept} kept aside as damaged` : ""} — ${str(data.reason)}`,
+        details: { facts: [fact("Bill", data.billNo), ...(data.customer ? [fact("Member", data.customer)] : []), fact("Paid back", `${money(data.refund)} ${toWallet ? "into the wallet" : "in cash from the drawer"}`), ...(Number(data.pointsReversed) > 0 ? [fact("Points taken back", data.pointsReversed)] : []), ...common] },
+      };
+    }
+    if (resource === "exchange") {
+      return {
+        action: "return.exchange", category: "RETURN", entityType: "return", entityId: no,
+        summary: `Exchanged damaged ${what} for new bottle(s)${data.billNo ? ` (bill ${str(data.billNo)})` : ""}${data.customer ? ` · ${str(data.customer)}` : ""} — ${str(data.reason)}`,
+        details: { facts: [...(data.billNo ? [fact("Bill", data.billNo)] : []), ...(data.customer ? [fact("Customer", `${str(data.customer)}${data.mobile ? ` · ${str(data.mobile)}` : ""}`)] : []), ...common] },
+      };
+    }
+    if (resource === "damage") {
+      return {
+        action: "return.store_damage", category: "RETURN", entityType: "return", entityId: no,
+        summary: `Marked ${what} as damaged in store and kept aside — ${str(data.reason)}`,
+        details: { facts: common },
+      };
+    }
+    if (resource === "clear") {
+      return {
+        action: "return.clear", category: "RETURN", entityType: "return", entityId: no,
+        summary: `Cleared damaged stock: ${what} — ${str(data.disposalLabel).toLowerCase()}${data.reference ? ` (${str(data.reference)})` : ""} — ${str(data.reason)}`,
+        details: { facts: [fact("What happened", data.disposalLabel), ...(data.reference ? [fact("Reference", data.reference)] : []), ...common] },
       };
     }
   }

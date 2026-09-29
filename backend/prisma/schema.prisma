@@ -66,6 +66,7 @@ enum PaymentMethod {
   CHEQUE
   BANK_TRANSFER
   CARD
+  SPLIT
 }
 
 enum ChequeStatus {
@@ -138,12 +139,22 @@ model PosCounterSale {
   paymentMethod    PaymentMethod @default(CASH)
   /// Card approval code (from the card machine slip) or bank transfer / QR reference.
   paymentReference String?
+  /// How the total was paid (they add up to totalAmount). A SPLIT bill has more than one.
+  cashPaid         Float         @default(0)
+  cardPaid         Float         @default(0)
+  transferPaid     Float         @default(0)
+  /// Part of the bill paid from the member's wallet (money received on an earlier bill).
+  walletUsed       Float         @default(0)
+  /// Change kept in the member's wallet instead of being handed back (stays in the drawer).
+  walletCredit     Float         @default(0)
   cashierId        Int
   cashier          PosAdmin      @relation(fields: [cashierId], references: [id])
   /// Loyalty member the sale was made to; null = walk-in customer.
   customerId       Int?
   customer         PosCustomer?  @relation(fields: [customerId], references: [id], onDelete: SetNull)
   pointsEarned     Int           @default(0)
+  /// Earning rate on the day of the bill: rupees per point (null = not a member, or sold before rates were kept).
+  pointsRate       Float?
   /// Bill discount: "PERCENT" or "AMOUNT" (null = none), the value entered and the rupees taken off.
   discountType     String?
   discountValue    Float         @default(0)
@@ -226,6 +237,8 @@ model InventoryProduct {
   emptyBottlePrice   Float?
   /// Empty bottles collected at the counter and not yet returned to the supplier.
   emptyBottlesOnHand Int                       @default(0)
+  /// Damaged bottles kept aside (not for sale) until sent back to the supplier or thrown away.
+  damagedQuantity    Int                       @default(0)
   description        String?
   lastSoldAt         DateTime?
   createdAt          DateTime                  @default(now())
@@ -233,6 +246,7 @@ model InventoryProduct {
   expenses           InventoryProductExpense[]
   images             InventoryProductImage[]
   purchaseOrderItems PurchaseOrderItem[]
+  returns            PosReturn[]
   customerPurchases  PosCustomerPurchase[]
 
   @@index([brandId])
@@ -267,24 +281,28 @@ model InventoryProductImage {
 /// Loyalty member (or the shared "Walk-in Customer" record, NIC "WALK-IN").
 /// Only name and mobile are required; the rest is optional.
 model PosCustomer {
-  id            Int                   @id @default(autoincrement())
-  firstName     String
-  lastName      String
-  nic           String?               @unique
-  mobileNumber  String                @unique
-  email         String?               @unique
-  province      String?
-  district      String?
-  address       String?
+  id                 Int                    @id @default(autoincrement())
+  firstName          String
+  lastName           String
+  nic                String?                @unique
+  mobileNumber       String                 @unique
+  email              String?                @unique
+  province           String?
+  district           String?
+  address            String?
   /// Loyalty: points balance, lifetime spend and visit count (updated on each counter sale).
-  loyaltyPoints Int                   @default(0)
-  totalSpent    Float                 @default(0)
-  visits        Int                   @default(0)
-  lastVisitAt   DateTime?
-  createdAt     DateTime              @default(now())
-  updatedAt     DateTime              @updatedAt
-  purchases     PosCustomerPurchase[]
-  counterSales  PosCounterSale[]
+  loyaltyPoints      Int                    @default(0)
+  totalSpent         Float                  @default(0)
+  visits             Int                    @default(0)
+  lastVisitAt        DateTime?
+  /// Wallet: change the customer chose to keep at the shop; can pay later bills.
+  walletBalance      Float                  @default(0)
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  purchases          PosCustomerPurchase[]
+  counterSales       PosCounterSale[]
+  walletTransactions PosWalletTransaction[]
+  returns            PosReturn[]
 
   @@index([firstName])
   @@index([lastName])
@@ -618,33 +636,34 @@ model PosSetting {
 
 /// A till session: opened with a float, closed with a blind cash count and a locked Z report.
 model PosShift {
-  id                 Int              @id @default(autoincrement())
-  shiftNo            String           @unique
-  status             String           @default("OPEN") // OPEN | CLOSED
-  openedById         Int
-  openedAt           DateTime         @default(now())
-  openingFloat       Float
+  id                   Int                 @id @default(autoincrement())
+  shiftNo              String              @unique
+  status               String              @default("OPEN") // OPEN | CLOSED
+  openedById           Int
+  openedAt             DateTime            @default(now())
+  openingFloat         Float
   /// Blind count: saved before the expected amount is shown.
-  countedCash        Float?
-  denominations      Json?
-  countedById        Int?
-  countedAt          DateTime?
-  expectedCash       Float?
-  cashDifference     Float?
-  differenceReason   String?
-  cardSlipTotal      Float?
+  countedCash          Float?
+  denominations        Json?
+  countedById          Int?
+  countedAt            DateTime?
+  expectedCash         Float?
+  cashDifference       Float?
+  differenceReason     String?
+  cardSlipTotal        Float?
   /// Why the card machine settlement didn't match the card sales (or "not settled yet").
   cardDifferenceReason String?
-  floatLeft          Float?
-  cashBanked         Float?
-  closedById         Int?
-  closedAt           DateTime?
-  notes              String?
+  floatLeft            Float?
+  cashBanked           Float?
+  closedById           Int?
+  closedAt             DateTime?
+  notes                String?
   /// Frozen Z report figures at close.
-  report             Json?
-  sales              PosCounterSale[]
-  cashEntries        PosCashEntry[]
-  movements          InventoryMovement[]
+  report               Json?
+  sales                PosCounterSale[]
+  cashEntries          PosCashEntry[]
+  movements            InventoryMovement[]
+  returns              PosReturn[]
 
   @@index([status])
   @@index([openedAt])
@@ -653,28 +672,28 @@ model PosShift {
 
 /// Cash book entry: money in (receipt, RCP-) or money out (voucher/expense, VCH-).
 model PosCashEntry {
-  id          Int       @id @default(autoincrement())
-  entryNo     String    @unique
-  direction   String    // IN | OUT
-  category    String
-  amount      Float
+  id            Int       @id @default(autoincrement())
+  entryNo       String    @unique
+  direction     String // IN | OUT
+  category      String
+  amount        Float
   /// Where the money came from / went: DRAWER (till), BANK or OWNER. Shift-close entries start in
   /// SAFE (cash takings) or CARD (card company) and move to BANK when marked as banked.
-  source      String
-  party       String?   // paid to / received from
-  reference   String?
-  note        String?
-  entryDate   DateTime  @default(now())
-  shiftId     Int?
-  shift       PosShift? @relation(fields: [shiftId], references: [id])
+  source        String
+  party         String? // paid to / received from
+  reference     String?
+  note          String?
+  entryDate     DateTime  @default(now())
+  shiftId       Int?
+  shift         PosShift? @relation(fields: [shiftId], references: [id])
   /// True for entries the system creates at shift close (takings banked, card settlement).
-  automatic   Boolean   @default(false)
-  createdById Int
-  createdAt   DateTime  @default(now())
-  voided      Boolean   @default(false)
-  voidReason  String?
-  voidedById  Int?
-  voidedAt    DateTime?
+  automatic     Boolean   @default(false)
+  createdById   Int
+  createdAt     DateTime  @default(now())
+  voided        Boolean   @default(false)
+  voidReason    String?
+  voidedById    Int?
+  voidedAt      DateTime?
   /// Takings waiting to be banked have bankStatus PENDING; BANKED once the deposit is confirmed.
   bankStatus    String?
   bankedAt      DateTime?
@@ -756,19 +775,88 @@ model PurchaseOrderItem {
 
 /// Every email attempt for a purchase order, sent or failed, with who sent it.
 model PurchaseOrderEmail {
-  id         Int           @id @default(autoincrement())
-  orderId    Int
-  order      PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  toEmail    String
-  ccEmail    String?
-  subject    String
-  message    String?
-  status     String        // SENT | FAILED
-  error      String?
-  messageId  String?
-  sentById   Int
-  createdAt  DateTime      @default(now())
+  id        Int           @id @default(autoincrement())
+  orderId   Int
+  order     PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  toEmail   String
+  ccEmail   String?
+  subject   String
+  message   String?
+  status    String // SENT | FAILED
+  error     String?
+  messageId String?
+  sentById  Int
+  createdAt DateTime      @default(now())
 
   @@index([orderId])
   @@map("purchase_order_emails")
+}
+
+/// Every movement of a loyalty member's wallet: change kept (CREDIT) or wallet spent on a bill (DEBIT).
+model PosWalletTransaction {
+  id               Int         @id @default(autoincrement())
+  customerId       Int
+  customer         PosCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  type             String // CREDIT (change kept) | REFUND (money back for returned bottles) | DEBIT (spent)
+  /// Signed: + added to the wallet, − spent from it.
+  amount           Float
+  balanceAfter     Float
+  invoiceGroupCode String?
+  shiftId          Int?
+  note             String?
+  createdById      Int
+  createdAt        DateTime    @default(now())
+
+  @@index([customerId, createdAt])
+  @@index([shiftId])
+  @@map("pos_wallet_transactions")
+}
+
+/// Returns & damages: one row per product. Rows made together share a returnNo (RT-00001).
+///   EXCHANGE       customer's damaged bottle swapped for a new one (shelf −, damaged +)
+///   REFUND         bottles from a bill brought back, money paid back (shelf + or damaged +)
+///   STORE_DAMAGE   bottle found damaged in the store (shelf −, damaged +)
+///   DAMAGE_CLEARED damaged stock sent back to the supplier, thrown away, or put back on the shelf
+model PosReturn {
+  id               Int               @id @default(autoincrement())
+  returnNo         String
+  type             String
+  productId        Int?
+  product          InventoryProduct? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName      String
+  quantity         Int
+  /// REFUND: SHELF (unopened, back for sale) or DAMAGED (kept aside).
+  condition        String?
+  /// The bill the bottles were bought on (REFUND always, EXCHANGE when known).
+  invoiceGroupCode String?
+  customerId       Int?
+  customer         PosCustomer?      @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerName     String?
+  customerMobile   String?
+  /// Refund per bottle (REFUND) or selling price (others), and the money paid back.
+  unitPrice        Float             @default(0)
+  refundAmount     Float             @default(0)
+  /// CASH (from the drawer) or WALLET (member's wallet).
+  refundMethod     String?
+  /// Points taken back because the member was refunded.
+  pointsReversed   Int               @default(0)
+  /// Cost per bottle, to value damaged stock.
+  unitCost         Float?
+  reason           String
+  note             String?
+  /// DAMAGE_CLEARED: SUPPLIER | WRITTEN_OFF | RESTORED
+  disposal         String?
+  reference        String?
+  shiftId          Int?
+  shift            PosShift?         @relation(fields: [shiftId], references: [id])
+  createdById      Int
+  createdAt        DateTime          @default(now())
+
+  @@index([returnNo])
+  @@index([type, createdAt])
+  @@index([shiftId])
+  @@index([invoiceGroupCode])
+  @@index([productId])
+  @@index([customerId])
+  @@map("pos_returns")
 }

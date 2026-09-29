@@ -208,6 +208,13 @@ export default function ReportsPage() {
                 <span>Points used ({report.loyalty.redeemBills} bills)<b>{report.loyalty.pointsRedeemed.toLocaleString()} · {money(report.loyalty.pointsValue)}</b></span>
                 <span>Points members hold now<b>{report.loyalty.owed.points.toLocaleString()} · {money(report.loyalty.owed.value)}</b></span>
               </div>
+              {report.loyalty.wallet && (
+                <div className="lx-book-totals">
+                  <span>Change kept in wallets ({report.loyalty.wallet.keptBills} bills)<b>{money(report.loyalty.wallet.kept)}</b></span>
+                  <span>Paid from wallets ({report.loyalty.wallet.usedBills} bills)<b>{money(report.loyalty.wallet.used)}</b></span>
+                  <span>Wallet money held now ({report.loyalty.wallet.membersHolding})<b>{money(report.loyalty.wallet.heldNow)}</b></span>
+                </div>
+              )}
               {report.loyalty.byMember.length > 0 && (
                 <div className="data-table-wrap" style={{ marginTop: "0.9rem" }}><table className="data-table">
                   <thead><tr><th>Member</th><th style={{ textAlign: "right" }}>Bills</th><th style={{ textAlign: "right" }}>Spent</th><th style={{ textAlign: "right" }}>Earned</th><th style={{ textAlign: "right" }}>Used</th></tr></thead>

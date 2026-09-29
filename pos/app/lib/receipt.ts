@@ -20,15 +20,22 @@ export type SaleReceipt = {
   cashierName: string;
   cashierRole: string;
   /** Loyalty member; null for a walk-in customer. */
-  member?: { name: string; mobileNumber: string; pointsEarned: number; pointsRedeemed?: number; pointsBalance: number } | null;
+  member?: { name: string; mobileNumber: string; pointsEarned: number; pointsRedeemed?: number; pointsBalance: number; walletBalance?: number } | null;
   /** Bill discount, when one was given. */
   discount?: { type: "PERCENT" | "AMOUNT"; value: number; amount: number } | null;
   /** Loyalty points spent on this bill and their rupee value (rate from Shop Settings at the time of sale). */
   pointsRedeemed?: number;
   pointsValue?: number;
-  paymentMethod: "CASH" | "CARD" | "BANK_TRANSFER" | "CHEQUE";
+  paymentMethod: "CASH" | "CARD" | "BANK_TRANSFER" | "CHEQUE" | "SPLIT";
   /** Card approval code or transfer / QR reference. */
   paymentReference?: string | null;
+  /** Split bills: the part paid each way (they add up to the total). */
+  cashPaid?: number;
+  cardPaid?: number;
+  transferPaid?: number;
+  /** Member wallet: part of the bill paid from it, and change kept in it. */
+  walletUsed?: number;
+  walletCredit?: number;
   lines: ReceiptLine[];
   subtotal: number;
   emptyDeduction: number;
@@ -43,6 +50,7 @@ const PAYMENT_LABELS: Record<SaleReceipt["paymentMethod"], string> = {
   CARD: "Card",
   BANK_TRANSFER: "Bank transfer / QR",
   CHEQUE: "Cheque",
+  SPLIT: "Split (cash + card)",
 };
 
 /** Shows only the last 3 digits of a member's mobile on paper, e.g. "07•••••123". */
@@ -162,10 +170,18 @@ export function buildReceiptHtml(receipt: SaleReceipt) {
     <div class="total"><div class="row"><span>TOTAL</span><span>Rs. ${amount(receipt.total)}</span></div></div>
 
     <div class="pay">
-      ${isCash
-        ? `<div class="row"><span>Cash received</span><span>${amount(receipt.amountReceived)}</span></div>
-           <div class="row strong"><span>Change given</span><span>${amount(receipt.change)}</span></div>`
-        : `<div class="row"><span>Paid by ${PAYMENT_LABELS[receipt.paymentMethod] ?? receipt.paymentMethod}</span><span>${amount(receipt.total)}</span></div>`}
+      ${receipt.paymentMethod === "SPLIT" || receipt.walletUsed
+        ? `${receipt.walletUsed ? `<div class="row"><span>Paid from wallet</span><span>${amount(receipt.walletUsed)}</span></div>` : ""}
+           ${receipt.cardPaid ? `<div class="row"><span>Paid by card</span><span>${amount(receipt.cardPaid)}</span></div>` : ""}
+           ${receipt.transferPaid ? `<div class="row"><span>Paid by transfer / QR</span><span>${amount(receipt.transferPaid)}</span></div>` : ""}
+           ${receipt.cashPaid ? `<div class="row"><span>Cash part</span><span>${amount(receipt.cashPaid)}</span></div>
+             <div class="row"><span>Cash received</span><span>${amount(receipt.amountReceived - (receipt.cardPaid ?? 0) - (receipt.transferPaid ?? 0))}</span></div>
+             <div class="row strong"><span>Change given</span><span>${amount(receipt.change)}</span></div>` : ""}`
+        : isCash
+          ? `<div class="row"><span>Cash received</span><span>${amount(receipt.amountReceived)}</span></div>
+             <div class="row strong"><span>Change given</span><span>${amount(receipt.change)}</span></div>`
+          : `<div class="row"><span>Paid by ${PAYMENT_LABELS[receipt.paymentMethod] ?? receipt.paymentMethod}</span><span>${amount(receipt.total)}</span></div>`}
+      ${receipt.walletCredit ? `<div class="row strong"><span>Change kept in wallet</span><span>${amount(receipt.walletCredit)}</span></div>` : ""}
     </div>
 
     ${receipt.member ? `<div class="loyalty">
@@ -173,6 +189,7 @@ export function buildReceiptHtml(receipt: SaleReceipt) {
       ${receipt.pointsRedeemed ? `<div class="row"><span>Used on this bill</span><span>−${receipt.pointsRedeemed}</span></div>` : ""}
       <div class="row"><span>Earned on this bill</span><span>+${receipt.member.pointsEarned}</span></div>
       <div class="row strong"><span>Points balance</span><span>${receipt.member.pointsBalance}</span></div>
+      ${receipt.walletUsed || receipt.walletCredit || receipt.member.walletBalance ? `<div class="row strong"><span>Wallet balance</span><span>Rs. ${amount(receipt.member.walletBalance ?? 0)}</span></div>` : ""}
     </div>` : ""}
 
     ${totalSaved > 0 ? `<div class="saved">You saved Rs. ${amount(totalSaved)} on this bill</div>` : ""}

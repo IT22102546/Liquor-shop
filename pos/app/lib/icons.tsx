@@ -41,6 +41,15 @@ export const IconReceipt = () => (
   </svg>
 );
 
+/** Returns & damages: a bottle with a return arrow. */
+export const IconReturns = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 3h3v3l1.5 2.5V20a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V8.5L14 6V3Z" />
+    <path d="M9 9H5.5a2.5 2.5 0 0 0 0 5H8" />
+    <path d="M7 7L5 9l2 2" />
+  </svg>
+);
+
 export const IconInvoice = () => (
   <svg
     width="18"

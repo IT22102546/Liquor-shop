@@ -17,6 +17,7 @@ import {
   IconInventory,
   IconInvoice,
   IconReceipt,
+  IconReturns,
   IconSupplier,
   IconTrend,
   IconUsers,
@@ -34,6 +35,7 @@ const NAV_SECTIONS: { title: string; links: NavLink[] }[] = [
     links: [
       { label: "Bar Counter", href: "/dashboard/inventory", Icon: IconBottle },
       { label: "Sold Products", href: "/dashboard/inventory/sold", Icon: IconReceipt },
+      { label: "Returns & Damages", href: "/dashboard/returns", Icon: IconReturns },
     ],
   },
   {

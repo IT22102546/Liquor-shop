@@ -53,15 +53,19 @@ async function nextEntryNo(db: Prisma.TransactionClient, direction: CashDirectio
   return `${prefix}-${String(count + 1).padStart(5, "0")}`;
 }
 
-/** Cash in the drawer right now: float + cash sales + cash in − cash out (for the open shift). */
+/** Cash in the drawer right now: float + cash sales + cash in − cash out − cash refunds (for the open shift). */
 export async function drawerCash(shiftId: number, db: Prisma.TransactionClient | typeof prisma = prisma) {
-  const [shift, cashSales, drawerIn, drawerOut] = await Promise.all([
+  const [shift, cashSales, drawerIn, drawerOut, refunds] = await Promise.all([
     db.posShift.findUniqueOrThrow({ where: { id: shiftId }, select: { openingFloat: true } }),
-    db.posCounterSale.aggregate({ where: { shiftId, paymentMethod: "CASH" }, _sum: { totalAmount: true } }),
+    // The cash part of every bill (cash sales in full, and the cash part of split bills).
+    // …plus change members kept in their wallet (that cash stayed in the drawer).
+    db.posCounterSale.aggregate({ where: { shiftId }, _sum: { cashPaid: true, walletCredit: true } }),
     db.posCashEntry.aggregate({ where: { shiftId, source: "DRAWER", direction: "IN", voided: false }, _sum: { amount: true } }),
     db.posCashEntry.aggregate({ where: { shiftId, source: "DRAWER", direction: "OUT", voided: false }, _sum: { amount: true } }),
+    // Money paid back in cash for returned bottles.
+    db.posReturn.aggregate({ where: { shiftId, type: "REFUND", refundMethod: "CASH" }, _sum: { refundAmount: true } }),
   ]);
-  return round2(shift.openingFloat + (cashSales._sum.totalAmount ?? 0) + (drawerIn._sum.amount ?? 0) - (drawerOut._sum.amount ?? 0));
+  return round2(shift.openingFloat + (cashSales._sum.cashPaid ?? 0) + (cashSales._sum.walletCredit ?? 0) + (drawerIn._sum.amount ?? 0) - (drawerOut._sum.amount ?? 0) - (refunds._sum.refundAmount ?? 0));
 }
 
 export type CreateCashEntryDto = {

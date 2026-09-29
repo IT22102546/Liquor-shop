@@ -75,6 +75,14 @@ export async function getPosUsers(
   }
 }
 
+export async function getMemberHistory(req: Request, res: Response, next: NextFunction) {
+  try {
+    return sendSuccess(res, await service.getMemberHistory(parsePositiveIntParam("id", req.params.id)));
+  } catch (error) {
+    return next(error);
+  }
+}
+
 export async function getPosUser(
   req: Request,
   res: Response,

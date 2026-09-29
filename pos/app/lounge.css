@@ -1426,6 +1426,56 @@ html:not([data-theme="dark"]) .sidebar .nav-section-divider { background: #efe4c
 .po-preview { width: 100%; height: 60vh; border: 1px solid var(--panel-border); border-radius: 12px; background: #e9e9ec; }
 .po-total-row td { font-weight: 800; border-top: 1.5px solid var(--text); }
 .po-note { margin: 0; font-size: 0.86rem; color: var(--text-soft); }
+
+/* ── Returns & damages ── */
+.rt-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.rt-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem; }
+.rt-kpi { padding: 0.85rem 1rem; border-radius: 16px; background: var(--panel); border: 1px solid var(--panel-border); display: grid; gap: 0.15rem; }
+.rt-kpi span { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-xsoft); }
+.rt-kpi strong { font-size: 1.55rem; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+.rt-kpi em { font-style: normal; font-size: 0.74rem; color: var(--text-soft); }
+.rt-kpi.warn { background: var(--warning-bg); border-color: color-mix(in srgb, var(--warning) 35%, transparent); }
+.rt-kpi.warn strong { color: var(--warning); }
+.rt-type { display: inline-block; padding: 0.16rem 0.55rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+.rt-type.EXCHANGE { color: var(--c5); background: color-mix(in srgb, var(--c5) 13%, transparent); }
+.rt-type.REFUND { color: var(--success); background: var(--success-bg); }
+.rt-type.STORE_DAMAGE { color: var(--danger); background: var(--danger-bg); }
+.rt-type.DAMAGE_CLEARED { color: var(--text-soft); background: var(--panel-2); border: 1px solid var(--panel-border); }
+.data-table tr.rt-cont td { border-top-color: transparent; padding-top: 0.2rem; }
+.rt-damaged { font-weight: 800; color: var(--danger); }
+.bm-modal.rt-modal { width: min(860px, 96vw); }
+.rt-picker { display: grid; gap: 0.45rem; }
+.rt-search { position: relative; display: flex; align-items: center; }
+.rt-search svg { position: absolute; left: 0.75rem; width: 17px; height: 17px; color: var(--text-xsoft); }
+.rt-search .bm-input { padding-left: 2.3rem; width: 100%; }
+.rt-matches, .rt-bills { display: grid; gap: 0.35rem; max-height: 300px; overflow-y: auto; }
+.rt-matches button, .rt-bills button {
+  display: flex; justify-content: space-between; align-items: center; gap: 0.8rem; text-align: left; padding: 0.6rem 0.8rem;
+  border-radius: 12px; background: var(--panel-2); border: 1px solid var(--panel-border); color: var(--text); cursor: pointer;
+}
+.rt-matches button { display: grid; gap: 0.1rem; }
+.rt-matches button:hover, .rt-bills button:hover { border-color: var(--soft-gold-border); background: var(--soft-gold); }
+.rt-matches span, .rt-bills em { font-size: 0.76rem; font-style: normal; color: var(--text-soft); }
+.rt-bills button > span { display: grid; gap: 0.1rem; min-width: 0; }
+.rt-bills b { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.rt-picked { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.7rem 0.9rem; border-radius: 12px; background: var(--soft-gold); border: 1px solid var(--soft-gold-border); }
+.rt-picked > div { display: grid; gap: 0.1rem; min-width: 0; }
+.rt-picked strong { color: var(--text); }
+.rt-picked span { font-size: 0.78rem; color: var(--text-soft); }
+.rt-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.2rem; }
+.rt-chips button { padding: 0.3rem 0.65rem; border-radius: 999px; font-size: 0.76rem; font-weight: 600; color: var(--text-soft); background: var(--panel-2); border: 1px solid var(--panel-border); cursor: pointer; }
+.rt-chips button.active { color: var(--soft-gold-text); background: var(--soft-gold); border-color: var(--soft-gold-border); }
+.rt-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; }
+.rt-options button { display: grid; gap: 0.2rem; text-align: left; padding: 0.75rem 0.85rem; border-radius: 12px; background: var(--panel-2); border: 1px solid var(--panel-border); color: var(--text); cursor: pointer; }
+.rt-options button span { font-size: 0.74rem; color: var(--text-soft); }
+.rt-options button.active { background: var(--soft-gold); border-color: var(--soft-gold-border); }
+.rt-qty { width: 5.5rem; }
+.rt-refund-foot { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.rt-refund-total { display: grid; justify-items: end; gap: 0.1rem; }
+.rt-refund-total span { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-xsoft); }
+.rt-refund-total strong { font-size: 1.5rem; color: var(--text); font-variant-numeric: tabular-nums; }
+.rt-refund-total em { font-style: normal; font-size: 0.74rem; color: var(--warning); }
+@media (max-width: 900px) { .rt-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .rt-options { grid-template-columns: 1fr; } }
 .po-history h4 { margin: 0 0 0.5rem; font-size: 0.95rem; color: var(--text); }
 .po-history ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.45rem; border-left: 2px solid var(--panel-border); }
 .po-history li { position: relative; padding-left: 1rem; font-size: 0.84rem; color: var(--text-soft); }
@@ -1470,3 +1520,67 @@ html:not([data-theme="dark"]) .sidebar .nav-section-divider { background: #efe4c
 .pos-hard-limit.over i { background: var(--danger); }
 /* Keep the entrance animation in the list while pressing, so it doesn't replay (card blinking) afterwards. */
 .pos-product-card.bump { animation: lx-rise 0.5s var(--ease-out) backwards, lx-press 0.35s var(--ease-out); animation-delay: calc(min(var(--i, 0), 16) * 25ms), 0s; }
+
+/* Product form: tax as % of the purchase price or as a rupee amount */
+.tax-field { display: flex; gap: 0.4rem; align-items: stretch; }
+.tax-field .bm-input { flex: 1; min-width: 0; }
+.tax-mode { display: inline-flex; padding: 3px; gap: 2px; border-radius: 10px; border: 1px solid var(--panel-border); background: var(--panel-2); flex-shrink: 0; }
+.tax-mode button { min-width: 2.4rem; padding: 0 0.55rem; border-radius: 7px; font-weight: 700; font-size: 0.82rem; color: var(--text-soft); }
+.tax-mode button.active { background: var(--accent-grad); color: var(--on-accent); }
+
+/* Payment: four options, and the split (cash + card) panel */
+.pos-payment-buttons.four { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.4rem; }
+.pos-payment-buttons.four button { flex-direction: column; gap: 0.25rem; min-height: 58px; padding: 0.3rem 0.2rem; font-size: 0.74rem; line-height: 1.1; white-space: normal; text-align: center; }
+.pos-payment-buttons.four button svg { width: 18px; height: 18px; }
+.pos-payment-buttons.four button.active { background: var(--soft-gold, var(--accent-bg)); border-color: var(--soft-gold-border, var(--accent)); color: var(--soft-gold-text, var(--accent-text)); box-shadow: none; }
+.pos-split-icon { display: inline-flex; }
+.pos-split-icon svg { width: 14px !important; height: 14px !important; }
+.pos-split-icon svg + svg { margin-left: -3px; }
+.pos-split { display: grid; gap: 0.45rem; margin-bottom: 0.75rem; padding: 0.65rem 0.75rem; border-radius: 12px; background: var(--panel); border: 1px solid var(--panel-border); animation: lx-rise 0.25s var(--ease-out) backwards; }
+.pos-split-row { display: grid; grid-template-columns: minmax(0, 1fr) 8.5rem; align-items: center; gap: 0.5rem; }
+.pos-split-row label { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.78rem; font-weight: 700; color: var(--text-soft); }
+.pos-split-row label em { font-style: normal; font-weight: 500; color: var(--text-xsoft); }
+.pos-split-row label svg { width: 15px; height: 15px; }
+.pos-split-row input { min-height: 38px; padding: 0 0.65rem; border-radius: 9px; border: 1px solid var(--panel-border); background: var(--panel-2); color: var(--text); font: inherit; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.pos-split-row input:focus { outline: none; border-color: var(--accent); }
+.pos-split-cash { display: flex; justify-content: space-between; align-items: center; padding-top: 0.45rem; border-top: 1px dashed var(--panel-border); font-size: 0.82rem; color: var(--text-soft); }
+.pos-split-cash span { display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 700; }
+.pos-split-cash span svg { width: 15px; height: 15px; color: var(--success); }
+.pos-split-cash strong { font-size: 1.05rem; color: var(--text); font-variant-numeric: tabular-nums; }
+.pos-split-cash.bad strong { color: var(--danger); }
+.pos-split-warn { font-size: 0.72rem; color: var(--danger); font-weight: 650; }
+
+/* Customer wallet at the counter */
+.pos-member-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.pos-member-stats div.wallet { border-color: color-mix(in srgb, var(--success) 40%, var(--panel-border)); background: color-mix(in srgb, var(--success) 8%, var(--panel)); }
+.pos-member-stats div.wallet strong { color: var(--success); }
+.pos-adjust-toggles button.wallet { border-color: color-mix(in srgb, var(--success) 40%, var(--panel-border)); }
+.pos-adjust-toggles button.wallet b { color: var(--success); margin-left: 0.2rem; }
+.pos-adjust-toggles button.wallet.active { background: var(--success-bg); color: var(--success); border-color: var(--success); }
+.pos-wallet-line { display: grid; grid-template-columns: 1fr auto; gap: 0.15rem 0.6rem; margin: -0.25rem 0 0.7rem; padding: 0.5rem 0.65rem; border-radius: 10px; background: var(--success-bg); font-size: 0.8rem; color: var(--text-soft); }
+.pos-wallet-line b { color: var(--success); text-align: right; font-variant-numeric: tabular-nums; }
+.pos-wallet-line strong { text-align: right; color: var(--text); font-size: 1rem; font-variant-numeric: tabular-nums; }
+.pos-wallet-full { margin-bottom: 0.75rem; padding: 0.65rem 0.8rem; border-radius: 12px; background: var(--success-bg); color: var(--success); font-weight: 700; font-size: 0.84rem; text-align: center; }
+.pos-keep-change { margin-top: 0.5rem; padding: 0.5rem 0.6rem; border-radius: 10px; border: 1px dashed var(--panel-border); }
+.pos-keep-change.on { border-style: solid; border-color: color-mix(in srgb, var(--success) 45%, transparent); background: color-mix(in srgb, var(--success) 7%, transparent); }
+.pos-keep-change .lx-check { font-size: 0.8rem; }
+.pos-keep-change-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.45rem; font-size: 0.78rem; color: var(--text-soft); }
+.pos-keep-change-row input { width: 7rem; min-height: 34px; padding: 0 0.55rem; border-radius: 8px; border: 1px solid var(--panel-border); background: var(--panel-2); color: var(--text); font: inherit; font-weight: 700; text-align: right; }
+.pos-keep-change-row b { color: var(--text); }
+
+/* Loyalty: member wallet */
+.lx-wallet { font-weight: 800; color: var(--success); font-variant-numeric: tabular-nums; }
+.bm-modal.wallet-modal { width: min(820px, 95vw); display: grid; gap: 0.8rem; }
+.wallet-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; }
+.wallet-summary > div { padding: 0.7rem 0.85rem; border-radius: 12px; background: var(--panel-2); border: 1px solid var(--panel-border); }
+.wallet-summary span { display: block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-xsoft); }
+.wallet-summary strong { display: block; margin-top: 0.2rem; font-size: 1.1rem; color: var(--text); font-variant-numeric: tabular-nums; }
+.wallet-summary .balance { background: var(--success-bg); border-color: color-mix(in srgb, var(--success) 35%, transparent); }
+.wallet-summary .balance strong { color: var(--success); }
+.wallet-summary em { display: block; margin-top: 0.1rem; font-style: normal; font-size: 0.72rem; color: var(--text-soft); }
+.wallet-summary .points { background: var(--soft-gold); border-color: var(--soft-gold-border); }
+.wallet-summary .points strong { color: var(--soft-gold-text); }
+.points-rule { font-size: 0.8rem; line-height: 1.45; color: var(--text-soft); padding: 0.55rem 0.8rem; border-radius: 10px; border: 1px dashed var(--panel-border); }
+.points-rule b { color: var(--text); }
+.bm-modal.wallet-modal { width: min(1000px, 96vw); }
+@media (max-width: 640px) { .wallet-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

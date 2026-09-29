@@ -26,20 +26,58 @@ export type ShiftReport = {
     pointsRedeemed: number; pointsValue: number | null; netSales: number | null; cashSales: number | null; cardSales: number | null;
     /** Bank transfer / QR (older reports lumped these into cardSales). */
     transferSales?: number | null;
+    /** Bill parts paid from members' wallets, and change members kept in them. */
+    walletUsed?: number | null;
+    walletKept?: number | null;
+    /** Paid back for returned bottles (cash + wallet), and net sales after that. */
+    refunds?: number | null;
+    netAfterReturns?: number | null;
     cardPayments?: PaymentRow[];
     transferPayments?: PaymentRow[];
     /** Discounts given and loyalty points moved in the shift (older reports don't have it). */
     loyalty?: ShiftLoyalty;
-    byStaff: Array<{ name: string; bills: number; cash: number | null; card: number | null; transfer?: number | null; total: number | null }>;
+    byStaff: Array<{ name: string; bills: number; cash: number | null; card: number | null; transfer?: number | null; wallet?: number | null; total: number | null }>;
     byProduct: Array<{ name: string; units: number; amount: number | null }>;
     billList: Array<{ billNo: string; time: string; cashier: string; customer: string; payment: string; reference?: string | null; items: string; units: number; emptyDeduction: number | null; discount: number | null; total: number | null }>;
   };
   cash: {
-    openingFloat: number; cashSales: number | null; drawerIn: number | null; drawerOut: number | null; expectedCash: number | null; expensesAll: number;
+    openingFloat: number; cashSales: number | null; walletKept?: number | null; drawerIn: number | null; drawerOut: number | null;
+    /** Cash paid back from the drawer for returned bottles. */
+    refundsCash?: number | null;
+    expectedCash: number | null; expensesAll: number;
     entries: Array<{ entryNo: string; direction: "IN" | "OUT"; category: string; source: string; fromDrawer: boolean; amount: number; party: string | null; note: string | null; reference: string | null; time: string; recordedBy: string; voided: boolean; voidReason: string | null; voidedBy: string | null; automatic: boolean }>;
   };
-  stockBook: Array<{ productId: number; name: string; size: string | null; brand: string; category: string; opening: number; received: number; sold: number; adjusted: number; closing: number }>;
+  /** returned = back on the shelf from customers; damaged = off the shelf into damaged stock (older reports have neither). */
+  stockBook: Array<{ productId: number; name: string; size: string | null; brand: string; category: string; opening: number; received: number; sold: number; returned?: number; damaged?: number; adjusted: number; closing: number }>;
   empties: Array<{ name: string; collected: number; returned: number; onHand: number }>;
+  /** How takings came in, with every split bill (older reports don't have these). Amounts are null in the cashier's blind view. */
+  payments?: {
+    rows: Array<{ method: string; bills: number; amount: number | null }>;
+    splitBills: Array<{ billNo: string; time: string; cashier: string; total: number | null; cash: number | null; card: number; transfer: number; reference: string | null; change: number }>;
+    changeGiven: number | null;
+    wallet?: { bills: number; amount: number };
+  };
+  /** Customer wallets: change kept and wallet money spent during the shift, member by member. */
+  wallet?: {
+    kept: number | null; used: number; refunded?: number;
+    rows: Array<{ time: string; member: string; mobile: string; type: "CREDIT" | "DEBIT" | "REFUND"; amount: number | null; balanceAfter: number; billNo: string | null; by: string }>;
+  };
+  /** Returns & damages during the shift: exchanges, refunds, store damage, damaged stock cleared. */
+  returns?: {
+    refunds: number; refundUnits: number; refundsCash: number | null; refundsWallet: number; refundsTotal: number | null; pointsReversed: number;
+    exchangedUnits: number; storeDamagedUnits: number; clearedUnits: number; damageCost: number;
+    rows: Array<{
+      returnNo: string; time: string; type: "EXCHANGE" | "REFUND" | "STORE_DAMAGE" | "DAMAGE_CLEARED"; what: string; product: string; quantity: number;
+      condition: "SHELF" | "DAMAGED" | null; disposal: string | null; billNo: string | null; customer: string | null;
+      refund: number | null; refundMethod: "CASH" | "WALLET" | null; pointsReversed: number; reason: string; note: string | null; reference: string | null; by: string;
+    }>;
+  };
+  /** Damaged bottles kept aside: added and cleared this shift, and on hand. */
+  damagedStock?: Array<{ name: string; added: number; cleared: number; onHand: number }>;
+  /** Stock received, corrected or returned during the shift, with where it came from and who did it. */
+  stockLog?: Array<{ time: string; product: string; what: string; quantity: number; reference: string | null; by: string }>;
+  /** Everything else done while the shift was open: price changes, purchase orders, settings, sign-ins… */
+  journal?: Array<{ time: string; by: string; category: string; summary: string }>;
   close?: {
     countedCash: number; expectedCash: number; difference: number; differenceReason: string | null; cardSlipTotal: number | null; cardDifference: number | null; cardDifferenceReason?: string | null;
     floatLeft: number; cashBanked: number; notes: string | null; stockCount: Array<{ name: string; system: number; counted: number; difference: number }>;
@@ -70,7 +108,7 @@ export function zReportFileName(report: ShiftReport) {
 export function buildZReportHtml(report: ShiftReport) {
   const { shift, sales, cash, close } = report;
   const entries = cash.entries.filter((entry) => !entry.automatic);
-  const stockRows = report.stockBook.filter((row) => row.opening || row.received || row.sold || row.adjusted || row.closing);
+  const stockRows = report.stockBook.filter((row) => row.opening || row.received || row.sold || row.adjusted || row.returned || row.damaged || row.closing);
   const counted = new Map((close?.stockCount ?? []).map((row) => [row.name, row]));
 
   return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(zReportFileName(report))}</title><style>${THERMAL_BASE_CSS}
@@ -98,9 +136,22 @@ export function buildZReportHtml(report: ShiftReport) {
     ${sales.discounts ? `<div class="row"><span>Discounts</span><span>−${amt(sales.discounts)}</span></div>` : ""}
     ${sales.pointsValue ? `<div class="row"><span>Loyalty points (${sales.pointsRedeemed})</span><span>−${amt(sales.pointsValue)}</span></div>` : ""}
     <div class="box"><div class="row"><span>NET SALES</span><span>${amt(sales.netSales)}</span></div></div>
+    ${sales.walletUsed ? `<div class="row"><span>Customer wallets</span><span>${amt(sales.walletUsed)}</span></div>` : ""}
     <div class="row"><span>Cash</span><span>${amt(sales.cashSales)}</span></div>
     <div class="row"><span>Card</span><span>${amt(sales.cardSales)}</span></div>
     ${sales.transferSales ? `<div class="row"><span>Transfer / QR</span><span>${amt(sales.transferSales)}</span></div>` : ""}
+    ${report.returns?.refunds ? `<div class="row"><span>Refunds for returns</span><span>−${amt(sales.refunds)}</span></div><div class="row strong"><span>Net after returns</span><span>${amt(sales.netAfterReturns)}</span></div>` : ""}
+
+    ${report.returns?.rows.length ? `
+      <div class="head">Returns &amp; damages</div>
+      ${report.returns.refunds ? `<div class="row"><span>Returned &amp; refunded (${report.returns.refundUnits} btl)</span><span>${amt(report.returns.refundsTotal)}</span></div>
+      <div class="row small"><span>&nbsp;· cash ${amt(report.returns.refundsCash)} · wallet ${amt(report.returns.refundsWallet)}</span><span></span></div>` : ""}
+      ${report.returns.exchangedUnits ? `<div class="row"><span>Damaged bottles exchanged</span><span>${report.returns.exchangedUnits}</span></div>` : ""}
+      ${report.returns.storeDamagedUnits ? `<div class="row"><span>Damaged in store</span><span>${report.returns.storeDamagedUnits}</span></div>` : ""}
+      ${report.returns.clearedUnits ? `<div class="row"><span>Damaged stock cleared</span><span>${report.returns.clearedUnits}</span></div>` : ""}
+      <table><tr><th>No. · item</th><th>Qty</th><th>Money</th></tr>
+        ${report.returns.rows.map((row) => `<tr><td style="text-align:left">${esc(row.returnNo)} ${esc(row.what)}<br>${esc(row.product)} · ${esc(row.by)}</td><td>${row.quantity}</td><td>${row.type === "REFUND" ? `−${amt(row.refund)}${row.refundMethod === "WALLET" ? " W" : ""}` : "—"}</td></tr>`).join("")}
+      </table>` : ""}
 
     <div class="head">Sales by staff</div>
     <table><tr><th>Staff</th><th>Bills</th><th>Cash</th><th>Card</th></tr>
@@ -119,11 +170,24 @@ export function buildZReportHtml(report: ShiftReport) {
         ${sales.loyalty.rows.filter((row) => row.discountAmount || row.pointsRedeemed).map((row) => `<tr><td style="text-align:left">${esc(row.billNo.slice(-9))} · ${esc(row.cashier)}${row.member ? `<br>${esc(row.member)}` : ""}</td><td>${row.discountType ? `${esc(discountText(row))} ` : ""}${row.pointsRedeemed ? `${row.pointsRedeemed}pt` : ""}<br>−${amt((row.discountAmount ?? 0) + (row.pointsValue ?? 0))}</td><td>${amt(row.total)}</td></tr>`).join("")}
       </table>` : ""}
 
+    ${report.payments ? `
+      <div class="head">Payments</div>
+      ${report.payments.rows.filter((row) => row.bills > 0).map((row) => `<div class="row"><span>${esc(row.method)} (${row.bills})</span><span>${amt(row.amount)}</span></div>`).join("")}
+      ${report.payments.splitBills.map((row) => `<div class="row small"><span>&nbsp;· ${esc(row.billNo.slice(-9))}: cash ${amt(row.cash)}${row.card ? ` + card ${amt(row.card)}` : ""}${row.transfer ? ` + QR ${amt(row.transfer)}` : ""}</span><span></span></div>`).join("")}
+      <div class="row small"><span>Change given back</span><span>${amt(report.payments.changeGiven)}</span></div>` : ""}
+    ${report.stockLog?.length || report.journal?.length ? `
+      <div class="head">Also during the shift</div>
+      ${report.stockLog?.length ? `<div class="row"><span>Stock in &amp; changes</span><span>${report.stockLog.length}</span></div>` : ""}
+      ${report.journal?.length ? `<div class="row"><span>Other actions (journal)</span><span>${report.journal.length}</span></div>` : ""}
+      <div class="small">Full list on the A4 Day End report.</div>` : ""}
+
     <div class="head">Cash drawer</div>
     <div class="row"><span>Opening float</span><span>${amt(cash.openingFloat)}</span></div>
     <div class="row"><span>+ Cash sales</span><span>${amt(cash.cashSales)}</span></div>
+    ${cash.walletKept !== undefined && cash.walletKept !== 0 ? `<div class="row"><span>+ Change kept in wallets</span><span>${amt(cash.walletKept)}</span></div>` : ""}
     <div class="row"><span>+ Cash in</span><span>${amt(cash.drawerIn)}</span></div>
     <div class="row"><span>− Paid out (expenses)</span><span>${amt(cash.drawerOut)}</span></div>
+    ${cash.refundsCash !== undefined && cash.refundsCash !== 0 ? `<div class="row"><span>− Cash refunds (returns)</span><span>${amt(cash.refundsCash)}</span></div>` : ""}
     <div class="row strong"><span>= Expected in drawer</span><span>${amt(close?.expectedCash ?? cash.expectedCash)}</span></div>
     ${close ? `
       <div class="row strong"><span>Counted</span><span>${amt(close.countedCash)}</span></div>
@@ -153,7 +217,12 @@ export function buildZReportHtml(report: ShiftReport) {
     <table><tr><th>Item</th><th>Open</th><th>+In</th><th>−Sold</th><th>Close</th>${close?.stockCount.length ? "<th>Count</th>" : ""}</tr>
       ${stockRows.map((row) => {
         const count = counted.get(row.name);
-        return `<tr><td>${esc(row.name)}${row.adjusted ? ` <span class="small">(adj ${row.adjusted > 0 ? "+" : ""}${row.adjusted})</span>` : ""}</td><td>${row.opening}</td><td>${row.received}</td><td>${row.sold}</td><td>${row.closing}</td>${close?.stockCount.length ? `<td class="${count && count.difference ? "flag" : ""}">${count ? `${count.counted}${count.difference ? ` (${count.difference > 0 ? "+" : ""}${count.difference})` : ""}` : "—"}</td>` : ""}</tr>`;
+        const notes = [
+          row.adjusted ? `adj ${row.adjusted > 0 ? "+" : ""}${row.adjusted}` : "",
+          row.returned ? `ret +${row.returned}` : "",
+          row.damaged ? `dmg −${row.damaged}` : "",
+        ].filter(Boolean).join(", ");
+        return `<tr><td>${esc(row.name)}${notes ? ` <span class="small">(${notes})</span>` : ""}</td><td>${row.opening}</td><td>${row.received}</td><td>${row.sold}</td><td>${row.closing}</td>${close?.stockCount.length ? `<td class="${count && count.difference ? "flag" : ""}">${count ? `${count.counted}${count.difference ? ` (${count.difference > 0 ? "+" : ""}${count.difference})` : ""}` : "—"}</td>` : ""}</tr>`;
       }).join("")}
     </table>
 
@@ -161,6 +230,12 @@ export function buildZReportHtml(report: ShiftReport) {
       <div class="head">Empty bottles</div>
       <table><tr><th>Item</th><th>Collected</th><th>Returned</th><th>On hand</th></tr>
         ${report.empties.map((row) => `<tr><td>${esc(row.name)}</td><td>${row.collected}</td><td>${row.returned}</td><td>${row.onHand}</td></tr>`).join("")}
+      </table>` : ""}
+
+    ${report.damagedStock?.length ? `
+      <div class="head">Damaged stock (kept aside)</div>
+      <table><tr><th>Item</th><th>+In</th><th>−Out</th><th>On hand</th></tr>
+        ${report.damagedStock.map((row) => `<tr><td>${esc(row.name)}</td><td>${row.added}</td><td>${row.cleared}</td><td>${row.onHand}</td></tr>`).join("")}
       </table>` : ""}
 
     <div class="head">Bills (${sales.billList.length})</div>

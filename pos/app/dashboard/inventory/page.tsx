@@ -56,6 +56,11 @@ type CheckoutResult = {
   total: number;
   amountReceived: number;
   changeGiven: number;
+  cashPaid?: number;
+  cardPaid?: number;
+  transferPaid?: number;
+  walletUsed?: number;
+  walletCredit?: number;
   purchases: Array<{ productId: number; name: string; quantity: number; unitPrice: number; emptiesReturned?: number; emptyDeduction?: number; lineTotal: number }>;
   counterSale?: { createdAt: string };
   member?: { id: number; name: string; mobileNumber: string; pointsEarned: number; pointsRedeemed?: number; pointsBalance: number } | null;
@@ -140,13 +145,18 @@ export default function InventoryPage() {
     return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", onKey); };
   }, [orderMenu]);
   const [cart, setCart] = useState<CartLine[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState<"CASH" | "CARD" | "BANK_TRANSFER">("CASH");
+  const [paymentMethod, setPaymentMethod] = useState<"CASH" | "CARD" | "BANK_TRANSFER" | "SPLIT">("CASH");
   // Card approval code (printed on the card machine slip) or transfer / QR reference — optional.
   const [paymentReference, setPaymentReference] = useState("");
-  const choosePayment = (method: "CASH" | "CARD" | "BANK_TRANSFER") => {
+  // Split bills: the card and transfer / QR parts; the rest is paid in cash.
+  const [splitCard, setSplitCard] = useState("");
+  const [splitTransfer, setSplitTransfer] = useState("");
+  const choosePayment = (method: "CASH" | "CARD" | "BANK_TRANSFER" | "SPLIT") => {
     setPaymentMethod(method);
     setPaymentReference("");
-    if (method !== "CASH") setAmountTendered("");
+    setSplitCard("");
+    setSplitTransfer("");
+    setAmountTendered("");
   };
   const [amountTendered, setAmountTendered] = useState("");
   const [checkingOut, setCheckingOut] = useState(false);
@@ -161,16 +171,29 @@ export default function InventoryPage() {
   const [discountInput, setDiscountInput] = useState("");
   const [redeemOn, setRedeemOn] = useState(false);
   const [redeemInput, setRedeemInput] = useState("");
+  // Member wallet: pay from it, or keep change in it.
+  const [walletOn, setWalletOn] = useState(false);
+  const [walletInput, setWalletInput] = useState("");
+  const [keepChangeOn, setKeepChangeOn] = useState(false);
+  const [keepChangeInput, setKeepChangeInput] = useState("");
+  const resetWallet = () => {
+    setWalletOn(false);
+    setWalletInput("");
+    setKeepChangeOn(false);
+    setKeepChangeInput("");
+  };
   const resetAdjustments = () => {
     setDiscountOn(false);
     setDiscountInput("");
     setRedeemOn(false);
     setRedeemInput("");
+    resetWallet();
   };
   const changeMember = (next: LoyaltyMember | null) => {
     setMember(next);
     setRedeemOn(false);
     setRedeemInput("");
+    resetWallet();
   };
   const [stockIn, setStockIn] = useState<{ initialCode?: string } | null>(null);
   // Selling needs an open shift (Day End): undefined = still checking.
@@ -383,11 +406,35 @@ export default function InventoryPage() {
   const pointsUsed = canRedeem && redeemOn ? Math.max(0, Math.min(maxPoints, Math.floor(Number(redeemInput) || 0))) : 0;
   const pointsDeduction = roundCurrency(pointsUsed * pointValue);
   const cartTotal = roundCurrency(afterDiscount - pointsDeduction);
-  const hasAdjustments = cartEmptyDeduction > 0 || discountAmount > 0 || pointsUsed > 0;
+  // Wallet: members can pay part or all of the bill with change they kept here before.
+  const walletBalance = roundCurrency(member?.walletBalance ?? 0);
+  const canUseWallet = Boolean(member) && walletBalance > 0;
+  const maxWallet = roundCurrency(Math.min(walletBalance, cartTotal));
+  const walletUse = canUseWallet && walletOn ? roundCurrency(Math.max(0, Math.min(maxWallet, Number(walletInput) || 0))) : 0;
+  /** Still to pay after the wallet. */
+  const due = roundCurrency(cartTotal - walletUse);
+  const hasAdjustments = cartEmptyDeduction > 0 || discountAmount > 0 || pointsUsed > 0 || walletUse > 0;
   const tendered = Number(amountTendered || "0");
-  const changeDue = paymentMethod === "CASH" && Number.isFinite(tendered)
-    ? Math.max(0, roundCurrency(tendered - cartTotal))
+  // Split: card and transfer parts are typed in; cash covers whatever is left.
+  const splitCardAmount = roundCurrency(Math.max(0, Number(splitCard) || 0));
+  const splitTransferAmount = roundCurrency(Math.max(0, Number(splitTransfer) || 0));
+  const splitNonCash = roundCurrency(splitCardAmount + splitTransferAmount);
+  const splitCashPart = roundCurrency(Math.max(0, due - splitNonCash));
+  const splitProblem = paymentMethod !== "SPLIT" || due <= 0 ? null
+    : splitNonCash <= 0 ? "Enter the card (or transfer / QR) amount"
+    : splitNonCash >= due ? "Card / QR part must be less than the amount to pay — use Card for the full amount"
+    : null;
+  /** Cash the customer has to hand over: the whole amount to pay, or the cash part of a split bill. */
+  const cashDue = due <= 0 ? 0 : paymentMethod === "CASH" ? due : paymentMethod === "SPLIT" ? splitCashPart : 0;
+  const changeDue = cashDue > 0 && Number.isFinite(tendered)
+    ? Math.max(0, roundCurrency(tendered - cashDue))
     : 0;
+  const cashShort = cashDue > 0 && (!Number.isFinite(tendered) || tendered < cashDue);
+  // Members can keep some or all of the change in their wallet instead of taking it.
+  const changeToWallet = member && keepChangeOn && changeDue > 0
+    ? roundCurrency(Math.max(0, Math.min(changeDue, keepChangeInput.trim() === "" ? changeDue : Number(keepChangeInput) || 0)))
+    : 0;
+  const handBack = roundCurrency(changeDue - changeToWallet);
 
   const showToast = (toast: Omit<ScanToast, "id">) => {
     const id = Date.now() + Math.random();
@@ -471,8 +518,12 @@ export default function InventoryPage() {
 
   const checkout = async () => {
     if (cart.length === 0) return;
-    if (paymentMethod === "CASH" && (!Number.isFinite(tendered) || tendered < cartTotal)) {
-      setError("Enter the cash received before completing the sale.");
+    if (splitProblem) {
+      setError(splitProblem);
+      return;
+    }
+    if (cashShort) {
+      setError(paymentMethod === "SPLIT" ? `Enter the cash received for the cash part (${formatCurrency(cashDue)}).` : "Enter the cash received before completing the sale.");
       return;
     }
     setCheckingOut(true);
@@ -490,7 +541,10 @@ export default function InventoryPage() {
             emptiesReturned: line.empties,
           })),
           paymentMethod,
-          amountReceived: paymentMethod === "CASH" ? tendered : undefined,
+          amountReceived: cashDue > 0 ? tendered : undefined,
+          ...(walletUse > 0 ? { walletUse } : {}),
+          ...(changeToWallet > 0 ? { changeToWallet } : {}),
+          ...(paymentMethod === "SPLIT" ? { split: { card: splitCardAmount, transfer: splitTransferAmount } } : {}),
           ...(paymentMethod !== "CASH" && paymentReference.trim() ? { paymentReference: paymentReference.trim() } : {}),
           ...(member ? { customerId: member.id } : {}),
           ...(discountAmount > 0 ? { discount: { type: discountType, value: discountValue } } : {}),
@@ -516,6 +570,11 @@ export default function InventoryPage() {
         pointsValue: sale.pointsValue ?? 0,
         paymentMethod: sale.paymentMethod,
         paymentReference: sale.paymentReference ?? null,
+        cashPaid: sale.cashPaid,
+        cardPaid: sale.cardPaid,
+        transferPaid: sale.transferPaid,
+        walletUsed: sale.walletUsed ?? 0,
+        walletCredit: sale.walletCredit ?? 0,
         lines: sale.purchases.map((line) => {
           const product = productById.get(line.productId);
           return {
@@ -808,7 +867,7 @@ export default function InventoryPage() {
         </div>
 
         <div className="pos-cart-checkout">
-          {cart.length > 0 && (settings.discountsEnabled || canRedeem) && (
+          {cart.length > 0 && (settings.discountsEnabled || canRedeem || canUseWallet) && (
             <div className="pos-adjust">
               <div className="pos-adjust-toggles">
                 {settings.discountsEnabled && (
@@ -819,6 +878,11 @@ export default function InventoryPage() {
                 {canRedeem && (
                   <button type="button" className={`points${redeemOn ? " active" : ""}`} onClick={() => { const next = !redeemOn; setRedeemOn(next); setRedeemInput(next ? String(maxPoints) : ""); }}>
                     Use points <b>{member?.loyaltyPoints}</b>
+                  </button>
+                )}
+                {canUseWallet && (
+                  <button type="button" className={`wallet${walletOn ? " active" : ""}`} onClick={() => { const next = !walletOn; setWalletOn(next); setWalletInput(next ? String(maxWallet) : ""); setAmountTendered(""); }}>
+                    Use wallet <b>{formatCurrency(walletBalance)}</b>
                   </button>
                 )}
               </div>
@@ -868,6 +932,23 @@ export default function InventoryPage() {
                   <span className="pos-adjust-hint">of {maxPoints} usable · 1 pt = {formatCurrency(pointValue)}</span>
                 </div>
               )}
+
+              {canUseWallet && walletOn && (
+                <div className="pos-adjust-row">
+                  <span className="pos-adjust-label">Wallet Rs.</span>
+                  <input
+                    className="bm-input"
+                    type="number"
+                    min={0}
+                    max={maxWallet}
+                    step="0.01"
+                    value={walletInput}
+                    onChange={(event) => { setWalletInput(event.target.value); setAmountTendered(""); }}
+                    aria-label="Amount to pay from the wallet"
+                  />
+                  <span className="pos-adjust-hint">of {formatCurrency(walletBalance)} in {member?.firstName}&apos;s wallet</span>
+                </div>
+              )}
             </div>
           )}
 
@@ -880,32 +961,71 @@ export default function InventoryPage() {
             </div>
           )}
           <div className="pos-cart-total"><span>Total</span><strong><AnimatedMoney value={cartTotal} /></strong></div>
-          <div className="pos-payment-buttons three" aria-label="Payment method">
+          {walletUse > 0 && (
+            <div className="pos-wallet-line">
+              <span>Paid from wallet</span><b>− {formatCurrency(walletUse)}</b>
+              <span>To pay now</span><strong>{formatCurrency(due)}</strong>
+            </div>
+          )}
+          {cart.length > 0 && due <= 0 && walletUse > 0 && <div className="pos-wallet-full">Paid in full from {member?.firstName}&apos;s wallet. No cash or card needed.</div>}
+          {!(cart.length > 0 && due <= 0 && walletUse > 0) && <div className="pos-payment-buttons four" aria-label="Payment method">
             <button type="button" className={paymentMethod === "CASH" ? "active" : ""} onClick={() => choosePayment("CASH")}><IconCash /> Cash</button>
             <button type="button" className={paymentMethod === "CARD" ? "active" : ""} onClick={() => choosePayment("CARD")}><IconCard /> Card</button>
             <button type="button" className={paymentMethod === "BANK_TRANSFER" ? "active" : ""} onClick={() => choosePayment("BANK_TRANSFER")}><IconQr /> Transfer / QR</button>
-          </div>
-          {paymentMethod !== "CASH" && cart.length > 0 && (
-            <div className="pos-payref">
-              <label htmlFor="payment-ref">{paymentMethod === "CARD" ? "Approval code" : "Transfer / QR reference"} <em>optional</em></label>
-              <input id="payment-ref" value={paymentReference} onChange={(event) => setPaymentReference(event.target.value)} maxLength={60} placeholder={paymentMethod === "CARD" ? "From the card slip, e.g. 004512" : "e.g. last 4 digits of the reference"} autoComplete="off" />
-              <small>{paymentMethod === "CARD" ? "Charge the card on the machine first. The payment is recorded automatically and checked against the machine at Day End." : "Check the money arrived in the bank app before completing."}</small>
+            <button type="button" className={paymentMethod === "SPLIT" ? "active" : ""} onClick={() => choosePayment("SPLIT")} title="Part card (or QR), rest in cash"><span className="pos-split-icon" aria-hidden="true"><IconCash /><IconCard /></span> Split</button>
+          </div>}
+          {paymentMethod === "SPLIT" && cart.length > 0 && due > 0 && (
+            <div className="pos-split">
+              <div className="pos-split-row">
+                <label htmlFor="split-card"><IconCard /> By card</label>
+                <input id="split-card" value={splitCard} onChange={(event) => setSplitCard(event.target.value)} inputMode="decimal" type="number" min={0} step="0.01" placeholder="0.00" autoFocus />
+              </div>
+              <div className="pos-split-row">
+                <label htmlFor="split-transfer"><IconQr /> By transfer / QR <em>optional</em></label>
+                <input id="split-transfer" value={splitTransfer} onChange={(event) => setSplitTransfer(event.target.value)} inputMode="decimal" type="number" min={0} step="0.01" placeholder="0.00" />
+              </div>
+              <div className={`pos-split-cash${splitProblem ? " bad" : ""}`}>
+                <span><IconCash /> Rest in cash</span>
+                <strong>{formatCurrency(splitCashPart)}</strong>
+              </div>
+              {splitProblem && splitNonCash > 0 && <small className="pos-split-warn">{splitProblem}</small>}
             </div>
           )}
-          {paymentMethod === "CASH" && cart.length > 0 && (
+          {paymentMethod !== "CASH" && cart.length > 0 && due > 0 && (
+            <div className="pos-payref">
+              <label htmlFor="payment-ref">{paymentMethod === "CARD" || (paymentMethod === "SPLIT" && splitCardAmount > 0) ? "Card approval code" : "Transfer / QR reference"} <em>optional</em></label>
+              <input id="payment-ref" value={paymentReference} onChange={(event) => setPaymentReference(event.target.value)} maxLength={60} placeholder={paymentMethod === "CARD" || (paymentMethod === "SPLIT" && splitCardAmount > 0) ? "From the card slip, e.g. 004512" : "e.g. last 4 digits of the reference"} autoComplete="off" />
+              <small>{paymentMethod === "BANK_TRANSFER" ? "Check the money arrived in the bank app before completing." : `Charge ${paymentMethod === "SPLIT" && splitCardAmount > 0 ? formatCurrency(splitCardAmount) + " on" : "the card on"} the machine first. The payment is recorded automatically and checked against the machine at Day End.`}</small>
+            </div>
+          )}
+          {cashDue > 0 && cart.length > 0 && !splitProblem && (
             <div className="pos-cash-area">
-              <label htmlFor="cash-received">Cash received</label>
+              <label htmlFor="cash-received">{paymentMethod === "SPLIT" ? `Cash received for ${formatCurrency(cashDue)}` : "Cash received"}</label>
               <input id="cash-received" value={amountTendered} onChange={(event) => setAmountTendered(event.target.value)} inputMode="decimal" type="number" min={0} step="0.01" placeholder="0.00" />
               <div className="pos-quick-cash">
-                {[cartTotal, Math.ceil(cartTotal / 100) * 100, Math.ceil(cartTotal / 500) * 500, Math.ceil(cartTotal / 1000) * 1000]
+                {[cashDue, Math.ceil(cashDue / 100) * 100, Math.ceil(cashDue / 500) * 500, Math.ceil(cashDue / 1000) * 1000]
                   .filter((value, index, values) => value > 0 && values.indexOf(value) === index)
                   .map((value) => <button key={value} type="button" onClick={() => setAmountTendered(String(value))}>{formatCurrency(value)}</button>)}
               </div>
               <div className="pos-change"><span>Change</span><strong>{formatCurrency(changeDue)}</strong></div>
+              {member && changeDue > 0 && (
+                <div className={`pos-keep-change${keepChangeOn ? " on" : ""}`}>
+                  <label className="lx-check">
+                    <input type="checkbox" checked={keepChangeOn} onChange={(event) => { setKeepChangeOn(event.target.checked); setKeepChangeInput(""); }} />
+                    Keep change in {member.firstName}&apos;s wallet
+                  </label>
+                  {keepChangeOn && (
+                    <div className="pos-keep-change-row">
+                      <input aria-label="Change to keep in the wallet" type="number" min={0} max={changeDue} step="0.01" value={keepChangeInput} placeholder={String(changeDue)} onChange={(event) => setKeepChangeInput(event.target.value)} />
+                      <span>to wallet · hand back <b>{formatCurrency(handBack)}</b></span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
-          <button type="button" className="pos-complete-sale" disabled={cart.length === 0 || checkingOut || shift === null || discountOverLimit || hardLiquorOver || (paymentMethod === "CASH" && tendered < cartTotal)} onClick={() => void checkout()}>
-            {checkingOut ? "Completing…" : shift === null ? "Start a shift to sell" : hardLiquorOver ? `Too much hard liquor (max ${settings.hardLiquorLimit})` : `Complete sale · ${formatCurrency(cartTotal)}`}
+          <button type="button" className="pos-complete-sale" disabled={cart.length === 0 || checkingOut || shift === null || discountOverLimit || hardLiquorOver || Boolean(splitProblem) || cashShort} onClick={() => void checkout()}>
+            {checkingOut ? "Completing…" : shift === null ? "Start a shift to sell" : hardLiquorOver ? `Too much hard liquor (max ${settings.hardLiquorLimit})` : `Complete sale · ${formatCurrency(walletUse > 0 ? due : cartTotal)}`}
           </button>
           <div className="pos-cart-shortcuts">
             <Link href="/dashboard/inventory/sold"><IconReceipt /> Recent sales</Link>
@@ -937,7 +1057,7 @@ export default function InventoryPage() {
           receipt={completedReceipt}
           success
           title="Payment successful"
-          subtitle={`${formatCurrency(completedReceipt.total)} · ${completedReceipt.paymentMethod === "CASH" ? `Change ${formatCurrency(completedReceipt.change)}` : completedReceipt.paymentMethod === "CARD" ? `Paid by card${completedReceipt.paymentReference ? ` · ${completedReceipt.paymentReference}` : ""}` : "Paid by transfer / QR"}${completedReceipt.member ? ` · +${completedReceipt.member.pointsEarned} pts for ${completedReceipt.member.name}` : ""}`}
+          subtitle={`${formatCurrency(completedReceipt.total)} · ${completedReceipt.paymentMethod === "CASH" ? `Change ${formatCurrency(completedReceipt.change)}` : completedReceipt.paymentMethod === "SPLIT" ? `Card ${formatCurrency((completedReceipt.cardPaid ?? 0) + (completedReceipt.transferPaid ?? 0))} + cash ${formatCurrency(completedReceipt.cashPaid ?? 0)} · change ${formatCurrency(completedReceipt.change)}` : completedReceipt.paymentMethod === "CARD" ? `Paid by card${completedReceipt.paymentReference ? ` · ${completedReceipt.paymentReference}` : ""}` : "Paid by transfer / QR"}${completedReceipt.member ? ` · +${completedReceipt.member.pointsEarned} pts for ${completedReceipt.member.name}` : ""}`}
           closeLabel="New sale"
           onClose={() => { setShowReceipt(false); searchInputRef.current?.focus(); }}
         />

@@ -155,9 +155,15 @@ exports.Prisma.PosCounterSaleScalarFieldEnum = {
   changeGiven: 'changeGiven',
   paymentMethod: 'paymentMethod',
   paymentReference: 'paymentReference',
+  cashPaid: 'cashPaid',
+  cardPaid: 'cardPaid',
+  transferPaid: 'transferPaid',
+  walletUsed: 'walletUsed',
+  walletCredit: 'walletCredit',
   cashierId: 'cashierId',
   customerId: 'customerId',
   pointsEarned: 'pointsEarned',
+  pointsRate: 'pointsRate',
   discountType: 'discountType',
   discountValue: 'discountValue',
   discountAmount: 'discountAmount',
@@ -213,6 +219,7 @@ exports.Prisma.InventoryProductScalarFieldEnum = {
   sellingPrice: 'sellingPrice',
   emptyBottlePrice: 'emptyBottlePrice',
   emptyBottlesOnHand: 'emptyBottlesOnHand',
+  damagedQuantity: 'damagedQuantity',
   description: 'description',
   lastSoldAt: 'lastSoldAt',
   createdAt: 'createdAt',
@@ -250,6 +257,7 @@ exports.Prisma.PosCustomerScalarFieldEnum = {
   totalSpent: 'totalSpent',
   visits: 'visits',
   lastVisitAt: 'lastVisitAt',
+  walletBalance: 'walletBalance',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -568,6 +576,45 @@ exports.Prisma.PurchaseOrderEmailScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.PosWalletTransactionScalarFieldEnum = {
+  id: 'id',
+  customerId: 'customerId',
+  type: 'type',
+  amount: 'amount',
+  balanceAfter: 'balanceAfter',
+  invoiceGroupCode: 'invoiceGroupCode',
+  shiftId: 'shiftId',
+  note: 'note',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.PosReturnScalarFieldEnum = {
+  id: 'id',
+  returnNo: 'returnNo',
+  type: 'type',
+  productId: 'productId',
+  productName: 'productName',
+  quantity: 'quantity',
+  condition: 'condition',
+  invoiceGroupCode: 'invoiceGroupCode',
+  customerId: 'customerId',
+  customerName: 'customerName',
+  customerMobile: 'customerMobile',
+  unitPrice: 'unitPrice',
+  refundAmount: 'refundAmount',
+  refundMethod: 'refundMethod',
+  pointsReversed: 'pointsReversed',
+  unitCost: 'unitCost',
+  reason: 'reason',
+  note: 'note',
+  disposal: 'disposal',
+  reference: 'reference',
+  shiftId: 'shiftId',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -614,7 +661,8 @@ exports.PaymentMethod = exports.$Enums.PaymentMethod = {
   CASH: 'CASH',
   CHEQUE: 'CHEQUE',
   BANK_TRANSFER: 'BANK_TRANSFER',
-  CARD: 'CARD'
+  CARD: 'CARD',
+  SPLIT: 'SPLIT'
 };
 
 exports.PosPurchaseItemType = exports.$Enums.PosPurchaseItemType = {
@@ -723,7 +771,9 @@ exports.Prisma.ModelName = {
   InventoryMovement: 'InventoryMovement',
   PurchaseOrder: 'PurchaseOrder',
   PurchaseOrderItem: 'PurchaseOrderItem',
-  PurchaseOrderEmail: 'PurchaseOrderEmail'
+  PurchaseOrderEmail: 'PurchaseOrderEmail',
+  PosWalletTransaction: 'PosWalletTransaction',
+  PosReturn: 'PosReturn'
 };
 
 /**

@@ -543,6 +543,15 @@ export function ProductModal({
     emptyBottlePrice:
       product?.emptyBottlePrice != null ? String(product.emptyBottlePrice) : "",
   });
+  // Tax can be typed as a % of the purchase price (default) or as a rupee amount for the batch.
+  const [taxMode, setTaxMode] = useState<"percent" | "amount">(() =>
+    product?.taxPaid && !(product?.purchasePrice && product.purchasePrice > 0) ? "amount" : "percent",
+  );
+  const [taxPercent, setTaxPercent] = useState(() =>
+    product?.taxPaid && product?.purchasePrice && product.purchasePrice > 0
+      ? String(Math.round((product.taxPaid / product.purchasePrice) * 1_000_000) / 10_000)
+      : "",
+  );
   const [descriptionPoints, setDescriptionPoints] = useState<string[]>(() =>
     parseDescriptionPoints(product?.description),
   );
@@ -612,7 +621,12 @@ export function ProductModal({
       )
     : undefined;
   const perPiecePurchasePrice = getPerPieceValue(form.purchasePrice);
-  const perPieceTaxPaid = getPerPieceValue(form.taxPaid);
+  // Tax for the whole batch in rupees, whichever way it was typed.
+  const taxBatchTotal =
+    taxMode === "percent"
+      ? Math.round((Number(form.purchasePrice) || 0) * (Number(taxPercent) || 0)) / 100
+      : Number(form.taxPaid) || 0;
+  const perPieceTaxPaid = getPerPieceValue(String(taxBatchTotal));
   const perPieceAdditionalExpenses =
     pricingUnitCount > 0 && totalAdditionalExpenses > 0
       ? totalAdditionalExpenses / pricingUnitCount
@@ -707,7 +721,7 @@ export function ProductModal({
             purchasePrice: form.purchasePrice
               ? Number(form.purchasePrice)
               : undefined,
-            taxPaid: form.taxPaid ? Number(form.taxPaid) : undefined,
+            taxPaid: taxBatchTotal > 0 ? taxBatchTotal : undefined,
             additionalExpenses:
               validExpenses.length > 0
                 ? validExpenses.reduce(
@@ -1076,21 +1090,38 @@ export function ProductModal({
             </div>
 
             <div className="bm-field-group">
-              <label>Tax Paid (batch total)</label>
-              <input
-                className="bm-input"
-                type="number"
-                min={0}
-                step="0.01"
-                value={form.taxPaid}
-                onChange={setEvent("taxPaid")}
-                placeholder="e.g. 250 for the full stock set"
-              />
-              {perPieceTaxPaid !== undefined && (
-                <span style={{ fontSize: 12, color: "var(--text-soft)" }}>
-                  Per unit: {formatCurrency(perPieceTaxPaid)}
-                </span>
-              )}
+              <label htmlFor="tax-input">Tax Paid</label>
+              <div className="tax-field">
+                <div className="tax-mode" role="radiogroup" aria-label="Enter tax as">
+                  <button type="button" role="radio" aria-checked={taxMode === "percent"} className={taxMode === "percent" ? "active" : ""}
+                    onClick={() => {
+                      // Switching keeps the same tax: turn the rupee amount into a % of the purchase price.
+                      const purchase = Number(form.purchasePrice) || 0;
+                      if (taxMode === "amount" && purchase > 0 && Number(form.taxPaid) > 0) setTaxPercent(String(Math.round((Number(form.taxPaid) / purchase) * 10000) / 100));
+                      setTaxMode("percent");
+                    }}>%</button>
+                  <button type="button" role="radio" aria-checked={taxMode === "amount"} className={taxMode === "amount" ? "active" : ""}
+                    onClick={() => { if (taxMode === "percent" && taxBatchTotal > 0) setField("taxPaid")(String(taxBatchTotal)); setTaxMode("amount"); }}>Rs.</button>
+                </div>
+                {taxMode === "percent" ? (
+                  <input id="tax-input" className="bm-input" type="number" min={0} max={1000} step="0.01" value={taxPercent}
+                    onChange={(event) => setTaxPercent(event.target.value)} placeholder="e.g. 18 (% of the purchase price)" />
+                ) : (
+                  <input id="tax-input" className="bm-input" type="number" min={0} step="0.01" value={form.taxPaid}
+                    onChange={setEvent("taxPaid")} placeholder="e.g. 250 for the full stock set" />
+                )}
+              </div>
+              <span style={{ fontSize: 12, color: "var(--text-soft)" }}>
+                {taxMode === "percent"
+                  ? Number(taxPercent) > 0
+                    ? Number(form.purchasePrice) > 0
+                      ? `${taxPercent}% of ${formatCurrency(Number(form.purchasePrice))} = ${formatCurrency(taxBatchTotal)} for the batch${perPieceTaxPaid !== undefined ? ` · ${formatCurrency(perPieceTaxPaid)} per unit` : ""}`
+                      : "Enter the purchase price first. The tax is worked out from it."
+                    : "Percentage of the purchase price (batch total)."
+                  : perPieceTaxPaid !== undefined
+                    ? `Batch total · per unit: ${formatCurrency(perPieceTaxPaid)}`
+                    : "Rupee amount for the whole batch."}
+              </span>
             </div>
 
             <div className="bm-field-group" style={{ gridColumn: "1 / -1" }}>

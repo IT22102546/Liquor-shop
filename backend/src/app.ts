@@ -19,6 +19,7 @@ import activityLogRouter from "./modules/activity-log/activity-log.routes";
 import settingsRouter from "./modules/settings/settings.routes";
 import { cashBookRouter, reportRouter, shiftRouter } from "./modules/book/book.routes";
 import purchaseOrderRouter from "./modules/purchase-orders/purchase-orders.routes";
+import returnsRouter from "./modules/returns/returns.routes";
 import { recordPosActivity } from "./modules/activity-log/activity-log.middleware";
 
 const app = express();
@@ -65,6 +66,7 @@ app.use("/api/pos/shifts", shiftRouter);
 app.use("/api/pos/cash-book", cashBookRouter);
 app.use("/api/pos/reports", reportRouter);
 app.use("/api/pos/purchase-orders", purchaseOrderRouter);
+app.use("/api/pos/returns", returnsRouter);
 
 /* ──────────────────── Error handling ────────────────────── */
 app.use(notFoundHandler);

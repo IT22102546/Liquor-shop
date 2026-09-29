@@ -2,7 +2,7 @@ import type { Request } from "express";
 import { Prisma } from "../../generated/prisma";
 import { prisma } from "../../database/prisma.client";
 
-export type ActivityCategory = "AUTH" | "SALE" | "STOCK" | "PRODUCT" | "STAFF" | "ACCOUNTS" | "CASHBOOK" | "PURCHASE" | "CUSTOMER" | "OTHER";
+export type ActivityCategory = "AUTH" | "SALE" | "STOCK" | "PRODUCT" | "STAFF" | "ACCOUNTS" | "CASHBOOK" | "PURCHASE" | "RETURN" | "CUSTOMER" | "OTHER";
 
 export type ActivityEntry = {
   actorId?: number | null;

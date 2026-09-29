@@ -34,6 +34,7 @@ export type PeriodReport = {
     newMembers: number; memberBills: number; pointsEarned: number; pointsRedeemed: number; pointsValue: number; redeemBills: number;
     byMember: Array<{ name: string; bills: number; spent: number; earned: number; redeemed: number; value: number }>;
     owed: { points: number; members: number; value: number; pointValue: number };
+    wallet?: { kept: number; keptBills: number; used: number; usedBills: number; heldNow: number; membersHolding: number };
   };
   adjustments: Array<{
     billNo: string; time: string; cashier: string; member: string | null; billBefore: number;
@@ -283,7 +284,12 @@ export function buildPeriodReportHtml(report: PeriodReport, kind: PeriodKind) {
         <tr><td>Points used on ${loyalty.redeemBills} bill(s)</td><td class="r">${loyalty.pointsRedeemed.toLocaleString()} · ${amt(loyalty.pointsValue)}</td></tr>
         <tr class="total"><td>Points members hold now (${loyalty.owed.members})</td><td class="r">${loyalty.owed.points.toLocaleString()} · ${amt(loyalty.owed.value)}</td></tr>
       </table>
-      <div class="note">Points held now are future discounts the shop owes, valued at Rs. ${loyalty.owed.pointValue} per point.</div>
+      ${loyalty.wallet ? `<table class="ledger" style="margin-top:6px">
+        <tr><td>Change kept in customer wallets (${loyalty.wallet.keptBills} bill(s))</td><td class="r">${amt(loyalty.wallet.kept)}</td></tr>
+        <tr><td>Paid from customer wallets (${loyalty.wallet.usedBills} bill(s))</td><td class="r">${amt(loyalty.wallet.used)}</td></tr>
+        <tr class="total"><td>Wallet money members hold now (${loyalty.wallet.membersHolding})</td><td class="r">${amt(loyalty.wallet.heldNow)}</td></tr>
+      </table>` : ""}
+      <div class="note">Wallet money held now is cash the shop keeps for members and owes back as future payments. Points held now are future discounts the shop owes, valued at Rs. ${loyalty.owed.pointValue} per point.</div>
     </section>
   </div>
 

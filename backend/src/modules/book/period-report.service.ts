@@ -11,7 +11,6 @@ import { getSettings } from "../settings/settings.service";
 const round2 = (value: number) => Math.round(value * 100) / 100;
 type Bucketing = "HOUR" | "DAY" | "MONTH";
 type PayKind = "cash" | "card" | "transfer";
-const kindOf = (method: string): PayKind => (method === "CASH" ? "cash" : method === "CARD" ? "card" : "transfer");
 /** Paid out but not a running cost: stock is already counted as cost of goods sold; an advance is a loan. */
 const NOT_OPERATING = new Set(["STOCK_PURCHASE", "STAFF_ADVANCE"]);
 
@@ -42,12 +41,12 @@ export async function getPeriodReport(fromText: string, toText: string) {
   if (days > 1_100) throw AppError.validation({ to: ["Choose a range of up to 3 years"] });
   const mode: Bucketing = days <= 1 ? "HOUR" : days <= 62 ? "DAY" : "MONTH";
 
-  const [sales, entries, shifts, movements, products, newMembers, owed, settings] = await Promise.all([
+  const [sales, entries, shifts, movements, products, newMembers, owed, settings, walletHeld] = await Promise.all([
     prisma.posCounterSale.findMany({
       where: { createdAt: { gte: from, lte: to } },
       orderBy: { createdAt: "asc" },
       select: {
-        invoiceGroupCode: true, totalAmount: true, paymentMethod: true, createdAt: true, customerId: true,
+        invoiceGroupCode: true, totalAmount: true, paymentMethod: true, cashPaid: true, cardPaid: true, transferPaid: true, walletUsed: true, walletCredit: true, createdAt: true, customerId: true,
         emptyDeduction: true, emptiesReturned: true, discountAmount: true, discountType: true, discountValue: true, pointsValue: true, pointsRedeemed: true, pointsEarned: true,
         cashier: { select: { name: true } },
         customer: { select: { id: true, firstName: true, lastName: true } },
@@ -58,7 +57,7 @@ export async function getPeriodReport(fromText: string, toText: string) {
     prisma.inventoryMovement.findMany({ where: { createdAt: { gte: from, lte: to } }, select: { productId: true, kind: true, type: true, quantity: true } }),
     prisma.inventoryProduct.findMany({
       select: {
-        id: true, name: true, compatibleWith: true, quantity: true, purchasePrice: true, taxPaid: true, additionalExpenses: true,
+        id: true, name: true, compatibleWith: true, quantity: true, damagedQuantity: true, purchasePrice: true, taxPaid: true, additionalExpenses: true,
         brand: { select: { name: true } }, category: { select: { name: true } },
       },
     }),
@@ -66,6 +65,8 @@ export async function getPeriodReport(fromText: string, toText: string) {
     // Points members hold right now: what the shop still owes in future discounts.
     prisma.posCustomer.aggregate({ where: { mobileNumber: { not: "WALK-IN" }, loyaltyPoints: { gt: 0 } }, _sum: { loyaltyPoints: true }, _count: true }),
     getSettings(),
+    // Money members hold in wallets right now: the shop owes it to them as future payments.
+    prisma.posCustomer.aggregate({ where: { walletBalance: { gt: 0 } }, _sum: { walletBalance: true }, _count: true }),
   ]);
   const lines = sales.length
     ? await prisma.posCustomerPurchase.findMany({
@@ -96,19 +97,24 @@ export async function getPeriodReport(fromText: string, toText: string) {
   const payCount = { cash: 0, card: 0, transfer: 0 };
   const staff = new Map<string, { name: string; bills: number; cash: number; card: number; transfer: number; total: number }>();
   sales.forEach((sale) => {
-    const kind = kindOf(sale.paymentMethod);
-    pay[kind] += sale.totalAmount;
-    payCount[kind] += 1;
+    // Amounts actually paid each way; a split bill adds to more than one (and counts as a bill for each).
+    const parts: Record<PayKind, number> = { cash: sale.cashPaid, card: sale.cardPaid, transfer: sale.transferPaid };
     const bucket = bucketOf(sale.createdAt);
     bucket.bills += 1;
     bucket.netSales += sale.totalAmount;
-    bucket[kind] += sale.totalAmount;
     const row = staff.get(sale.cashier.name) ?? { name: sale.cashier.name, bills: 0, cash: 0, card: 0, transfer: 0, total: 0 };
     row.bills += 1;
     row.total += sale.totalAmount;
-    row[kind] += sale.totalAmount;
+    (Object.keys(parts) as PayKind[]).forEach((kind) => {
+      if (parts[kind] <= 0) return;
+      pay[kind] += parts[kind];
+      payCount[kind] += 1;
+      bucket[kind] += parts[kind];
+      row[kind] += parts[kind];
+    });
     staff.set(sale.cashier.name, row);
   });
+  const splitBills = sales.filter((sale) => sale.paymentMethod === "SPLIT").length;
 
   let cost = 0;
   let units = 0;
@@ -140,11 +146,45 @@ export async function getPeriodReport(fromText: string, toText: string) {
     byCategory.set(categoryName, category);
   });
 
-  const netSales = round2(pay.cash + pay.card + pay.transfer);
+  const walletUsed = round2(sales.reduce((sum, sale) => sum + sale.walletUsed, 0));
+  const walletKept = round2(sales.reduce((sum, sale) => sum + sale.walletCredit, 0));
+  const netSales = round2(pay.cash + pay.card + pay.transfer + walletUsed);
   const emptyDeduction = round2(sales.reduce((sum, sale) => sum + sale.emptyDeduction, 0));
   const discounts = round2(sales.reduce((sum, sale) => sum + sale.discountAmount, 0));
   const pointsValue = round2(sales.reduce((sum, sale) => sum + sale.pointsValue, 0));
-  const grossProfit = round2(netSales - cost);
+
+  // ── Returns & damages in the period ──
+  const returnRows = await prisma.posReturn.findMany({ where: { createdAt: { gte: from, lte: to } } });
+  const costOf = (row: { unitCost: number | null; quantity: number }) => (row.unitCost ?? 0) * row.quantity;
+  const refundRows = returnRows.filter((row) => row.type === "REFUND");
+  const refunds = round2(refundRows.reduce((sum, row) => sum + row.refundAmount, 0));
+  // Unopened bottles back on the shelf are no longer a cost of sales.
+  const shelfReturnedCost = round2(refundRows.filter((row) => row.condition === "SHELF").reduce((sum, row) => sum + costOf(row), 0));
+  // New bottles given for damaged ones and damage found in the store are a loss (at cost); damaged bottles put back on the shelf are not.
+  const damageLoss = round2(
+    returnRows.filter((row) => row.type === "EXCHANGE" || row.type === "STORE_DAMAGE").reduce((sum, row) => sum + costOf(row), 0)
+    - returnRows.filter((row) => row.type === "DAMAGE_CLEARED" && row.disposal === "RESTORED").reduce((sum, row) => sum + costOf(row), 0),
+  );
+  const unitsWhere = (test: (row: (typeof returnRows)[number]) => boolean) => returnRows.filter(test).reduce((sum, row) => sum + row.quantity, 0);
+  const damagedNow = products.reduce((sum, product) => sum + product.damagedQuantity, 0);
+  const returns = {
+    refunds,
+    refundBills: new Set(refundRows.map((row) => row.returnNo)).size,
+    refundUnits: unitsWhere((row) => row.type === "REFUND"),
+    refundsCash: round2(refundRows.filter((row) => row.refundMethod === "CASH").reduce((sum, row) => sum + row.refundAmount, 0)),
+    refundsWallet: round2(refundRows.filter((row) => row.refundMethod === "WALLET").reduce((sum, row) => sum + row.refundAmount, 0)),
+    returnedToShelf: unitsWhere((row) => row.type === "REFUND" && row.condition === "SHELF"),
+    returnedDamaged: unitsWhere((row) => row.type === "REFUND" && row.condition === "DAMAGED"),
+    exchanged: unitsWhere((row) => row.type === "EXCHANGE"),
+    storeDamaged: unitsWhere((row) => row.type === "STORE_DAMAGE"),
+    toSupplier: unitsWhere((row) => row.type === "DAMAGE_CLEARED" && row.disposal === "SUPPLIER"),
+    writtenOff: unitsWhere((row) => row.type === "DAMAGE_CLEARED" && row.disposal === "WRITTEN_OFF"),
+    restored: unitsWhere((row) => row.type === "DAMAGE_CLEARED" && row.disposal === "RESTORED"),
+    damageLoss,
+    damagedNow,
+    damagedValueNow: round2(products.reduce((sum, product) => sum + product.damagedQuantity * unitCost(product.id), 0)),
+  };
+  const grossProfit = round2(netSales - refunds - (cost - shelfReturnedCost));
 
   // ── Cash book ──
   const expenseRows = entries.filter((entry) => entry.direction === "OUT");
@@ -193,12 +233,16 @@ export async function getPeriodReport(fromText: string, toText: string) {
   const short = round2(shiftRows.filter((row) => row.cashDifference < -0.004).reduce((sum, row) => sum + row.cashDifference, 0));
 
   // ── Stock movements ──
-  const stock = new Map<number, { received: number; sold: number; adjusted: number; collected: number; returned: number }>();
+  const stock = new Map<number, { received: number; sold: number; customerReturns: number; damaged: number; adjusted: number; collected: number; returned: number }>();
   movements.forEach((movement) => {
-    const row = stock.get(movement.productId) ?? { received: 0, sold: 0, adjusted: 0, collected: 0, returned: 0 };
+    // Damaged stock kept aside is reported under Returns & damages.
+    if (movement.kind === "DAMAGED") return;
+    const row = stock.get(movement.productId) ?? { received: 0, sold: 0, customerReturns: 0, damaged: 0, adjusted: 0, collected: 0, returned: 0 };
     if (movement.kind === "STOCK") {
       if (movement.type === "RECEIVED" || movement.type === "OPENING") row.received += movement.quantity;
       else if (movement.type === "SOLD") row.sold += -movement.quantity;
+      else if (movement.type === "CUSTOMER_RETURN" || movement.type === "RESTORED") row.customerReturns += movement.quantity;
+      else if (movement.type === "EXCHANGED" || movement.type === "DAMAGED") row.damaged += -movement.quantity;
       else row.adjusted += movement.quantity;
     } else if (movement.type === "COLLECTED") row.collected += movement.quantity;
     else if (movement.type === "RETURNED") row.returned += -movement.quantity;
@@ -227,17 +271,21 @@ export async function getPeriodReport(fromText: string, toText: string) {
       discounts,
       pointsValue,
       netSales,
+      /** Paid back for returned bottles, and net sales after that. */
+      refunds,
+      netAfterReturns: round2(netSales - refunds),
       averageBill: sales.length ? round2(netSales / sales.length) : 0,
       cash: round2(pay.cash), card: round2(pay.card), transfer: round2(pay.transfer),
-      cashBills: payCount.cash, cardBills: payCount.card, transferBills: payCount.transfer,
+      cashBills: payCount.cash, cardBills: payCount.card, transferBills: payCount.transfer, splitBills,
       memberBills: sales.filter((sale) => sale.customerId != null).length,
     },
     profit: {
-      costOfSales: round2(cost),
+      costOfSales: round2(cost - shelfReturnedCost),
       grossProfit,
-      margin: netSales > 0 ? round2((grossProfit / netSales) * 100) : 0,
+      margin: netSales - refunds > 0 ? round2((grossProfit / (netSales - refunds)) * 100) : 0,
       operatingExpenses,
-      netProfit: round2(grossProfit - operatingExpenses + [...otherIncome.values()].filter((row) => row.category !== "OWNER_CASH_IN").reduce((sum, row) => sum + row.amount, 0)),
+      damageLoss,
+      netProfit: round2(grossProfit - operatingExpenses - damageLoss +[...otherIncome.values()].filter((row) => row.category !== "OWNER_CASH_IN").reduce((sum, row) => sum + row.amount, 0)),
     },
     trend: [...buckets.entries()].map(([key, row]) => ({
       key, bills: row.bills, netSales: round2(row.netSales), cash: round2(row.cash), card: round2(row.card), transfer: round2(row.transfer),
@@ -262,6 +310,7 @@ export async function getPeriodReport(fromText: string, toText: string) {
       rows: shiftRows,
     },
     stock: { rows: stockRows, stockValueNow },
+    returns,
     discounts: discountSummary(sales),
     loyalty: {
       newMembers,
@@ -271,6 +320,14 @@ export async function getPeriodReport(fromText: string, toText: string) {
       pointsValue: round2(sales.reduce((sum, sale) => sum + sale.pointsValue, 0)),
       redeemBills: sales.filter((sale) => sale.pointsRedeemed > 0).length,
       byMember: memberSummary(sales),
+      wallet: {
+        kept: walletKept,
+        keptBills: sales.filter((sale) => sale.walletCredit > 0).length,
+        used: walletUsed,
+        usedBills: sales.filter((sale) => sale.walletUsed > 0).length,
+        heldNow: round2(walletHeld._sum.walletBalance ?? 0),
+        membersHolding: walletHeld._count,
+      },
       owed: { points: owed._sum.loyaltyPoints ?? 0, members: owed._count, value: round2((owed._sum.loyaltyPoints ?? 0) * settings.loyaltyPointValue), pointValue: settings.loyaltyPointValue },
     },
     // Every bill with a discount or points spent, with who served it.

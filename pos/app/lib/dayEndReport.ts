@@ -146,9 +146,12 @@ export function buildDayEndReportHtml(report: ShiftReport) {
         ${sales.discounts ? `<tr><td>Less: discounts</td><td class="r minus">−${amt(sales.discounts)}</td></tr>` : ""}
         ${sales.pointsValue ? `<tr><td>Less: loyalty points redeemed (${sales.pointsRedeemed})</td><td class="r minus">−${amt(sales.pointsValue)}</td></tr>` : ""}
         <tr class="total"><td>Net sales</td><td class="r">${amt(sales.netSales)}</td></tr>
+        ${sales.walletUsed ? `<tr><td>Paid from customer wallets</td><td class="r">${amt(sales.walletUsed)}</td></tr>` : ""}
         <tr><td>Received in cash</td><td class="r">${amt(sales.cashSales)}</td></tr>
         <tr><td>Received by card</td><td class="r">${amt(sales.cardSales)}</td></tr>
         ${sales.transferSales != null ? `<tr><td>Received by bank transfer / QR</td><td class="r">${amt(sales.transferSales)}</td></tr>` : ""}
+        ${report.returns?.refunds ? `<tr><td>Less: refunds for returned bottles (${report.returns.refundUnits})</td><td class="r minus">−${amt(sales.refunds)}</td></tr>
+        <tr class="total"><td>Net sales after returns</td><td class="r">${amt(sales.netAfterReturns)}</td></tr>` : ""}
       </table>
     </section>
     <section class="keep">
@@ -156,8 +159,10 @@ export function buildDayEndReportHtml(report: ShiftReport) {
       <table class="ledger">
         <tr><td>Opening float</td><td class="r">${amt(cash.openingFloat)}</td></tr>
         <tr><td>Add: cash sales</td><td class="r plus">+${amt(cash.cashSales)}</td></tr>
+        ${cash.walletKept !== undefined && cash.walletKept !== 0 ? `<tr><td>Add: change kept in customer wallets</td><td class="r plus">${cash.walletKept == null ? "—" : `+${amt(cash.walletKept)}`}</td></tr>` : ""}
         <tr><td>Add: cash in</td><td class="r plus">+${amt(cash.drawerIn)}</td></tr>
         <tr><td>Less: paid out from drawer</td><td class="r minus">−${amt(cash.drawerOut)}</td></tr>
+        ${cash.refundsCash !== undefined && cash.refundsCash !== 0 ? `<tr><td>Less: cash refunds for returned bottles</td><td class="r minus">${cash.refundsCash == null ? "—" : `−${amt(cash.refundsCash)}`}</td></tr>` : ""}
         <tr class="total"><td>Expected in drawer</td><td class="r">${amt(close?.expectedCash ?? cash.expectedCash)}</td></tr>
         ${close ? `
         <tr class="strong"><td>Counted</td><td class="r">${amt(close.countedCash)}</td></tr>
@@ -177,6 +182,23 @@ export function buildDayEndReportHtml(report: ShiftReport) {
       ${noteRows.map(([note, qty]) => `<tr><td>Rs. ${Number(note).toLocaleString()}</td><td class="r">${qty}</td><td class="r">${amt(Number(note) * qty)}</td></tr>`).join("")}
       <tr class="total"><td>Total counted</td><td class="r">${noteRows.reduce((s, [, q]) => s + q, 0)}</td><td class="r">${amt(close?.countedCash)}</td></tr>
     </table>
+  </section>` : ""}
+
+  ${report.payments ? `
+  <section class="keep">
+    <h2>Payments <small>how the takings came in</small></h2>
+    <table>
+      <thead><tr><th>Paid by</th><th class="r">Bills</th><th class="r">Amount</th></tr></thead>
+      ${report.payments.rows.map((row) => `<tr><td>${esc(row.method)}</td><td class="r">${row.bills}</td><td class="r">${amt(row.amount)}</td></tr>`).join("")}
+      ${report.payments.wallet?.amount ? `<tr><td>Part paid from customer wallets</td><td class="r">${report.payments.wallet.bills}</td><td class="r">${amt(report.payments.wallet.amount)}</td></tr>` : ""}
+      <tr class="total"><td>Total</td><td class="r">${report.payments.rows.reduce((sum, row) => sum + row.bills, 0)}</td><td class="r">${amt(sales.netSales)}</td></tr>
+    </table>
+    <div class="note" style="margin-top:4px;font-size:8pt;color:#666">Money actually received: cash ${amt(sales.cashSales)} · card ${amt(sales.cardSales)} · transfer / QR ${amt(sales.transferSales ?? 0)} · change given back ${amt(report.payments.changeGiven)}</div>
+    ${report.payments.splitBills.length ? `
+    <table style="margin-top:8px">
+      <thead><tr><th>Split bill</th><th>Time</th><th>Sold by</th><th class="r">Total</th><th class="r">Cash</th><th class="r">Card</th><th class="r">QR</th><th>Approval / ref</th></tr></thead>
+      ${report.payments.splitBills.map((row) => `<tr><td>${esc(row.billNo)}</td><td>${timeOnly(row.time)}</td><td>${esc(row.cashier)}</td><td class="r">${amt(row.total)}</td><td class="r">${amt(row.cash)}</td><td class="r">${row.card ? amt(row.card) : "—"}</td><td class="r">${row.transfer ? amt(row.transfer) : "—"}</td><td>${esc(row.reference ?? "—")}</td></tr>`).join("")}
+    </table>` : ""}
   </section>` : ""}
 
   ${cardRows.length || close?.cardSlipTotal != null ? `
@@ -241,13 +263,13 @@ export function buildDayEndReportHtml(report: ShiftReport) {
   </section>
 
   <section>
-    <h2>Stock book <small>opening + received − sold ± adjusted = closing${hasCount ? " · checked against the shelf count" : ""}</small></h2>
+    <h2>Stock book <small>opening + received − sold${hasReturnCols ? " + returned − damaged" : ""} ± adjusted = closing${hasCount ? " · checked against the shelf count" : ""}</small></h2>
     <table>
-      <thead><tr><th>Product</th><th class="r">Opening</th><th class="r">Received</th><th class="r">Sold</th><th class="r">Adjusted</th><th class="r">Closing</th>${hasCount ? `<th class="r">Counted</th><th class="r">Difference</th>` : ""}</tr></thead>
+      <thead><tr><th>Product</th><th class="r">Opening</th><th class="r">Received</th><th class="r">Sold</th>${hasReturnCols ? `<th class="r">Returned</th><th class="r">Damaged</th>` : ""}<th class="r">Adjusted</th><th class="r">Closing</th>${hasCount ? `<th class="r">Counted</th><th class="r">Difference</th>` : ""}</tr></thead>
       ${stockRows.map((row) => {
         const count = counted.get(row.name);
         return `<tr><td>${esc(row.name)}<div class="muted">${esc([row.brand, row.size].filter(Boolean).join(" · "))}</div></td>
-          <td class="r">${row.opening}</td><td class="r">${row.received || "—"}</td><td class="r">${row.sold || "—"}</td><td class="r">${row.adjusted ? (row.adjusted > 0 ? `+${row.adjusted}` : row.adjusted) : "—"}</td><td class="r strong">${row.closing}</td>
+          <td class="r">${row.opening}</td><td class="r">${row.received || "—"}</td><td class="r">${row.sold || "—"}</td>${hasReturnCols ? `<td class="r">${row.returned ? `+${row.returned}` : "—"}</td><td class="r">${row.damaged ? `−${row.damaged}` : "—"}</td>` : ""}<td class="r">${row.adjusted ? (row.adjusted > 0 ? `+${row.adjusted}` : row.adjusted) : "—"}</td><td class="r strong">${row.closing}</td>
           ${hasCount ? `<td class="r">${count ? count.counted : "—"}</td><td class="r ${count && count.difference ? "flag" : ""}">${count ? (count.difference ? (count.difference > 0 ? `+${count.difference}` : count.difference) : "✓") : ""}</td>` : ""}</tr>`;
       }).join("") || `<tr><td colspan="8" class="empty">No stock movements</td></tr>`}
     </table>
@@ -270,6 +292,59 @@ export function buildDayEndReportHtml(report: ShiftReport) {
       ${sales.billList.length ? `<tr class="total"><td colspan="6">Total</td><td class="r">${amt(sales.netSales)}</td></tr>` : ""}
     </table>
   </section>
+
+  ${report.wallet?.rows.length ? `
+  <section>
+    <h2>Customer wallets <small>change kept ${amt(report.wallet.kept)} · spent ${amt(report.wallet.used)}</small></h2>
+    <table>
+      <thead><tr><th>Time</th><th>Member</th><th>What</th><th>Bill</th><th>By</th><th class="r">Amount</th><th class="r">Wallet after</th></tr></thead>
+      ${report.wallet.rows.map((row) => `<tr><td>${timeOnly(row.time)}</td><td>${esc(row.member)}<div class="muted">${esc(row.mobile)}</div></td><td>${row.type === "CREDIT" ? "Change kept" : row.type === "REFUND" ? "Refund for returned bottles" : "Spent on bill"}</td><td>${esc(row.billNo ?? "—")}</td><td>${esc(row.by)}</td><td class="r ${row.type === "DEBIT" ? "minus" : "plus"}">${row.amount == null ? "—" : `${row.amount >= 0 ? "+" : "−"}${amt(Math.abs(row.amount))}`}</td><td class="r">${amt(row.balanceAfter)}</td></tr>`).join("")}
+    </table>
+  </section>` : ""}
+
+  ${report.returns?.rows.length ? `
+  <section>
+    <h2>Returns &amp; damages <small>${report.returns.refunds} refund(s) · ${report.returns.exchangedUnits} exchanged · ${report.returns.storeDamagedUnits} damaged in store · ${report.returns.clearedUnits} cleared</small></h2>
+    <table>
+      <thead><tr><th>Time</th><th>No</th><th>What</th><th>Product</th><th class="r">Qty</th><th>Bill / customer</th><th>Reason</th><th>By</th><th class="r">Paid back</th></tr></thead>
+      ${report.returns.rows.map((row) => `<tr><td>${timeOnly(row.time)}</td><td style="white-space:nowrap">${esc(row.returnNo)}</td>
+        <td>${esc(row.what)}${row.condition ? `<div class="muted">${row.condition === "SHELF" ? "Back on the shelf" : "Kept aside as damaged"}</div>` : ""}${row.disposal ? `<div class="muted">${esc(row.disposal)}</div>` : ""}</td>
+        <td>${esc(row.product)}</td><td class="r">${row.quantity}</td>
+        <td class="muted">${esc(row.billNo ?? "—")}${row.customer ? `<div>${esc(row.customer)}</div>` : ""}</td>
+        <td>${esc(row.reason)}${row.note ? `<div class="muted">${esc(row.note)}</div>` : ""}${row.reference ? `<div class="muted">Ref ${esc(row.reference)}</div>` : ""}</td>
+        <td>${esc(row.by)}</td>
+        <td class="r">${row.type === "REFUND" ? `<span class="minus">−${amt(row.refund)}</span><div class="muted">${row.refundMethod === "WALLET" ? "to wallet" : "cash"}${row.pointsReversed ? ` · −${row.pointsReversed} pts` : ""}</div>` : "—"}</td></tr>`).join("")}
+      ${report.returns.refunds ? `<tr class="total"><td colspan="8">Paid back · cash ${amt(report.returns.refundsCash)} · wallet ${amt(report.returns.refundsWallet)}</td><td class="r">${amt(report.returns.refundsTotal)}</td></tr>` : ""}
+    </table>
+    ${report.returns.damageCost ? `<div class="reason"><b>Bottles damaged this shift (at cost):</b> Rs. ${amt(report.returns.damageCost)}</div>` : ""}
+  </section>` : ""}
+
+  ${report.damagedStock?.length ? `
+  <section class="keep">
+    <h2>Damaged stock <small>kept aside, not for sale</small></h2>
+    <table>
+      <thead><tr><th>Product</th><th class="r">Added this shift</th><th class="r">Cleared this shift</th><th class="r">On hand</th></tr></thead>
+      ${report.damagedStock.map((row) => `<tr><td>${esc(row.name)}</td><td class="r">${row.added || "—"}</td><td class="r">${row.cleared || "—"}</td><td class="r strong">${row.onHand}</td></tr>`).join("")}
+    </table>
+  </section>` : ""}
+
+  ${report.stockLog?.length ? `
+  <section>
+    <h2>Stock in &amp; changes <small>everything received, corrected or returned, with who did it</small></h2>
+    <table>
+      <thead><tr><th>Time</th><th>What</th><th>Product</th><th class="r">Qty</th><th>From / reference</th><th>By</th></tr></thead>
+      ${report.stockLog.map((row) => `<tr><td>${timeOnly(row.time)}</td><td>${esc(row.what)}</td><td>${esc(row.product)}</td><td class="r ${row.quantity < 0 ? "minus" : "plus"}">${row.quantity > 0 ? "+" : ""}${row.quantity}</td><td class="muted">${esc(row.reference ?? "—")}</td><td>${esc(row.by)}</td></tr>`).join("")}
+    </table>
+  </section>` : ""}
+
+  ${report.journal?.length ? `
+  <section>
+    <h2>Shift journal <small>everything else done during the shift · ${report.journal.length} entr${report.journal.length === 1 ? "y" : "ies"}</small></h2>
+    <table>
+      <thead><tr><th>Time</th><th>Who</th><th>What happened</th></tr></thead>
+      ${report.journal.map((row) => `<tr><td>${timeOnly(row.time)}</td><td>${esc(row.by)}</td><td${row.summary.startsWith("Blocked") ? ' class="flag"' : ""}>${esc(row.summary)}</td></tr>`).join("")}
+    </table>
+  </section>` : ""}
 
   ${close?.notes ? `<section><h2>Notes</h2><div class="notes">${esc(close.notes)}</div></section>` : ""}
 

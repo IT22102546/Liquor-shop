@@ -169,6 +169,20 @@ export type PurchaseOrderItem = $Result.DefaultSelection<Prisma.$PurchaseOrderIt
  * Every email attempt for a purchase order, sent or failed, with who sent it.
  */
 export type PurchaseOrderEmail = $Result.DefaultSelection<Prisma.$PurchaseOrderEmailPayload>
+/**
+ * Model PosWalletTransaction
+ * Every movement of a loyalty member's wallet: change kept (CREDIT) or wallet spent on a bill (DEBIT).
+ */
+export type PosWalletTransaction = $Result.DefaultSelection<Prisma.$PosWalletTransactionPayload>
+/**
+ * Model PosReturn
+ * Returns & damages: one row per product. Rows made together share a returnNo (RT-00001).
+ * EXCHANGE       customer's damaged bottle swapped for a new one (shelf −, damaged +)
+ * REFUND         bottles from a bill brought back, money paid back (shelf + or damaged +)
+ * STORE_DAMAGE   bottle found damaged in the store (shelf −, damaged +)
+ * DAMAGE_CLEARED damaged stock sent back to the supplier, thrown away, or put back on the shelf
+ */
+export type PosReturn = $Result.DefaultSelection<Prisma.$PosReturnPayload>
 
 /**
  * Enums
@@ -197,7 +211,8 @@ export const PaymentMethod: {
   CASH: 'CASH',
   CHEQUE: 'CHEQUE',
   BANK_TRANSFER: 'BANK_TRANSFER',
-  CARD: 'CARD'
+  CARD: 'CARD',
+  SPLIT: 'SPLIT'
 };
 
 export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]
@@ -814,6 +829,26 @@ export class PrismaClient<
     * ```
     */
   get purchaseOrderEmail(): Prisma.PurchaseOrderEmailDelegate<ExtArgs>;
+
+  /**
+   * `prisma.posWalletTransaction`: Exposes CRUD operations for the **PosWalletTransaction** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PosWalletTransactions
+    * const posWalletTransactions = await prisma.posWalletTransaction.findMany()
+    * ```
+    */
+  get posWalletTransaction(): Prisma.PosWalletTransactionDelegate<ExtArgs>;
+
+  /**
+   * `prisma.posReturn`: Exposes CRUD operations for the **PosReturn** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PosReturns
+    * const posReturns = await prisma.posReturn.findMany()
+    * ```
+    */
+  get posReturn(): Prisma.PosReturnDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -1285,7 +1320,9 @@ export namespace Prisma {
     InventoryMovement: 'InventoryMovement',
     PurchaseOrder: 'PurchaseOrder',
     PurchaseOrderItem: 'PurchaseOrderItem',
-    PurchaseOrderEmail: 'PurchaseOrderEmail'
+    PurchaseOrderEmail: 'PurchaseOrderEmail',
+    PosWalletTransaction: 'PosWalletTransaction',
+    PosReturn: 'PosReturn'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1301,7 +1338,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "posAdmin" | "posCounterSale" | "supplier" | "inventoryBrand" | "inventoryCategory" | "inventoryProduct" | "inventoryProductExpense" | "inventoryProductImage" | "posCustomer" | "posCustomerPurchase" | "posInvoiceTerm" | "posInstallment" | "posInstallmentPayment" | "contactRequest" | "account" | "accountRelationship" | "accountReceipt" | "accountVoucher" | "accountTransaction" | "invoicePayment" | "accountDeposit" | "accountDepositItem" | "activityLog" | "posSetting" | "posShift" | "posCashEntry" | "inventoryMovement" | "purchaseOrder" | "purchaseOrderItem" | "purchaseOrderEmail"
+      modelProps: "user" | "posAdmin" | "posCounterSale" | "supplier" | "inventoryBrand" | "inventoryCategory" | "inventoryProduct" | "inventoryProductExpense" | "inventoryProductImage" | "posCustomer" | "posCustomerPurchase" | "posInvoiceTerm" | "posInstallment" | "posInstallmentPayment" | "contactRequest" | "account" | "accountRelationship" | "accountReceipt" | "accountVoucher" | "accountTransaction" | "invoicePayment" | "accountDeposit" | "accountDepositItem" | "activityLog" | "posSetting" | "posShift" | "posCashEntry" | "inventoryMovement" | "purchaseOrder" | "purchaseOrderItem" | "purchaseOrderEmail" | "posWalletTransaction" | "posReturn"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3475,6 +3512,146 @@ export namespace Prisma {
           }
         }
       }
+      PosWalletTransaction: {
+        payload: Prisma.$PosWalletTransactionPayload<ExtArgs>
+        fields: Prisma.PosWalletTransactionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PosWalletTransactionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosWalletTransactionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PosWalletTransactionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosWalletTransactionPayload>
+          }
+          findFirst: {
+            args: Prisma.PosWalletTransactionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosWalletTransactionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PosWalletTransactionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosWalletTransactionPayload>
+          }
+          findMany: {
+            args: Prisma.PosWalletTransactionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosWalletTransactionPayload>[]
+          }
+          create: {
+            args: Prisma.PosWalletTransactionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosWalletTransactionPayload>
+          }
+          createMany: {
+            args: Prisma.PosWalletTransactionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PosWalletTransactionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosWalletTransactionPayload>[]
+          }
+          delete: {
+            args: Prisma.PosWalletTransactionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosWalletTransactionPayload>
+          }
+          update: {
+            args: Prisma.PosWalletTransactionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosWalletTransactionPayload>
+          }
+          deleteMany: {
+            args: Prisma.PosWalletTransactionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PosWalletTransactionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.PosWalletTransactionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosWalletTransactionPayload>
+          }
+          aggregate: {
+            args: Prisma.PosWalletTransactionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePosWalletTransaction>
+          }
+          groupBy: {
+            args: Prisma.PosWalletTransactionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PosWalletTransactionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PosWalletTransactionCountArgs<ExtArgs>
+            result: $Utils.Optional<PosWalletTransactionCountAggregateOutputType> | number
+          }
+        }
+      }
+      PosReturn: {
+        payload: Prisma.$PosReturnPayload<ExtArgs>
+        fields: Prisma.PosReturnFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PosReturnFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosReturnPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PosReturnFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosReturnPayload>
+          }
+          findFirst: {
+            args: Prisma.PosReturnFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosReturnPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PosReturnFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosReturnPayload>
+          }
+          findMany: {
+            args: Prisma.PosReturnFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosReturnPayload>[]
+          }
+          create: {
+            args: Prisma.PosReturnCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosReturnPayload>
+          }
+          createMany: {
+            args: Prisma.PosReturnCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PosReturnCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosReturnPayload>[]
+          }
+          delete: {
+            args: Prisma.PosReturnDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosReturnPayload>
+          }
+          update: {
+            args: Prisma.PosReturnUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosReturnPayload>
+          }
+          deleteMany: {
+            args: Prisma.PosReturnDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PosReturnUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.PosReturnUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosReturnPayload>
+          }
+          aggregate: {
+            args: Prisma.PosReturnAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePosReturn>
+          }
+          groupBy: {
+            args: Prisma.PosReturnGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PosReturnGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PosReturnCountArgs<ExtArgs>
+            result: $Utils.Optional<PosReturnCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -3772,6 +3949,7 @@ export namespace Prisma {
     expenses: number
     images: number
     purchaseOrderItems: number
+    returns: number
     customerPurchases: number
   }
 
@@ -3779,6 +3957,7 @@ export namespace Prisma {
     expenses?: boolean | InventoryProductCountOutputTypeCountExpensesArgs
     images?: boolean | InventoryProductCountOutputTypeCountImagesArgs
     purchaseOrderItems?: boolean | InventoryProductCountOutputTypeCountPurchaseOrderItemsArgs
+    returns?: boolean | InventoryProductCountOutputTypeCountReturnsArgs
     customerPurchases?: boolean | InventoryProductCountOutputTypeCountCustomerPurchasesArgs
   }
 
@@ -3817,6 +3996,13 @@ export namespace Prisma {
   /**
    * InventoryProductCountOutputType without action
    */
+  export type InventoryProductCountOutputTypeCountReturnsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PosReturnWhereInput
+  }
+
+  /**
+   * InventoryProductCountOutputType without action
+   */
   export type InventoryProductCountOutputTypeCountCustomerPurchasesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PosCustomerPurchaseWhereInput
   }
@@ -3829,11 +4015,15 @@ export namespace Prisma {
   export type PosCustomerCountOutputType = {
     purchases: number
     counterSales: number
+    walletTransactions: number
+    returns: number
   }
 
   export type PosCustomerCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     purchases?: boolean | PosCustomerCountOutputTypeCountPurchasesArgs
     counterSales?: boolean | PosCustomerCountOutputTypeCountCounterSalesArgs
+    walletTransactions?: boolean | PosCustomerCountOutputTypeCountWalletTransactionsArgs
+    returns?: boolean | PosCustomerCountOutputTypeCountReturnsArgs
   }
 
   // Custom InputTypes
@@ -3859,6 +4049,20 @@ export namespace Prisma {
    */
   export type PosCustomerCountOutputTypeCountCounterSalesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PosCounterSaleWhereInput
+  }
+
+  /**
+   * PosCustomerCountOutputType without action
+   */
+  export type PosCustomerCountOutputTypeCountWalletTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PosWalletTransactionWhereInput
+  }
+
+  /**
+   * PosCustomerCountOutputType without action
+   */
+  export type PosCustomerCountOutputTypeCountReturnsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PosReturnWhereInput
   }
 
 
@@ -4146,12 +4350,14 @@ export namespace Prisma {
     sales: number
     cashEntries: number
     movements: number
+    returns: number
   }
 
   export type PosShiftCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     sales?: boolean | PosShiftCountOutputTypeCountSalesArgs
     cashEntries?: boolean | PosShiftCountOutputTypeCountCashEntriesArgs
     movements?: boolean | PosShiftCountOutputTypeCountMovementsArgs
+    returns?: boolean | PosShiftCountOutputTypeCountReturnsArgs
   }
 
   // Custom InputTypes
@@ -4184,6 +4390,13 @@ export namespace Prisma {
    */
   export type PosShiftCountOutputTypeCountMovementsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: InventoryMovementWhereInput
+  }
+
+  /**
+   * PosShiftCountOutputType without action
+   */
+  export type PosShiftCountOutputTypeCountReturnsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PosReturnWhereInput
   }
 
 
@@ -6228,9 +6441,15 @@ export namespace Prisma {
     emptiesReturned: number | null
     amountReceived: number | null
     changeGiven: number | null
+    cashPaid: number | null
+    cardPaid: number | null
+    transferPaid: number | null
+    walletUsed: number | null
+    walletCredit: number | null
     cashierId: number | null
     customerId: number | null
     pointsEarned: number | null
+    pointsRate: number | null
     discountValue: number | null
     discountAmount: number | null
     pointsRedeemed: number | null
@@ -6245,9 +6464,15 @@ export namespace Prisma {
     emptiesReturned: number | null
     amountReceived: number | null
     changeGiven: number | null
+    cashPaid: number | null
+    cardPaid: number | null
+    transferPaid: number | null
+    walletUsed: number | null
+    walletCredit: number | null
     cashierId: number | null
     customerId: number | null
     pointsEarned: number | null
+    pointsRate: number | null
     discountValue: number | null
     discountAmount: number | null
     pointsRedeemed: number | null
@@ -6265,9 +6490,15 @@ export namespace Prisma {
     changeGiven: number | null
     paymentMethod: $Enums.PaymentMethod | null
     paymentReference: string | null
+    cashPaid: number | null
+    cardPaid: number | null
+    transferPaid: number | null
+    walletUsed: number | null
+    walletCredit: number | null
     cashierId: number | null
     customerId: number | null
     pointsEarned: number | null
+    pointsRate: number | null
     discountType: string | null
     discountValue: number | null
     discountAmount: number | null
@@ -6287,9 +6518,15 @@ export namespace Prisma {
     changeGiven: number | null
     paymentMethod: $Enums.PaymentMethod | null
     paymentReference: string | null
+    cashPaid: number | null
+    cardPaid: number | null
+    transferPaid: number | null
+    walletUsed: number | null
+    walletCredit: number | null
     cashierId: number | null
     customerId: number | null
     pointsEarned: number | null
+    pointsRate: number | null
     discountType: string | null
     discountValue: number | null
     discountAmount: number | null
@@ -6309,9 +6546,15 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod: number
     paymentReference: number
+    cashPaid: number
+    cardPaid: number
+    transferPaid: number
+    walletUsed: number
+    walletCredit: number
     cashierId: number
     customerId: number
     pointsEarned: number
+    pointsRate: number
     discountType: number
     discountValue: number
     discountAmount: number
@@ -6330,9 +6573,15 @@ export namespace Prisma {
     emptiesReturned?: true
     amountReceived?: true
     changeGiven?: true
+    cashPaid?: true
+    cardPaid?: true
+    transferPaid?: true
+    walletUsed?: true
+    walletCredit?: true
     cashierId?: true
     customerId?: true
     pointsEarned?: true
+    pointsRate?: true
     discountValue?: true
     discountAmount?: true
     pointsRedeemed?: true
@@ -6347,9 +6596,15 @@ export namespace Prisma {
     emptiesReturned?: true
     amountReceived?: true
     changeGiven?: true
+    cashPaid?: true
+    cardPaid?: true
+    transferPaid?: true
+    walletUsed?: true
+    walletCredit?: true
     cashierId?: true
     customerId?: true
     pointsEarned?: true
+    pointsRate?: true
     discountValue?: true
     discountAmount?: true
     pointsRedeemed?: true
@@ -6367,9 +6622,15 @@ export namespace Prisma {
     changeGiven?: true
     paymentMethod?: true
     paymentReference?: true
+    cashPaid?: true
+    cardPaid?: true
+    transferPaid?: true
+    walletUsed?: true
+    walletCredit?: true
     cashierId?: true
     customerId?: true
     pointsEarned?: true
+    pointsRate?: true
     discountType?: true
     discountValue?: true
     discountAmount?: true
@@ -6389,9 +6650,15 @@ export namespace Prisma {
     changeGiven?: true
     paymentMethod?: true
     paymentReference?: true
+    cashPaid?: true
+    cardPaid?: true
+    transferPaid?: true
+    walletUsed?: true
+    walletCredit?: true
     cashierId?: true
     customerId?: true
     pointsEarned?: true
+    pointsRate?: true
     discountType?: true
     discountValue?: true
     discountAmount?: true
@@ -6411,9 +6678,15 @@ export namespace Prisma {
     changeGiven?: true
     paymentMethod?: true
     paymentReference?: true
+    cashPaid?: true
+    cardPaid?: true
+    transferPaid?: true
+    walletUsed?: true
+    walletCredit?: true
     cashierId?: true
     customerId?: true
     pointsEarned?: true
+    pointsRate?: true
     discountType?: true
     discountValue?: true
     discountAmount?: true
@@ -6520,9 +6793,15 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod: $Enums.PaymentMethod
     paymentReference: string | null
+    cashPaid: number
+    cardPaid: number
+    transferPaid: number
+    walletUsed: number
+    walletCredit: number
     cashierId: number
     customerId: number | null
     pointsEarned: number
+    pointsRate: number | null
     discountType: string | null
     discountValue: number
     discountAmount: number
@@ -6561,9 +6840,15 @@ export namespace Prisma {
     changeGiven?: boolean
     paymentMethod?: boolean
     paymentReference?: boolean
+    cashPaid?: boolean
+    cardPaid?: boolean
+    transferPaid?: boolean
+    walletUsed?: boolean
+    walletCredit?: boolean
     cashierId?: boolean
     customerId?: boolean
     pointsEarned?: boolean
+    pointsRate?: boolean
     discountType?: boolean
     discountValue?: boolean
     discountAmount?: boolean
@@ -6586,9 +6871,15 @@ export namespace Prisma {
     changeGiven?: boolean
     paymentMethod?: boolean
     paymentReference?: boolean
+    cashPaid?: boolean
+    cardPaid?: boolean
+    transferPaid?: boolean
+    walletUsed?: boolean
+    walletCredit?: boolean
     cashierId?: boolean
     customerId?: boolean
     pointsEarned?: boolean
+    pointsRate?: boolean
     discountType?: boolean
     discountValue?: boolean
     discountAmount?: boolean
@@ -6611,9 +6902,15 @@ export namespace Prisma {
     changeGiven?: boolean
     paymentMethod?: boolean
     paymentReference?: boolean
+    cashPaid?: boolean
+    cardPaid?: boolean
+    transferPaid?: boolean
+    walletUsed?: boolean
+    walletCredit?: boolean
     cashierId?: boolean
     customerId?: boolean
     pointsEarned?: boolean
+    pointsRate?: boolean
     discountType?: boolean
     discountValue?: boolean
     discountAmount?: boolean
@@ -6657,12 +6954,30 @@ export namespace Prisma {
        * Card approval code (from the card machine slip) or bank transfer / QR reference.
        */
       paymentReference: string | null
+      /**
+       * How the total was paid (they add up to totalAmount). A SPLIT bill has more than one.
+       */
+      cashPaid: number
+      cardPaid: number
+      transferPaid: number
+      /**
+       * Part of the bill paid from the member's wallet (money received on an earlier bill).
+       */
+      walletUsed: number
+      /**
+       * Change kept in the member's wallet instead of being handed back (stays in the drawer).
+       */
+      walletCredit: number
       cashierId: number
       /**
        * Loyalty member the sale was made to; null = walk-in customer.
        */
       customerId: number | null
       pointsEarned: number
+      /**
+       * Earning rate on the day of the bill: rupees per point (null = not a member, or sold before rates were kept).
+       */
+      pointsRate: number | null
       /**
        * Bill discount: "PERCENT" or "AMOUNT" (null = none), the value entered and the rupees taken off.
        */
@@ -7084,9 +7399,15 @@ export namespace Prisma {
     readonly changeGiven: FieldRef<"PosCounterSale", 'Float'>
     readonly paymentMethod: FieldRef<"PosCounterSale", 'PaymentMethod'>
     readonly paymentReference: FieldRef<"PosCounterSale", 'String'>
+    readonly cashPaid: FieldRef<"PosCounterSale", 'Float'>
+    readonly cardPaid: FieldRef<"PosCounterSale", 'Float'>
+    readonly transferPaid: FieldRef<"PosCounterSale", 'Float'>
+    readonly walletUsed: FieldRef<"PosCounterSale", 'Float'>
+    readonly walletCredit: FieldRef<"PosCounterSale", 'Float'>
     readonly cashierId: FieldRef<"PosCounterSale", 'Int'>
     readonly customerId: FieldRef<"PosCounterSale", 'Int'>
     readonly pointsEarned: FieldRef<"PosCounterSale", 'Int'>
+    readonly pointsRate: FieldRef<"PosCounterSale", 'Float'>
     readonly discountType: FieldRef<"PosCounterSale", 'String'>
     readonly discountValue: FieldRef<"PosCounterSale", 'Float'>
     readonly discountAmount: FieldRef<"PosCounterSale", 'Float'>
@@ -10500,6 +10821,7 @@ export namespace Prisma {
     sellingPrice: number | null
     emptyBottlePrice: number | null
     emptyBottlesOnHand: number | null
+    damagedQuantity: number | null
   }
 
   export type InventoryProductSumAggregateOutputType = {
@@ -10516,6 +10838,7 @@ export namespace Prisma {
     sellingPrice: number | null
     emptyBottlePrice: number | null
     emptyBottlesOnHand: number | null
+    damagedQuantity: number | null
   }
 
   export type InventoryProductMinAggregateOutputType = {
@@ -10536,6 +10859,7 @@ export namespace Prisma {
     sellingPrice: number | null
     emptyBottlePrice: number | null
     emptyBottlesOnHand: number | null
+    damagedQuantity: number | null
     description: string | null
     lastSoldAt: Date | null
     createdAt: Date | null
@@ -10560,6 +10884,7 @@ export namespace Prisma {
     sellingPrice: number | null
     emptyBottlePrice: number | null
     emptyBottlesOnHand: number | null
+    damagedQuantity: number | null
     description: string | null
     lastSoldAt: Date | null
     createdAt: Date | null
@@ -10584,6 +10909,7 @@ export namespace Prisma {
     sellingPrice: number
     emptyBottlePrice: number
     emptyBottlesOnHand: number
+    damagedQuantity: number
     description: number
     lastSoldAt: number
     createdAt: number
@@ -10606,6 +10932,7 @@ export namespace Prisma {
     sellingPrice?: true
     emptyBottlePrice?: true
     emptyBottlesOnHand?: true
+    damagedQuantity?: true
   }
 
   export type InventoryProductSumAggregateInputType = {
@@ -10622,6 +10949,7 @@ export namespace Prisma {
     sellingPrice?: true
     emptyBottlePrice?: true
     emptyBottlesOnHand?: true
+    damagedQuantity?: true
   }
 
   export type InventoryProductMinAggregateInputType = {
@@ -10642,6 +10970,7 @@ export namespace Prisma {
     sellingPrice?: true
     emptyBottlePrice?: true
     emptyBottlesOnHand?: true
+    damagedQuantity?: true
     description?: true
     lastSoldAt?: true
     createdAt?: true
@@ -10666,6 +10995,7 @@ export namespace Prisma {
     sellingPrice?: true
     emptyBottlePrice?: true
     emptyBottlesOnHand?: true
+    damagedQuantity?: true
     description?: true
     lastSoldAt?: true
     createdAt?: true
@@ -10690,6 +11020,7 @@ export namespace Prisma {
     sellingPrice?: true
     emptyBottlePrice?: true
     emptyBottlesOnHand?: true
+    damagedQuantity?: true
     description?: true
     lastSoldAt?: true
     createdAt?: true
@@ -10801,6 +11132,7 @@ export namespace Prisma {
     sellingPrice: number | null
     emptyBottlePrice: number | null
     emptyBottlesOnHand: number
+    damagedQuantity: number
     description: string | null
     lastSoldAt: Date | null
     createdAt: Date
@@ -10844,6 +11176,7 @@ export namespace Prisma {
     sellingPrice?: boolean
     emptyBottlePrice?: boolean
     emptyBottlesOnHand?: boolean
+    damagedQuantity?: boolean
     description?: boolean
     lastSoldAt?: boolean
     createdAt?: boolean
@@ -10854,6 +11187,7 @@ export namespace Prisma {
     expenses?: boolean | InventoryProduct$expensesArgs<ExtArgs>
     images?: boolean | InventoryProduct$imagesArgs<ExtArgs>
     purchaseOrderItems?: boolean | InventoryProduct$purchaseOrderItemsArgs<ExtArgs>
+    returns?: boolean | InventoryProduct$returnsArgs<ExtArgs>
     customerPurchases?: boolean | InventoryProduct$customerPurchasesArgs<ExtArgs>
     _count?: boolean | InventoryProductCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["inventoryProduct"]>
@@ -10876,6 +11210,7 @@ export namespace Prisma {
     sellingPrice?: boolean
     emptyBottlePrice?: boolean
     emptyBottlesOnHand?: boolean
+    damagedQuantity?: boolean
     description?: boolean
     lastSoldAt?: boolean
     createdAt?: boolean
@@ -10903,6 +11238,7 @@ export namespace Prisma {
     sellingPrice?: boolean
     emptyBottlePrice?: boolean
     emptyBottlesOnHand?: boolean
+    damagedQuantity?: boolean
     description?: boolean
     lastSoldAt?: boolean
     createdAt?: boolean
@@ -10916,6 +11252,7 @@ export namespace Prisma {
     expenses?: boolean | InventoryProduct$expensesArgs<ExtArgs>
     images?: boolean | InventoryProduct$imagesArgs<ExtArgs>
     purchaseOrderItems?: boolean | InventoryProduct$purchaseOrderItemsArgs<ExtArgs>
+    returns?: boolean | InventoryProduct$returnsArgs<ExtArgs>
     customerPurchases?: boolean | InventoryProduct$customerPurchasesArgs<ExtArgs>
     _count?: boolean | InventoryProductCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -10934,6 +11271,7 @@ export namespace Prisma {
       expenses: Prisma.$InventoryProductExpensePayload<ExtArgs>[]
       images: Prisma.$InventoryProductImagePayload<ExtArgs>[]
       purchaseOrderItems: Prisma.$PurchaseOrderItemPayload<ExtArgs>[]
+      returns: Prisma.$PosReturnPayload<ExtArgs>[]
       customerPurchases: Prisma.$PosCustomerPurchasePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -10960,6 +11298,10 @@ export namespace Prisma {
        * Empty bottles collected at the counter and not yet returned to the supplier.
        */
       emptyBottlesOnHand: number
+      /**
+       * Damaged bottles kept aside (not for sale) until sent back to the supplier or thrown away.
+       */
+      damagedQuantity: number
       description: string | null
       lastSoldAt: Date | null
       createdAt: Date
@@ -11334,6 +11676,7 @@ export namespace Prisma {
     expenses<T extends InventoryProduct$expensesArgs<ExtArgs> = {}>(args?: Subset<T, InventoryProduct$expensesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryProductExpensePayload<ExtArgs>, T, "findMany"> | Null>
     images<T extends InventoryProduct$imagesArgs<ExtArgs> = {}>(args?: Subset<T, InventoryProduct$imagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryProductImagePayload<ExtArgs>, T, "findMany"> | Null>
     purchaseOrderItems<T extends InventoryProduct$purchaseOrderItemsArgs<ExtArgs> = {}>(args?: Subset<T, InventoryProduct$purchaseOrderItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PurchaseOrderItemPayload<ExtArgs>, T, "findMany"> | Null>
+    returns<T extends InventoryProduct$returnsArgs<ExtArgs> = {}>(args?: Subset<T, InventoryProduct$returnsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosReturnPayload<ExtArgs>, T, "findMany"> | Null>
     customerPurchases<T extends InventoryProduct$customerPurchasesArgs<ExtArgs> = {}>(args?: Subset<T, InventoryProduct$customerPurchasesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosCustomerPurchasePayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -11381,6 +11724,7 @@ export namespace Prisma {
     readonly sellingPrice: FieldRef<"InventoryProduct", 'Float'>
     readonly emptyBottlePrice: FieldRef<"InventoryProduct", 'Float'>
     readonly emptyBottlesOnHand: FieldRef<"InventoryProduct", 'Int'>
+    readonly damagedQuantity: FieldRef<"InventoryProduct", 'Int'>
     readonly description: FieldRef<"InventoryProduct", 'String'>
     readonly lastSoldAt: FieldRef<"InventoryProduct", 'DateTime'>
     readonly createdAt: FieldRef<"InventoryProduct", 'DateTime'>
@@ -11775,6 +12119,26 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: PurchaseOrderItemScalarFieldEnum | PurchaseOrderItemScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryProduct.returns
+   */
+  export type InventoryProduct$returnsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosReturn
+     */
+    select?: PosReturnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosReturnInclude<ExtArgs> | null
+    where?: PosReturnWhereInput
+    orderBy?: PosReturnOrderByWithRelationInput | PosReturnOrderByWithRelationInput[]
+    cursor?: PosReturnWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PosReturnScalarFieldEnum | PosReturnScalarFieldEnum[]
   }
 
   /**
@@ -13791,6 +14155,7 @@ export namespace Prisma {
     loyaltyPoints: number | null
     totalSpent: number | null
     visits: number | null
+    walletBalance: number | null
   }
 
   export type PosCustomerSumAggregateOutputType = {
@@ -13798,6 +14163,7 @@ export namespace Prisma {
     loyaltyPoints: number | null
     totalSpent: number | null
     visits: number | null
+    walletBalance: number | null
   }
 
   export type PosCustomerMinAggregateOutputType = {
@@ -13814,6 +14180,7 @@ export namespace Prisma {
     totalSpent: number | null
     visits: number | null
     lastVisitAt: Date | null
+    walletBalance: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -13832,6 +14199,7 @@ export namespace Prisma {
     totalSpent: number | null
     visits: number | null
     lastVisitAt: Date | null
+    walletBalance: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -13850,6 +14218,7 @@ export namespace Prisma {
     totalSpent: number
     visits: number
     lastVisitAt: number
+    walletBalance: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -13861,6 +14230,7 @@ export namespace Prisma {
     loyaltyPoints?: true
     totalSpent?: true
     visits?: true
+    walletBalance?: true
   }
 
   export type PosCustomerSumAggregateInputType = {
@@ -13868,6 +14238,7 @@ export namespace Prisma {
     loyaltyPoints?: true
     totalSpent?: true
     visits?: true
+    walletBalance?: true
   }
 
   export type PosCustomerMinAggregateInputType = {
@@ -13884,6 +14255,7 @@ export namespace Prisma {
     totalSpent?: true
     visits?: true
     lastVisitAt?: true
+    walletBalance?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -13902,6 +14274,7 @@ export namespace Prisma {
     totalSpent?: true
     visits?: true
     lastVisitAt?: true
+    walletBalance?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -13920,6 +14293,7 @@ export namespace Prisma {
     totalSpent?: true
     visits?: true
     lastVisitAt?: true
+    walletBalance?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -14025,6 +14399,7 @@ export namespace Prisma {
     totalSpent: number
     visits: number
     lastVisitAt: Date | null
+    walletBalance: number
     createdAt: Date
     updatedAt: Date
     _count: PosCustomerCountAggregateOutputType | null
@@ -14062,10 +14437,13 @@ export namespace Prisma {
     totalSpent?: boolean
     visits?: boolean
     lastVisitAt?: boolean
+    walletBalance?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     purchases?: boolean | PosCustomer$purchasesArgs<ExtArgs>
     counterSales?: boolean | PosCustomer$counterSalesArgs<ExtArgs>
+    walletTransactions?: boolean | PosCustomer$walletTransactionsArgs<ExtArgs>
+    returns?: boolean | PosCustomer$returnsArgs<ExtArgs>
     _count?: boolean | PosCustomerCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["posCustomer"]>
 
@@ -14083,6 +14461,7 @@ export namespace Prisma {
     totalSpent?: boolean
     visits?: boolean
     lastVisitAt?: boolean
+    walletBalance?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["posCustomer"]>
@@ -14101,6 +14480,7 @@ export namespace Prisma {
     totalSpent?: boolean
     visits?: boolean
     lastVisitAt?: boolean
+    walletBalance?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -14108,6 +14488,8 @@ export namespace Prisma {
   export type PosCustomerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     purchases?: boolean | PosCustomer$purchasesArgs<ExtArgs>
     counterSales?: boolean | PosCustomer$counterSalesArgs<ExtArgs>
+    walletTransactions?: boolean | PosCustomer$walletTransactionsArgs<ExtArgs>
+    returns?: boolean | PosCustomer$returnsArgs<ExtArgs>
     _count?: boolean | PosCustomerCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type PosCustomerIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -14117,6 +14499,8 @@ export namespace Prisma {
     objects: {
       purchases: Prisma.$PosCustomerPurchasePayload<ExtArgs>[]
       counterSales: Prisma.$PosCounterSalePayload<ExtArgs>[]
+      walletTransactions: Prisma.$PosWalletTransactionPayload<ExtArgs>[]
+      returns: Prisma.$PosReturnPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -14135,6 +14519,10 @@ export namespace Prisma {
       totalSpent: number
       visits: number
       lastVisitAt: Date | null
+      /**
+       * Wallet: change the customer chose to keep at the shop; can pay later bills.
+       */
+      walletBalance: number
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["posCustomer"]>
@@ -14503,6 +14891,8 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     purchases<T extends PosCustomer$purchasesArgs<ExtArgs> = {}>(args?: Subset<T, PosCustomer$purchasesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosCustomerPurchasePayload<ExtArgs>, T, "findMany"> | Null>
     counterSales<T extends PosCustomer$counterSalesArgs<ExtArgs> = {}>(args?: Subset<T, PosCustomer$counterSalesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosCounterSalePayload<ExtArgs>, T, "findMany"> | Null>
+    walletTransactions<T extends PosCustomer$walletTransactionsArgs<ExtArgs> = {}>(args?: Subset<T, PosCustomer$walletTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosWalletTransactionPayload<ExtArgs>, T, "findMany"> | Null>
+    returns<T extends PosCustomer$returnsArgs<ExtArgs> = {}>(args?: Subset<T, PosCustomer$returnsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosReturnPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -14545,6 +14935,7 @@ export namespace Prisma {
     readonly totalSpent: FieldRef<"PosCustomer", 'Float'>
     readonly visits: FieldRef<"PosCustomer", 'Int'>
     readonly lastVisitAt: FieldRef<"PosCustomer", 'DateTime'>
+    readonly walletBalance: FieldRef<"PosCustomer", 'Float'>
     readonly createdAt: FieldRef<"PosCustomer", 'DateTime'>
     readonly updatedAt: FieldRef<"PosCustomer", 'DateTime'>
   }
@@ -14898,6 +15289,46 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: PosCounterSaleScalarFieldEnum | PosCounterSaleScalarFieldEnum[]
+  }
+
+  /**
+   * PosCustomer.walletTransactions
+   */
+  export type PosCustomer$walletTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosWalletTransaction
+     */
+    select?: PosWalletTransactionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosWalletTransactionInclude<ExtArgs> | null
+    where?: PosWalletTransactionWhereInput
+    orderBy?: PosWalletTransactionOrderByWithRelationInput | PosWalletTransactionOrderByWithRelationInput[]
+    cursor?: PosWalletTransactionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PosWalletTransactionScalarFieldEnum | PosWalletTransactionScalarFieldEnum[]
+  }
+
+  /**
+   * PosCustomer.returns
+   */
+  export type PosCustomer$returnsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosReturn
+     */
+    select?: PosReturnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosReturnInclude<ExtArgs> | null
+    where?: PosReturnWhereInput
+    orderBy?: PosReturnOrderByWithRelationInput | PosReturnOrderByWithRelationInput[]
+    cursor?: PosReturnWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PosReturnScalarFieldEnum | PosReturnScalarFieldEnum[]
   }
 
   /**
@@ -31412,6 +31843,7 @@ export namespace Prisma {
     sales?: boolean | PosShift$salesArgs<ExtArgs>
     cashEntries?: boolean | PosShift$cashEntriesArgs<ExtArgs>
     movements?: boolean | PosShift$movementsArgs<ExtArgs>
+    returns?: boolean | PosShift$returnsArgs<ExtArgs>
     _count?: boolean | PosShiftCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["posShift"]>
 
@@ -31467,6 +31899,7 @@ export namespace Prisma {
     sales?: boolean | PosShift$salesArgs<ExtArgs>
     cashEntries?: boolean | PosShift$cashEntriesArgs<ExtArgs>
     movements?: boolean | PosShift$movementsArgs<ExtArgs>
+    returns?: boolean | PosShift$returnsArgs<ExtArgs>
     _count?: boolean | PosShiftCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type PosShiftIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -31477,6 +31910,7 @@ export namespace Prisma {
       sales: Prisma.$PosCounterSalePayload<ExtArgs>[]
       cashEntries: Prisma.$PosCashEntryPayload<ExtArgs>[]
       movements: Prisma.$InventoryMovementPayload<ExtArgs>[]
+      returns: Prisma.$PosReturnPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -31876,6 +32310,7 @@ export namespace Prisma {
     sales<T extends PosShift$salesArgs<ExtArgs> = {}>(args?: Subset<T, PosShift$salesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosCounterSalePayload<ExtArgs>, T, "findMany"> | Null>
     cashEntries<T extends PosShift$cashEntriesArgs<ExtArgs> = {}>(args?: Subset<T, PosShift$cashEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosCashEntryPayload<ExtArgs>, T, "findMany"> | Null>
     movements<T extends PosShift$movementsArgs<ExtArgs> = {}>(args?: Subset<T, PosShift$movementsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryMovementPayload<ExtArgs>, T, "findMany"> | Null>
+    returns<T extends PosShift$returnsArgs<ExtArgs> = {}>(args?: Subset<T, PosShift$returnsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosReturnPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -32297,6 +32732,26 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: InventoryMovementScalarFieldEnum | InventoryMovementScalarFieldEnum[]
+  }
+
+  /**
+   * PosShift.returns
+   */
+  export type PosShift$returnsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosReturn
+     */
+    select?: PosReturnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosReturnInclude<ExtArgs> | null
+    where?: PosReturnWhereInput
+    orderBy?: PosReturnOrderByWithRelationInput | PosReturnOrderByWithRelationInput[]
+    cursor?: PosReturnWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PosReturnScalarFieldEnum | PosReturnScalarFieldEnum[]
   }
 
   /**
@@ -37881,6 +38336,2353 @@ export namespace Prisma {
 
 
   /**
+   * Model PosWalletTransaction
+   */
+
+  export type AggregatePosWalletTransaction = {
+    _count: PosWalletTransactionCountAggregateOutputType | null
+    _avg: PosWalletTransactionAvgAggregateOutputType | null
+    _sum: PosWalletTransactionSumAggregateOutputType | null
+    _min: PosWalletTransactionMinAggregateOutputType | null
+    _max: PosWalletTransactionMaxAggregateOutputType | null
+  }
+
+  export type PosWalletTransactionAvgAggregateOutputType = {
+    id: number | null
+    customerId: number | null
+    amount: number | null
+    balanceAfter: number | null
+    shiftId: number | null
+    createdById: number | null
+  }
+
+  export type PosWalletTransactionSumAggregateOutputType = {
+    id: number | null
+    customerId: number | null
+    amount: number | null
+    balanceAfter: number | null
+    shiftId: number | null
+    createdById: number | null
+  }
+
+  export type PosWalletTransactionMinAggregateOutputType = {
+    id: number | null
+    customerId: number | null
+    type: string | null
+    amount: number | null
+    balanceAfter: number | null
+    invoiceGroupCode: string | null
+    shiftId: number | null
+    note: string | null
+    createdById: number | null
+    createdAt: Date | null
+  }
+
+  export type PosWalletTransactionMaxAggregateOutputType = {
+    id: number | null
+    customerId: number | null
+    type: string | null
+    amount: number | null
+    balanceAfter: number | null
+    invoiceGroupCode: string | null
+    shiftId: number | null
+    note: string | null
+    createdById: number | null
+    createdAt: Date | null
+  }
+
+  export type PosWalletTransactionCountAggregateOutputType = {
+    id: number
+    customerId: number
+    type: number
+    amount: number
+    balanceAfter: number
+    invoiceGroupCode: number
+    shiftId: number
+    note: number
+    createdById: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type PosWalletTransactionAvgAggregateInputType = {
+    id?: true
+    customerId?: true
+    amount?: true
+    balanceAfter?: true
+    shiftId?: true
+    createdById?: true
+  }
+
+  export type PosWalletTransactionSumAggregateInputType = {
+    id?: true
+    customerId?: true
+    amount?: true
+    balanceAfter?: true
+    shiftId?: true
+    createdById?: true
+  }
+
+  export type PosWalletTransactionMinAggregateInputType = {
+    id?: true
+    customerId?: true
+    type?: true
+    amount?: true
+    balanceAfter?: true
+    invoiceGroupCode?: true
+    shiftId?: true
+    note?: true
+    createdById?: true
+    createdAt?: true
+  }
+
+  export type PosWalletTransactionMaxAggregateInputType = {
+    id?: true
+    customerId?: true
+    type?: true
+    amount?: true
+    balanceAfter?: true
+    invoiceGroupCode?: true
+    shiftId?: true
+    note?: true
+    createdById?: true
+    createdAt?: true
+  }
+
+  export type PosWalletTransactionCountAggregateInputType = {
+    id?: true
+    customerId?: true
+    type?: true
+    amount?: true
+    balanceAfter?: true
+    invoiceGroupCode?: true
+    shiftId?: true
+    note?: true
+    createdById?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type PosWalletTransactionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PosWalletTransaction to aggregate.
+     */
+    where?: PosWalletTransactionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosWalletTransactions to fetch.
+     */
+    orderBy?: PosWalletTransactionOrderByWithRelationInput | PosWalletTransactionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PosWalletTransactionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosWalletTransactions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosWalletTransactions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PosWalletTransactions
+    **/
+    _count?: true | PosWalletTransactionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PosWalletTransactionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PosWalletTransactionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PosWalletTransactionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PosWalletTransactionMaxAggregateInputType
+  }
+
+  export type GetPosWalletTransactionAggregateType<T extends PosWalletTransactionAggregateArgs> = {
+        [P in keyof T & keyof AggregatePosWalletTransaction]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePosWalletTransaction[P]>
+      : GetScalarType<T[P], AggregatePosWalletTransaction[P]>
+  }
+
+
+
+
+  export type PosWalletTransactionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PosWalletTransactionWhereInput
+    orderBy?: PosWalletTransactionOrderByWithAggregationInput | PosWalletTransactionOrderByWithAggregationInput[]
+    by: PosWalletTransactionScalarFieldEnum[] | PosWalletTransactionScalarFieldEnum
+    having?: PosWalletTransactionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PosWalletTransactionCountAggregateInputType | true
+    _avg?: PosWalletTransactionAvgAggregateInputType
+    _sum?: PosWalletTransactionSumAggregateInputType
+    _min?: PosWalletTransactionMinAggregateInputType
+    _max?: PosWalletTransactionMaxAggregateInputType
+  }
+
+  export type PosWalletTransactionGroupByOutputType = {
+    id: number
+    customerId: number
+    type: string
+    amount: number
+    balanceAfter: number
+    invoiceGroupCode: string | null
+    shiftId: number | null
+    note: string | null
+    createdById: number
+    createdAt: Date
+    _count: PosWalletTransactionCountAggregateOutputType | null
+    _avg: PosWalletTransactionAvgAggregateOutputType | null
+    _sum: PosWalletTransactionSumAggregateOutputType | null
+    _min: PosWalletTransactionMinAggregateOutputType | null
+    _max: PosWalletTransactionMaxAggregateOutputType | null
+  }
+
+  type GetPosWalletTransactionGroupByPayload<T extends PosWalletTransactionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PosWalletTransactionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PosWalletTransactionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PosWalletTransactionGroupByOutputType[P]>
+            : GetScalarType<T[P], PosWalletTransactionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PosWalletTransactionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    customerId?: boolean
+    type?: boolean
+    amount?: boolean
+    balanceAfter?: boolean
+    invoiceGroupCode?: boolean
+    shiftId?: boolean
+    note?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    customer?: boolean | PosCustomerDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["posWalletTransaction"]>
+
+  export type PosWalletTransactionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    customerId?: boolean
+    type?: boolean
+    amount?: boolean
+    balanceAfter?: boolean
+    invoiceGroupCode?: boolean
+    shiftId?: boolean
+    note?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    customer?: boolean | PosCustomerDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["posWalletTransaction"]>
+
+  export type PosWalletTransactionSelectScalar = {
+    id?: boolean
+    customerId?: boolean
+    type?: boolean
+    amount?: boolean
+    balanceAfter?: boolean
+    invoiceGroupCode?: boolean
+    shiftId?: boolean
+    note?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+  }
+
+  export type PosWalletTransactionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    customer?: boolean | PosCustomerDefaultArgs<ExtArgs>
+  }
+  export type PosWalletTransactionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    customer?: boolean | PosCustomerDefaultArgs<ExtArgs>
+  }
+
+  export type $PosWalletTransactionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PosWalletTransaction"
+    objects: {
+      customer: Prisma.$PosCustomerPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      customerId: number
+      type: string
+      /**
+       * Signed: + added to the wallet, − spent from it.
+       */
+      amount: number
+      balanceAfter: number
+      invoiceGroupCode: string | null
+      shiftId: number | null
+      note: string | null
+      createdById: number
+      createdAt: Date
+    }, ExtArgs["result"]["posWalletTransaction"]>
+    composites: {}
+  }
+
+  type PosWalletTransactionGetPayload<S extends boolean | null | undefined | PosWalletTransactionDefaultArgs> = $Result.GetResult<Prisma.$PosWalletTransactionPayload, S>
+
+  type PosWalletTransactionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<PosWalletTransactionFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: PosWalletTransactionCountAggregateInputType | true
+    }
+
+  export interface PosWalletTransactionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PosWalletTransaction'], meta: { name: 'PosWalletTransaction' } }
+    /**
+     * Find zero or one PosWalletTransaction that matches the filter.
+     * @param {PosWalletTransactionFindUniqueArgs} args - Arguments to find a PosWalletTransaction
+     * @example
+     * // Get one PosWalletTransaction
+     * const posWalletTransaction = await prisma.posWalletTransaction.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PosWalletTransactionFindUniqueArgs>(args: SelectSubset<T, PosWalletTransactionFindUniqueArgs<ExtArgs>>): Prisma__PosWalletTransactionClient<$Result.GetResult<Prisma.$PosWalletTransactionPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one PosWalletTransaction that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {PosWalletTransactionFindUniqueOrThrowArgs} args - Arguments to find a PosWalletTransaction
+     * @example
+     * // Get one PosWalletTransaction
+     * const posWalletTransaction = await prisma.posWalletTransaction.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PosWalletTransactionFindUniqueOrThrowArgs>(args: SelectSubset<T, PosWalletTransactionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PosWalletTransactionClient<$Result.GetResult<Prisma.$PosWalletTransactionPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first PosWalletTransaction that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosWalletTransactionFindFirstArgs} args - Arguments to find a PosWalletTransaction
+     * @example
+     * // Get one PosWalletTransaction
+     * const posWalletTransaction = await prisma.posWalletTransaction.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PosWalletTransactionFindFirstArgs>(args?: SelectSubset<T, PosWalletTransactionFindFirstArgs<ExtArgs>>): Prisma__PosWalletTransactionClient<$Result.GetResult<Prisma.$PosWalletTransactionPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first PosWalletTransaction that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosWalletTransactionFindFirstOrThrowArgs} args - Arguments to find a PosWalletTransaction
+     * @example
+     * // Get one PosWalletTransaction
+     * const posWalletTransaction = await prisma.posWalletTransaction.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PosWalletTransactionFindFirstOrThrowArgs>(args?: SelectSubset<T, PosWalletTransactionFindFirstOrThrowArgs<ExtArgs>>): Prisma__PosWalletTransactionClient<$Result.GetResult<Prisma.$PosWalletTransactionPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more PosWalletTransactions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosWalletTransactionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PosWalletTransactions
+     * const posWalletTransactions = await prisma.posWalletTransaction.findMany()
+     * 
+     * // Get first 10 PosWalletTransactions
+     * const posWalletTransactions = await prisma.posWalletTransaction.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const posWalletTransactionWithIdOnly = await prisma.posWalletTransaction.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PosWalletTransactionFindManyArgs>(args?: SelectSubset<T, PosWalletTransactionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosWalletTransactionPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a PosWalletTransaction.
+     * @param {PosWalletTransactionCreateArgs} args - Arguments to create a PosWalletTransaction.
+     * @example
+     * // Create one PosWalletTransaction
+     * const PosWalletTransaction = await prisma.posWalletTransaction.create({
+     *   data: {
+     *     // ... data to create a PosWalletTransaction
+     *   }
+     * })
+     * 
+     */
+    create<T extends PosWalletTransactionCreateArgs>(args: SelectSubset<T, PosWalletTransactionCreateArgs<ExtArgs>>): Prisma__PosWalletTransactionClient<$Result.GetResult<Prisma.$PosWalletTransactionPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many PosWalletTransactions.
+     * @param {PosWalletTransactionCreateManyArgs} args - Arguments to create many PosWalletTransactions.
+     * @example
+     * // Create many PosWalletTransactions
+     * const posWalletTransaction = await prisma.posWalletTransaction.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PosWalletTransactionCreateManyArgs>(args?: SelectSubset<T, PosWalletTransactionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PosWalletTransactions and returns the data saved in the database.
+     * @param {PosWalletTransactionCreateManyAndReturnArgs} args - Arguments to create many PosWalletTransactions.
+     * @example
+     * // Create many PosWalletTransactions
+     * const posWalletTransaction = await prisma.posWalletTransaction.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PosWalletTransactions and only return the `id`
+     * const posWalletTransactionWithIdOnly = await prisma.posWalletTransaction.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PosWalletTransactionCreateManyAndReturnArgs>(args?: SelectSubset<T, PosWalletTransactionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosWalletTransactionPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a PosWalletTransaction.
+     * @param {PosWalletTransactionDeleteArgs} args - Arguments to delete one PosWalletTransaction.
+     * @example
+     * // Delete one PosWalletTransaction
+     * const PosWalletTransaction = await prisma.posWalletTransaction.delete({
+     *   where: {
+     *     // ... filter to delete one PosWalletTransaction
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PosWalletTransactionDeleteArgs>(args: SelectSubset<T, PosWalletTransactionDeleteArgs<ExtArgs>>): Prisma__PosWalletTransactionClient<$Result.GetResult<Prisma.$PosWalletTransactionPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one PosWalletTransaction.
+     * @param {PosWalletTransactionUpdateArgs} args - Arguments to update one PosWalletTransaction.
+     * @example
+     * // Update one PosWalletTransaction
+     * const posWalletTransaction = await prisma.posWalletTransaction.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PosWalletTransactionUpdateArgs>(args: SelectSubset<T, PosWalletTransactionUpdateArgs<ExtArgs>>): Prisma__PosWalletTransactionClient<$Result.GetResult<Prisma.$PosWalletTransactionPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more PosWalletTransactions.
+     * @param {PosWalletTransactionDeleteManyArgs} args - Arguments to filter PosWalletTransactions to delete.
+     * @example
+     * // Delete a few PosWalletTransactions
+     * const { count } = await prisma.posWalletTransaction.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PosWalletTransactionDeleteManyArgs>(args?: SelectSubset<T, PosWalletTransactionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PosWalletTransactions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosWalletTransactionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PosWalletTransactions
+     * const posWalletTransaction = await prisma.posWalletTransaction.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PosWalletTransactionUpdateManyArgs>(args: SelectSubset<T, PosWalletTransactionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one PosWalletTransaction.
+     * @param {PosWalletTransactionUpsertArgs} args - Arguments to update or create a PosWalletTransaction.
+     * @example
+     * // Update or create a PosWalletTransaction
+     * const posWalletTransaction = await prisma.posWalletTransaction.upsert({
+     *   create: {
+     *     // ... data to create a PosWalletTransaction
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PosWalletTransaction we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PosWalletTransactionUpsertArgs>(args: SelectSubset<T, PosWalletTransactionUpsertArgs<ExtArgs>>): Prisma__PosWalletTransactionClient<$Result.GetResult<Prisma.$PosWalletTransactionPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of PosWalletTransactions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosWalletTransactionCountArgs} args - Arguments to filter PosWalletTransactions to count.
+     * @example
+     * // Count the number of PosWalletTransactions
+     * const count = await prisma.posWalletTransaction.count({
+     *   where: {
+     *     // ... the filter for the PosWalletTransactions we want to count
+     *   }
+     * })
+    **/
+    count<T extends PosWalletTransactionCountArgs>(
+      args?: Subset<T, PosWalletTransactionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PosWalletTransactionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PosWalletTransaction.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosWalletTransactionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PosWalletTransactionAggregateArgs>(args: Subset<T, PosWalletTransactionAggregateArgs>): Prisma.PrismaPromise<GetPosWalletTransactionAggregateType<T>>
+
+    /**
+     * Group by PosWalletTransaction.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosWalletTransactionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PosWalletTransactionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PosWalletTransactionGroupByArgs['orderBy'] }
+        : { orderBy?: PosWalletTransactionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PosWalletTransactionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPosWalletTransactionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PosWalletTransaction model
+   */
+  readonly fields: PosWalletTransactionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PosWalletTransaction.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PosWalletTransactionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    customer<T extends PosCustomerDefaultArgs<ExtArgs> = {}>(args?: Subset<T, PosCustomerDefaultArgs<ExtArgs>>): Prisma__PosCustomerClient<$Result.GetResult<Prisma.$PosCustomerPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PosWalletTransaction model
+   */ 
+  interface PosWalletTransactionFieldRefs {
+    readonly id: FieldRef<"PosWalletTransaction", 'Int'>
+    readonly customerId: FieldRef<"PosWalletTransaction", 'Int'>
+    readonly type: FieldRef<"PosWalletTransaction", 'String'>
+    readonly amount: FieldRef<"PosWalletTransaction", 'Float'>
+    readonly balanceAfter: FieldRef<"PosWalletTransaction", 'Float'>
+    readonly invoiceGroupCode: FieldRef<"PosWalletTransaction", 'String'>
+    readonly shiftId: FieldRef<"PosWalletTransaction", 'Int'>
+    readonly note: FieldRef<"PosWalletTransaction", 'String'>
+    readonly createdById: FieldRef<"PosWalletTransaction", 'Int'>
+    readonly createdAt: FieldRef<"PosWalletTransaction", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PosWalletTransaction findUnique
+   */
+  export type PosWalletTransactionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosWalletTransaction
+     */
+    select?: PosWalletTransactionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosWalletTransactionInclude<ExtArgs> | null
+    /**
+     * Filter, which PosWalletTransaction to fetch.
+     */
+    where: PosWalletTransactionWhereUniqueInput
+  }
+
+  /**
+   * PosWalletTransaction findUniqueOrThrow
+   */
+  export type PosWalletTransactionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosWalletTransaction
+     */
+    select?: PosWalletTransactionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosWalletTransactionInclude<ExtArgs> | null
+    /**
+     * Filter, which PosWalletTransaction to fetch.
+     */
+    where: PosWalletTransactionWhereUniqueInput
+  }
+
+  /**
+   * PosWalletTransaction findFirst
+   */
+  export type PosWalletTransactionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosWalletTransaction
+     */
+    select?: PosWalletTransactionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosWalletTransactionInclude<ExtArgs> | null
+    /**
+     * Filter, which PosWalletTransaction to fetch.
+     */
+    where?: PosWalletTransactionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosWalletTransactions to fetch.
+     */
+    orderBy?: PosWalletTransactionOrderByWithRelationInput | PosWalletTransactionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PosWalletTransactions.
+     */
+    cursor?: PosWalletTransactionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosWalletTransactions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosWalletTransactions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PosWalletTransactions.
+     */
+    distinct?: PosWalletTransactionScalarFieldEnum | PosWalletTransactionScalarFieldEnum[]
+  }
+
+  /**
+   * PosWalletTransaction findFirstOrThrow
+   */
+  export type PosWalletTransactionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosWalletTransaction
+     */
+    select?: PosWalletTransactionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosWalletTransactionInclude<ExtArgs> | null
+    /**
+     * Filter, which PosWalletTransaction to fetch.
+     */
+    where?: PosWalletTransactionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosWalletTransactions to fetch.
+     */
+    orderBy?: PosWalletTransactionOrderByWithRelationInput | PosWalletTransactionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PosWalletTransactions.
+     */
+    cursor?: PosWalletTransactionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosWalletTransactions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosWalletTransactions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PosWalletTransactions.
+     */
+    distinct?: PosWalletTransactionScalarFieldEnum | PosWalletTransactionScalarFieldEnum[]
+  }
+
+  /**
+   * PosWalletTransaction findMany
+   */
+  export type PosWalletTransactionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosWalletTransaction
+     */
+    select?: PosWalletTransactionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosWalletTransactionInclude<ExtArgs> | null
+    /**
+     * Filter, which PosWalletTransactions to fetch.
+     */
+    where?: PosWalletTransactionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosWalletTransactions to fetch.
+     */
+    orderBy?: PosWalletTransactionOrderByWithRelationInput | PosWalletTransactionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PosWalletTransactions.
+     */
+    cursor?: PosWalletTransactionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosWalletTransactions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosWalletTransactions.
+     */
+    skip?: number
+    distinct?: PosWalletTransactionScalarFieldEnum | PosWalletTransactionScalarFieldEnum[]
+  }
+
+  /**
+   * PosWalletTransaction create
+   */
+  export type PosWalletTransactionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosWalletTransaction
+     */
+    select?: PosWalletTransactionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosWalletTransactionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PosWalletTransaction.
+     */
+    data: XOR<PosWalletTransactionCreateInput, PosWalletTransactionUncheckedCreateInput>
+  }
+
+  /**
+   * PosWalletTransaction createMany
+   */
+  export type PosWalletTransactionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PosWalletTransactions.
+     */
+    data: PosWalletTransactionCreateManyInput | PosWalletTransactionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PosWalletTransaction createManyAndReturn
+   */
+  export type PosWalletTransactionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosWalletTransaction
+     */
+    select?: PosWalletTransactionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many PosWalletTransactions.
+     */
+    data: PosWalletTransactionCreateManyInput | PosWalletTransactionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosWalletTransactionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PosWalletTransaction update
+   */
+  export type PosWalletTransactionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosWalletTransaction
+     */
+    select?: PosWalletTransactionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosWalletTransactionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PosWalletTransaction.
+     */
+    data: XOR<PosWalletTransactionUpdateInput, PosWalletTransactionUncheckedUpdateInput>
+    /**
+     * Choose, which PosWalletTransaction to update.
+     */
+    where: PosWalletTransactionWhereUniqueInput
+  }
+
+  /**
+   * PosWalletTransaction updateMany
+   */
+  export type PosWalletTransactionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PosWalletTransactions.
+     */
+    data: XOR<PosWalletTransactionUpdateManyMutationInput, PosWalletTransactionUncheckedUpdateManyInput>
+    /**
+     * Filter which PosWalletTransactions to update
+     */
+    where?: PosWalletTransactionWhereInput
+  }
+
+  /**
+   * PosWalletTransaction upsert
+   */
+  export type PosWalletTransactionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosWalletTransaction
+     */
+    select?: PosWalletTransactionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosWalletTransactionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PosWalletTransaction to update in case it exists.
+     */
+    where: PosWalletTransactionWhereUniqueInput
+    /**
+     * In case the PosWalletTransaction found by the `where` argument doesn't exist, create a new PosWalletTransaction with this data.
+     */
+    create: XOR<PosWalletTransactionCreateInput, PosWalletTransactionUncheckedCreateInput>
+    /**
+     * In case the PosWalletTransaction was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PosWalletTransactionUpdateInput, PosWalletTransactionUncheckedUpdateInput>
+  }
+
+  /**
+   * PosWalletTransaction delete
+   */
+  export type PosWalletTransactionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosWalletTransaction
+     */
+    select?: PosWalletTransactionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosWalletTransactionInclude<ExtArgs> | null
+    /**
+     * Filter which PosWalletTransaction to delete.
+     */
+    where: PosWalletTransactionWhereUniqueInput
+  }
+
+  /**
+   * PosWalletTransaction deleteMany
+   */
+  export type PosWalletTransactionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PosWalletTransactions to delete
+     */
+    where?: PosWalletTransactionWhereInput
+  }
+
+  /**
+   * PosWalletTransaction without action
+   */
+  export type PosWalletTransactionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosWalletTransaction
+     */
+    select?: PosWalletTransactionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosWalletTransactionInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model PosReturn
+   */
+
+  export type AggregatePosReturn = {
+    _count: PosReturnCountAggregateOutputType | null
+    _avg: PosReturnAvgAggregateOutputType | null
+    _sum: PosReturnSumAggregateOutputType | null
+    _min: PosReturnMinAggregateOutputType | null
+    _max: PosReturnMaxAggregateOutputType | null
+  }
+
+  export type PosReturnAvgAggregateOutputType = {
+    id: number | null
+    productId: number | null
+    quantity: number | null
+    customerId: number | null
+    unitPrice: number | null
+    refundAmount: number | null
+    pointsReversed: number | null
+    unitCost: number | null
+    shiftId: number | null
+    createdById: number | null
+  }
+
+  export type PosReturnSumAggregateOutputType = {
+    id: number | null
+    productId: number | null
+    quantity: number | null
+    customerId: number | null
+    unitPrice: number | null
+    refundAmount: number | null
+    pointsReversed: number | null
+    unitCost: number | null
+    shiftId: number | null
+    createdById: number | null
+  }
+
+  export type PosReturnMinAggregateOutputType = {
+    id: number | null
+    returnNo: string | null
+    type: string | null
+    productId: number | null
+    productName: string | null
+    quantity: number | null
+    condition: string | null
+    invoiceGroupCode: string | null
+    customerId: number | null
+    customerName: string | null
+    customerMobile: string | null
+    unitPrice: number | null
+    refundAmount: number | null
+    refundMethod: string | null
+    pointsReversed: number | null
+    unitCost: number | null
+    reason: string | null
+    note: string | null
+    disposal: string | null
+    reference: string | null
+    shiftId: number | null
+    createdById: number | null
+    createdAt: Date | null
+  }
+
+  export type PosReturnMaxAggregateOutputType = {
+    id: number | null
+    returnNo: string | null
+    type: string | null
+    productId: number | null
+    productName: string | null
+    quantity: number | null
+    condition: string | null
+    invoiceGroupCode: string | null
+    customerId: number | null
+    customerName: string | null
+    customerMobile: string | null
+    unitPrice: number | null
+    refundAmount: number | null
+    refundMethod: string | null
+    pointsReversed: number | null
+    unitCost: number | null
+    reason: string | null
+    note: string | null
+    disposal: string | null
+    reference: string | null
+    shiftId: number | null
+    createdById: number | null
+    createdAt: Date | null
+  }
+
+  export type PosReturnCountAggregateOutputType = {
+    id: number
+    returnNo: number
+    type: number
+    productId: number
+    productName: number
+    quantity: number
+    condition: number
+    invoiceGroupCode: number
+    customerId: number
+    customerName: number
+    customerMobile: number
+    unitPrice: number
+    refundAmount: number
+    refundMethod: number
+    pointsReversed: number
+    unitCost: number
+    reason: number
+    note: number
+    disposal: number
+    reference: number
+    shiftId: number
+    createdById: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type PosReturnAvgAggregateInputType = {
+    id?: true
+    productId?: true
+    quantity?: true
+    customerId?: true
+    unitPrice?: true
+    refundAmount?: true
+    pointsReversed?: true
+    unitCost?: true
+    shiftId?: true
+    createdById?: true
+  }
+
+  export type PosReturnSumAggregateInputType = {
+    id?: true
+    productId?: true
+    quantity?: true
+    customerId?: true
+    unitPrice?: true
+    refundAmount?: true
+    pointsReversed?: true
+    unitCost?: true
+    shiftId?: true
+    createdById?: true
+  }
+
+  export type PosReturnMinAggregateInputType = {
+    id?: true
+    returnNo?: true
+    type?: true
+    productId?: true
+    productName?: true
+    quantity?: true
+    condition?: true
+    invoiceGroupCode?: true
+    customerId?: true
+    customerName?: true
+    customerMobile?: true
+    unitPrice?: true
+    refundAmount?: true
+    refundMethod?: true
+    pointsReversed?: true
+    unitCost?: true
+    reason?: true
+    note?: true
+    disposal?: true
+    reference?: true
+    shiftId?: true
+    createdById?: true
+    createdAt?: true
+  }
+
+  export type PosReturnMaxAggregateInputType = {
+    id?: true
+    returnNo?: true
+    type?: true
+    productId?: true
+    productName?: true
+    quantity?: true
+    condition?: true
+    invoiceGroupCode?: true
+    customerId?: true
+    customerName?: true
+    customerMobile?: true
+    unitPrice?: true
+    refundAmount?: true
+    refundMethod?: true
+    pointsReversed?: true
+    unitCost?: true
+    reason?: true
+    note?: true
+    disposal?: true
+    reference?: true
+    shiftId?: true
+    createdById?: true
+    createdAt?: true
+  }
+
+  export type PosReturnCountAggregateInputType = {
+    id?: true
+    returnNo?: true
+    type?: true
+    productId?: true
+    productName?: true
+    quantity?: true
+    condition?: true
+    invoiceGroupCode?: true
+    customerId?: true
+    customerName?: true
+    customerMobile?: true
+    unitPrice?: true
+    refundAmount?: true
+    refundMethod?: true
+    pointsReversed?: true
+    unitCost?: true
+    reason?: true
+    note?: true
+    disposal?: true
+    reference?: true
+    shiftId?: true
+    createdById?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type PosReturnAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PosReturn to aggregate.
+     */
+    where?: PosReturnWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosReturns to fetch.
+     */
+    orderBy?: PosReturnOrderByWithRelationInput | PosReturnOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PosReturnWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosReturns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosReturns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PosReturns
+    **/
+    _count?: true | PosReturnCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PosReturnAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PosReturnSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PosReturnMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PosReturnMaxAggregateInputType
+  }
+
+  export type GetPosReturnAggregateType<T extends PosReturnAggregateArgs> = {
+        [P in keyof T & keyof AggregatePosReturn]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePosReturn[P]>
+      : GetScalarType<T[P], AggregatePosReturn[P]>
+  }
+
+
+
+
+  export type PosReturnGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PosReturnWhereInput
+    orderBy?: PosReturnOrderByWithAggregationInput | PosReturnOrderByWithAggregationInput[]
+    by: PosReturnScalarFieldEnum[] | PosReturnScalarFieldEnum
+    having?: PosReturnScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PosReturnCountAggregateInputType | true
+    _avg?: PosReturnAvgAggregateInputType
+    _sum?: PosReturnSumAggregateInputType
+    _min?: PosReturnMinAggregateInputType
+    _max?: PosReturnMaxAggregateInputType
+  }
+
+  export type PosReturnGroupByOutputType = {
+    id: number
+    returnNo: string
+    type: string
+    productId: number | null
+    productName: string
+    quantity: number
+    condition: string | null
+    invoiceGroupCode: string | null
+    customerId: number | null
+    customerName: string | null
+    customerMobile: string | null
+    unitPrice: number
+    refundAmount: number
+    refundMethod: string | null
+    pointsReversed: number
+    unitCost: number | null
+    reason: string
+    note: string | null
+    disposal: string | null
+    reference: string | null
+    shiftId: number | null
+    createdById: number
+    createdAt: Date
+    _count: PosReturnCountAggregateOutputType | null
+    _avg: PosReturnAvgAggregateOutputType | null
+    _sum: PosReturnSumAggregateOutputType | null
+    _min: PosReturnMinAggregateOutputType | null
+    _max: PosReturnMaxAggregateOutputType | null
+  }
+
+  type GetPosReturnGroupByPayload<T extends PosReturnGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PosReturnGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PosReturnGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PosReturnGroupByOutputType[P]>
+            : GetScalarType<T[P], PosReturnGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PosReturnSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    returnNo?: boolean
+    type?: boolean
+    productId?: boolean
+    productName?: boolean
+    quantity?: boolean
+    condition?: boolean
+    invoiceGroupCode?: boolean
+    customerId?: boolean
+    customerName?: boolean
+    customerMobile?: boolean
+    unitPrice?: boolean
+    refundAmount?: boolean
+    refundMethod?: boolean
+    pointsReversed?: boolean
+    unitCost?: boolean
+    reason?: boolean
+    note?: boolean
+    disposal?: boolean
+    reference?: boolean
+    shiftId?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    product?: boolean | PosReturn$productArgs<ExtArgs>
+    customer?: boolean | PosReturn$customerArgs<ExtArgs>
+    shift?: boolean | PosReturn$shiftArgs<ExtArgs>
+  }, ExtArgs["result"]["posReturn"]>
+
+  export type PosReturnSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    returnNo?: boolean
+    type?: boolean
+    productId?: boolean
+    productName?: boolean
+    quantity?: boolean
+    condition?: boolean
+    invoiceGroupCode?: boolean
+    customerId?: boolean
+    customerName?: boolean
+    customerMobile?: boolean
+    unitPrice?: boolean
+    refundAmount?: boolean
+    refundMethod?: boolean
+    pointsReversed?: boolean
+    unitCost?: boolean
+    reason?: boolean
+    note?: boolean
+    disposal?: boolean
+    reference?: boolean
+    shiftId?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    product?: boolean | PosReturn$productArgs<ExtArgs>
+    customer?: boolean | PosReturn$customerArgs<ExtArgs>
+    shift?: boolean | PosReturn$shiftArgs<ExtArgs>
+  }, ExtArgs["result"]["posReturn"]>
+
+  export type PosReturnSelectScalar = {
+    id?: boolean
+    returnNo?: boolean
+    type?: boolean
+    productId?: boolean
+    productName?: boolean
+    quantity?: boolean
+    condition?: boolean
+    invoiceGroupCode?: boolean
+    customerId?: boolean
+    customerName?: boolean
+    customerMobile?: boolean
+    unitPrice?: boolean
+    refundAmount?: boolean
+    refundMethod?: boolean
+    pointsReversed?: boolean
+    unitCost?: boolean
+    reason?: boolean
+    note?: boolean
+    disposal?: boolean
+    reference?: boolean
+    shiftId?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+  }
+
+  export type PosReturnInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    product?: boolean | PosReturn$productArgs<ExtArgs>
+    customer?: boolean | PosReturn$customerArgs<ExtArgs>
+    shift?: boolean | PosReturn$shiftArgs<ExtArgs>
+  }
+  export type PosReturnIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    product?: boolean | PosReturn$productArgs<ExtArgs>
+    customer?: boolean | PosReturn$customerArgs<ExtArgs>
+    shift?: boolean | PosReturn$shiftArgs<ExtArgs>
+  }
+
+  export type $PosReturnPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PosReturn"
+    objects: {
+      product: Prisma.$InventoryProductPayload<ExtArgs> | null
+      customer: Prisma.$PosCustomerPayload<ExtArgs> | null
+      shift: Prisma.$PosShiftPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      returnNo: string
+      type: string
+      productId: number | null
+      productName: string
+      quantity: number
+      /**
+       * REFUND: SHELF (unopened, back for sale) or DAMAGED (kept aside).
+       */
+      condition: string | null
+      /**
+       * The bill the bottles were bought on (REFUND always, EXCHANGE when known).
+       */
+      invoiceGroupCode: string | null
+      customerId: number | null
+      customerName: string | null
+      customerMobile: string | null
+      /**
+       * Refund per bottle (REFUND) or selling price (others), and the money paid back.
+       */
+      unitPrice: number
+      refundAmount: number
+      /**
+       * CASH (from the drawer) or WALLET (member's wallet).
+       */
+      refundMethod: string | null
+      /**
+       * Points taken back because the member was refunded.
+       */
+      pointsReversed: number
+      /**
+       * Cost per bottle, to value damaged stock.
+       */
+      unitCost: number | null
+      reason: string
+      note: string | null
+      /**
+       * DAMAGE_CLEARED: SUPPLIER | WRITTEN_OFF | RESTORED
+       */
+      disposal: string | null
+      reference: string | null
+      shiftId: number | null
+      createdById: number
+      createdAt: Date
+    }, ExtArgs["result"]["posReturn"]>
+    composites: {}
+  }
+
+  type PosReturnGetPayload<S extends boolean | null | undefined | PosReturnDefaultArgs> = $Result.GetResult<Prisma.$PosReturnPayload, S>
+
+  type PosReturnCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<PosReturnFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: PosReturnCountAggregateInputType | true
+    }
+
+  export interface PosReturnDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PosReturn'], meta: { name: 'PosReturn' } }
+    /**
+     * Find zero or one PosReturn that matches the filter.
+     * @param {PosReturnFindUniqueArgs} args - Arguments to find a PosReturn
+     * @example
+     * // Get one PosReturn
+     * const posReturn = await prisma.posReturn.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PosReturnFindUniqueArgs>(args: SelectSubset<T, PosReturnFindUniqueArgs<ExtArgs>>): Prisma__PosReturnClient<$Result.GetResult<Prisma.$PosReturnPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one PosReturn that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {PosReturnFindUniqueOrThrowArgs} args - Arguments to find a PosReturn
+     * @example
+     * // Get one PosReturn
+     * const posReturn = await prisma.posReturn.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PosReturnFindUniqueOrThrowArgs>(args: SelectSubset<T, PosReturnFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PosReturnClient<$Result.GetResult<Prisma.$PosReturnPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first PosReturn that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosReturnFindFirstArgs} args - Arguments to find a PosReturn
+     * @example
+     * // Get one PosReturn
+     * const posReturn = await prisma.posReturn.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PosReturnFindFirstArgs>(args?: SelectSubset<T, PosReturnFindFirstArgs<ExtArgs>>): Prisma__PosReturnClient<$Result.GetResult<Prisma.$PosReturnPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first PosReturn that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosReturnFindFirstOrThrowArgs} args - Arguments to find a PosReturn
+     * @example
+     * // Get one PosReturn
+     * const posReturn = await prisma.posReturn.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PosReturnFindFirstOrThrowArgs>(args?: SelectSubset<T, PosReturnFindFirstOrThrowArgs<ExtArgs>>): Prisma__PosReturnClient<$Result.GetResult<Prisma.$PosReturnPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more PosReturns that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosReturnFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PosReturns
+     * const posReturns = await prisma.posReturn.findMany()
+     * 
+     * // Get first 10 PosReturns
+     * const posReturns = await prisma.posReturn.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const posReturnWithIdOnly = await prisma.posReturn.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PosReturnFindManyArgs>(args?: SelectSubset<T, PosReturnFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosReturnPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a PosReturn.
+     * @param {PosReturnCreateArgs} args - Arguments to create a PosReturn.
+     * @example
+     * // Create one PosReturn
+     * const PosReturn = await prisma.posReturn.create({
+     *   data: {
+     *     // ... data to create a PosReturn
+     *   }
+     * })
+     * 
+     */
+    create<T extends PosReturnCreateArgs>(args: SelectSubset<T, PosReturnCreateArgs<ExtArgs>>): Prisma__PosReturnClient<$Result.GetResult<Prisma.$PosReturnPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many PosReturns.
+     * @param {PosReturnCreateManyArgs} args - Arguments to create many PosReturns.
+     * @example
+     * // Create many PosReturns
+     * const posReturn = await prisma.posReturn.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PosReturnCreateManyArgs>(args?: SelectSubset<T, PosReturnCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PosReturns and returns the data saved in the database.
+     * @param {PosReturnCreateManyAndReturnArgs} args - Arguments to create many PosReturns.
+     * @example
+     * // Create many PosReturns
+     * const posReturn = await prisma.posReturn.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PosReturns and only return the `id`
+     * const posReturnWithIdOnly = await prisma.posReturn.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PosReturnCreateManyAndReturnArgs>(args?: SelectSubset<T, PosReturnCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosReturnPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a PosReturn.
+     * @param {PosReturnDeleteArgs} args - Arguments to delete one PosReturn.
+     * @example
+     * // Delete one PosReturn
+     * const PosReturn = await prisma.posReturn.delete({
+     *   where: {
+     *     // ... filter to delete one PosReturn
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PosReturnDeleteArgs>(args: SelectSubset<T, PosReturnDeleteArgs<ExtArgs>>): Prisma__PosReturnClient<$Result.GetResult<Prisma.$PosReturnPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one PosReturn.
+     * @param {PosReturnUpdateArgs} args - Arguments to update one PosReturn.
+     * @example
+     * // Update one PosReturn
+     * const posReturn = await prisma.posReturn.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PosReturnUpdateArgs>(args: SelectSubset<T, PosReturnUpdateArgs<ExtArgs>>): Prisma__PosReturnClient<$Result.GetResult<Prisma.$PosReturnPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more PosReturns.
+     * @param {PosReturnDeleteManyArgs} args - Arguments to filter PosReturns to delete.
+     * @example
+     * // Delete a few PosReturns
+     * const { count } = await prisma.posReturn.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PosReturnDeleteManyArgs>(args?: SelectSubset<T, PosReturnDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PosReturns.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosReturnUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PosReturns
+     * const posReturn = await prisma.posReturn.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PosReturnUpdateManyArgs>(args: SelectSubset<T, PosReturnUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one PosReturn.
+     * @param {PosReturnUpsertArgs} args - Arguments to update or create a PosReturn.
+     * @example
+     * // Update or create a PosReturn
+     * const posReturn = await prisma.posReturn.upsert({
+     *   create: {
+     *     // ... data to create a PosReturn
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PosReturn we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PosReturnUpsertArgs>(args: SelectSubset<T, PosReturnUpsertArgs<ExtArgs>>): Prisma__PosReturnClient<$Result.GetResult<Prisma.$PosReturnPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of PosReturns.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosReturnCountArgs} args - Arguments to filter PosReturns to count.
+     * @example
+     * // Count the number of PosReturns
+     * const count = await prisma.posReturn.count({
+     *   where: {
+     *     // ... the filter for the PosReturns we want to count
+     *   }
+     * })
+    **/
+    count<T extends PosReturnCountArgs>(
+      args?: Subset<T, PosReturnCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PosReturnCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PosReturn.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosReturnAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PosReturnAggregateArgs>(args: Subset<T, PosReturnAggregateArgs>): Prisma.PrismaPromise<GetPosReturnAggregateType<T>>
+
+    /**
+     * Group by PosReturn.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosReturnGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PosReturnGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PosReturnGroupByArgs['orderBy'] }
+        : { orderBy?: PosReturnGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PosReturnGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPosReturnGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PosReturn model
+   */
+  readonly fields: PosReturnFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PosReturn.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PosReturnClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    product<T extends PosReturn$productArgs<ExtArgs> = {}>(args?: Subset<T, PosReturn$productArgs<ExtArgs>>): Prisma__InventoryProductClient<$Result.GetResult<Prisma.$InventoryProductPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
+    customer<T extends PosReturn$customerArgs<ExtArgs> = {}>(args?: Subset<T, PosReturn$customerArgs<ExtArgs>>): Prisma__PosCustomerClient<$Result.GetResult<Prisma.$PosCustomerPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
+    shift<T extends PosReturn$shiftArgs<ExtArgs> = {}>(args?: Subset<T, PosReturn$shiftArgs<ExtArgs>>): Prisma__PosShiftClient<$Result.GetResult<Prisma.$PosShiftPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PosReturn model
+   */ 
+  interface PosReturnFieldRefs {
+    readonly id: FieldRef<"PosReturn", 'Int'>
+    readonly returnNo: FieldRef<"PosReturn", 'String'>
+    readonly type: FieldRef<"PosReturn", 'String'>
+    readonly productId: FieldRef<"PosReturn", 'Int'>
+    readonly productName: FieldRef<"PosReturn", 'String'>
+    readonly quantity: FieldRef<"PosReturn", 'Int'>
+    readonly condition: FieldRef<"PosReturn", 'String'>
+    readonly invoiceGroupCode: FieldRef<"PosReturn", 'String'>
+    readonly customerId: FieldRef<"PosReturn", 'Int'>
+    readonly customerName: FieldRef<"PosReturn", 'String'>
+    readonly customerMobile: FieldRef<"PosReturn", 'String'>
+    readonly unitPrice: FieldRef<"PosReturn", 'Float'>
+    readonly refundAmount: FieldRef<"PosReturn", 'Float'>
+    readonly refundMethod: FieldRef<"PosReturn", 'String'>
+    readonly pointsReversed: FieldRef<"PosReturn", 'Int'>
+    readonly unitCost: FieldRef<"PosReturn", 'Float'>
+    readonly reason: FieldRef<"PosReturn", 'String'>
+    readonly note: FieldRef<"PosReturn", 'String'>
+    readonly disposal: FieldRef<"PosReturn", 'String'>
+    readonly reference: FieldRef<"PosReturn", 'String'>
+    readonly shiftId: FieldRef<"PosReturn", 'Int'>
+    readonly createdById: FieldRef<"PosReturn", 'Int'>
+    readonly createdAt: FieldRef<"PosReturn", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PosReturn findUnique
+   */
+  export type PosReturnFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosReturn
+     */
+    select?: PosReturnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosReturnInclude<ExtArgs> | null
+    /**
+     * Filter, which PosReturn to fetch.
+     */
+    where: PosReturnWhereUniqueInput
+  }
+
+  /**
+   * PosReturn findUniqueOrThrow
+   */
+  export type PosReturnFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosReturn
+     */
+    select?: PosReturnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosReturnInclude<ExtArgs> | null
+    /**
+     * Filter, which PosReturn to fetch.
+     */
+    where: PosReturnWhereUniqueInput
+  }
+
+  /**
+   * PosReturn findFirst
+   */
+  export type PosReturnFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosReturn
+     */
+    select?: PosReturnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosReturnInclude<ExtArgs> | null
+    /**
+     * Filter, which PosReturn to fetch.
+     */
+    where?: PosReturnWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosReturns to fetch.
+     */
+    orderBy?: PosReturnOrderByWithRelationInput | PosReturnOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PosReturns.
+     */
+    cursor?: PosReturnWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosReturns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosReturns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PosReturns.
+     */
+    distinct?: PosReturnScalarFieldEnum | PosReturnScalarFieldEnum[]
+  }
+
+  /**
+   * PosReturn findFirstOrThrow
+   */
+  export type PosReturnFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosReturn
+     */
+    select?: PosReturnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosReturnInclude<ExtArgs> | null
+    /**
+     * Filter, which PosReturn to fetch.
+     */
+    where?: PosReturnWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosReturns to fetch.
+     */
+    orderBy?: PosReturnOrderByWithRelationInput | PosReturnOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PosReturns.
+     */
+    cursor?: PosReturnWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosReturns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosReturns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PosReturns.
+     */
+    distinct?: PosReturnScalarFieldEnum | PosReturnScalarFieldEnum[]
+  }
+
+  /**
+   * PosReturn findMany
+   */
+  export type PosReturnFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosReturn
+     */
+    select?: PosReturnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosReturnInclude<ExtArgs> | null
+    /**
+     * Filter, which PosReturns to fetch.
+     */
+    where?: PosReturnWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosReturns to fetch.
+     */
+    orderBy?: PosReturnOrderByWithRelationInput | PosReturnOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PosReturns.
+     */
+    cursor?: PosReturnWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosReturns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosReturns.
+     */
+    skip?: number
+    distinct?: PosReturnScalarFieldEnum | PosReturnScalarFieldEnum[]
+  }
+
+  /**
+   * PosReturn create
+   */
+  export type PosReturnCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosReturn
+     */
+    select?: PosReturnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosReturnInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PosReturn.
+     */
+    data: XOR<PosReturnCreateInput, PosReturnUncheckedCreateInput>
+  }
+
+  /**
+   * PosReturn createMany
+   */
+  export type PosReturnCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PosReturns.
+     */
+    data: PosReturnCreateManyInput | PosReturnCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PosReturn createManyAndReturn
+   */
+  export type PosReturnCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosReturn
+     */
+    select?: PosReturnSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many PosReturns.
+     */
+    data: PosReturnCreateManyInput | PosReturnCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosReturnIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PosReturn update
+   */
+  export type PosReturnUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosReturn
+     */
+    select?: PosReturnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosReturnInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PosReturn.
+     */
+    data: XOR<PosReturnUpdateInput, PosReturnUncheckedUpdateInput>
+    /**
+     * Choose, which PosReturn to update.
+     */
+    where: PosReturnWhereUniqueInput
+  }
+
+  /**
+   * PosReturn updateMany
+   */
+  export type PosReturnUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PosReturns.
+     */
+    data: XOR<PosReturnUpdateManyMutationInput, PosReturnUncheckedUpdateManyInput>
+    /**
+     * Filter which PosReturns to update
+     */
+    where?: PosReturnWhereInput
+  }
+
+  /**
+   * PosReturn upsert
+   */
+  export type PosReturnUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosReturn
+     */
+    select?: PosReturnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosReturnInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PosReturn to update in case it exists.
+     */
+    where: PosReturnWhereUniqueInput
+    /**
+     * In case the PosReturn found by the `where` argument doesn't exist, create a new PosReturn with this data.
+     */
+    create: XOR<PosReturnCreateInput, PosReturnUncheckedCreateInput>
+    /**
+     * In case the PosReturn was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PosReturnUpdateInput, PosReturnUncheckedUpdateInput>
+  }
+
+  /**
+   * PosReturn delete
+   */
+  export type PosReturnDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosReturn
+     */
+    select?: PosReturnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosReturnInclude<ExtArgs> | null
+    /**
+     * Filter which PosReturn to delete.
+     */
+    where: PosReturnWhereUniqueInput
+  }
+
+  /**
+   * PosReturn deleteMany
+   */
+  export type PosReturnDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PosReturns to delete
+     */
+    where?: PosReturnWhereInput
+  }
+
+  /**
+   * PosReturn.product
+   */
+  export type PosReturn$productArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryProduct
+     */
+    select?: InventoryProductSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryProductInclude<ExtArgs> | null
+    where?: InventoryProductWhereInput
+  }
+
+  /**
+   * PosReturn.customer
+   */
+  export type PosReturn$customerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosCustomer
+     */
+    select?: PosCustomerSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosCustomerInclude<ExtArgs> | null
+    where?: PosCustomerWhereInput
+  }
+
+  /**
+   * PosReturn.shift
+   */
+  export type PosReturn$shiftArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosShift
+     */
+    select?: PosShiftSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosShiftInclude<ExtArgs> | null
+    where?: PosShiftWhereInput
+  }
+
+  /**
+   * PosReturn without action
+   */
+  export type PosReturnDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosReturn
+     */
+    select?: PosReturnSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosReturnInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -37933,9 +40735,15 @@ export namespace Prisma {
     changeGiven: 'changeGiven',
     paymentMethod: 'paymentMethod',
     paymentReference: 'paymentReference',
+    cashPaid: 'cashPaid',
+    cardPaid: 'cardPaid',
+    transferPaid: 'transferPaid',
+    walletUsed: 'walletUsed',
+    walletCredit: 'walletCredit',
     cashierId: 'cashierId',
     customerId: 'customerId',
     pointsEarned: 'pointsEarned',
+    pointsRate: 'pointsRate',
     discountType: 'discountType',
     discountValue: 'discountValue',
     discountAmount: 'discountAmount',
@@ -38003,6 +40811,7 @@ export namespace Prisma {
     sellingPrice: 'sellingPrice',
     emptyBottlePrice: 'emptyBottlePrice',
     emptyBottlesOnHand: 'emptyBottlesOnHand',
+    damagedQuantity: 'damagedQuantity',
     description: 'description',
     lastSoldAt: 'lastSoldAt',
     createdAt: 'createdAt',
@@ -38049,6 +40858,7 @@ export namespace Prisma {
     totalSpent: 'totalSpent',
     visits: 'visits',
     lastVisitAt: 'lastVisitAt',
+    walletBalance: 'walletBalance',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -38431,6 +41241,51 @@ export namespace Prisma {
   };
 
   export type PurchaseOrderEmailScalarFieldEnum = (typeof PurchaseOrderEmailScalarFieldEnum)[keyof typeof PurchaseOrderEmailScalarFieldEnum]
+
+
+  export const PosWalletTransactionScalarFieldEnum: {
+    id: 'id',
+    customerId: 'customerId',
+    type: 'type',
+    amount: 'amount',
+    balanceAfter: 'balanceAfter',
+    invoiceGroupCode: 'invoiceGroupCode',
+    shiftId: 'shiftId',
+    note: 'note',
+    createdById: 'createdById',
+    createdAt: 'createdAt'
+  };
+
+  export type PosWalletTransactionScalarFieldEnum = (typeof PosWalletTransactionScalarFieldEnum)[keyof typeof PosWalletTransactionScalarFieldEnum]
+
+
+  export const PosReturnScalarFieldEnum: {
+    id: 'id',
+    returnNo: 'returnNo',
+    type: 'type',
+    productId: 'productId',
+    productName: 'productName',
+    quantity: 'quantity',
+    condition: 'condition',
+    invoiceGroupCode: 'invoiceGroupCode',
+    customerId: 'customerId',
+    customerName: 'customerName',
+    customerMobile: 'customerMobile',
+    unitPrice: 'unitPrice',
+    refundAmount: 'refundAmount',
+    refundMethod: 'refundMethod',
+    pointsReversed: 'pointsReversed',
+    unitCost: 'unitCost',
+    reason: 'reason',
+    note: 'note',
+    disposal: 'disposal',
+    reference: 'reference',
+    shiftId: 'shiftId',
+    createdById: 'createdById',
+    createdAt: 'createdAt'
+  };
+
+  export type PosReturnScalarFieldEnum = (typeof PosReturnScalarFieldEnum)[keyof typeof PosReturnScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -38942,9 +41797,15 @@ export namespace Prisma {
     changeGiven?: FloatFilter<"PosCounterSale"> | number
     paymentMethod?: EnumPaymentMethodFilter<"PosCounterSale"> | $Enums.PaymentMethod
     paymentReference?: StringNullableFilter<"PosCounterSale"> | string | null
+    cashPaid?: FloatFilter<"PosCounterSale"> | number
+    cardPaid?: FloatFilter<"PosCounterSale"> | number
+    transferPaid?: FloatFilter<"PosCounterSale"> | number
+    walletUsed?: FloatFilter<"PosCounterSale"> | number
+    walletCredit?: FloatFilter<"PosCounterSale"> | number
     cashierId?: IntFilter<"PosCounterSale"> | number
     customerId?: IntNullableFilter<"PosCounterSale"> | number | null
     pointsEarned?: IntFilter<"PosCounterSale"> | number
+    pointsRate?: FloatNullableFilter<"PosCounterSale"> | number | null
     discountType?: StringNullableFilter<"PosCounterSale"> | string | null
     discountValue?: FloatFilter<"PosCounterSale"> | number
     discountAmount?: FloatFilter<"PosCounterSale"> | number
@@ -38967,9 +41828,15 @@ export namespace Prisma {
     changeGiven?: SortOrder
     paymentMethod?: SortOrder
     paymentReference?: SortOrderInput | SortOrder
+    cashPaid?: SortOrder
+    cardPaid?: SortOrder
+    transferPaid?: SortOrder
+    walletUsed?: SortOrder
+    walletCredit?: SortOrder
     cashierId?: SortOrder
     customerId?: SortOrderInput | SortOrder
     pointsEarned?: SortOrder
+    pointsRate?: SortOrderInput | SortOrder
     discountType?: SortOrderInput | SortOrder
     discountValue?: SortOrder
     discountAmount?: SortOrder
@@ -38995,9 +41862,15 @@ export namespace Prisma {
     changeGiven?: FloatFilter<"PosCounterSale"> | number
     paymentMethod?: EnumPaymentMethodFilter<"PosCounterSale"> | $Enums.PaymentMethod
     paymentReference?: StringNullableFilter<"PosCounterSale"> | string | null
+    cashPaid?: FloatFilter<"PosCounterSale"> | number
+    cardPaid?: FloatFilter<"PosCounterSale"> | number
+    transferPaid?: FloatFilter<"PosCounterSale"> | number
+    walletUsed?: FloatFilter<"PosCounterSale"> | number
+    walletCredit?: FloatFilter<"PosCounterSale"> | number
     cashierId?: IntFilter<"PosCounterSale"> | number
     customerId?: IntNullableFilter<"PosCounterSale"> | number | null
     pointsEarned?: IntFilter<"PosCounterSale"> | number
+    pointsRate?: FloatNullableFilter<"PosCounterSale"> | number | null
     discountType?: StringNullableFilter<"PosCounterSale"> | string | null
     discountValue?: FloatFilter<"PosCounterSale"> | number
     discountAmount?: FloatFilter<"PosCounterSale"> | number
@@ -39020,9 +41893,15 @@ export namespace Prisma {
     changeGiven?: SortOrder
     paymentMethod?: SortOrder
     paymentReference?: SortOrderInput | SortOrder
+    cashPaid?: SortOrder
+    cardPaid?: SortOrder
+    transferPaid?: SortOrder
+    walletUsed?: SortOrder
+    walletCredit?: SortOrder
     cashierId?: SortOrder
     customerId?: SortOrderInput | SortOrder
     pointsEarned?: SortOrder
+    pointsRate?: SortOrderInput | SortOrder
     discountType?: SortOrderInput | SortOrder
     discountValue?: SortOrder
     discountAmount?: SortOrder
@@ -39050,9 +41929,15 @@ export namespace Prisma {
     changeGiven?: FloatWithAggregatesFilter<"PosCounterSale"> | number
     paymentMethod?: EnumPaymentMethodWithAggregatesFilter<"PosCounterSale"> | $Enums.PaymentMethod
     paymentReference?: StringNullableWithAggregatesFilter<"PosCounterSale"> | string | null
+    cashPaid?: FloatWithAggregatesFilter<"PosCounterSale"> | number
+    cardPaid?: FloatWithAggregatesFilter<"PosCounterSale"> | number
+    transferPaid?: FloatWithAggregatesFilter<"PosCounterSale"> | number
+    walletUsed?: FloatWithAggregatesFilter<"PosCounterSale"> | number
+    walletCredit?: FloatWithAggregatesFilter<"PosCounterSale"> | number
     cashierId?: IntWithAggregatesFilter<"PosCounterSale"> | number
     customerId?: IntNullableWithAggregatesFilter<"PosCounterSale"> | number | null
     pointsEarned?: IntWithAggregatesFilter<"PosCounterSale"> | number
+    pointsRate?: FloatNullableWithAggregatesFilter<"PosCounterSale"> | number | null
     discountType?: StringNullableWithAggregatesFilter<"PosCounterSale"> | string | null
     discountValue?: FloatWithAggregatesFilter<"PosCounterSale"> | number
     discountAmount?: FloatWithAggregatesFilter<"PosCounterSale"> | number
@@ -39277,6 +42162,7 @@ export namespace Prisma {
     sellingPrice?: FloatNullableFilter<"InventoryProduct"> | number | null
     emptyBottlePrice?: FloatNullableFilter<"InventoryProduct"> | number | null
     emptyBottlesOnHand?: IntFilter<"InventoryProduct"> | number
+    damagedQuantity?: IntFilter<"InventoryProduct"> | number
     description?: StringNullableFilter<"InventoryProduct"> | string | null
     lastSoldAt?: DateTimeNullableFilter<"InventoryProduct"> | Date | string | null
     createdAt?: DateTimeFilter<"InventoryProduct"> | Date | string
@@ -39287,6 +42173,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseListRelationFilter
     images?: InventoryProductImageListRelationFilter
     purchaseOrderItems?: PurchaseOrderItemListRelationFilter
+    returns?: PosReturnListRelationFilter
     customerPurchases?: PosCustomerPurchaseListRelationFilter
   }
 
@@ -39308,6 +42195,7 @@ export namespace Prisma {
     sellingPrice?: SortOrderInput | SortOrder
     emptyBottlePrice?: SortOrderInput | SortOrder
     emptyBottlesOnHand?: SortOrder
+    damagedQuantity?: SortOrder
     description?: SortOrderInput | SortOrder
     lastSoldAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -39318,6 +42206,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseOrderByRelationAggregateInput
     images?: InventoryProductImageOrderByRelationAggregateInput
     purchaseOrderItems?: PurchaseOrderItemOrderByRelationAggregateInput
+    returns?: PosReturnOrderByRelationAggregateInput
     customerPurchases?: PosCustomerPurchaseOrderByRelationAggregateInput
   }
 
@@ -39342,6 +42231,7 @@ export namespace Prisma {
     sellingPrice?: FloatNullableFilter<"InventoryProduct"> | number | null
     emptyBottlePrice?: FloatNullableFilter<"InventoryProduct"> | number | null
     emptyBottlesOnHand?: IntFilter<"InventoryProduct"> | number
+    damagedQuantity?: IntFilter<"InventoryProduct"> | number
     description?: StringNullableFilter<"InventoryProduct"> | string | null
     lastSoldAt?: DateTimeNullableFilter<"InventoryProduct"> | Date | string | null
     createdAt?: DateTimeFilter<"InventoryProduct"> | Date | string
@@ -39352,6 +42242,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseListRelationFilter
     images?: InventoryProductImageListRelationFilter
     purchaseOrderItems?: PurchaseOrderItemListRelationFilter
+    returns?: PosReturnListRelationFilter
     customerPurchases?: PosCustomerPurchaseListRelationFilter
   }, "id" | "displayId">
 
@@ -39373,6 +42264,7 @@ export namespace Prisma {
     sellingPrice?: SortOrderInput | SortOrder
     emptyBottlePrice?: SortOrderInput | SortOrder
     emptyBottlesOnHand?: SortOrder
+    damagedQuantity?: SortOrder
     description?: SortOrderInput | SortOrder
     lastSoldAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -39405,6 +42297,7 @@ export namespace Prisma {
     sellingPrice?: FloatNullableWithAggregatesFilter<"InventoryProduct"> | number | null
     emptyBottlePrice?: FloatNullableWithAggregatesFilter<"InventoryProduct"> | number | null
     emptyBottlesOnHand?: IntWithAggregatesFilter<"InventoryProduct"> | number
+    damagedQuantity?: IntWithAggregatesFilter<"InventoryProduct"> | number
     description?: StringNullableWithAggregatesFilter<"InventoryProduct"> | string | null
     lastSoldAt?: DateTimeNullableWithAggregatesFilter<"InventoryProduct"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"InventoryProduct"> | Date | string
@@ -39547,10 +42440,13 @@ export namespace Prisma {
     totalSpent?: FloatFilter<"PosCustomer"> | number
     visits?: IntFilter<"PosCustomer"> | number
     lastVisitAt?: DateTimeNullableFilter<"PosCustomer"> | Date | string | null
+    walletBalance?: FloatFilter<"PosCustomer"> | number
     createdAt?: DateTimeFilter<"PosCustomer"> | Date | string
     updatedAt?: DateTimeFilter<"PosCustomer"> | Date | string
     purchases?: PosCustomerPurchaseListRelationFilter
     counterSales?: PosCounterSaleListRelationFilter
+    walletTransactions?: PosWalletTransactionListRelationFilter
+    returns?: PosReturnListRelationFilter
   }
 
   export type PosCustomerOrderByWithRelationInput = {
@@ -39567,10 +42463,13 @@ export namespace Prisma {
     totalSpent?: SortOrder
     visits?: SortOrder
     lastVisitAt?: SortOrderInput | SortOrder
+    walletBalance?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     purchases?: PosCustomerPurchaseOrderByRelationAggregateInput
     counterSales?: PosCounterSaleOrderByRelationAggregateInput
+    walletTransactions?: PosWalletTransactionOrderByRelationAggregateInput
+    returns?: PosReturnOrderByRelationAggregateInput
   }
 
   export type PosCustomerWhereUniqueInput = Prisma.AtLeast<{
@@ -39590,10 +42489,13 @@ export namespace Prisma {
     totalSpent?: FloatFilter<"PosCustomer"> | number
     visits?: IntFilter<"PosCustomer"> | number
     lastVisitAt?: DateTimeNullableFilter<"PosCustomer"> | Date | string | null
+    walletBalance?: FloatFilter<"PosCustomer"> | number
     createdAt?: DateTimeFilter<"PosCustomer"> | Date | string
     updatedAt?: DateTimeFilter<"PosCustomer"> | Date | string
     purchases?: PosCustomerPurchaseListRelationFilter
     counterSales?: PosCounterSaleListRelationFilter
+    walletTransactions?: PosWalletTransactionListRelationFilter
+    returns?: PosReturnListRelationFilter
   }, "id" | "nic" | "mobileNumber" | "email">
 
   export type PosCustomerOrderByWithAggregationInput = {
@@ -39610,6 +42512,7 @@ export namespace Prisma {
     totalSpent?: SortOrder
     visits?: SortOrder
     lastVisitAt?: SortOrderInput | SortOrder
+    walletBalance?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: PosCustomerCountOrderByAggregateInput
@@ -39636,6 +42539,7 @@ export namespace Prisma {
     totalSpent?: FloatWithAggregatesFilter<"PosCustomer"> | number
     visits?: IntWithAggregatesFilter<"PosCustomer"> | number
     lastVisitAt?: DateTimeNullableWithAggregatesFilter<"PosCustomer"> | Date | string | null
+    walletBalance?: FloatWithAggregatesFilter<"PosCustomer"> | number
     createdAt?: DateTimeWithAggregatesFilter<"PosCustomer"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"PosCustomer"> | Date | string
   }
@@ -41028,6 +43932,7 @@ export namespace Prisma {
     sales?: PosCounterSaleListRelationFilter
     cashEntries?: PosCashEntryListRelationFilter
     movements?: InventoryMovementListRelationFilter
+    returns?: PosReturnListRelationFilter
   }
 
   export type PosShiftOrderByWithRelationInput = {
@@ -41055,6 +43960,7 @@ export namespace Prisma {
     sales?: PosCounterSaleOrderByRelationAggregateInput
     cashEntries?: PosCashEntryOrderByRelationAggregateInput
     movements?: InventoryMovementOrderByRelationAggregateInput
+    returns?: PosReturnOrderByRelationAggregateInput
   }
 
   export type PosShiftWhereUniqueInput = Prisma.AtLeast<{
@@ -41085,6 +43991,7 @@ export namespace Prisma {
     sales?: PosCounterSaleListRelationFilter
     cashEntries?: PosCashEntryListRelationFilter
     movements?: InventoryMovementListRelationFilter
+    returns?: PosReturnListRelationFilter
   }, "id" | "shiftNo">
 
   export type PosShiftOrderByWithAggregationInput = {
@@ -41652,6 +44559,241 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"PurchaseOrderEmail"> | Date | string
   }
 
+  export type PosWalletTransactionWhereInput = {
+    AND?: PosWalletTransactionWhereInput | PosWalletTransactionWhereInput[]
+    OR?: PosWalletTransactionWhereInput[]
+    NOT?: PosWalletTransactionWhereInput | PosWalletTransactionWhereInput[]
+    id?: IntFilter<"PosWalletTransaction"> | number
+    customerId?: IntFilter<"PosWalletTransaction"> | number
+    type?: StringFilter<"PosWalletTransaction"> | string
+    amount?: FloatFilter<"PosWalletTransaction"> | number
+    balanceAfter?: FloatFilter<"PosWalletTransaction"> | number
+    invoiceGroupCode?: StringNullableFilter<"PosWalletTransaction"> | string | null
+    shiftId?: IntNullableFilter<"PosWalletTransaction"> | number | null
+    note?: StringNullableFilter<"PosWalletTransaction"> | string | null
+    createdById?: IntFilter<"PosWalletTransaction"> | number
+    createdAt?: DateTimeFilter<"PosWalletTransaction"> | Date | string
+    customer?: XOR<PosCustomerRelationFilter, PosCustomerWhereInput>
+  }
+
+  export type PosWalletTransactionOrderByWithRelationInput = {
+    id?: SortOrder
+    customerId?: SortOrder
+    type?: SortOrder
+    amount?: SortOrder
+    balanceAfter?: SortOrder
+    invoiceGroupCode?: SortOrderInput | SortOrder
+    shiftId?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    customer?: PosCustomerOrderByWithRelationInput
+  }
+
+  export type PosWalletTransactionWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: PosWalletTransactionWhereInput | PosWalletTransactionWhereInput[]
+    OR?: PosWalletTransactionWhereInput[]
+    NOT?: PosWalletTransactionWhereInput | PosWalletTransactionWhereInput[]
+    customerId?: IntFilter<"PosWalletTransaction"> | number
+    type?: StringFilter<"PosWalletTransaction"> | string
+    amount?: FloatFilter<"PosWalletTransaction"> | number
+    balanceAfter?: FloatFilter<"PosWalletTransaction"> | number
+    invoiceGroupCode?: StringNullableFilter<"PosWalletTransaction"> | string | null
+    shiftId?: IntNullableFilter<"PosWalletTransaction"> | number | null
+    note?: StringNullableFilter<"PosWalletTransaction"> | string | null
+    createdById?: IntFilter<"PosWalletTransaction"> | number
+    createdAt?: DateTimeFilter<"PosWalletTransaction"> | Date | string
+    customer?: XOR<PosCustomerRelationFilter, PosCustomerWhereInput>
+  }, "id">
+
+  export type PosWalletTransactionOrderByWithAggregationInput = {
+    id?: SortOrder
+    customerId?: SortOrder
+    type?: SortOrder
+    amount?: SortOrder
+    balanceAfter?: SortOrder
+    invoiceGroupCode?: SortOrderInput | SortOrder
+    shiftId?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    _count?: PosWalletTransactionCountOrderByAggregateInput
+    _avg?: PosWalletTransactionAvgOrderByAggregateInput
+    _max?: PosWalletTransactionMaxOrderByAggregateInput
+    _min?: PosWalletTransactionMinOrderByAggregateInput
+    _sum?: PosWalletTransactionSumOrderByAggregateInput
+  }
+
+  export type PosWalletTransactionScalarWhereWithAggregatesInput = {
+    AND?: PosWalletTransactionScalarWhereWithAggregatesInput | PosWalletTransactionScalarWhereWithAggregatesInput[]
+    OR?: PosWalletTransactionScalarWhereWithAggregatesInput[]
+    NOT?: PosWalletTransactionScalarWhereWithAggregatesInput | PosWalletTransactionScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"PosWalletTransaction"> | number
+    customerId?: IntWithAggregatesFilter<"PosWalletTransaction"> | number
+    type?: StringWithAggregatesFilter<"PosWalletTransaction"> | string
+    amount?: FloatWithAggregatesFilter<"PosWalletTransaction"> | number
+    balanceAfter?: FloatWithAggregatesFilter<"PosWalletTransaction"> | number
+    invoiceGroupCode?: StringNullableWithAggregatesFilter<"PosWalletTransaction"> | string | null
+    shiftId?: IntNullableWithAggregatesFilter<"PosWalletTransaction"> | number | null
+    note?: StringNullableWithAggregatesFilter<"PosWalletTransaction"> | string | null
+    createdById?: IntWithAggregatesFilter<"PosWalletTransaction"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"PosWalletTransaction"> | Date | string
+  }
+
+  export type PosReturnWhereInput = {
+    AND?: PosReturnWhereInput | PosReturnWhereInput[]
+    OR?: PosReturnWhereInput[]
+    NOT?: PosReturnWhereInput | PosReturnWhereInput[]
+    id?: IntFilter<"PosReturn"> | number
+    returnNo?: StringFilter<"PosReturn"> | string
+    type?: StringFilter<"PosReturn"> | string
+    productId?: IntNullableFilter<"PosReturn"> | number | null
+    productName?: StringFilter<"PosReturn"> | string
+    quantity?: IntFilter<"PosReturn"> | number
+    condition?: StringNullableFilter<"PosReturn"> | string | null
+    invoiceGroupCode?: StringNullableFilter<"PosReturn"> | string | null
+    customerId?: IntNullableFilter<"PosReturn"> | number | null
+    customerName?: StringNullableFilter<"PosReturn"> | string | null
+    customerMobile?: StringNullableFilter<"PosReturn"> | string | null
+    unitPrice?: FloatFilter<"PosReturn"> | number
+    refundAmount?: FloatFilter<"PosReturn"> | number
+    refundMethod?: StringNullableFilter<"PosReturn"> | string | null
+    pointsReversed?: IntFilter<"PosReturn"> | number
+    unitCost?: FloatNullableFilter<"PosReturn"> | number | null
+    reason?: StringFilter<"PosReturn"> | string
+    note?: StringNullableFilter<"PosReturn"> | string | null
+    disposal?: StringNullableFilter<"PosReturn"> | string | null
+    reference?: StringNullableFilter<"PosReturn"> | string | null
+    shiftId?: IntNullableFilter<"PosReturn"> | number | null
+    createdById?: IntFilter<"PosReturn"> | number
+    createdAt?: DateTimeFilter<"PosReturn"> | Date | string
+    product?: XOR<InventoryProductNullableRelationFilter, InventoryProductWhereInput> | null
+    customer?: XOR<PosCustomerNullableRelationFilter, PosCustomerWhereInput> | null
+    shift?: XOR<PosShiftNullableRelationFilter, PosShiftWhereInput> | null
+  }
+
+  export type PosReturnOrderByWithRelationInput = {
+    id?: SortOrder
+    returnNo?: SortOrder
+    type?: SortOrder
+    productId?: SortOrderInput | SortOrder
+    productName?: SortOrder
+    quantity?: SortOrder
+    condition?: SortOrderInput | SortOrder
+    invoiceGroupCode?: SortOrderInput | SortOrder
+    customerId?: SortOrderInput | SortOrder
+    customerName?: SortOrderInput | SortOrder
+    customerMobile?: SortOrderInput | SortOrder
+    unitPrice?: SortOrder
+    refundAmount?: SortOrder
+    refundMethod?: SortOrderInput | SortOrder
+    pointsReversed?: SortOrder
+    unitCost?: SortOrderInput | SortOrder
+    reason?: SortOrder
+    note?: SortOrderInput | SortOrder
+    disposal?: SortOrderInput | SortOrder
+    reference?: SortOrderInput | SortOrder
+    shiftId?: SortOrderInput | SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    product?: InventoryProductOrderByWithRelationInput
+    customer?: PosCustomerOrderByWithRelationInput
+    shift?: PosShiftOrderByWithRelationInput
+  }
+
+  export type PosReturnWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: PosReturnWhereInput | PosReturnWhereInput[]
+    OR?: PosReturnWhereInput[]
+    NOT?: PosReturnWhereInput | PosReturnWhereInput[]
+    returnNo?: StringFilter<"PosReturn"> | string
+    type?: StringFilter<"PosReturn"> | string
+    productId?: IntNullableFilter<"PosReturn"> | number | null
+    productName?: StringFilter<"PosReturn"> | string
+    quantity?: IntFilter<"PosReturn"> | number
+    condition?: StringNullableFilter<"PosReturn"> | string | null
+    invoiceGroupCode?: StringNullableFilter<"PosReturn"> | string | null
+    customerId?: IntNullableFilter<"PosReturn"> | number | null
+    customerName?: StringNullableFilter<"PosReturn"> | string | null
+    customerMobile?: StringNullableFilter<"PosReturn"> | string | null
+    unitPrice?: FloatFilter<"PosReturn"> | number
+    refundAmount?: FloatFilter<"PosReturn"> | number
+    refundMethod?: StringNullableFilter<"PosReturn"> | string | null
+    pointsReversed?: IntFilter<"PosReturn"> | number
+    unitCost?: FloatNullableFilter<"PosReturn"> | number | null
+    reason?: StringFilter<"PosReturn"> | string
+    note?: StringNullableFilter<"PosReturn"> | string | null
+    disposal?: StringNullableFilter<"PosReturn"> | string | null
+    reference?: StringNullableFilter<"PosReturn"> | string | null
+    shiftId?: IntNullableFilter<"PosReturn"> | number | null
+    createdById?: IntFilter<"PosReturn"> | number
+    createdAt?: DateTimeFilter<"PosReturn"> | Date | string
+    product?: XOR<InventoryProductNullableRelationFilter, InventoryProductWhereInput> | null
+    customer?: XOR<PosCustomerNullableRelationFilter, PosCustomerWhereInput> | null
+    shift?: XOR<PosShiftNullableRelationFilter, PosShiftWhereInput> | null
+  }, "id">
+
+  export type PosReturnOrderByWithAggregationInput = {
+    id?: SortOrder
+    returnNo?: SortOrder
+    type?: SortOrder
+    productId?: SortOrderInput | SortOrder
+    productName?: SortOrder
+    quantity?: SortOrder
+    condition?: SortOrderInput | SortOrder
+    invoiceGroupCode?: SortOrderInput | SortOrder
+    customerId?: SortOrderInput | SortOrder
+    customerName?: SortOrderInput | SortOrder
+    customerMobile?: SortOrderInput | SortOrder
+    unitPrice?: SortOrder
+    refundAmount?: SortOrder
+    refundMethod?: SortOrderInput | SortOrder
+    pointsReversed?: SortOrder
+    unitCost?: SortOrderInput | SortOrder
+    reason?: SortOrder
+    note?: SortOrderInput | SortOrder
+    disposal?: SortOrderInput | SortOrder
+    reference?: SortOrderInput | SortOrder
+    shiftId?: SortOrderInput | SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    _count?: PosReturnCountOrderByAggregateInput
+    _avg?: PosReturnAvgOrderByAggregateInput
+    _max?: PosReturnMaxOrderByAggregateInput
+    _min?: PosReturnMinOrderByAggregateInput
+    _sum?: PosReturnSumOrderByAggregateInput
+  }
+
+  export type PosReturnScalarWhereWithAggregatesInput = {
+    AND?: PosReturnScalarWhereWithAggregatesInput | PosReturnScalarWhereWithAggregatesInput[]
+    OR?: PosReturnScalarWhereWithAggregatesInput[]
+    NOT?: PosReturnScalarWhereWithAggregatesInput | PosReturnScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"PosReturn"> | number
+    returnNo?: StringWithAggregatesFilter<"PosReturn"> | string
+    type?: StringWithAggregatesFilter<"PosReturn"> | string
+    productId?: IntNullableWithAggregatesFilter<"PosReturn"> | number | null
+    productName?: StringWithAggregatesFilter<"PosReturn"> | string
+    quantity?: IntWithAggregatesFilter<"PosReturn"> | number
+    condition?: StringNullableWithAggregatesFilter<"PosReturn"> | string | null
+    invoiceGroupCode?: StringNullableWithAggregatesFilter<"PosReturn"> | string | null
+    customerId?: IntNullableWithAggregatesFilter<"PosReturn"> | number | null
+    customerName?: StringNullableWithAggregatesFilter<"PosReturn"> | string | null
+    customerMobile?: StringNullableWithAggregatesFilter<"PosReturn"> | string | null
+    unitPrice?: FloatWithAggregatesFilter<"PosReturn"> | number
+    refundAmount?: FloatWithAggregatesFilter<"PosReturn"> | number
+    refundMethod?: StringNullableWithAggregatesFilter<"PosReturn"> | string | null
+    pointsReversed?: IntWithAggregatesFilter<"PosReturn"> | number
+    unitCost?: FloatNullableWithAggregatesFilter<"PosReturn"> | number | null
+    reason?: StringWithAggregatesFilter<"PosReturn"> | string
+    note?: StringNullableWithAggregatesFilter<"PosReturn"> | string | null
+    disposal?: StringNullableWithAggregatesFilter<"PosReturn"> | string | null
+    reference?: StringNullableWithAggregatesFilter<"PosReturn"> | string | null
+    shiftId?: IntNullableWithAggregatesFilter<"PosReturn"> | number | null
+    createdById?: IntWithAggregatesFilter<"PosReturn"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"PosReturn"> | Date | string
+  }
+
   export type UserCreateInput = {
     name: string
     email: string
@@ -41820,7 +44962,13 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
     paymentReference?: string | null
+    cashPaid?: number
+    cardPaid?: number
+    transferPaid?: number
+    walletUsed?: number
+    walletCredit?: number
     pointsEarned?: number
+    pointsRate?: number | null
     discountType?: string | null
     discountValue?: number
     discountAmount?: number
@@ -41842,9 +44990,15 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
     paymentReference?: string | null
+    cashPaid?: number
+    cardPaid?: number
+    transferPaid?: number
+    walletUsed?: number
+    walletCredit?: number
     cashierId: number
     customerId?: number | null
     pointsEarned?: number
+    pointsRate?: number | null
     discountType?: string | null
     discountValue?: number
     discountAmount?: number
@@ -41863,7 +45017,13 @@ export namespace Prisma {
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
+    cashPaid?: FloatFieldUpdateOperationsInput | number
+    cardPaid?: FloatFieldUpdateOperationsInput | number
+    transferPaid?: FloatFieldUpdateOperationsInput | number
+    walletUsed?: FloatFieldUpdateOperationsInput | number
+    walletCredit?: FloatFieldUpdateOperationsInput | number
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    pointsRate?: NullableFloatFieldUpdateOperationsInput | number | null
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
     discountValue?: FloatFieldUpdateOperationsInput | number
     discountAmount?: FloatFieldUpdateOperationsInput | number
@@ -41885,9 +45045,15 @@ export namespace Prisma {
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
+    cashPaid?: FloatFieldUpdateOperationsInput | number
+    cardPaid?: FloatFieldUpdateOperationsInput | number
+    transferPaid?: FloatFieldUpdateOperationsInput | number
+    walletUsed?: FloatFieldUpdateOperationsInput | number
+    walletCredit?: FloatFieldUpdateOperationsInput | number
     cashierId?: IntFieldUpdateOperationsInput | number
     customerId?: NullableIntFieldUpdateOperationsInput | number | null
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    pointsRate?: NullableFloatFieldUpdateOperationsInput | number | null
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
     discountValue?: FloatFieldUpdateOperationsInput | number
     discountAmount?: FloatFieldUpdateOperationsInput | number
@@ -41907,9 +45073,15 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
     paymentReference?: string | null
+    cashPaid?: number
+    cardPaid?: number
+    transferPaid?: number
+    walletUsed?: number
+    walletCredit?: number
     cashierId: number
     customerId?: number | null
     pointsEarned?: number
+    pointsRate?: number | null
     discountType?: string | null
     discountValue?: number
     discountAmount?: number
@@ -41928,7 +45100,13 @@ export namespace Prisma {
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
+    cashPaid?: FloatFieldUpdateOperationsInput | number
+    cardPaid?: FloatFieldUpdateOperationsInput | number
+    transferPaid?: FloatFieldUpdateOperationsInput | number
+    walletUsed?: FloatFieldUpdateOperationsInput | number
+    walletCredit?: FloatFieldUpdateOperationsInput | number
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    pointsRate?: NullableFloatFieldUpdateOperationsInput | number | null
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
     discountValue?: FloatFieldUpdateOperationsInput | number
     discountAmount?: FloatFieldUpdateOperationsInput | number
@@ -41947,9 +45125,15 @@ export namespace Prisma {
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
+    cashPaid?: FloatFieldUpdateOperationsInput | number
+    cardPaid?: FloatFieldUpdateOperationsInput | number
+    transferPaid?: FloatFieldUpdateOperationsInput | number
+    walletUsed?: FloatFieldUpdateOperationsInput | number
+    walletCredit?: FloatFieldUpdateOperationsInput | number
     cashierId?: IntFieldUpdateOperationsInput | number
     customerId?: NullableIntFieldUpdateOperationsInput | number | null
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    pointsRate?: NullableFloatFieldUpdateOperationsInput | number | null
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
     discountValue?: FloatFieldUpdateOperationsInput | number
     discountAmount?: FloatFieldUpdateOperationsInput | number
@@ -42176,6 +45360,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -42186,6 +45371,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseCreateNestedManyWithoutProductInput
     images?: InventoryProductImageCreateNestedManyWithoutProductInput
     purchaseOrderItems?: PurchaseOrderItemCreateNestedManyWithoutProductInput
+    returns?: PosReturnCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseCreateNestedManyWithoutInventoryProductInput
   }
 
@@ -42207,6 +45393,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -42214,6 +45401,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseUncheckedCreateNestedManyWithoutProductInput
     images?: InventoryProductImageUncheckedCreateNestedManyWithoutProductInput
     purchaseOrderItems?: PurchaseOrderItemUncheckedCreateNestedManyWithoutProductInput
+    returns?: PosReturnUncheckedCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutInventoryProductInput
   }
 
@@ -42231,6 +45419,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -42241,6 +45430,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseUpdateManyWithoutProductNestedInput
     images?: InventoryProductImageUpdateManyWithoutProductNestedInput
     purchaseOrderItems?: PurchaseOrderItemUpdateManyWithoutProductNestedInput
+    returns?: PosReturnUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUpdateManyWithoutInventoryProductNestedInput
   }
 
@@ -42262,6 +45452,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -42269,6 +45460,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseUncheckedUpdateManyWithoutProductNestedInput
     images?: InventoryProductImageUncheckedUpdateManyWithoutProductNestedInput
     purchaseOrderItems?: PurchaseOrderItemUncheckedUpdateManyWithoutProductNestedInput
+    returns?: PosReturnUncheckedUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutInventoryProductNestedInput
   }
 
@@ -42290,6 +45482,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -42310,6 +45503,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -42334,6 +45528,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -42464,10 +45659,13 @@ export namespace Prisma {
     totalSpent?: number
     visits?: number
     lastVisitAt?: Date | string | null
+    walletBalance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     purchases?: PosCustomerPurchaseCreateNestedManyWithoutCustomerInput
     counterSales?: PosCounterSaleCreateNestedManyWithoutCustomerInput
+    walletTransactions?: PosWalletTransactionCreateNestedManyWithoutCustomerInput
+    returns?: PosReturnCreateNestedManyWithoutCustomerInput
   }
 
   export type PosCustomerUncheckedCreateInput = {
@@ -42484,10 +45682,13 @@ export namespace Prisma {
     totalSpent?: number
     visits?: number
     lastVisitAt?: Date | string | null
+    walletBalance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     purchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutCustomerInput
     counterSales?: PosCounterSaleUncheckedCreateNestedManyWithoutCustomerInput
+    walletTransactions?: PosWalletTransactionUncheckedCreateNestedManyWithoutCustomerInput
+    returns?: PosReturnUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type PosCustomerUpdateInput = {
@@ -42503,10 +45704,13 @@ export namespace Prisma {
     totalSpent?: FloatFieldUpdateOperationsInput | number
     visits?: IntFieldUpdateOperationsInput | number
     lastVisitAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     purchases?: PosCustomerPurchaseUpdateManyWithoutCustomerNestedInput
     counterSales?: PosCounterSaleUpdateManyWithoutCustomerNestedInput
+    walletTransactions?: PosWalletTransactionUpdateManyWithoutCustomerNestedInput
+    returns?: PosReturnUpdateManyWithoutCustomerNestedInput
   }
 
   export type PosCustomerUncheckedUpdateInput = {
@@ -42523,10 +45727,13 @@ export namespace Prisma {
     totalSpent?: FloatFieldUpdateOperationsInput | number
     visits?: IntFieldUpdateOperationsInput | number
     lastVisitAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     purchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutCustomerNestedInput
     counterSales?: PosCounterSaleUncheckedUpdateManyWithoutCustomerNestedInput
+    walletTransactions?: PosWalletTransactionUncheckedUpdateManyWithoutCustomerNestedInput
+    returns?: PosReturnUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type PosCustomerCreateManyInput = {
@@ -42543,6 +45750,7 @@ export namespace Prisma {
     totalSpent?: number
     visits?: number
     lastVisitAt?: Date | string | null
+    walletBalance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -42560,6 +45768,7 @@ export namespace Prisma {
     totalSpent?: FloatFieldUpdateOperationsInput | number
     visits?: IntFieldUpdateOperationsInput | number
     lastVisitAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -42578,6 +45787,7 @@ export namespace Prisma {
     totalSpent?: FloatFieldUpdateOperationsInput | number
     visits?: IntFieldUpdateOperationsInput | number
     lastVisitAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -44068,6 +47278,7 @@ export namespace Prisma {
     sales?: PosCounterSaleCreateNestedManyWithoutShiftInput
     cashEntries?: PosCashEntryCreateNestedManyWithoutShiftInput
     movements?: InventoryMovementCreateNestedManyWithoutShiftInput
+    returns?: PosReturnCreateNestedManyWithoutShiftInput
   }
 
   export type PosShiftUncheckedCreateInput = {
@@ -44095,6 +47306,7 @@ export namespace Prisma {
     sales?: PosCounterSaleUncheckedCreateNestedManyWithoutShiftInput
     cashEntries?: PosCashEntryUncheckedCreateNestedManyWithoutShiftInput
     movements?: InventoryMovementUncheckedCreateNestedManyWithoutShiftInput
+    returns?: PosReturnUncheckedCreateNestedManyWithoutShiftInput
   }
 
   export type PosShiftUpdateInput = {
@@ -44121,6 +47333,7 @@ export namespace Prisma {
     sales?: PosCounterSaleUpdateManyWithoutShiftNestedInput
     cashEntries?: PosCashEntryUpdateManyWithoutShiftNestedInput
     movements?: InventoryMovementUpdateManyWithoutShiftNestedInput
+    returns?: PosReturnUpdateManyWithoutShiftNestedInput
   }
 
   export type PosShiftUncheckedUpdateInput = {
@@ -44148,6 +47361,7 @@ export namespace Prisma {
     sales?: PosCounterSaleUncheckedUpdateManyWithoutShiftNestedInput
     cashEntries?: PosCashEntryUncheckedUpdateManyWithoutShiftNestedInput
     movements?: InventoryMovementUncheckedUpdateManyWithoutShiftNestedInput
+    returns?: PosReturnUncheckedUpdateManyWithoutShiftNestedInput
   }
 
   export type PosShiftCreateManyInput = {
@@ -44789,6 +48003,269 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type PosWalletTransactionCreateInput = {
+    type: string
+    amount: number
+    balanceAfter: number
+    invoiceGroupCode?: string | null
+    shiftId?: number | null
+    note?: string | null
+    createdById: number
+    createdAt?: Date | string
+    customer: PosCustomerCreateNestedOneWithoutWalletTransactionsInput
+  }
+
+  export type PosWalletTransactionUncheckedCreateInput = {
+    id?: number
+    customerId: number
+    type: string
+    amount: number
+    balanceAfter: number
+    invoiceGroupCode?: string | null
+    shiftId?: number | null
+    note?: string | null
+    createdById: number
+    createdAt?: Date | string
+  }
+
+  export type PosWalletTransactionUpdateInput = {
+    type?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    balanceAfter?: FloatFieldUpdateOperationsInput | number
+    invoiceGroupCode?: NullableStringFieldUpdateOperationsInput | string | null
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customer?: PosCustomerUpdateOneRequiredWithoutWalletTransactionsNestedInput
+  }
+
+  export type PosWalletTransactionUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    customerId?: IntFieldUpdateOperationsInput | number
+    type?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    balanceAfter?: FloatFieldUpdateOperationsInput | number
+    invoiceGroupCode?: NullableStringFieldUpdateOperationsInput | string | null
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosWalletTransactionCreateManyInput = {
+    id?: number
+    customerId: number
+    type: string
+    amount: number
+    balanceAfter: number
+    invoiceGroupCode?: string | null
+    shiftId?: number | null
+    note?: string | null
+    createdById: number
+    createdAt?: Date | string
+  }
+
+  export type PosWalletTransactionUpdateManyMutationInput = {
+    type?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    balanceAfter?: FloatFieldUpdateOperationsInput | number
+    invoiceGroupCode?: NullableStringFieldUpdateOperationsInput | string | null
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosWalletTransactionUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    customerId?: IntFieldUpdateOperationsInput | number
+    type?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    balanceAfter?: FloatFieldUpdateOperationsInput | number
+    invoiceGroupCode?: NullableStringFieldUpdateOperationsInput | string | null
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosReturnCreateInput = {
+    returnNo: string
+    type: string
+    productName: string
+    quantity: number
+    condition?: string | null
+    invoiceGroupCode?: string | null
+    customerName?: string | null
+    customerMobile?: string | null
+    unitPrice?: number
+    refundAmount?: number
+    refundMethod?: string | null
+    pointsReversed?: number
+    unitCost?: number | null
+    reason: string
+    note?: string | null
+    disposal?: string | null
+    reference?: string | null
+    createdById: number
+    createdAt?: Date | string
+    product?: InventoryProductCreateNestedOneWithoutReturnsInput
+    customer?: PosCustomerCreateNestedOneWithoutReturnsInput
+    shift?: PosShiftCreateNestedOneWithoutReturnsInput
+  }
+
+  export type PosReturnUncheckedCreateInput = {
+    id?: number
+    returnNo: string
+    type: string
+    productId?: number | null
+    productName: string
+    quantity: number
+    condition?: string | null
+    invoiceGroupCode?: string | null
+    customerId?: number | null
+    customerName?: string | null
+    customerMobile?: string | null
+    unitPrice?: number
+    refundAmount?: number
+    refundMethod?: string | null
+    pointsReversed?: number
+    unitCost?: number | null
+    reason: string
+    note?: string | null
+    disposal?: string | null
+    reference?: string | null
+    shiftId?: number | null
+    createdById: number
+    createdAt?: Date | string
+  }
+
+  export type PosReturnUpdateInput = {
+    returnNo?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    productName?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    condition?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceGroupCode?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerMobile?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    refundAmount?: FloatFieldUpdateOperationsInput | number
+    refundMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    pointsReversed?: IntFieldUpdateOperationsInput | number
+    unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    reason?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    disposal?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    product?: InventoryProductUpdateOneWithoutReturnsNestedInput
+    customer?: PosCustomerUpdateOneWithoutReturnsNestedInput
+    shift?: PosShiftUpdateOneWithoutReturnsNestedInput
+  }
+
+  export type PosReturnUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    returnNo?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    productId?: NullableIntFieldUpdateOperationsInput | number | null
+    productName?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    condition?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceGroupCode?: NullableStringFieldUpdateOperationsInput | string | null
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerMobile?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    refundAmount?: FloatFieldUpdateOperationsInput | number
+    refundMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    pointsReversed?: IntFieldUpdateOperationsInput | number
+    unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    reason?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    disposal?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosReturnCreateManyInput = {
+    id?: number
+    returnNo: string
+    type: string
+    productId?: number | null
+    productName: string
+    quantity: number
+    condition?: string | null
+    invoiceGroupCode?: string | null
+    customerId?: number | null
+    customerName?: string | null
+    customerMobile?: string | null
+    unitPrice?: number
+    refundAmount?: number
+    refundMethod?: string | null
+    pointsReversed?: number
+    unitCost?: number | null
+    reason: string
+    note?: string | null
+    disposal?: string | null
+    reference?: string | null
+    shiftId?: number | null
+    createdById: number
+    createdAt?: Date | string
+  }
+
+  export type PosReturnUpdateManyMutationInput = {
+    returnNo?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    productName?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    condition?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceGroupCode?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerMobile?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    refundAmount?: FloatFieldUpdateOperationsInput | number
+    refundMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    pointsReversed?: IntFieldUpdateOperationsInput | number
+    unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    reason?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    disposal?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosReturnUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    returnNo?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    productId?: NullableIntFieldUpdateOperationsInput | number | null
+    productName?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    condition?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceGroupCode?: NullableStringFieldUpdateOperationsInput | string | null
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerMobile?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    refundAmount?: FloatFieldUpdateOperationsInput | number
+    refundMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    pointsReversed?: IntFieldUpdateOperationsInput | number
+    unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    reason?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    disposal?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -45108,6 +48585,17 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
+  export type FloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
   export type PosAdminRelationFilter = {
     is?: PosAdminWhereInput
     isNot?: PosAdminWhereInput
@@ -45133,9 +48621,15 @@ export namespace Prisma {
     changeGiven?: SortOrder
     paymentMethod?: SortOrder
     paymentReference?: SortOrder
+    cashPaid?: SortOrder
+    cardPaid?: SortOrder
+    transferPaid?: SortOrder
+    walletUsed?: SortOrder
+    walletCredit?: SortOrder
     cashierId?: SortOrder
     customerId?: SortOrder
     pointsEarned?: SortOrder
+    pointsRate?: SortOrder
     discountType?: SortOrder
     discountValue?: SortOrder
     discountAmount?: SortOrder
@@ -45152,9 +48646,15 @@ export namespace Prisma {
     emptiesReturned?: SortOrder
     amountReceived?: SortOrder
     changeGiven?: SortOrder
+    cashPaid?: SortOrder
+    cardPaid?: SortOrder
+    transferPaid?: SortOrder
+    walletUsed?: SortOrder
+    walletCredit?: SortOrder
     cashierId?: SortOrder
     customerId?: SortOrder
     pointsEarned?: SortOrder
+    pointsRate?: SortOrder
     discountValue?: SortOrder
     discountAmount?: SortOrder
     pointsRedeemed?: SortOrder
@@ -45172,9 +48672,15 @@ export namespace Prisma {
     changeGiven?: SortOrder
     paymentMethod?: SortOrder
     paymentReference?: SortOrder
+    cashPaid?: SortOrder
+    cardPaid?: SortOrder
+    transferPaid?: SortOrder
+    walletUsed?: SortOrder
+    walletCredit?: SortOrder
     cashierId?: SortOrder
     customerId?: SortOrder
     pointsEarned?: SortOrder
+    pointsRate?: SortOrder
     discountType?: SortOrder
     discountValue?: SortOrder
     discountAmount?: SortOrder
@@ -45194,9 +48700,15 @@ export namespace Prisma {
     changeGiven?: SortOrder
     paymentMethod?: SortOrder
     paymentReference?: SortOrder
+    cashPaid?: SortOrder
+    cardPaid?: SortOrder
+    transferPaid?: SortOrder
+    walletUsed?: SortOrder
+    walletCredit?: SortOrder
     cashierId?: SortOrder
     customerId?: SortOrder
     pointsEarned?: SortOrder
+    pointsRate?: SortOrder
     discountType?: SortOrder
     discountValue?: SortOrder
     discountAmount?: SortOrder
@@ -45213,9 +48725,15 @@ export namespace Prisma {
     emptiesReturned?: SortOrder
     amountReceived?: SortOrder
     changeGiven?: SortOrder
+    cashPaid?: SortOrder
+    cardPaid?: SortOrder
+    transferPaid?: SortOrder
+    walletUsed?: SortOrder
+    walletCredit?: SortOrder
     cashierId?: SortOrder
     customerId?: SortOrder
     pointsEarned?: SortOrder
+    pointsRate?: SortOrder
     discountValue?: SortOrder
     discountAmount?: SortOrder
     pointsRedeemed?: SortOrder
@@ -45263,6 +48781,22 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
   export type InventoryProductListRelationFilter = {
@@ -45393,17 +48927,6 @@ export namespace Prisma {
     id?: SortOrder
   }
 
-  export type FloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
-  }
-
   export type InventoryBrandRelationFilter = {
     is?: InventoryBrandWhereInput
     isNot?: InventoryBrandWhereInput
@@ -45437,6 +48960,12 @@ export namespace Prisma {
     none?: PurchaseOrderItemWhereInput
   }
 
+  export type PosReturnListRelationFilter = {
+    every?: PosReturnWhereInput
+    some?: PosReturnWhereInput
+    none?: PosReturnWhereInput
+  }
+
   export type PosCustomerPurchaseListRelationFilter = {
     every?: PosCustomerPurchaseWhereInput
     some?: PosCustomerPurchaseWhereInput
@@ -45452,6 +48981,10 @@ export namespace Prisma {
   }
 
   export type PurchaseOrderItemOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type PosReturnOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -45477,6 +49010,7 @@ export namespace Prisma {
     sellingPrice?: SortOrder
     emptyBottlePrice?: SortOrder
     emptyBottlesOnHand?: SortOrder
+    damagedQuantity?: SortOrder
     description?: SortOrder
     lastSoldAt?: SortOrder
     createdAt?: SortOrder
@@ -45497,6 +49031,7 @@ export namespace Prisma {
     sellingPrice?: SortOrder
     emptyBottlePrice?: SortOrder
     emptyBottlesOnHand?: SortOrder
+    damagedQuantity?: SortOrder
   }
 
   export type InventoryProductMaxOrderByAggregateInput = {
@@ -45517,6 +49052,7 @@ export namespace Prisma {
     sellingPrice?: SortOrder
     emptyBottlePrice?: SortOrder
     emptyBottlesOnHand?: SortOrder
+    damagedQuantity?: SortOrder
     description?: SortOrder
     lastSoldAt?: SortOrder
     createdAt?: SortOrder
@@ -45541,6 +49077,7 @@ export namespace Prisma {
     sellingPrice?: SortOrder
     emptyBottlePrice?: SortOrder
     emptyBottlesOnHand?: SortOrder
+    damagedQuantity?: SortOrder
     description?: SortOrder
     lastSoldAt?: SortOrder
     createdAt?: SortOrder
@@ -45561,22 +49098,7 @@ export namespace Prisma {
     sellingPrice?: SortOrder
     emptyBottlePrice?: SortOrder
     emptyBottlesOnHand?: SortOrder
-  }
-
-  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedFloatNullableFilter<$PrismaModel>
-    _min?: NestedFloatNullableFilter<$PrismaModel>
-    _max?: NestedFloatNullableFilter<$PrismaModel>
+    damagedQuantity?: SortOrder
   }
 
   export type InventoryProductRelationFilter = {
@@ -45659,6 +49181,16 @@ export namespace Prisma {
     sortOrder?: SortOrder
   }
 
+  export type PosWalletTransactionListRelationFilter = {
+    every?: PosWalletTransactionWhereInput
+    some?: PosWalletTransactionWhereInput
+    none?: PosWalletTransactionWhereInput
+  }
+
+  export type PosWalletTransactionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type PosCustomerCountOrderByAggregateInput = {
     id?: SortOrder
     firstName?: SortOrder
@@ -45673,6 +49205,7 @@ export namespace Prisma {
     totalSpent?: SortOrder
     visits?: SortOrder
     lastVisitAt?: SortOrder
+    walletBalance?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -45682,6 +49215,7 @@ export namespace Prisma {
     loyaltyPoints?: SortOrder
     totalSpent?: SortOrder
     visits?: SortOrder
+    walletBalance?: SortOrder
   }
 
   export type PosCustomerMaxOrderByAggregateInput = {
@@ -45698,6 +49232,7 @@ export namespace Prisma {
     totalSpent?: SortOrder
     visits?: SortOrder
     lastVisitAt?: SortOrder
+    walletBalance?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -45716,6 +49251,7 @@ export namespace Prisma {
     totalSpent?: SortOrder
     visits?: SortOrder
     lastVisitAt?: SortOrder
+    walletBalance?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -45725,6 +49261,7 @@ export namespace Prisma {
     loyaltyPoints?: SortOrder
     totalSpent?: SortOrder
     visits?: SortOrder
+    walletBalance?: SortOrder
   }
 
   export type EnumPosPurchaseItemTypeFilter<$PrismaModel = never> = {
@@ -47510,6 +51047,167 @@ export namespace Prisma {
     sentById?: SortOrder
   }
 
+  export type PosWalletTransactionCountOrderByAggregateInput = {
+    id?: SortOrder
+    customerId?: SortOrder
+    type?: SortOrder
+    amount?: SortOrder
+    balanceAfter?: SortOrder
+    invoiceGroupCode?: SortOrder
+    shiftId?: SortOrder
+    note?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PosWalletTransactionAvgOrderByAggregateInput = {
+    id?: SortOrder
+    customerId?: SortOrder
+    amount?: SortOrder
+    balanceAfter?: SortOrder
+    shiftId?: SortOrder
+    createdById?: SortOrder
+  }
+
+  export type PosWalletTransactionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    customerId?: SortOrder
+    type?: SortOrder
+    amount?: SortOrder
+    balanceAfter?: SortOrder
+    invoiceGroupCode?: SortOrder
+    shiftId?: SortOrder
+    note?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PosWalletTransactionMinOrderByAggregateInput = {
+    id?: SortOrder
+    customerId?: SortOrder
+    type?: SortOrder
+    amount?: SortOrder
+    balanceAfter?: SortOrder
+    invoiceGroupCode?: SortOrder
+    shiftId?: SortOrder
+    note?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PosWalletTransactionSumOrderByAggregateInput = {
+    id?: SortOrder
+    customerId?: SortOrder
+    amount?: SortOrder
+    balanceAfter?: SortOrder
+    shiftId?: SortOrder
+    createdById?: SortOrder
+  }
+
+  export type PosReturnCountOrderByAggregateInput = {
+    id?: SortOrder
+    returnNo?: SortOrder
+    type?: SortOrder
+    productId?: SortOrder
+    productName?: SortOrder
+    quantity?: SortOrder
+    condition?: SortOrder
+    invoiceGroupCode?: SortOrder
+    customerId?: SortOrder
+    customerName?: SortOrder
+    customerMobile?: SortOrder
+    unitPrice?: SortOrder
+    refundAmount?: SortOrder
+    refundMethod?: SortOrder
+    pointsReversed?: SortOrder
+    unitCost?: SortOrder
+    reason?: SortOrder
+    note?: SortOrder
+    disposal?: SortOrder
+    reference?: SortOrder
+    shiftId?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PosReturnAvgOrderByAggregateInput = {
+    id?: SortOrder
+    productId?: SortOrder
+    quantity?: SortOrder
+    customerId?: SortOrder
+    unitPrice?: SortOrder
+    refundAmount?: SortOrder
+    pointsReversed?: SortOrder
+    unitCost?: SortOrder
+    shiftId?: SortOrder
+    createdById?: SortOrder
+  }
+
+  export type PosReturnMaxOrderByAggregateInput = {
+    id?: SortOrder
+    returnNo?: SortOrder
+    type?: SortOrder
+    productId?: SortOrder
+    productName?: SortOrder
+    quantity?: SortOrder
+    condition?: SortOrder
+    invoiceGroupCode?: SortOrder
+    customerId?: SortOrder
+    customerName?: SortOrder
+    customerMobile?: SortOrder
+    unitPrice?: SortOrder
+    refundAmount?: SortOrder
+    refundMethod?: SortOrder
+    pointsReversed?: SortOrder
+    unitCost?: SortOrder
+    reason?: SortOrder
+    note?: SortOrder
+    disposal?: SortOrder
+    reference?: SortOrder
+    shiftId?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PosReturnMinOrderByAggregateInput = {
+    id?: SortOrder
+    returnNo?: SortOrder
+    type?: SortOrder
+    productId?: SortOrder
+    productName?: SortOrder
+    quantity?: SortOrder
+    condition?: SortOrder
+    invoiceGroupCode?: SortOrder
+    customerId?: SortOrder
+    customerName?: SortOrder
+    customerMobile?: SortOrder
+    unitPrice?: SortOrder
+    refundAmount?: SortOrder
+    refundMethod?: SortOrder
+    pointsReversed?: SortOrder
+    unitCost?: SortOrder
+    reason?: SortOrder
+    note?: SortOrder
+    disposal?: SortOrder
+    reference?: SortOrder
+    shiftId?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PosReturnSumOrderByAggregateInput = {
+    id?: SortOrder
+    productId?: SortOrder
+    quantity?: SortOrder
+    customerId?: SortOrder
+    unitPrice?: SortOrder
+    refundAmount?: SortOrder
+    pointsReversed?: SortOrder
+    unitCost?: SortOrder
+    shiftId?: SortOrder
+    createdById?: SortOrder
+  }
+
   export type StringFieldUpdateOperationsInput = {
     set?: string
   }
@@ -47616,6 +51314,14 @@ export namespace Prisma {
 
   export type EnumPaymentMethodFieldUpdateOperationsInput = {
     set?: $Enums.PaymentMethod
+  }
+
+  export type NullableFloatFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type PosAdminUpdateOneRequiredWithoutCounterSalesNestedInput = {
@@ -47861,6 +51567,13 @@ export namespace Prisma {
     connect?: PurchaseOrderItemWhereUniqueInput | PurchaseOrderItemWhereUniqueInput[]
   }
 
+  export type PosReturnCreateNestedManyWithoutProductInput = {
+    create?: XOR<PosReturnCreateWithoutProductInput, PosReturnUncheckedCreateWithoutProductInput> | PosReturnCreateWithoutProductInput[] | PosReturnUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: PosReturnCreateOrConnectWithoutProductInput | PosReturnCreateOrConnectWithoutProductInput[]
+    createMany?: PosReturnCreateManyProductInputEnvelope
+    connect?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+  }
+
   export type PosCustomerPurchaseCreateNestedManyWithoutInventoryProductInput = {
     create?: XOR<PosCustomerPurchaseCreateWithoutInventoryProductInput, PosCustomerPurchaseUncheckedCreateWithoutInventoryProductInput> | PosCustomerPurchaseCreateWithoutInventoryProductInput[] | PosCustomerPurchaseUncheckedCreateWithoutInventoryProductInput[]
     connectOrCreate?: PosCustomerPurchaseCreateOrConnectWithoutInventoryProductInput | PosCustomerPurchaseCreateOrConnectWithoutInventoryProductInput[]
@@ -47889,19 +51602,18 @@ export namespace Prisma {
     connect?: PurchaseOrderItemWhereUniqueInput | PurchaseOrderItemWhereUniqueInput[]
   }
 
+  export type PosReturnUncheckedCreateNestedManyWithoutProductInput = {
+    create?: XOR<PosReturnCreateWithoutProductInput, PosReturnUncheckedCreateWithoutProductInput> | PosReturnCreateWithoutProductInput[] | PosReturnUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: PosReturnCreateOrConnectWithoutProductInput | PosReturnCreateOrConnectWithoutProductInput[]
+    createMany?: PosReturnCreateManyProductInputEnvelope
+    connect?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+  }
+
   export type PosCustomerPurchaseUncheckedCreateNestedManyWithoutInventoryProductInput = {
     create?: XOR<PosCustomerPurchaseCreateWithoutInventoryProductInput, PosCustomerPurchaseUncheckedCreateWithoutInventoryProductInput> | PosCustomerPurchaseCreateWithoutInventoryProductInput[] | PosCustomerPurchaseUncheckedCreateWithoutInventoryProductInput[]
     connectOrCreate?: PosCustomerPurchaseCreateOrConnectWithoutInventoryProductInput | PosCustomerPurchaseCreateOrConnectWithoutInventoryProductInput[]
     createMany?: PosCustomerPurchaseCreateManyInventoryProductInputEnvelope
     connect?: PosCustomerPurchaseWhereUniqueInput | PosCustomerPurchaseWhereUniqueInput[]
-  }
-
-  export type NullableFloatFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type InventoryBrandUpdateOneRequiredWithoutProductsNestedInput = {
@@ -47972,6 +51684,20 @@ export namespace Prisma {
     deleteMany?: PurchaseOrderItemScalarWhereInput | PurchaseOrderItemScalarWhereInput[]
   }
 
+  export type PosReturnUpdateManyWithoutProductNestedInput = {
+    create?: XOR<PosReturnCreateWithoutProductInput, PosReturnUncheckedCreateWithoutProductInput> | PosReturnCreateWithoutProductInput[] | PosReturnUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: PosReturnCreateOrConnectWithoutProductInput | PosReturnCreateOrConnectWithoutProductInput[]
+    upsert?: PosReturnUpsertWithWhereUniqueWithoutProductInput | PosReturnUpsertWithWhereUniqueWithoutProductInput[]
+    createMany?: PosReturnCreateManyProductInputEnvelope
+    set?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    disconnect?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    delete?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    connect?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    update?: PosReturnUpdateWithWhereUniqueWithoutProductInput | PosReturnUpdateWithWhereUniqueWithoutProductInput[]
+    updateMany?: PosReturnUpdateManyWithWhereWithoutProductInput | PosReturnUpdateManyWithWhereWithoutProductInput[]
+    deleteMany?: PosReturnScalarWhereInput | PosReturnScalarWhereInput[]
+  }
+
   export type PosCustomerPurchaseUpdateManyWithoutInventoryProductNestedInput = {
     create?: XOR<PosCustomerPurchaseCreateWithoutInventoryProductInput, PosCustomerPurchaseUncheckedCreateWithoutInventoryProductInput> | PosCustomerPurchaseCreateWithoutInventoryProductInput[] | PosCustomerPurchaseUncheckedCreateWithoutInventoryProductInput[]
     connectOrCreate?: PosCustomerPurchaseCreateOrConnectWithoutInventoryProductInput | PosCustomerPurchaseCreateOrConnectWithoutInventoryProductInput[]
@@ -48026,6 +51752,20 @@ export namespace Prisma {
     update?: PurchaseOrderItemUpdateWithWhereUniqueWithoutProductInput | PurchaseOrderItemUpdateWithWhereUniqueWithoutProductInput[]
     updateMany?: PurchaseOrderItemUpdateManyWithWhereWithoutProductInput | PurchaseOrderItemUpdateManyWithWhereWithoutProductInput[]
     deleteMany?: PurchaseOrderItemScalarWhereInput | PurchaseOrderItemScalarWhereInput[]
+  }
+
+  export type PosReturnUncheckedUpdateManyWithoutProductNestedInput = {
+    create?: XOR<PosReturnCreateWithoutProductInput, PosReturnUncheckedCreateWithoutProductInput> | PosReturnCreateWithoutProductInput[] | PosReturnUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: PosReturnCreateOrConnectWithoutProductInput | PosReturnCreateOrConnectWithoutProductInput[]
+    upsert?: PosReturnUpsertWithWhereUniqueWithoutProductInput | PosReturnUpsertWithWhereUniqueWithoutProductInput[]
+    createMany?: PosReturnCreateManyProductInputEnvelope
+    set?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    disconnect?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    delete?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    connect?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    update?: PosReturnUpdateWithWhereUniqueWithoutProductInput | PosReturnUpdateWithWhereUniqueWithoutProductInput[]
+    updateMany?: PosReturnUpdateManyWithWhereWithoutProductInput | PosReturnUpdateManyWithWhereWithoutProductInput[]
+    deleteMany?: PosReturnScalarWhereInput | PosReturnScalarWhereInput[]
   }
 
   export type PosCustomerPurchaseUncheckedUpdateManyWithoutInventoryProductNestedInput = {
@@ -48084,6 +51824,20 @@ export namespace Prisma {
     connect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
   }
 
+  export type PosWalletTransactionCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<PosWalletTransactionCreateWithoutCustomerInput, PosWalletTransactionUncheckedCreateWithoutCustomerInput> | PosWalletTransactionCreateWithoutCustomerInput[] | PosWalletTransactionUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: PosWalletTransactionCreateOrConnectWithoutCustomerInput | PosWalletTransactionCreateOrConnectWithoutCustomerInput[]
+    createMany?: PosWalletTransactionCreateManyCustomerInputEnvelope
+    connect?: PosWalletTransactionWhereUniqueInput | PosWalletTransactionWhereUniqueInput[]
+  }
+
+  export type PosReturnCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<PosReturnCreateWithoutCustomerInput, PosReturnUncheckedCreateWithoutCustomerInput> | PosReturnCreateWithoutCustomerInput[] | PosReturnUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: PosReturnCreateOrConnectWithoutCustomerInput | PosReturnCreateOrConnectWithoutCustomerInput[]
+    createMany?: PosReturnCreateManyCustomerInputEnvelope
+    connect?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+  }
+
   export type PosCustomerPurchaseUncheckedCreateNestedManyWithoutCustomerInput = {
     create?: XOR<PosCustomerPurchaseCreateWithoutCustomerInput, PosCustomerPurchaseUncheckedCreateWithoutCustomerInput> | PosCustomerPurchaseCreateWithoutCustomerInput[] | PosCustomerPurchaseUncheckedCreateWithoutCustomerInput[]
     connectOrCreate?: PosCustomerPurchaseCreateOrConnectWithoutCustomerInput | PosCustomerPurchaseCreateOrConnectWithoutCustomerInput[]
@@ -48096,6 +51850,20 @@ export namespace Prisma {
     connectOrCreate?: PosCounterSaleCreateOrConnectWithoutCustomerInput | PosCounterSaleCreateOrConnectWithoutCustomerInput[]
     createMany?: PosCounterSaleCreateManyCustomerInputEnvelope
     connect?: PosCounterSaleWhereUniqueInput | PosCounterSaleWhereUniqueInput[]
+  }
+
+  export type PosWalletTransactionUncheckedCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<PosWalletTransactionCreateWithoutCustomerInput, PosWalletTransactionUncheckedCreateWithoutCustomerInput> | PosWalletTransactionCreateWithoutCustomerInput[] | PosWalletTransactionUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: PosWalletTransactionCreateOrConnectWithoutCustomerInput | PosWalletTransactionCreateOrConnectWithoutCustomerInput[]
+    createMany?: PosWalletTransactionCreateManyCustomerInputEnvelope
+    connect?: PosWalletTransactionWhereUniqueInput | PosWalletTransactionWhereUniqueInput[]
+  }
+
+  export type PosReturnUncheckedCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<PosReturnCreateWithoutCustomerInput, PosReturnUncheckedCreateWithoutCustomerInput> | PosReturnCreateWithoutCustomerInput[] | PosReturnUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: PosReturnCreateOrConnectWithoutCustomerInput | PosReturnCreateOrConnectWithoutCustomerInput[]
+    createMany?: PosReturnCreateManyCustomerInputEnvelope
+    connect?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
   }
 
   export type PosCustomerPurchaseUpdateManyWithoutCustomerNestedInput = {
@@ -48126,6 +51894,34 @@ export namespace Prisma {
     deleteMany?: PosCounterSaleScalarWhereInput | PosCounterSaleScalarWhereInput[]
   }
 
+  export type PosWalletTransactionUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<PosWalletTransactionCreateWithoutCustomerInput, PosWalletTransactionUncheckedCreateWithoutCustomerInput> | PosWalletTransactionCreateWithoutCustomerInput[] | PosWalletTransactionUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: PosWalletTransactionCreateOrConnectWithoutCustomerInput | PosWalletTransactionCreateOrConnectWithoutCustomerInput[]
+    upsert?: PosWalletTransactionUpsertWithWhereUniqueWithoutCustomerInput | PosWalletTransactionUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: PosWalletTransactionCreateManyCustomerInputEnvelope
+    set?: PosWalletTransactionWhereUniqueInput | PosWalletTransactionWhereUniqueInput[]
+    disconnect?: PosWalletTransactionWhereUniqueInput | PosWalletTransactionWhereUniqueInput[]
+    delete?: PosWalletTransactionWhereUniqueInput | PosWalletTransactionWhereUniqueInput[]
+    connect?: PosWalletTransactionWhereUniqueInput | PosWalletTransactionWhereUniqueInput[]
+    update?: PosWalletTransactionUpdateWithWhereUniqueWithoutCustomerInput | PosWalletTransactionUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: PosWalletTransactionUpdateManyWithWhereWithoutCustomerInput | PosWalletTransactionUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: PosWalletTransactionScalarWhereInput | PosWalletTransactionScalarWhereInput[]
+  }
+
+  export type PosReturnUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<PosReturnCreateWithoutCustomerInput, PosReturnUncheckedCreateWithoutCustomerInput> | PosReturnCreateWithoutCustomerInput[] | PosReturnUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: PosReturnCreateOrConnectWithoutCustomerInput | PosReturnCreateOrConnectWithoutCustomerInput[]
+    upsert?: PosReturnUpsertWithWhereUniqueWithoutCustomerInput | PosReturnUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: PosReturnCreateManyCustomerInputEnvelope
+    set?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    disconnect?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    delete?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    connect?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    update?: PosReturnUpdateWithWhereUniqueWithoutCustomerInput | PosReturnUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: PosReturnUpdateManyWithWhereWithoutCustomerInput | PosReturnUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: PosReturnScalarWhereInput | PosReturnScalarWhereInput[]
+  }
+
   export type PosCustomerPurchaseUncheckedUpdateManyWithoutCustomerNestedInput = {
     create?: XOR<PosCustomerPurchaseCreateWithoutCustomerInput, PosCustomerPurchaseUncheckedCreateWithoutCustomerInput> | PosCustomerPurchaseCreateWithoutCustomerInput[] | PosCustomerPurchaseUncheckedCreateWithoutCustomerInput[]
     connectOrCreate?: PosCustomerPurchaseCreateOrConnectWithoutCustomerInput | PosCustomerPurchaseCreateOrConnectWithoutCustomerInput[]
@@ -48152,6 +51948,34 @@ export namespace Prisma {
     update?: PosCounterSaleUpdateWithWhereUniqueWithoutCustomerInput | PosCounterSaleUpdateWithWhereUniqueWithoutCustomerInput[]
     updateMany?: PosCounterSaleUpdateManyWithWhereWithoutCustomerInput | PosCounterSaleUpdateManyWithWhereWithoutCustomerInput[]
     deleteMany?: PosCounterSaleScalarWhereInput | PosCounterSaleScalarWhereInput[]
+  }
+
+  export type PosWalletTransactionUncheckedUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<PosWalletTransactionCreateWithoutCustomerInput, PosWalletTransactionUncheckedCreateWithoutCustomerInput> | PosWalletTransactionCreateWithoutCustomerInput[] | PosWalletTransactionUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: PosWalletTransactionCreateOrConnectWithoutCustomerInput | PosWalletTransactionCreateOrConnectWithoutCustomerInput[]
+    upsert?: PosWalletTransactionUpsertWithWhereUniqueWithoutCustomerInput | PosWalletTransactionUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: PosWalletTransactionCreateManyCustomerInputEnvelope
+    set?: PosWalletTransactionWhereUniqueInput | PosWalletTransactionWhereUniqueInput[]
+    disconnect?: PosWalletTransactionWhereUniqueInput | PosWalletTransactionWhereUniqueInput[]
+    delete?: PosWalletTransactionWhereUniqueInput | PosWalletTransactionWhereUniqueInput[]
+    connect?: PosWalletTransactionWhereUniqueInput | PosWalletTransactionWhereUniqueInput[]
+    update?: PosWalletTransactionUpdateWithWhereUniqueWithoutCustomerInput | PosWalletTransactionUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: PosWalletTransactionUpdateManyWithWhereWithoutCustomerInput | PosWalletTransactionUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: PosWalletTransactionScalarWhereInput | PosWalletTransactionScalarWhereInput[]
+  }
+
+  export type PosReturnUncheckedUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<PosReturnCreateWithoutCustomerInput, PosReturnUncheckedCreateWithoutCustomerInput> | PosReturnCreateWithoutCustomerInput[] | PosReturnUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: PosReturnCreateOrConnectWithoutCustomerInput | PosReturnCreateOrConnectWithoutCustomerInput[]
+    upsert?: PosReturnUpsertWithWhereUniqueWithoutCustomerInput | PosReturnUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: PosReturnCreateManyCustomerInputEnvelope
+    set?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    disconnect?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    delete?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    connect?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    update?: PosReturnUpdateWithWhereUniqueWithoutCustomerInput | PosReturnUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: PosReturnUpdateManyWithWhereWithoutCustomerInput | PosReturnUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: PosReturnScalarWhereInput | PosReturnScalarWhereInput[]
   }
 
   export type PosCustomerCreateNestedOneWithoutPurchasesInput = {
@@ -49259,6 +53083,13 @@ export namespace Prisma {
     connect?: InventoryMovementWhereUniqueInput | InventoryMovementWhereUniqueInput[]
   }
 
+  export type PosReturnCreateNestedManyWithoutShiftInput = {
+    create?: XOR<PosReturnCreateWithoutShiftInput, PosReturnUncheckedCreateWithoutShiftInput> | PosReturnCreateWithoutShiftInput[] | PosReturnUncheckedCreateWithoutShiftInput[]
+    connectOrCreate?: PosReturnCreateOrConnectWithoutShiftInput | PosReturnCreateOrConnectWithoutShiftInput[]
+    createMany?: PosReturnCreateManyShiftInputEnvelope
+    connect?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+  }
+
   export type PosCounterSaleUncheckedCreateNestedManyWithoutShiftInput = {
     create?: XOR<PosCounterSaleCreateWithoutShiftInput, PosCounterSaleUncheckedCreateWithoutShiftInput> | PosCounterSaleCreateWithoutShiftInput[] | PosCounterSaleUncheckedCreateWithoutShiftInput[]
     connectOrCreate?: PosCounterSaleCreateOrConnectWithoutShiftInput | PosCounterSaleCreateOrConnectWithoutShiftInput[]
@@ -49278,6 +53109,13 @@ export namespace Prisma {
     connectOrCreate?: InventoryMovementCreateOrConnectWithoutShiftInput | InventoryMovementCreateOrConnectWithoutShiftInput[]
     createMany?: InventoryMovementCreateManyShiftInputEnvelope
     connect?: InventoryMovementWhereUniqueInput | InventoryMovementWhereUniqueInput[]
+  }
+
+  export type PosReturnUncheckedCreateNestedManyWithoutShiftInput = {
+    create?: XOR<PosReturnCreateWithoutShiftInput, PosReturnUncheckedCreateWithoutShiftInput> | PosReturnCreateWithoutShiftInput[] | PosReturnUncheckedCreateWithoutShiftInput[]
+    connectOrCreate?: PosReturnCreateOrConnectWithoutShiftInput | PosReturnCreateOrConnectWithoutShiftInput[]
+    createMany?: PosReturnCreateManyShiftInputEnvelope
+    connect?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
   }
 
   export type PosCounterSaleUpdateManyWithoutShiftNestedInput = {
@@ -49322,6 +53160,20 @@ export namespace Prisma {
     deleteMany?: InventoryMovementScalarWhereInput | InventoryMovementScalarWhereInput[]
   }
 
+  export type PosReturnUpdateManyWithoutShiftNestedInput = {
+    create?: XOR<PosReturnCreateWithoutShiftInput, PosReturnUncheckedCreateWithoutShiftInput> | PosReturnCreateWithoutShiftInput[] | PosReturnUncheckedCreateWithoutShiftInput[]
+    connectOrCreate?: PosReturnCreateOrConnectWithoutShiftInput | PosReturnCreateOrConnectWithoutShiftInput[]
+    upsert?: PosReturnUpsertWithWhereUniqueWithoutShiftInput | PosReturnUpsertWithWhereUniqueWithoutShiftInput[]
+    createMany?: PosReturnCreateManyShiftInputEnvelope
+    set?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    disconnect?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    delete?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    connect?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    update?: PosReturnUpdateWithWhereUniqueWithoutShiftInput | PosReturnUpdateWithWhereUniqueWithoutShiftInput[]
+    updateMany?: PosReturnUpdateManyWithWhereWithoutShiftInput | PosReturnUpdateManyWithWhereWithoutShiftInput[]
+    deleteMany?: PosReturnScalarWhereInput | PosReturnScalarWhereInput[]
+  }
+
   export type PosCounterSaleUncheckedUpdateManyWithoutShiftNestedInput = {
     create?: XOR<PosCounterSaleCreateWithoutShiftInput, PosCounterSaleUncheckedCreateWithoutShiftInput> | PosCounterSaleCreateWithoutShiftInput[] | PosCounterSaleUncheckedCreateWithoutShiftInput[]
     connectOrCreate?: PosCounterSaleCreateOrConnectWithoutShiftInput | PosCounterSaleCreateOrConnectWithoutShiftInput[]
@@ -49362,6 +53214,20 @@ export namespace Prisma {
     update?: InventoryMovementUpdateWithWhereUniqueWithoutShiftInput | InventoryMovementUpdateWithWhereUniqueWithoutShiftInput[]
     updateMany?: InventoryMovementUpdateManyWithWhereWithoutShiftInput | InventoryMovementUpdateManyWithWhereWithoutShiftInput[]
     deleteMany?: InventoryMovementScalarWhereInput | InventoryMovementScalarWhereInput[]
+  }
+
+  export type PosReturnUncheckedUpdateManyWithoutShiftNestedInput = {
+    create?: XOR<PosReturnCreateWithoutShiftInput, PosReturnUncheckedCreateWithoutShiftInput> | PosReturnCreateWithoutShiftInput[] | PosReturnUncheckedCreateWithoutShiftInput[]
+    connectOrCreate?: PosReturnCreateOrConnectWithoutShiftInput | PosReturnCreateOrConnectWithoutShiftInput[]
+    upsert?: PosReturnUpsertWithWhereUniqueWithoutShiftInput | PosReturnUpsertWithWhereUniqueWithoutShiftInput[]
+    createMany?: PosReturnCreateManyShiftInputEnvelope
+    set?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    disconnect?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    delete?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    connect?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+    update?: PosReturnUpdateWithWhereUniqueWithoutShiftInput | PosReturnUpdateWithWhereUniqueWithoutShiftInput[]
+    updateMany?: PosReturnUpdateManyWithWhereWithoutShiftInput | PosReturnUpdateManyWithWhereWithoutShiftInput[]
+    deleteMany?: PosReturnScalarWhereInput | PosReturnScalarWhereInput[]
   }
 
   export type PosShiftCreateNestedOneWithoutCashEntriesInput = {
@@ -49536,6 +53402,68 @@ export namespace Prisma {
     upsert?: PurchaseOrderUpsertWithoutEmailsInput
     connect?: PurchaseOrderWhereUniqueInput
     update?: XOR<XOR<PurchaseOrderUpdateToOneWithWhereWithoutEmailsInput, PurchaseOrderUpdateWithoutEmailsInput>, PurchaseOrderUncheckedUpdateWithoutEmailsInput>
+  }
+
+  export type PosCustomerCreateNestedOneWithoutWalletTransactionsInput = {
+    create?: XOR<PosCustomerCreateWithoutWalletTransactionsInput, PosCustomerUncheckedCreateWithoutWalletTransactionsInput>
+    connectOrCreate?: PosCustomerCreateOrConnectWithoutWalletTransactionsInput
+    connect?: PosCustomerWhereUniqueInput
+  }
+
+  export type PosCustomerUpdateOneRequiredWithoutWalletTransactionsNestedInput = {
+    create?: XOR<PosCustomerCreateWithoutWalletTransactionsInput, PosCustomerUncheckedCreateWithoutWalletTransactionsInput>
+    connectOrCreate?: PosCustomerCreateOrConnectWithoutWalletTransactionsInput
+    upsert?: PosCustomerUpsertWithoutWalletTransactionsInput
+    connect?: PosCustomerWhereUniqueInput
+    update?: XOR<XOR<PosCustomerUpdateToOneWithWhereWithoutWalletTransactionsInput, PosCustomerUpdateWithoutWalletTransactionsInput>, PosCustomerUncheckedUpdateWithoutWalletTransactionsInput>
+  }
+
+  export type InventoryProductCreateNestedOneWithoutReturnsInput = {
+    create?: XOR<InventoryProductCreateWithoutReturnsInput, InventoryProductUncheckedCreateWithoutReturnsInput>
+    connectOrCreate?: InventoryProductCreateOrConnectWithoutReturnsInput
+    connect?: InventoryProductWhereUniqueInput
+  }
+
+  export type PosCustomerCreateNestedOneWithoutReturnsInput = {
+    create?: XOR<PosCustomerCreateWithoutReturnsInput, PosCustomerUncheckedCreateWithoutReturnsInput>
+    connectOrCreate?: PosCustomerCreateOrConnectWithoutReturnsInput
+    connect?: PosCustomerWhereUniqueInput
+  }
+
+  export type PosShiftCreateNestedOneWithoutReturnsInput = {
+    create?: XOR<PosShiftCreateWithoutReturnsInput, PosShiftUncheckedCreateWithoutReturnsInput>
+    connectOrCreate?: PosShiftCreateOrConnectWithoutReturnsInput
+    connect?: PosShiftWhereUniqueInput
+  }
+
+  export type InventoryProductUpdateOneWithoutReturnsNestedInput = {
+    create?: XOR<InventoryProductCreateWithoutReturnsInput, InventoryProductUncheckedCreateWithoutReturnsInput>
+    connectOrCreate?: InventoryProductCreateOrConnectWithoutReturnsInput
+    upsert?: InventoryProductUpsertWithoutReturnsInput
+    disconnect?: InventoryProductWhereInput | boolean
+    delete?: InventoryProductWhereInput | boolean
+    connect?: InventoryProductWhereUniqueInput
+    update?: XOR<XOR<InventoryProductUpdateToOneWithWhereWithoutReturnsInput, InventoryProductUpdateWithoutReturnsInput>, InventoryProductUncheckedUpdateWithoutReturnsInput>
+  }
+
+  export type PosCustomerUpdateOneWithoutReturnsNestedInput = {
+    create?: XOR<PosCustomerCreateWithoutReturnsInput, PosCustomerUncheckedCreateWithoutReturnsInput>
+    connectOrCreate?: PosCustomerCreateOrConnectWithoutReturnsInput
+    upsert?: PosCustomerUpsertWithoutReturnsInput
+    disconnect?: PosCustomerWhereInput | boolean
+    delete?: PosCustomerWhereInput | boolean
+    connect?: PosCustomerWhereUniqueInput
+    update?: XOR<XOR<PosCustomerUpdateToOneWithWhereWithoutReturnsInput, PosCustomerUpdateWithoutReturnsInput>, PosCustomerUncheckedUpdateWithoutReturnsInput>
+  }
+
+  export type PosShiftUpdateOneWithoutReturnsNestedInput = {
+    create?: XOR<PosShiftCreateWithoutReturnsInput, PosShiftUncheckedCreateWithoutReturnsInput>
+    connectOrCreate?: PosShiftCreateOrConnectWithoutReturnsInput
+    upsert?: PosShiftUpsertWithoutReturnsInput
+    disconnect?: PosShiftWhereInput | boolean
+    delete?: PosShiftWhereInput | boolean
+    connect?: PosShiftWhereUniqueInput
+    update?: XOR<XOR<PosShiftUpdateToOneWithWhereWithoutReturnsInput, PosShiftUpdateWithoutReturnsInput>, PosShiftUncheckedUpdateWithoutReturnsInput>
   }
 
   export type NestedIntFilter<$PrismaModel = never> = {
@@ -49753,6 +53681,17 @@ export namespace Prisma {
     not?: NestedEnumPaymentMethodFilter<$PrismaModel> | $Enums.PaymentMethod
   }
 
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -49793,17 +53732,6 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
-  }
-
-  export type NestedFloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -50096,7 +54024,13 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
     paymentReference?: string | null
+    cashPaid?: number
+    cardPaid?: number
+    transferPaid?: number
+    walletUsed?: number
+    walletCredit?: number
     pointsEarned?: number
+    pointsRate?: number | null
     discountType?: string | null
     discountValue?: number
     discountAmount?: number
@@ -50117,8 +54051,14 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
     paymentReference?: string | null
+    cashPaid?: number
+    cardPaid?: number
+    transferPaid?: number
+    walletUsed?: number
+    walletCredit?: number
     customerId?: number | null
     pointsEarned?: number
+    pointsRate?: number | null
     discountType?: string | null
     discountValue?: number
     discountAmount?: number
@@ -50167,9 +54107,15 @@ export namespace Prisma {
     changeGiven?: FloatFilter<"PosCounterSale"> | number
     paymentMethod?: EnumPaymentMethodFilter<"PosCounterSale"> | $Enums.PaymentMethod
     paymentReference?: StringNullableFilter<"PosCounterSale"> | string | null
+    cashPaid?: FloatFilter<"PosCounterSale"> | number
+    cardPaid?: FloatFilter<"PosCounterSale"> | number
+    transferPaid?: FloatFilter<"PosCounterSale"> | number
+    walletUsed?: FloatFilter<"PosCounterSale"> | number
+    walletCredit?: FloatFilter<"PosCounterSale"> | number
     cashierId?: IntFilter<"PosCounterSale"> | number
     customerId?: IntNullableFilter<"PosCounterSale"> | number | null
     pointsEarned?: IntFilter<"PosCounterSale"> | number
+    pointsRate?: FloatNullableFilter<"PosCounterSale"> | number | null
     discountType?: StringNullableFilter<"PosCounterSale"> | string | null
     discountValue?: FloatFilter<"PosCounterSale"> | number
     discountAmount?: FloatFilter<"PosCounterSale"> | number
@@ -50220,9 +54166,12 @@ export namespace Prisma {
     totalSpent?: number
     visits?: number
     lastVisitAt?: Date | string | null
+    walletBalance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     purchases?: PosCustomerPurchaseCreateNestedManyWithoutCustomerInput
+    walletTransactions?: PosWalletTransactionCreateNestedManyWithoutCustomerInput
+    returns?: PosReturnCreateNestedManyWithoutCustomerInput
   }
 
   export type PosCustomerUncheckedCreateWithoutCounterSalesInput = {
@@ -50239,9 +54188,12 @@ export namespace Prisma {
     totalSpent?: number
     visits?: number
     lastVisitAt?: Date | string | null
+    walletBalance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     purchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutCustomerInput
+    walletTransactions?: PosWalletTransactionUncheckedCreateNestedManyWithoutCustomerInput
+    returns?: PosReturnUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type PosCustomerCreateOrConnectWithoutCounterSalesInput = {
@@ -50272,6 +54224,7 @@ export namespace Prisma {
     report?: NullableJsonNullValueInput | InputJsonValue
     cashEntries?: PosCashEntryCreateNestedManyWithoutShiftInput
     movements?: InventoryMovementCreateNestedManyWithoutShiftInput
+    returns?: PosReturnCreateNestedManyWithoutShiftInput
   }
 
   export type PosShiftUncheckedCreateWithoutSalesInput = {
@@ -50298,6 +54251,7 @@ export namespace Prisma {
     report?: NullableJsonNullValueInput | InputJsonValue
     cashEntries?: PosCashEntryUncheckedCreateNestedManyWithoutShiftInput
     movements?: InventoryMovementUncheckedCreateNestedManyWithoutShiftInput
+    returns?: PosReturnUncheckedCreateNestedManyWithoutShiftInput
   }
 
   export type PosShiftCreateOrConnectWithoutSalesInput = {
@@ -50363,9 +54317,12 @@ export namespace Prisma {
     totalSpent?: FloatFieldUpdateOperationsInput | number
     visits?: IntFieldUpdateOperationsInput | number
     lastVisitAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     purchases?: PosCustomerPurchaseUpdateManyWithoutCustomerNestedInput
+    walletTransactions?: PosWalletTransactionUpdateManyWithoutCustomerNestedInput
+    returns?: PosReturnUpdateManyWithoutCustomerNestedInput
   }
 
   export type PosCustomerUncheckedUpdateWithoutCounterSalesInput = {
@@ -50382,9 +54339,12 @@ export namespace Prisma {
     totalSpent?: FloatFieldUpdateOperationsInput | number
     visits?: IntFieldUpdateOperationsInput | number
     lastVisitAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     purchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutCustomerNestedInput
+    walletTransactions?: PosWalletTransactionUncheckedUpdateManyWithoutCustomerNestedInput
+    returns?: PosReturnUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type PosShiftUpsertWithoutSalesInput = {
@@ -50421,6 +54381,7 @@ export namespace Prisma {
     report?: NullableJsonNullValueInput | InputJsonValue
     cashEntries?: PosCashEntryUpdateManyWithoutShiftNestedInput
     movements?: InventoryMovementUpdateManyWithoutShiftNestedInput
+    returns?: PosReturnUpdateManyWithoutShiftNestedInput
   }
 
   export type PosShiftUncheckedUpdateWithoutSalesInput = {
@@ -50447,6 +54408,7 @@ export namespace Prisma {
     report?: NullableJsonNullValueInput | InputJsonValue
     cashEntries?: PosCashEntryUncheckedUpdateManyWithoutShiftNestedInput
     movements?: InventoryMovementUncheckedUpdateManyWithoutShiftNestedInput
+    returns?: PosReturnUncheckedUpdateManyWithoutShiftNestedInput
   }
 
   export type InventoryProductCreateWithoutSupplierInput = {
@@ -50463,6 +54425,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -50472,6 +54435,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseCreateNestedManyWithoutProductInput
     images?: InventoryProductImageCreateNestedManyWithoutProductInput
     purchaseOrderItems?: PurchaseOrderItemCreateNestedManyWithoutProductInput
+    returns?: PosReturnCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseCreateNestedManyWithoutInventoryProductInput
   }
 
@@ -50492,6 +54456,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -50499,6 +54464,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseUncheckedCreateNestedManyWithoutProductInput
     images?: InventoryProductImageUncheckedCreateNestedManyWithoutProductInput
     purchaseOrderItems?: PurchaseOrderItemUncheckedCreateNestedManyWithoutProductInput
+    returns?: PosReturnUncheckedCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutInventoryProductInput
   }
 
@@ -50602,6 +54568,7 @@ export namespace Prisma {
     sellingPrice?: FloatNullableFilter<"InventoryProduct"> | number | null
     emptyBottlePrice?: FloatNullableFilter<"InventoryProduct"> | number | null
     emptyBottlesOnHand?: IntFilter<"InventoryProduct"> | number
+    damagedQuantity?: IntFilter<"InventoryProduct"> | number
     description?: StringNullableFilter<"InventoryProduct"> | string | null
     lastSoldAt?: DateTimeNullableFilter<"InventoryProduct"> | Date | string | null
     createdAt?: DateTimeFilter<"InventoryProduct"> | Date | string
@@ -50662,6 +54629,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -50671,6 +54639,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseCreateNestedManyWithoutProductInput
     images?: InventoryProductImageCreateNestedManyWithoutProductInput
     purchaseOrderItems?: PurchaseOrderItemCreateNestedManyWithoutProductInput
+    returns?: PosReturnCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseCreateNestedManyWithoutInventoryProductInput
   }
 
@@ -50691,6 +54660,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -50698,6 +54668,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseUncheckedCreateNestedManyWithoutProductInput
     images?: InventoryProductImageUncheckedCreateNestedManyWithoutProductInput
     purchaseOrderItems?: PurchaseOrderItemUncheckedCreateNestedManyWithoutProductInput
+    returns?: PosReturnUncheckedCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutInventoryProductInput
   }
 
@@ -50741,6 +54712,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -50750,6 +54722,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseCreateNestedManyWithoutProductInput
     images?: InventoryProductImageCreateNestedManyWithoutProductInput
     purchaseOrderItems?: PurchaseOrderItemCreateNestedManyWithoutProductInput
+    returns?: PosReturnCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseCreateNestedManyWithoutInventoryProductInput
   }
 
@@ -50770,6 +54743,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -50777,6 +54751,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseUncheckedCreateNestedManyWithoutProductInput
     images?: InventoryProductImageUncheckedCreateNestedManyWithoutProductInput
     purchaseOrderItems?: PurchaseOrderItemUncheckedCreateNestedManyWithoutProductInput
+    returns?: PosReturnUncheckedCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutInventoryProductInput
   }
 
@@ -50950,6 +54925,65 @@ export namespace Prisma {
 
   export type PurchaseOrderItemCreateManyProductInputEnvelope = {
     data: PurchaseOrderItemCreateManyProductInput | PurchaseOrderItemCreateManyProductInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type PosReturnCreateWithoutProductInput = {
+    returnNo: string
+    type: string
+    productName: string
+    quantity: number
+    condition?: string | null
+    invoiceGroupCode?: string | null
+    customerName?: string | null
+    customerMobile?: string | null
+    unitPrice?: number
+    refundAmount?: number
+    refundMethod?: string | null
+    pointsReversed?: number
+    unitCost?: number | null
+    reason: string
+    note?: string | null
+    disposal?: string | null
+    reference?: string | null
+    createdById: number
+    createdAt?: Date | string
+    customer?: PosCustomerCreateNestedOneWithoutReturnsInput
+    shift?: PosShiftCreateNestedOneWithoutReturnsInput
+  }
+
+  export type PosReturnUncheckedCreateWithoutProductInput = {
+    id?: number
+    returnNo: string
+    type: string
+    productName: string
+    quantity: number
+    condition?: string | null
+    invoiceGroupCode?: string | null
+    customerId?: number | null
+    customerName?: string | null
+    customerMobile?: string | null
+    unitPrice?: number
+    refundAmount?: number
+    refundMethod?: string | null
+    pointsReversed?: number
+    unitCost?: number | null
+    reason: string
+    note?: string | null
+    disposal?: string | null
+    reference?: string | null
+    shiftId?: number | null
+    createdById: number
+    createdAt?: Date | string
+  }
+
+  export type PosReturnCreateOrConnectWithoutProductInput = {
+    where: PosReturnWhereUniqueInput
+    create: XOR<PosReturnCreateWithoutProductInput, PosReturnUncheckedCreateWithoutProductInput>
+  }
+
+  export type PosReturnCreateManyProductInputEnvelope = {
+    data: PosReturnCreateManyProductInput | PosReturnCreateManyProductInput[]
     skipDuplicates?: boolean
   }
 
@@ -51195,6 +55229,51 @@ export namespace Prisma {
     receivedQty?: IntFilter<"PurchaseOrderItem"> | number
   }
 
+  export type PosReturnUpsertWithWhereUniqueWithoutProductInput = {
+    where: PosReturnWhereUniqueInput
+    update: XOR<PosReturnUpdateWithoutProductInput, PosReturnUncheckedUpdateWithoutProductInput>
+    create: XOR<PosReturnCreateWithoutProductInput, PosReturnUncheckedCreateWithoutProductInput>
+  }
+
+  export type PosReturnUpdateWithWhereUniqueWithoutProductInput = {
+    where: PosReturnWhereUniqueInput
+    data: XOR<PosReturnUpdateWithoutProductInput, PosReturnUncheckedUpdateWithoutProductInput>
+  }
+
+  export type PosReturnUpdateManyWithWhereWithoutProductInput = {
+    where: PosReturnScalarWhereInput
+    data: XOR<PosReturnUpdateManyMutationInput, PosReturnUncheckedUpdateManyWithoutProductInput>
+  }
+
+  export type PosReturnScalarWhereInput = {
+    AND?: PosReturnScalarWhereInput | PosReturnScalarWhereInput[]
+    OR?: PosReturnScalarWhereInput[]
+    NOT?: PosReturnScalarWhereInput | PosReturnScalarWhereInput[]
+    id?: IntFilter<"PosReturn"> | number
+    returnNo?: StringFilter<"PosReturn"> | string
+    type?: StringFilter<"PosReturn"> | string
+    productId?: IntNullableFilter<"PosReturn"> | number | null
+    productName?: StringFilter<"PosReturn"> | string
+    quantity?: IntFilter<"PosReturn"> | number
+    condition?: StringNullableFilter<"PosReturn"> | string | null
+    invoiceGroupCode?: StringNullableFilter<"PosReturn"> | string | null
+    customerId?: IntNullableFilter<"PosReturn"> | number | null
+    customerName?: StringNullableFilter<"PosReturn"> | string | null
+    customerMobile?: StringNullableFilter<"PosReturn"> | string | null
+    unitPrice?: FloatFilter<"PosReturn"> | number
+    refundAmount?: FloatFilter<"PosReturn"> | number
+    refundMethod?: StringNullableFilter<"PosReturn"> | string | null
+    pointsReversed?: IntFilter<"PosReturn"> | number
+    unitCost?: FloatNullableFilter<"PosReturn"> | number | null
+    reason?: StringFilter<"PosReturn"> | string
+    note?: StringNullableFilter<"PosReturn"> | string | null
+    disposal?: StringNullableFilter<"PosReturn"> | string | null
+    reference?: StringNullableFilter<"PosReturn"> | string | null
+    shiftId?: IntNullableFilter<"PosReturn"> | number | null
+    createdById?: IntFilter<"PosReturn"> | number
+    createdAt?: DateTimeFilter<"PosReturn"> | Date | string
+  }
+
   export type PosCustomerPurchaseUpsertWithWhereUniqueWithoutInventoryProductInput = {
     where: PosCustomerPurchaseWhereUniqueInput
     update: XOR<PosCustomerPurchaseUpdateWithoutInventoryProductInput, PosCustomerPurchaseUncheckedUpdateWithoutInventoryProductInput>
@@ -51256,6 +55335,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -51265,6 +55345,7 @@ export namespace Prisma {
     supplier?: SupplierCreateNestedOneWithoutProductsInput
     images?: InventoryProductImageCreateNestedManyWithoutProductInput
     purchaseOrderItems?: PurchaseOrderItemCreateNestedManyWithoutProductInput
+    returns?: PosReturnCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseCreateNestedManyWithoutInventoryProductInput
   }
 
@@ -51286,12 +55367,14 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     images?: InventoryProductImageUncheckedCreateNestedManyWithoutProductInput
     purchaseOrderItems?: PurchaseOrderItemUncheckedCreateNestedManyWithoutProductInput
+    returns?: PosReturnUncheckedCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutInventoryProductInput
   }
 
@@ -51325,6 +55408,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -51334,6 +55418,7 @@ export namespace Prisma {
     supplier?: SupplierUpdateOneWithoutProductsNestedInput
     images?: InventoryProductImageUpdateManyWithoutProductNestedInput
     purchaseOrderItems?: PurchaseOrderItemUpdateManyWithoutProductNestedInput
+    returns?: PosReturnUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUpdateManyWithoutInventoryProductNestedInput
   }
 
@@ -51355,12 +55440,14 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     images?: InventoryProductImageUncheckedUpdateManyWithoutProductNestedInput
     purchaseOrderItems?: PurchaseOrderItemUncheckedUpdateManyWithoutProductNestedInput
+    returns?: PosReturnUncheckedUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutInventoryProductNestedInput
   }
 
@@ -51378,6 +55465,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -51387,6 +55475,7 @@ export namespace Prisma {
     supplier?: SupplierCreateNestedOneWithoutProductsInput
     expenses?: InventoryProductExpenseCreateNestedManyWithoutProductInput
     purchaseOrderItems?: PurchaseOrderItemCreateNestedManyWithoutProductInput
+    returns?: PosReturnCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseCreateNestedManyWithoutInventoryProductInput
   }
 
@@ -51408,12 +55497,14 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     expenses?: InventoryProductExpenseUncheckedCreateNestedManyWithoutProductInput
     purchaseOrderItems?: PurchaseOrderItemUncheckedCreateNestedManyWithoutProductInput
+    returns?: PosReturnUncheckedCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutInventoryProductInput
   }
 
@@ -51447,6 +55538,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -51456,6 +55548,7 @@ export namespace Prisma {
     supplier?: SupplierUpdateOneWithoutProductsNestedInput
     expenses?: InventoryProductExpenseUpdateManyWithoutProductNestedInput
     purchaseOrderItems?: PurchaseOrderItemUpdateManyWithoutProductNestedInput
+    returns?: PosReturnUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUpdateManyWithoutInventoryProductNestedInput
   }
 
@@ -51477,12 +55570,14 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expenses?: InventoryProductExpenseUncheckedUpdateManyWithoutProductNestedInput
     purchaseOrderItems?: PurchaseOrderItemUncheckedUpdateManyWithoutProductNestedInput
+    returns?: PosReturnUncheckedUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutInventoryProductNestedInput
   }
 
@@ -51564,7 +55659,13 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
     paymentReference?: string | null
+    cashPaid?: number
+    cardPaid?: number
+    transferPaid?: number
+    walletUsed?: number
+    walletCredit?: number
     pointsEarned?: number
+    pointsRate?: number | null
     discountType?: string | null
     discountValue?: number
     discountAmount?: number
@@ -51585,8 +55686,14 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
     paymentReference?: string | null
+    cashPaid?: number
+    cardPaid?: number
+    transferPaid?: number
+    walletUsed?: number
+    walletCredit?: number
     cashierId: number
     pointsEarned?: number
+    pointsRate?: number | null
     discountType?: string | null
     discountValue?: number
     discountAmount?: number
@@ -51603,6 +55710,98 @@ export namespace Prisma {
 
   export type PosCounterSaleCreateManyCustomerInputEnvelope = {
     data: PosCounterSaleCreateManyCustomerInput | PosCounterSaleCreateManyCustomerInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type PosWalletTransactionCreateWithoutCustomerInput = {
+    type: string
+    amount: number
+    balanceAfter: number
+    invoiceGroupCode?: string | null
+    shiftId?: number | null
+    note?: string | null
+    createdById: number
+    createdAt?: Date | string
+  }
+
+  export type PosWalletTransactionUncheckedCreateWithoutCustomerInput = {
+    id?: number
+    type: string
+    amount: number
+    balanceAfter: number
+    invoiceGroupCode?: string | null
+    shiftId?: number | null
+    note?: string | null
+    createdById: number
+    createdAt?: Date | string
+  }
+
+  export type PosWalletTransactionCreateOrConnectWithoutCustomerInput = {
+    where: PosWalletTransactionWhereUniqueInput
+    create: XOR<PosWalletTransactionCreateWithoutCustomerInput, PosWalletTransactionUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type PosWalletTransactionCreateManyCustomerInputEnvelope = {
+    data: PosWalletTransactionCreateManyCustomerInput | PosWalletTransactionCreateManyCustomerInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type PosReturnCreateWithoutCustomerInput = {
+    returnNo: string
+    type: string
+    productName: string
+    quantity: number
+    condition?: string | null
+    invoiceGroupCode?: string | null
+    customerName?: string | null
+    customerMobile?: string | null
+    unitPrice?: number
+    refundAmount?: number
+    refundMethod?: string | null
+    pointsReversed?: number
+    unitCost?: number | null
+    reason: string
+    note?: string | null
+    disposal?: string | null
+    reference?: string | null
+    createdById: number
+    createdAt?: Date | string
+    product?: InventoryProductCreateNestedOneWithoutReturnsInput
+    shift?: PosShiftCreateNestedOneWithoutReturnsInput
+  }
+
+  export type PosReturnUncheckedCreateWithoutCustomerInput = {
+    id?: number
+    returnNo: string
+    type: string
+    productId?: number | null
+    productName: string
+    quantity: number
+    condition?: string | null
+    invoiceGroupCode?: string | null
+    customerName?: string | null
+    customerMobile?: string | null
+    unitPrice?: number
+    refundAmount?: number
+    refundMethod?: string | null
+    pointsReversed?: number
+    unitCost?: number | null
+    reason: string
+    note?: string | null
+    disposal?: string | null
+    reference?: string | null
+    shiftId?: number | null
+    createdById: number
+    createdAt?: Date | string
+  }
+
+  export type PosReturnCreateOrConnectWithoutCustomerInput = {
+    where: PosReturnWhereUniqueInput
+    create: XOR<PosReturnCreateWithoutCustomerInput, PosReturnUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type PosReturnCreateManyCustomerInputEnvelope = {
+    data: PosReturnCreateManyCustomerInput | PosReturnCreateManyCustomerInput[]
     skipDuplicates?: boolean
   }
 
@@ -51638,6 +55837,54 @@ export namespace Prisma {
     data: XOR<PosCounterSaleUpdateManyMutationInput, PosCounterSaleUncheckedUpdateManyWithoutCustomerInput>
   }
 
+  export type PosWalletTransactionUpsertWithWhereUniqueWithoutCustomerInput = {
+    where: PosWalletTransactionWhereUniqueInput
+    update: XOR<PosWalletTransactionUpdateWithoutCustomerInput, PosWalletTransactionUncheckedUpdateWithoutCustomerInput>
+    create: XOR<PosWalletTransactionCreateWithoutCustomerInput, PosWalletTransactionUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type PosWalletTransactionUpdateWithWhereUniqueWithoutCustomerInput = {
+    where: PosWalletTransactionWhereUniqueInput
+    data: XOR<PosWalletTransactionUpdateWithoutCustomerInput, PosWalletTransactionUncheckedUpdateWithoutCustomerInput>
+  }
+
+  export type PosWalletTransactionUpdateManyWithWhereWithoutCustomerInput = {
+    where: PosWalletTransactionScalarWhereInput
+    data: XOR<PosWalletTransactionUpdateManyMutationInput, PosWalletTransactionUncheckedUpdateManyWithoutCustomerInput>
+  }
+
+  export type PosWalletTransactionScalarWhereInput = {
+    AND?: PosWalletTransactionScalarWhereInput | PosWalletTransactionScalarWhereInput[]
+    OR?: PosWalletTransactionScalarWhereInput[]
+    NOT?: PosWalletTransactionScalarWhereInput | PosWalletTransactionScalarWhereInput[]
+    id?: IntFilter<"PosWalletTransaction"> | number
+    customerId?: IntFilter<"PosWalletTransaction"> | number
+    type?: StringFilter<"PosWalletTransaction"> | string
+    amount?: FloatFilter<"PosWalletTransaction"> | number
+    balanceAfter?: FloatFilter<"PosWalletTransaction"> | number
+    invoiceGroupCode?: StringNullableFilter<"PosWalletTransaction"> | string | null
+    shiftId?: IntNullableFilter<"PosWalletTransaction"> | number | null
+    note?: StringNullableFilter<"PosWalletTransaction"> | string | null
+    createdById?: IntFilter<"PosWalletTransaction"> | number
+    createdAt?: DateTimeFilter<"PosWalletTransaction"> | Date | string
+  }
+
+  export type PosReturnUpsertWithWhereUniqueWithoutCustomerInput = {
+    where: PosReturnWhereUniqueInput
+    update: XOR<PosReturnUpdateWithoutCustomerInput, PosReturnUncheckedUpdateWithoutCustomerInput>
+    create: XOR<PosReturnCreateWithoutCustomerInput, PosReturnUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type PosReturnUpdateWithWhereUniqueWithoutCustomerInput = {
+    where: PosReturnWhereUniqueInput
+    data: XOR<PosReturnUpdateWithoutCustomerInput, PosReturnUncheckedUpdateWithoutCustomerInput>
+  }
+
+  export type PosReturnUpdateManyWithWhereWithoutCustomerInput = {
+    where: PosReturnScalarWhereInput
+    data: XOR<PosReturnUpdateManyMutationInput, PosReturnUncheckedUpdateManyWithoutCustomerInput>
+  }
+
   export type PosCustomerCreateWithoutPurchasesInput = {
     firstName: string
     lastName: string
@@ -51651,9 +55898,12 @@ export namespace Prisma {
     totalSpent?: number
     visits?: number
     lastVisitAt?: Date | string | null
+    walletBalance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     counterSales?: PosCounterSaleCreateNestedManyWithoutCustomerInput
+    walletTransactions?: PosWalletTransactionCreateNestedManyWithoutCustomerInput
+    returns?: PosReturnCreateNestedManyWithoutCustomerInput
   }
 
   export type PosCustomerUncheckedCreateWithoutPurchasesInput = {
@@ -51670,9 +55920,12 @@ export namespace Prisma {
     totalSpent?: number
     visits?: number
     lastVisitAt?: Date | string | null
+    walletBalance?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     counterSales?: PosCounterSaleUncheckedCreateNestedManyWithoutCustomerInput
+    walletTransactions?: PosWalletTransactionUncheckedCreateNestedManyWithoutCustomerInput
+    returns?: PosReturnUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type PosCustomerCreateOrConnectWithoutPurchasesInput = {
@@ -51694,6 +55947,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -51704,6 +55958,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseCreateNestedManyWithoutProductInput
     images?: InventoryProductImageCreateNestedManyWithoutProductInput
     purchaseOrderItems?: PurchaseOrderItemCreateNestedManyWithoutProductInput
+    returns?: PosReturnCreateNestedManyWithoutProductInput
   }
 
   export type InventoryProductUncheckedCreateWithoutCustomerPurchasesInput = {
@@ -51724,6 +55979,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -51731,6 +55987,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseUncheckedCreateNestedManyWithoutProductInput
     images?: InventoryProductImageUncheckedCreateNestedManyWithoutProductInput
     purchaseOrderItems?: PurchaseOrderItemUncheckedCreateNestedManyWithoutProductInput
+    returns?: PosReturnUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type InventoryProductCreateOrConnectWithoutCustomerPurchasesInput = {
@@ -51889,9 +56146,12 @@ export namespace Prisma {
     totalSpent?: FloatFieldUpdateOperationsInput | number
     visits?: IntFieldUpdateOperationsInput | number
     lastVisitAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     counterSales?: PosCounterSaleUpdateManyWithoutCustomerNestedInput
+    walletTransactions?: PosWalletTransactionUpdateManyWithoutCustomerNestedInput
+    returns?: PosReturnUpdateManyWithoutCustomerNestedInput
   }
 
   export type PosCustomerUncheckedUpdateWithoutPurchasesInput = {
@@ -51908,9 +56168,12 @@ export namespace Prisma {
     totalSpent?: FloatFieldUpdateOperationsInput | number
     visits?: IntFieldUpdateOperationsInput | number
     lastVisitAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    walletBalance?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     counterSales?: PosCounterSaleUncheckedUpdateManyWithoutCustomerNestedInput
+    walletTransactions?: PosWalletTransactionUncheckedUpdateManyWithoutCustomerNestedInput
+    returns?: PosReturnUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type InventoryProductUpsertWithoutCustomerPurchasesInput = {
@@ -51938,6 +56201,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -51948,6 +56212,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseUpdateManyWithoutProductNestedInput
     images?: InventoryProductImageUpdateManyWithoutProductNestedInput
     purchaseOrderItems?: PurchaseOrderItemUpdateManyWithoutProductNestedInput
+    returns?: PosReturnUpdateManyWithoutProductNestedInput
   }
 
   export type InventoryProductUncheckedUpdateWithoutCustomerPurchasesInput = {
@@ -51968,6 +56233,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -51975,6 +56241,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseUncheckedUpdateManyWithoutProductNestedInput
     images?: InventoryProductImageUncheckedUpdateManyWithoutProductNestedInput
     purchaseOrderItems?: PurchaseOrderItemUncheckedUpdateManyWithoutProductNestedInput
+    returns?: PosReturnUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type AccountReceiptUpsertWithWhereUniqueWithoutPurchaseInput = {
@@ -54668,7 +58935,13 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
     paymentReference?: string | null
+    cashPaid?: number
+    cardPaid?: number
+    transferPaid?: number
+    walletUsed?: number
+    walletCredit?: number
     pointsEarned?: number
+    pointsRate?: number | null
     discountType?: string | null
     discountValue?: number
     discountAmount?: number
@@ -54689,9 +58962,15 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
     paymentReference?: string | null
+    cashPaid?: number
+    cardPaid?: number
+    transferPaid?: number
+    walletUsed?: number
+    walletCredit?: number
     cashierId: number
     customerId?: number | null
     pointsEarned?: number
+    pointsRate?: number | null
     discountType?: string | null
     discountValue?: number
     discountAmount?: number
@@ -54798,6 +59077,65 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type PosReturnCreateWithoutShiftInput = {
+    returnNo: string
+    type: string
+    productName: string
+    quantity: number
+    condition?: string | null
+    invoiceGroupCode?: string | null
+    customerName?: string | null
+    customerMobile?: string | null
+    unitPrice?: number
+    refundAmount?: number
+    refundMethod?: string | null
+    pointsReversed?: number
+    unitCost?: number | null
+    reason: string
+    note?: string | null
+    disposal?: string | null
+    reference?: string | null
+    createdById: number
+    createdAt?: Date | string
+    product?: InventoryProductCreateNestedOneWithoutReturnsInput
+    customer?: PosCustomerCreateNestedOneWithoutReturnsInput
+  }
+
+  export type PosReturnUncheckedCreateWithoutShiftInput = {
+    id?: number
+    returnNo: string
+    type: string
+    productId?: number | null
+    productName: string
+    quantity: number
+    condition?: string | null
+    invoiceGroupCode?: string | null
+    customerId?: number | null
+    customerName?: string | null
+    customerMobile?: string | null
+    unitPrice?: number
+    refundAmount?: number
+    refundMethod?: string | null
+    pointsReversed?: number
+    unitCost?: number | null
+    reason: string
+    note?: string | null
+    disposal?: string | null
+    reference?: string | null
+    createdById: number
+    createdAt?: Date | string
+  }
+
+  export type PosReturnCreateOrConnectWithoutShiftInput = {
+    where: PosReturnWhereUniqueInput
+    create: XOR<PosReturnCreateWithoutShiftInput, PosReturnUncheckedCreateWithoutShiftInput>
+  }
+
+  export type PosReturnCreateManyShiftInputEnvelope = {
+    data: PosReturnCreateManyShiftInput | PosReturnCreateManyShiftInput[]
+    skipDuplicates?: boolean
+  }
+
   export type PosCounterSaleUpsertWithWhereUniqueWithoutShiftInput = {
     where: PosCounterSaleWhereUniqueInput
     update: XOR<PosCounterSaleUpdateWithoutShiftInput, PosCounterSaleUncheckedUpdateWithoutShiftInput>
@@ -54889,6 +59227,22 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"InventoryMovement"> | Date | string
   }
 
+  export type PosReturnUpsertWithWhereUniqueWithoutShiftInput = {
+    where: PosReturnWhereUniqueInput
+    update: XOR<PosReturnUpdateWithoutShiftInput, PosReturnUncheckedUpdateWithoutShiftInput>
+    create: XOR<PosReturnCreateWithoutShiftInput, PosReturnUncheckedCreateWithoutShiftInput>
+  }
+
+  export type PosReturnUpdateWithWhereUniqueWithoutShiftInput = {
+    where: PosReturnWhereUniqueInput
+    data: XOR<PosReturnUpdateWithoutShiftInput, PosReturnUncheckedUpdateWithoutShiftInput>
+  }
+
+  export type PosReturnUpdateManyWithWhereWithoutShiftInput = {
+    where: PosReturnScalarWhereInput
+    data: XOR<PosReturnUpdateManyMutationInput, PosReturnUncheckedUpdateManyWithoutShiftInput>
+  }
+
   export type PosShiftCreateWithoutCashEntriesInput = {
     shiftNo: string
     status?: string
@@ -54912,6 +59266,7 @@ export namespace Prisma {
     report?: NullableJsonNullValueInput | InputJsonValue
     sales?: PosCounterSaleCreateNestedManyWithoutShiftInput
     movements?: InventoryMovementCreateNestedManyWithoutShiftInput
+    returns?: PosReturnCreateNestedManyWithoutShiftInput
   }
 
   export type PosShiftUncheckedCreateWithoutCashEntriesInput = {
@@ -54938,6 +59293,7 @@ export namespace Prisma {
     report?: NullableJsonNullValueInput | InputJsonValue
     sales?: PosCounterSaleUncheckedCreateNestedManyWithoutShiftInput
     movements?: InventoryMovementUncheckedCreateNestedManyWithoutShiftInput
+    returns?: PosReturnUncheckedCreateNestedManyWithoutShiftInput
   }
 
   export type PosShiftCreateOrConnectWithoutCashEntriesInput = {
@@ -54979,6 +59335,7 @@ export namespace Prisma {
     report?: NullableJsonNullValueInput | InputJsonValue
     sales?: PosCounterSaleUpdateManyWithoutShiftNestedInput
     movements?: InventoryMovementUpdateManyWithoutShiftNestedInput
+    returns?: PosReturnUpdateManyWithoutShiftNestedInput
   }
 
   export type PosShiftUncheckedUpdateWithoutCashEntriesInput = {
@@ -55005,6 +59362,7 @@ export namespace Prisma {
     report?: NullableJsonNullValueInput | InputJsonValue
     sales?: PosCounterSaleUncheckedUpdateManyWithoutShiftNestedInput
     movements?: InventoryMovementUncheckedUpdateManyWithoutShiftNestedInput
+    returns?: PosReturnUncheckedUpdateManyWithoutShiftNestedInput
   }
 
   export type PosShiftCreateWithoutMovementsInput = {
@@ -55030,6 +59388,7 @@ export namespace Prisma {
     report?: NullableJsonNullValueInput | InputJsonValue
     sales?: PosCounterSaleCreateNestedManyWithoutShiftInput
     cashEntries?: PosCashEntryCreateNestedManyWithoutShiftInput
+    returns?: PosReturnCreateNestedManyWithoutShiftInput
   }
 
   export type PosShiftUncheckedCreateWithoutMovementsInput = {
@@ -55056,6 +59415,7 @@ export namespace Prisma {
     report?: NullableJsonNullValueInput | InputJsonValue
     sales?: PosCounterSaleUncheckedCreateNestedManyWithoutShiftInput
     cashEntries?: PosCashEntryUncheckedCreateNestedManyWithoutShiftInput
+    returns?: PosReturnUncheckedCreateNestedManyWithoutShiftInput
   }
 
   export type PosShiftCreateOrConnectWithoutMovementsInput = {
@@ -55097,6 +59457,7 @@ export namespace Prisma {
     report?: NullableJsonNullValueInput | InputJsonValue
     sales?: PosCounterSaleUpdateManyWithoutShiftNestedInput
     cashEntries?: PosCashEntryUpdateManyWithoutShiftNestedInput
+    returns?: PosReturnUpdateManyWithoutShiftNestedInput
   }
 
   export type PosShiftUncheckedUpdateWithoutMovementsInput = {
@@ -55123,6 +59484,7 @@ export namespace Prisma {
     report?: NullableJsonNullValueInput | InputJsonValue
     sales?: PosCounterSaleUncheckedUpdateManyWithoutShiftNestedInput
     cashEntries?: PosCashEntryUncheckedUpdateManyWithoutShiftNestedInput
+    returns?: PosReturnUncheckedUpdateManyWithoutShiftNestedInput
   }
 
   export type SupplierCreateWithoutPurchaseOrdersInput = {
@@ -55374,6 +59736,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -55383,6 +59746,7 @@ export namespace Prisma {
     supplier?: SupplierCreateNestedOneWithoutProductsInput
     expenses?: InventoryProductExpenseCreateNestedManyWithoutProductInput
     images?: InventoryProductImageCreateNestedManyWithoutProductInput
+    returns?: PosReturnCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseCreateNestedManyWithoutInventoryProductInput
   }
 
@@ -55404,12 +59768,14 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     expenses?: InventoryProductExpenseUncheckedCreateNestedManyWithoutProductInput
     images?: InventoryProductImageUncheckedCreateNestedManyWithoutProductInput
+    returns?: PosReturnUncheckedCreateNestedManyWithoutProductInput
     customerPurchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutInventoryProductInput
   }
 
@@ -55497,6 +59863,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -55506,6 +59873,7 @@ export namespace Prisma {
     supplier?: SupplierUpdateOneWithoutProductsNestedInput
     expenses?: InventoryProductExpenseUpdateManyWithoutProductNestedInput
     images?: InventoryProductImageUpdateManyWithoutProductNestedInput
+    returns?: PosReturnUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUpdateManyWithoutInventoryProductNestedInput
   }
 
@@ -55527,12 +59895,14 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expenses?: InventoryProductExpenseUncheckedUpdateManyWithoutProductNestedInput
     images?: InventoryProductImageUncheckedUpdateManyWithoutProductNestedInput
+    returns?: PosReturnUncheckedUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutInventoryProductNestedInput
   }
 
@@ -55638,6 +60008,462 @@ export namespace Prisma {
     items?: PurchaseOrderItemUncheckedUpdateManyWithoutOrderNestedInput
   }
 
+  export type PosCustomerCreateWithoutWalletTransactionsInput = {
+    firstName: string
+    lastName: string
+    nic?: string | null
+    mobileNumber: string
+    email?: string | null
+    province?: string | null
+    district?: string | null
+    address?: string | null
+    loyaltyPoints?: number
+    totalSpent?: number
+    visits?: number
+    lastVisitAt?: Date | string | null
+    walletBalance?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    purchases?: PosCustomerPurchaseCreateNestedManyWithoutCustomerInput
+    counterSales?: PosCounterSaleCreateNestedManyWithoutCustomerInput
+    returns?: PosReturnCreateNestedManyWithoutCustomerInput
+  }
+
+  export type PosCustomerUncheckedCreateWithoutWalletTransactionsInput = {
+    id?: number
+    firstName: string
+    lastName: string
+    nic?: string | null
+    mobileNumber: string
+    email?: string | null
+    province?: string | null
+    district?: string | null
+    address?: string | null
+    loyaltyPoints?: number
+    totalSpent?: number
+    visits?: number
+    lastVisitAt?: Date | string | null
+    walletBalance?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    purchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutCustomerInput
+    counterSales?: PosCounterSaleUncheckedCreateNestedManyWithoutCustomerInput
+    returns?: PosReturnUncheckedCreateNestedManyWithoutCustomerInput
+  }
+
+  export type PosCustomerCreateOrConnectWithoutWalletTransactionsInput = {
+    where: PosCustomerWhereUniqueInput
+    create: XOR<PosCustomerCreateWithoutWalletTransactionsInput, PosCustomerUncheckedCreateWithoutWalletTransactionsInput>
+  }
+
+  export type PosCustomerUpsertWithoutWalletTransactionsInput = {
+    update: XOR<PosCustomerUpdateWithoutWalletTransactionsInput, PosCustomerUncheckedUpdateWithoutWalletTransactionsInput>
+    create: XOR<PosCustomerCreateWithoutWalletTransactionsInput, PosCustomerUncheckedCreateWithoutWalletTransactionsInput>
+    where?: PosCustomerWhereInput
+  }
+
+  export type PosCustomerUpdateToOneWithWhereWithoutWalletTransactionsInput = {
+    where?: PosCustomerWhereInput
+    data: XOR<PosCustomerUpdateWithoutWalletTransactionsInput, PosCustomerUncheckedUpdateWithoutWalletTransactionsInput>
+  }
+
+  export type PosCustomerUpdateWithoutWalletTransactionsInput = {
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    nic?: NullableStringFieldUpdateOperationsInput | string | null
+    mobileNumber?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    province?: NullableStringFieldUpdateOperationsInput | string | null
+    district?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    visits?: IntFieldUpdateOperationsInput | number
+    lastVisitAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    walletBalance?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    purchases?: PosCustomerPurchaseUpdateManyWithoutCustomerNestedInput
+    counterSales?: PosCounterSaleUpdateManyWithoutCustomerNestedInput
+    returns?: PosReturnUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type PosCustomerUncheckedUpdateWithoutWalletTransactionsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    nic?: NullableStringFieldUpdateOperationsInput | string | null
+    mobileNumber?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    province?: NullableStringFieldUpdateOperationsInput | string | null
+    district?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    visits?: IntFieldUpdateOperationsInput | number
+    lastVisitAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    walletBalance?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    purchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutCustomerNestedInput
+    counterSales?: PosCounterSaleUncheckedUpdateManyWithoutCustomerNestedInput
+    returns?: PosReturnUncheckedUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type InventoryProductCreateWithoutReturnsInput = {
+    displayId: string
+    name: string
+    partNumber?: string | null
+    compatibleWith?: string | null
+    quantity?: number
+    soldQuantity?: number
+    lowStockThreshold?: number | null
+    purchasePrice?: number | null
+    taxPaid?: number | null
+    additionalExpenses?: number | null
+    sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
+    damagedQuantity?: number
+    description?: string | null
+    lastSoldAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    brand: InventoryBrandCreateNestedOneWithoutProductsInput
+    category: InventoryCategoryCreateNestedOneWithoutProductsInput
+    supplier?: SupplierCreateNestedOneWithoutProductsInput
+    expenses?: InventoryProductExpenseCreateNestedManyWithoutProductInput
+    images?: InventoryProductImageCreateNestedManyWithoutProductInput
+    purchaseOrderItems?: PurchaseOrderItemCreateNestedManyWithoutProductInput
+    customerPurchases?: PosCustomerPurchaseCreateNestedManyWithoutInventoryProductInput
+  }
+
+  export type InventoryProductUncheckedCreateWithoutReturnsInput = {
+    id?: number
+    displayId: string
+    brandId: number
+    categoryId: number
+    supplierId?: number | null
+    name: string
+    partNumber?: string | null
+    compatibleWith?: string | null
+    quantity?: number
+    soldQuantity?: number
+    lowStockThreshold?: number | null
+    purchasePrice?: number | null
+    taxPaid?: number | null
+    additionalExpenses?: number | null
+    sellingPrice?: number | null
+    emptyBottlePrice?: number | null
+    emptyBottlesOnHand?: number
+    damagedQuantity?: number
+    description?: string | null
+    lastSoldAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    expenses?: InventoryProductExpenseUncheckedCreateNestedManyWithoutProductInput
+    images?: InventoryProductImageUncheckedCreateNestedManyWithoutProductInput
+    purchaseOrderItems?: PurchaseOrderItemUncheckedCreateNestedManyWithoutProductInput
+    customerPurchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutInventoryProductInput
+  }
+
+  export type InventoryProductCreateOrConnectWithoutReturnsInput = {
+    where: InventoryProductWhereUniqueInput
+    create: XOR<InventoryProductCreateWithoutReturnsInput, InventoryProductUncheckedCreateWithoutReturnsInput>
+  }
+
+  export type PosCustomerCreateWithoutReturnsInput = {
+    firstName: string
+    lastName: string
+    nic?: string | null
+    mobileNumber: string
+    email?: string | null
+    province?: string | null
+    district?: string | null
+    address?: string | null
+    loyaltyPoints?: number
+    totalSpent?: number
+    visits?: number
+    lastVisitAt?: Date | string | null
+    walletBalance?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    purchases?: PosCustomerPurchaseCreateNestedManyWithoutCustomerInput
+    counterSales?: PosCounterSaleCreateNestedManyWithoutCustomerInput
+    walletTransactions?: PosWalletTransactionCreateNestedManyWithoutCustomerInput
+  }
+
+  export type PosCustomerUncheckedCreateWithoutReturnsInput = {
+    id?: number
+    firstName: string
+    lastName: string
+    nic?: string | null
+    mobileNumber: string
+    email?: string | null
+    province?: string | null
+    district?: string | null
+    address?: string | null
+    loyaltyPoints?: number
+    totalSpent?: number
+    visits?: number
+    lastVisitAt?: Date | string | null
+    walletBalance?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    purchases?: PosCustomerPurchaseUncheckedCreateNestedManyWithoutCustomerInput
+    counterSales?: PosCounterSaleUncheckedCreateNestedManyWithoutCustomerInput
+    walletTransactions?: PosWalletTransactionUncheckedCreateNestedManyWithoutCustomerInput
+  }
+
+  export type PosCustomerCreateOrConnectWithoutReturnsInput = {
+    where: PosCustomerWhereUniqueInput
+    create: XOR<PosCustomerCreateWithoutReturnsInput, PosCustomerUncheckedCreateWithoutReturnsInput>
+  }
+
+  export type PosShiftCreateWithoutReturnsInput = {
+    shiftNo: string
+    status?: string
+    openedById: number
+    openedAt?: Date | string
+    openingFloat: number
+    countedCash?: number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: number | null
+    countedAt?: Date | string | null
+    expectedCash?: number | null
+    cashDifference?: number | null
+    differenceReason?: string | null
+    cardSlipTotal?: number | null
+    cardDifferenceReason?: string | null
+    floatLeft?: number | null
+    cashBanked?: number | null
+    closedById?: number | null
+    closedAt?: Date | string | null
+    notes?: string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    sales?: PosCounterSaleCreateNestedManyWithoutShiftInput
+    cashEntries?: PosCashEntryCreateNestedManyWithoutShiftInput
+    movements?: InventoryMovementCreateNestedManyWithoutShiftInput
+  }
+
+  export type PosShiftUncheckedCreateWithoutReturnsInput = {
+    id?: number
+    shiftNo: string
+    status?: string
+    openedById: number
+    openedAt?: Date | string
+    openingFloat: number
+    countedCash?: number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: number | null
+    countedAt?: Date | string | null
+    expectedCash?: number | null
+    cashDifference?: number | null
+    differenceReason?: string | null
+    cardSlipTotal?: number | null
+    cardDifferenceReason?: string | null
+    floatLeft?: number | null
+    cashBanked?: number | null
+    closedById?: number | null
+    closedAt?: Date | string | null
+    notes?: string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    sales?: PosCounterSaleUncheckedCreateNestedManyWithoutShiftInput
+    cashEntries?: PosCashEntryUncheckedCreateNestedManyWithoutShiftInput
+    movements?: InventoryMovementUncheckedCreateNestedManyWithoutShiftInput
+  }
+
+  export type PosShiftCreateOrConnectWithoutReturnsInput = {
+    where: PosShiftWhereUniqueInput
+    create: XOR<PosShiftCreateWithoutReturnsInput, PosShiftUncheckedCreateWithoutReturnsInput>
+  }
+
+  export type InventoryProductUpsertWithoutReturnsInput = {
+    update: XOR<InventoryProductUpdateWithoutReturnsInput, InventoryProductUncheckedUpdateWithoutReturnsInput>
+    create: XOR<InventoryProductCreateWithoutReturnsInput, InventoryProductUncheckedCreateWithoutReturnsInput>
+    where?: InventoryProductWhereInput
+  }
+
+  export type InventoryProductUpdateToOneWithWhereWithoutReturnsInput = {
+    where?: InventoryProductWhereInput
+    data: XOR<InventoryProductUpdateWithoutReturnsInput, InventoryProductUncheckedUpdateWithoutReturnsInput>
+  }
+
+  export type InventoryProductUpdateWithoutReturnsInput = {
+    displayId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    partNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    compatibleWith?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    soldQuantity?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    purchasePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
+    additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
+    sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    brand?: InventoryBrandUpdateOneRequiredWithoutProductsNestedInput
+    category?: InventoryCategoryUpdateOneRequiredWithoutProductsNestedInput
+    supplier?: SupplierUpdateOneWithoutProductsNestedInput
+    expenses?: InventoryProductExpenseUpdateManyWithoutProductNestedInput
+    images?: InventoryProductImageUpdateManyWithoutProductNestedInput
+    purchaseOrderItems?: PurchaseOrderItemUpdateManyWithoutProductNestedInput
+    customerPurchases?: PosCustomerPurchaseUpdateManyWithoutInventoryProductNestedInput
+  }
+
+  export type InventoryProductUncheckedUpdateWithoutReturnsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    displayId?: StringFieldUpdateOperationsInput | string
+    brandId?: IntFieldUpdateOperationsInput | number
+    categoryId?: IntFieldUpdateOperationsInput | number
+    supplierId?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: StringFieldUpdateOperationsInput | string
+    partNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    compatibleWith?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    soldQuantity?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    purchasePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxPaid?: NullableFloatFieldUpdateOperationsInput | number | null
+    additionalExpenses?: NullableFloatFieldUpdateOperationsInput | number | null
+    sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expenses?: InventoryProductExpenseUncheckedUpdateManyWithoutProductNestedInput
+    images?: InventoryProductImageUncheckedUpdateManyWithoutProductNestedInput
+    purchaseOrderItems?: PurchaseOrderItemUncheckedUpdateManyWithoutProductNestedInput
+    customerPurchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutInventoryProductNestedInput
+  }
+
+  export type PosCustomerUpsertWithoutReturnsInput = {
+    update: XOR<PosCustomerUpdateWithoutReturnsInput, PosCustomerUncheckedUpdateWithoutReturnsInput>
+    create: XOR<PosCustomerCreateWithoutReturnsInput, PosCustomerUncheckedCreateWithoutReturnsInput>
+    where?: PosCustomerWhereInput
+  }
+
+  export type PosCustomerUpdateToOneWithWhereWithoutReturnsInput = {
+    where?: PosCustomerWhereInput
+    data: XOR<PosCustomerUpdateWithoutReturnsInput, PosCustomerUncheckedUpdateWithoutReturnsInput>
+  }
+
+  export type PosCustomerUpdateWithoutReturnsInput = {
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    nic?: NullableStringFieldUpdateOperationsInput | string | null
+    mobileNumber?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    province?: NullableStringFieldUpdateOperationsInput | string | null
+    district?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    visits?: IntFieldUpdateOperationsInput | number
+    lastVisitAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    walletBalance?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    purchases?: PosCustomerPurchaseUpdateManyWithoutCustomerNestedInput
+    counterSales?: PosCounterSaleUpdateManyWithoutCustomerNestedInput
+    walletTransactions?: PosWalletTransactionUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type PosCustomerUncheckedUpdateWithoutReturnsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    nic?: NullableStringFieldUpdateOperationsInput | string | null
+    mobileNumber?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    province?: NullableStringFieldUpdateOperationsInput | string | null
+    district?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    visits?: IntFieldUpdateOperationsInput | number
+    lastVisitAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    walletBalance?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    purchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutCustomerNestedInput
+    counterSales?: PosCounterSaleUncheckedUpdateManyWithoutCustomerNestedInput
+    walletTransactions?: PosWalletTransactionUncheckedUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type PosShiftUpsertWithoutReturnsInput = {
+    update: XOR<PosShiftUpdateWithoutReturnsInput, PosShiftUncheckedUpdateWithoutReturnsInput>
+    create: XOR<PosShiftCreateWithoutReturnsInput, PosShiftUncheckedCreateWithoutReturnsInput>
+    where?: PosShiftWhereInput
+  }
+
+  export type PosShiftUpdateToOneWithWhereWithoutReturnsInput = {
+    where?: PosShiftWhereInput
+    data: XOR<PosShiftUpdateWithoutReturnsInput, PosShiftUncheckedUpdateWithoutReturnsInput>
+  }
+
+  export type PosShiftUpdateWithoutReturnsInput = {
+    shiftNo?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    openedById?: IntFieldUpdateOperationsInput | number
+    openedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    openingFloat?: FloatFieldUpdateOperationsInput | number
+    countedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: NullableIntFieldUpdateOperationsInput | number | null
+    countedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expectedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashDifference?: NullableFloatFieldUpdateOperationsInput | number | null
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cardSlipTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    cardDifferenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    floatLeft?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashBanked?: NullableFloatFieldUpdateOperationsInput | number | null
+    closedById?: NullableIntFieldUpdateOperationsInput | number | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    sales?: PosCounterSaleUpdateManyWithoutShiftNestedInput
+    cashEntries?: PosCashEntryUpdateManyWithoutShiftNestedInput
+    movements?: InventoryMovementUpdateManyWithoutShiftNestedInput
+  }
+
+  export type PosShiftUncheckedUpdateWithoutReturnsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    shiftNo?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    openedById?: IntFieldUpdateOperationsInput | number
+    openedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    openingFloat?: FloatFieldUpdateOperationsInput | number
+    countedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: NullableIntFieldUpdateOperationsInput | number | null
+    countedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expectedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashDifference?: NullableFloatFieldUpdateOperationsInput | number | null
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cardSlipTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    cardDifferenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    floatLeft?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashBanked?: NullableFloatFieldUpdateOperationsInput | number | null
+    closedById?: NullableIntFieldUpdateOperationsInput | number | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    sales?: PosCounterSaleUncheckedUpdateManyWithoutShiftNestedInput
+    cashEntries?: PosCashEntryUncheckedUpdateManyWithoutShiftNestedInput
+    movements?: InventoryMovementUncheckedUpdateManyWithoutShiftNestedInput
+  }
+
   export type PosCounterSaleCreateManyCashierInput = {
     id?: number
     invoiceGroupCode: string
@@ -55648,8 +60474,14 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
     paymentReference?: string | null
+    cashPaid?: number
+    cardPaid?: number
+    transferPaid?: number
+    walletUsed?: number
+    walletCredit?: number
     customerId?: number | null
     pointsEarned?: number
+    pointsRate?: number | null
     discountType?: string | null
     discountValue?: number
     discountAmount?: number
@@ -55668,7 +60500,13 @@ export namespace Prisma {
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
+    cashPaid?: FloatFieldUpdateOperationsInput | number
+    cardPaid?: FloatFieldUpdateOperationsInput | number
+    transferPaid?: FloatFieldUpdateOperationsInput | number
+    walletUsed?: FloatFieldUpdateOperationsInput | number
+    walletCredit?: FloatFieldUpdateOperationsInput | number
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    pointsRate?: NullableFloatFieldUpdateOperationsInput | number | null
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
     discountValue?: FloatFieldUpdateOperationsInput | number
     discountAmount?: FloatFieldUpdateOperationsInput | number
@@ -55689,8 +60527,14 @@ export namespace Prisma {
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
+    cashPaid?: FloatFieldUpdateOperationsInput | number
+    cardPaid?: FloatFieldUpdateOperationsInput | number
+    transferPaid?: FloatFieldUpdateOperationsInput | number
+    walletUsed?: FloatFieldUpdateOperationsInput | number
+    walletCredit?: FloatFieldUpdateOperationsInput | number
     customerId?: NullableIntFieldUpdateOperationsInput | number | null
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    pointsRate?: NullableFloatFieldUpdateOperationsInput | number | null
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
     discountValue?: FloatFieldUpdateOperationsInput | number
     discountAmount?: FloatFieldUpdateOperationsInput | number
@@ -55710,8 +60554,14 @@ export namespace Prisma {
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
+    cashPaid?: FloatFieldUpdateOperationsInput | number
+    cardPaid?: FloatFieldUpdateOperationsInput | number
+    transferPaid?: FloatFieldUpdateOperationsInput | number
+    walletUsed?: FloatFieldUpdateOperationsInput | number
+    walletCredit?: FloatFieldUpdateOperationsInput | number
     customerId?: NullableIntFieldUpdateOperationsInput | number | null
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    pointsRate?: NullableFloatFieldUpdateOperationsInput | number | null
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
     discountValue?: FloatFieldUpdateOperationsInput | number
     discountAmount?: FloatFieldUpdateOperationsInput | number
@@ -55738,6 +60588,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -55778,6 +60629,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -55787,6 +60639,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseUpdateManyWithoutProductNestedInput
     images?: InventoryProductImageUpdateManyWithoutProductNestedInput
     purchaseOrderItems?: PurchaseOrderItemUpdateManyWithoutProductNestedInput
+    returns?: PosReturnUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUpdateManyWithoutInventoryProductNestedInput
   }
 
@@ -55807,6 +60660,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -55814,6 +60668,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseUncheckedUpdateManyWithoutProductNestedInput
     images?: InventoryProductImageUncheckedUpdateManyWithoutProductNestedInput
     purchaseOrderItems?: PurchaseOrderItemUncheckedUpdateManyWithoutProductNestedInput
+    returns?: PosReturnUncheckedUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutInventoryProductNestedInput
   }
 
@@ -55834,6 +60689,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -55920,6 +60776,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -55940,6 +60797,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -55949,6 +60807,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseUpdateManyWithoutProductNestedInput
     images?: InventoryProductImageUpdateManyWithoutProductNestedInput
     purchaseOrderItems?: PurchaseOrderItemUpdateManyWithoutProductNestedInput
+    returns?: PosReturnUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUpdateManyWithoutInventoryProductNestedInput
   }
 
@@ -55969,6 +60828,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -55976,6 +60836,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseUncheckedUpdateManyWithoutProductNestedInput
     images?: InventoryProductImageUncheckedUpdateManyWithoutProductNestedInput
     purchaseOrderItems?: PurchaseOrderItemUncheckedUpdateManyWithoutProductNestedInput
+    returns?: PosReturnUncheckedUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutInventoryProductNestedInput
   }
 
@@ -55996,6 +60857,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -56019,6 +60881,7 @@ export namespace Prisma {
     sellingPrice?: number | null
     emptyBottlePrice?: number | null
     emptyBottlesOnHand?: number
+    damagedQuantity?: number
     description?: string | null
     lastSoldAt?: Date | string | null
     createdAt?: Date | string
@@ -56039,6 +60902,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -56048,6 +60912,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseUpdateManyWithoutProductNestedInput
     images?: InventoryProductImageUpdateManyWithoutProductNestedInput
     purchaseOrderItems?: PurchaseOrderItemUpdateManyWithoutProductNestedInput
+    returns?: PosReturnUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUpdateManyWithoutInventoryProductNestedInput
   }
 
@@ -56068,6 +60933,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -56075,6 +60941,7 @@ export namespace Prisma {
     expenses?: InventoryProductExpenseUncheckedUpdateManyWithoutProductNestedInput
     images?: InventoryProductImageUncheckedUpdateManyWithoutProductNestedInput
     purchaseOrderItems?: PurchaseOrderItemUncheckedUpdateManyWithoutProductNestedInput
+    returns?: PosReturnUncheckedUpdateManyWithoutProductNestedInput
     customerPurchases?: PosCustomerPurchaseUncheckedUpdateManyWithoutInventoryProductNestedInput
   }
 
@@ -56095,6 +60962,7 @@ export namespace Prisma {
     sellingPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlePrice?: NullableFloatFieldUpdateOperationsInput | number | null
     emptyBottlesOnHand?: IntFieldUpdateOperationsInput | number
+    damagedQuantity?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     lastSoldAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -56124,6 +60992,31 @@ export namespace Prisma {
     unitCost: number
     lineTotal: number
     receivedQty?: number
+  }
+
+  export type PosReturnCreateManyProductInput = {
+    id?: number
+    returnNo: string
+    type: string
+    productName: string
+    quantity: number
+    condition?: string | null
+    invoiceGroupCode?: string | null
+    customerId?: number | null
+    customerName?: string | null
+    customerMobile?: string | null
+    unitPrice?: number
+    refundAmount?: number
+    refundMethod?: string | null
+    pointsReversed?: number
+    unitCost?: number | null
+    reason: string
+    note?: string | null
+    disposal?: string | null
+    reference?: string | null
+    shiftId?: number | null
+    createdById: number
+    createdAt?: Date | string
   }
 
   export type PosCustomerPurchaseCreateManyInventoryProductInput = {
@@ -56223,6 +61116,80 @@ export namespace Prisma {
     unitCost?: FloatFieldUpdateOperationsInput | number
     lineTotal?: FloatFieldUpdateOperationsInput | number
     receivedQty?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type PosReturnUpdateWithoutProductInput = {
+    returnNo?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    productName?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    condition?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceGroupCode?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerMobile?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    refundAmount?: FloatFieldUpdateOperationsInput | number
+    refundMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    pointsReversed?: IntFieldUpdateOperationsInput | number
+    unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    reason?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    disposal?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customer?: PosCustomerUpdateOneWithoutReturnsNestedInput
+    shift?: PosShiftUpdateOneWithoutReturnsNestedInput
+  }
+
+  export type PosReturnUncheckedUpdateWithoutProductInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    returnNo?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    productName?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    condition?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceGroupCode?: NullableStringFieldUpdateOperationsInput | string | null
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerMobile?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    refundAmount?: FloatFieldUpdateOperationsInput | number
+    refundMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    pointsReversed?: IntFieldUpdateOperationsInput | number
+    unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    reason?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    disposal?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosReturnUncheckedUpdateManyWithoutProductInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    returnNo?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    productName?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    condition?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceGroupCode?: NullableStringFieldUpdateOperationsInput | string | null
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerMobile?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    refundAmount?: FloatFieldUpdateOperationsInput | number
+    refundMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    pointsReversed?: IntFieldUpdateOperationsInput | number
+    unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    reason?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    disposal?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type PosCustomerPurchaseUpdateWithoutInventoryProductInput = {
@@ -56348,14 +61315,57 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
     paymentReference?: string | null
+    cashPaid?: number
+    cardPaid?: number
+    transferPaid?: number
+    walletUsed?: number
+    walletCredit?: number
     cashierId: number
     pointsEarned?: number
+    pointsRate?: number | null
     discountType?: string | null
     discountValue?: number
     discountAmount?: number
     pointsRedeemed?: number
     pointsValue?: number
     shiftId?: number | null
+    createdAt?: Date | string
+  }
+
+  export type PosWalletTransactionCreateManyCustomerInput = {
+    id?: number
+    type: string
+    amount: number
+    balanceAfter: number
+    invoiceGroupCode?: string | null
+    shiftId?: number | null
+    note?: string | null
+    createdById: number
+    createdAt?: Date | string
+  }
+
+  export type PosReturnCreateManyCustomerInput = {
+    id?: number
+    returnNo: string
+    type: string
+    productId?: number | null
+    productName: string
+    quantity: number
+    condition?: string | null
+    invoiceGroupCode?: string | null
+    customerName?: string | null
+    customerMobile?: string | null
+    unitPrice?: number
+    refundAmount?: number
+    refundMethod?: string | null
+    pointsReversed?: number
+    unitCost?: number | null
+    reason: string
+    note?: string | null
+    disposal?: string | null
+    reference?: string | null
+    shiftId?: number | null
+    createdById: number
     createdAt?: Date | string
   }
 
@@ -56454,7 +61464,13 @@ export namespace Prisma {
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
+    cashPaid?: FloatFieldUpdateOperationsInput | number
+    cardPaid?: FloatFieldUpdateOperationsInput | number
+    transferPaid?: FloatFieldUpdateOperationsInput | number
+    walletUsed?: FloatFieldUpdateOperationsInput | number
+    walletCredit?: FloatFieldUpdateOperationsInput | number
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    pointsRate?: NullableFloatFieldUpdateOperationsInput | number | null
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
     discountValue?: FloatFieldUpdateOperationsInput | number
     discountAmount?: FloatFieldUpdateOperationsInput | number
@@ -56475,8 +61491,14 @@ export namespace Prisma {
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
+    cashPaid?: FloatFieldUpdateOperationsInput | number
+    cardPaid?: FloatFieldUpdateOperationsInput | number
+    transferPaid?: FloatFieldUpdateOperationsInput | number
+    walletUsed?: FloatFieldUpdateOperationsInput | number
+    walletCredit?: FloatFieldUpdateOperationsInput | number
     cashierId?: IntFieldUpdateOperationsInput | number
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    pointsRate?: NullableFloatFieldUpdateOperationsInput | number | null
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
     discountValue?: FloatFieldUpdateOperationsInput | number
     discountAmount?: FloatFieldUpdateOperationsInput | number
@@ -56496,14 +61518,129 @@ export namespace Prisma {
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
+    cashPaid?: FloatFieldUpdateOperationsInput | number
+    cardPaid?: FloatFieldUpdateOperationsInput | number
+    transferPaid?: FloatFieldUpdateOperationsInput | number
+    walletUsed?: FloatFieldUpdateOperationsInput | number
+    walletCredit?: FloatFieldUpdateOperationsInput | number
     cashierId?: IntFieldUpdateOperationsInput | number
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    pointsRate?: NullableFloatFieldUpdateOperationsInput | number | null
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
     discountValue?: FloatFieldUpdateOperationsInput | number
     discountAmount?: FloatFieldUpdateOperationsInput | number
     pointsRedeemed?: IntFieldUpdateOperationsInput | number
     pointsValue?: FloatFieldUpdateOperationsInput | number
     shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosWalletTransactionUpdateWithoutCustomerInput = {
+    type?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    balanceAfter?: FloatFieldUpdateOperationsInput | number
+    invoiceGroupCode?: NullableStringFieldUpdateOperationsInput | string | null
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosWalletTransactionUncheckedUpdateWithoutCustomerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    type?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    balanceAfter?: FloatFieldUpdateOperationsInput | number
+    invoiceGroupCode?: NullableStringFieldUpdateOperationsInput | string | null
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosWalletTransactionUncheckedUpdateManyWithoutCustomerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    type?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    balanceAfter?: FloatFieldUpdateOperationsInput | number
+    invoiceGroupCode?: NullableStringFieldUpdateOperationsInput | string | null
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosReturnUpdateWithoutCustomerInput = {
+    returnNo?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    productName?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    condition?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceGroupCode?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerMobile?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    refundAmount?: FloatFieldUpdateOperationsInput | number
+    refundMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    pointsReversed?: IntFieldUpdateOperationsInput | number
+    unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    reason?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    disposal?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    product?: InventoryProductUpdateOneWithoutReturnsNestedInput
+    shift?: PosShiftUpdateOneWithoutReturnsNestedInput
+  }
+
+  export type PosReturnUncheckedUpdateWithoutCustomerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    returnNo?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    productId?: NullableIntFieldUpdateOperationsInput | number | null
+    productName?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    condition?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceGroupCode?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerMobile?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    refundAmount?: FloatFieldUpdateOperationsInput | number
+    refundMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    pointsReversed?: IntFieldUpdateOperationsInput | number
+    unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    reason?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    disposal?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosReturnUncheckedUpdateManyWithoutCustomerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    returnNo?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    productId?: NullableIntFieldUpdateOperationsInput | number | null
+    productName?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    condition?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceGroupCode?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerMobile?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    refundAmount?: FloatFieldUpdateOperationsInput | number
+    refundMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    pointsReversed?: IntFieldUpdateOperationsInput | number
+    unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    reason?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    disposal?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdById?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -57361,9 +62498,15 @@ export namespace Prisma {
     changeGiven: number
     paymentMethod?: $Enums.PaymentMethod
     paymentReference?: string | null
+    cashPaid?: number
+    cardPaid?: number
+    transferPaid?: number
+    walletUsed?: number
+    walletCredit?: number
     cashierId: number
     customerId?: number | null
     pointsEarned?: number
+    pointsRate?: number | null
     discountType?: string | null
     discountValue?: number
     discountAmount?: number
@@ -57407,6 +62550,31 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
+  export type PosReturnCreateManyShiftInput = {
+    id?: number
+    returnNo: string
+    type: string
+    productId?: number | null
+    productName: string
+    quantity: number
+    condition?: string | null
+    invoiceGroupCode?: string | null
+    customerId?: number | null
+    customerName?: string | null
+    customerMobile?: string | null
+    unitPrice?: number
+    refundAmount?: number
+    refundMethod?: string | null
+    pointsReversed?: number
+    unitCost?: number | null
+    reason: string
+    note?: string | null
+    disposal?: string | null
+    reference?: string | null
+    createdById: number
+    createdAt?: Date | string
+  }
+
   export type PosCounterSaleUpdateWithoutShiftInput = {
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
     totalAmount?: FloatFieldUpdateOperationsInput | number
@@ -57416,7 +62584,13 @@ export namespace Prisma {
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
+    cashPaid?: FloatFieldUpdateOperationsInput | number
+    cardPaid?: FloatFieldUpdateOperationsInput | number
+    transferPaid?: FloatFieldUpdateOperationsInput | number
+    walletUsed?: FloatFieldUpdateOperationsInput | number
+    walletCredit?: FloatFieldUpdateOperationsInput | number
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    pointsRate?: NullableFloatFieldUpdateOperationsInput | number | null
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
     discountValue?: FloatFieldUpdateOperationsInput | number
     discountAmount?: FloatFieldUpdateOperationsInput | number
@@ -57437,9 +62611,15 @@ export namespace Prisma {
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
+    cashPaid?: FloatFieldUpdateOperationsInput | number
+    cardPaid?: FloatFieldUpdateOperationsInput | number
+    transferPaid?: FloatFieldUpdateOperationsInput | number
+    walletUsed?: FloatFieldUpdateOperationsInput | number
+    walletCredit?: FloatFieldUpdateOperationsInput | number
     cashierId?: IntFieldUpdateOperationsInput | number
     customerId?: NullableIntFieldUpdateOperationsInput | number | null
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    pointsRate?: NullableFloatFieldUpdateOperationsInput | number | null
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
     discountValue?: FloatFieldUpdateOperationsInput | number
     discountAmount?: FloatFieldUpdateOperationsInput | number
@@ -57458,9 +62638,15 @@ export namespace Prisma {
     changeGiven?: FloatFieldUpdateOperationsInput | number
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
     paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
+    cashPaid?: FloatFieldUpdateOperationsInput | number
+    cardPaid?: FloatFieldUpdateOperationsInput | number
+    transferPaid?: FloatFieldUpdateOperationsInput | number
+    walletUsed?: FloatFieldUpdateOperationsInput | number
+    walletCredit?: FloatFieldUpdateOperationsInput | number
     cashierId?: IntFieldUpdateOperationsInput | number
     customerId?: NullableIntFieldUpdateOperationsInput | number | null
     pointsEarned?: IntFieldUpdateOperationsInput | number
+    pointsRate?: NullableFloatFieldUpdateOperationsInput | number | null
     discountType?: NullableStringFieldUpdateOperationsInput | string | null
     discountValue?: FloatFieldUpdateOperationsInput | number
     discountAmount?: FloatFieldUpdateOperationsInput | number
@@ -57569,6 +62755,80 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     reference?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosReturnUpdateWithoutShiftInput = {
+    returnNo?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    productName?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    condition?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceGroupCode?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerMobile?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    refundAmount?: FloatFieldUpdateOperationsInput | number
+    refundMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    pointsReversed?: IntFieldUpdateOperationsInput | number
+    unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    reason?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    disposal?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    product?: InventoryProductUpdateOneWithoutReturnsNestedInput
+    customer?: PosCustomerUpdateOneWithoutReturnsNestedInput
+  }
+
+  export type PosReturnUncheckedUpdateWithoutShiftInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    returnNo?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    productId?: NullableIntFieldUpdateOperationsInput | number | null
+    productName?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    condition?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceGroupCode?: NullableStringFieldUpdateOperationsInput | string | null
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerMobile?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    refundAmount?: FloatFieldUpdateOperationsInput | number
+    refundMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    pointsReversed?: IntFieldUpdateOperationsInput | number
+    unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    reason?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    disposal?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosReturnUncheckedUpdateManyWithoutShiftInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    returnNo?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    productId?: NullableIntFieldUpdateOperationsInput | number | null
+    productName?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    condition?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceGroupCode?: NullableStringFieldUpdateOperationsInput | string | null
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    customerName?: NullableStringFieldUpdateOperationsInput | string | null
+    customerMobile?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    refundAmount?: FloatFieldUpdateOperationsInput | number
+    refundMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    pointsReversed?: IntFieldUpdateOperationsInput | number
+    unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    reason?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    disposal?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -57847,6 +63107,14 @@ export namespace Prisma {
      * @deprecated Use PurchaseOrderEmailDefaultArgs instead
      */
     export type PurchaseOrderEmailArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PurchaseOrderEmailDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use PosWalletTransactionDefaultArgs instead
+     */
+    export type PosWalletTransactionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PosWalletTransactionDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use PosReturnDefaultArgs instead
+     */
+    export type PosReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PosReturnDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

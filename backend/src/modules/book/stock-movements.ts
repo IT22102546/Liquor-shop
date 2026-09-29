@@ -3,8 +3,16 @@ import { prisma } from "../../database/prisma.client";
 
 type Db = Prisma.TransactionClient | typeof prisma;
 
-export type MovementKind = "STOCK" | "EMPTIES";
-export type MovementType = "OPENING" | "RECEIVED" | "SOLD" | "ADJUSTED" | "COLLECTED" | "RETURNED";
+/** STOCK = bottles for sale, EMPTIES = empty bottles on hand, DAMAGED = damaged bottles kept aside. */
+export type MovementKind = "STOCK" | "EMPTIES" | "DAMAGED";
+/**
+ * STOCK: OPENING | RECEIVED | SOLD | ADJUSTED | CUSTOMER_RETURN (+, unopened bottles brought back) |
+ *        EXCHANGED (−, new bottle given for a damaged one) | DAMAGED (−, found damaged in store) | RESTORED (+, back from damaged)
+ * EMPTIES: COLLECTED | RETURNED | ADJUSTED · DAMAGED: IN (+) | CLEARED (−)
+ */
+export type MovementType =
+  | "OPENING" | "RECEIVED" | "SOLD" | "ADJUSTED" | "COLLECTED" | "RETURNED"
+  | "CUSTOMER_RETURN" | "EXCHANGED" | "DAMAGED" | "RESTORED" | "IN" | "CLEARED";
 
 /** The till session that is open right now, if any (only one can be open at a time). */
 export async function findOpenShift(db: Db = prisma) {

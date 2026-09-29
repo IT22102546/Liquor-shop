@@ -316,6 +316,7 @@ type CustomerRecord = {
   district: string | null;
   address: string | null;
   loyaltyPoints: number;
+  walletBalance: number;
   totalSpent: number;
   visits: number;
   lastVisitAt: Date | null;
@@ -335,6 +336,7 @@ function mapCustomer(customer: CustomerRecord) {
     district: customer.district,
     address: customer.address,
     loyaltyPoints: customer.loyaltyPoints,
+    walletBalance: Math.round(customer.walletBalance * 100) / 100,
     totalSpent: customer.totalSpent,
     visits: customer.visits,
     lastVisitAt: customer.lastVisitAt,
@@ -401,6 +403,132 @@ export async function listPosUsers(query: PosUserQueryDto) {
     total,
     page,
     limit,
+  };
+}
+
+/**
+ * A member's full account: every bill they were served on (and every refund for bottles they brought
+ * back), with the money added to / spent from their wallet and the points earned (and how they were
+ * worked out), spent or taken back, newest first.
+ */
+export async function getMemberHistory(id: number) {
+  const member = await prisma.posCustomer.findUnique({
+    where: { id },
+    select: { id: true, firstName: true, lastName: true, mobileNumber: true, createdAt: true, loyaltyPoints: true, walletBalance: true, totalSpent: true, visits: true },
+  });
+  if (!member) throw AppError.notFound("Member not found");
+  const [sales, settings] = await Promise.all([
+    prisma.posCounterSale.findMany({
+      where: { customerId: id },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: 1000,
+      select: {
+        id: true, invoiceGroupCode: true, createdAt: true, totalAmount: true, discountAmount: true, emptyDeduction: true,
+        pointsEarned: true, pointsRate: true, pointsRedeemed: true, pointsValue: true, walletUsed: true, walletCredit: true,
+        cashPaid: true, cardPaid: true, transferPaid: true, amountReceived: true, changeGiven: true, shiftId: true, cashierId: true,
+        cashier: { select: { name: true } }, shift: { select: { shiftNo: true } },
+      },
+    }),
+    getSettings(),
+  ]);
+  const round = (value: number) => Math.round(value * 100) / 100;
+  // Refunds for bottles brought back: one entry per return (its lines share a return number).
+  const returnRows = await prisma.posReturn.findMany({
+    where: { customerId: id, type: "REFUND" },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    include: { shift: { select: { shiftNo: true } } },
+  });
+  const returnStaff = new Map((await prisma.posAdmin.findMany({ where: { id: { in: [...new Set(returnRows.map((row) => row.createdById))] } }, select: { id: true, name: true } })).map((row) => [row.id, row.name]));
+  const refunds = [...new Set(returnRows.map((row) => row.returnNo))].map((returnNo) => {
+    const rows = returnRows.filter((row) => row.returnNo === returnNo);
+    return {
+      id: -rows[0].id, time: rows[0].createdAt, returnNo, billNo: rows[0].invoiceGroupCode ?? "", shiftNo: rows[0].shift?.shiftNo ?? null,
+      by: returnStaff.get(rows[0].createdById) ?? "—", method: rows[0].refundMethod, reason: rows[0].reason,
+      items: rows.map((row) => `${row.quantity} × ${row.productName}`).join(", "),
+      amount: round(rows.reduce((sum, row) => sum + row.refundAmount, 0)),
+      points: rows.reduce((sum, row) => sum + row.pointsReversed, 0),
+    };
+  });
+  // Points and wallet only change on counter bills and refunds, so walk back from today's balances to get each entry's "after".
+  let pointsAfter = member.loyaltyPoints;
+  let walletAfter = round(member.walletBalance);
+  const entries = [
+    ...sales.map((sale) => ({ kind: "BILL" as const, time: sale.createdAt, sale })),
+    ...refunds.map((refund) => ({ kind: "RETURN" as const, time: refund.time, refund })),
+  ].sort((a, b) => b.time.getTime() - a.time.getTime());
+  const bills = entries.map((entry) => {
+    if (entry.kind === "RETURN") {
+      const { refund } = entry;
+      const toWallet = refund.method === "WALLET" ? refund.amount : 0;
+      const row = {
+        kind: "RETURN" as const,
+        id: refund.id, time: refund.time, billNo: refund.billNo, returnNo: refund.returnNo, shiftNo: refund.shiftNo, by: refund.by,
+        returnedItems: refund.items, refundAmount: refund.amount, refundMethod: refund.method, reason: refund.reason,
+        billTotal: 0, discount: 0, paid: { cash: 0, card: 0, transfer: 0, wallet: 0 }, cashReceived: 0, changeGiven: 0,
+        walletAdded: toWallet, walletSpent: 0, walletAfter,
+        pointsEarned: 0, pointsRate: null, pointsUsed: 0, pointsUsedValue: 0, pointsTakenBack: refund.points, pointsAfter,
+      };
+      pointsAfter += refund.points;
+      walletAfter = round(walletAfter - toWallet);
+      return row;
+    }
+    const { sale } = entry;
+    const row = {
+      kind: "BILL" as const,
+      returnNo: null, returnedItems: null, refundAmount: 0, refundMethod: null, reason: null, pointsTakenBack: 0,
+      id: sale.id,
+      time: sale.createdAt,
+      billNo: sale.invoiceGroupCode,
+      shiftNo: sale.shift?.shiftNo ?? null,
+      by: sale.cashier.name,
+      billTotal: round(sale.totalAmount),
+      discount: round(sale.discountAmount),
+      paid: { cash: round(sale.cashPaid), card: round(sale.cardPaid), transfer: round(sale.transferPaid), wallet: round(sale.walletUsed) },
+      // Cash handed over (amountReceived also counts the card / QR parts).
+      cashReceived: round(sale.amountReceived - sale.cardPaid - sale.transferPaid),
+      changeGiven: round(sale.changeGiven),
+      walletAdded: round(sale.walletCredit),
+      walletSpent: round(sale.walletUsed),
+      walletAfter,
+      pointsEarned: sale.pointsEarned,
+      // Rupees per point on the day of the bill; older bills did not keep it.
+      pointsRate: sale.pointsRate,
+      pointsUsed: sale.pointsRedeemed,
+      pointsUsedValue: round(sale.pointsValue),
+      pointsAfter,
+    };
+    pointsAfter = pointsAfter - sale.pointsEarned + sale.pointsRedeemed;
+    walletAfter = round(walletAfter - sale.walletCredit + sale.walletUsed);
+    return row;
+  });
+  return {
+    member: {
+      id: member.id, name: `${member.firstName} ${member.lastName}`.trim(), mobile: member.mobileNumber,
+      joined: member.createdAt, visits: member.visits, totalSpent: round(member.totalSpent),
+    },
+    wallet: {
+      balance: round(member.walletBalance),
+      // Change kept, plus refunds for returned bottles paid into the wallet.
+      added: round(sales.reduce((sum, sale) => sum + sale.walletCredit, 0) + refunds.filter((refund) => refund.method === "WALLET").reduce((sum, refund) => sum + refund.amount, 0)),
+      addedBills: sales.filter((sale) => sale.walletCredit > 0).length + refunds.filter((refund) => refund.method === "WALLET").length,
+      refunded: round(refunds.filter((refund) => refund.method === "WALLET").reduce((sum, refund) => sum + refund.amount, 0)),
+      spent: round(sales.reduce((sum, sale) => sum + sale.walletUsed, 0)),
+      spentBills: sales.filter((sale) => sale.walletUsed > 0).length,
+    },
+    points: {
+      balance: member.loyaltyPoints,
+      balanceValue: round(member.loyaltyPoints * settings.loyaltyPointValue),
+      earned: sales.reduce((sum, sale) => sum + sale.pointsEarned, 0),
+      earnedBills: sales.filter((sale) => sale.pointsEarned > 0).length,
+      used: sales.reduce((sum, sale) => sum + sale.pointsRedeemed, 0),
+      usedValue: round(sales.reduce((sum, sale) => sum + sale.pointsValue, 0)),
+      /** Taken back because bottles were returned and refunded. */
+      takenBack: refunds.reduce((sum, refund) => sum + refund.points, 0),
+      // Today's rules, to explain how points are earned and what they are worth.
+      rupeesPerPoint: settings.loyaltyRupeesPerPoint,
+      pointValue: settings.loyaltyPointValue,
+    },
+    bills,
   };
 }
 
@@ -496,11 +624,14 @@ export async function updatePosUser(id: number, dto: UpdatePosUserDto) {
 export async function deletePosUser(id: number) {
   const existing = await prisma.posCustomer.findUnique({
     where: { id },
-    select: { id: true, mobileNumber: true },
+    select: { id: true, mobileNumber: true, firstName: true, walletBalance: true },
   });
   if (!existing) throw AppError.notFound("User not found");
   if (existing.mobileNumber === WALK_IN_MOBILE) {
     throw new AppError("The walk-in customer can't be deleted", 400);
+  }
+  if (existing.walletBalance > 0.004) {
+    throw new AppError(`${existing.firstName} still has Rs. ${existing.walletBalance.toLocaleString("en-LK", { minimumFractionDigits: 2 })} in their wallet. Let them spend it first.`, 409);
   }
   // Keep the shop's sales history: move the member's sales to the walk-in customer first
   // (deleting a customer would otherwise delete their purchase records too).
@@ -648,17 +779,63 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
     return share;
   });
 
-  const amountReceived = dto.paymentMethod === "CASH"
-    ? roundCurrency(dto.amountReceived ?? Number.NaN)
-    : total;
-  if (!Number.isFinite(amountReceived) || amountReceived < total) {
+  // ── Wallet (members only): money kept at the shop on an earlier bill can pay this one ──
+  const walletUsed = roundCurrency(dto.walletUse ?? 0);
+  if (walletUsed > 0) {
+    if (!member) throw AppError.validation({ walletUse: ["Only registered loyalty members have a wallet"] });
+    if (walletUsed > member.walletBalance + 0.001) {
+      throw AppError.validation({ walletUse: [`${member.firstName}'s wallet has only Rs. ${member.walletBalance.toLocaleString("en-LK", { minimumFractionDigits: 2 })}`] });
+    }
+    if (walletUsed > total + 0.001) throw AppError.validation({ walletUse: ["The wallet can't pay more than the bill"] });
+  }
+  /** What is still to pay after the wallet: paid by cash, card, transfer / QR or split. */
+  const due = roundCurrency(total - walletUsed);
+
+  // ── How the rest is paid: cash, card, transfer / QR, or split across cash and card / transfer ──
+  let cashPaid = 0;
+  let cardPaid = 0;
+  let transferPaid = 0;
+  if (due <= 0) {
+    // The wallet paid the whole bill.
+  } else if (dto.paymentMethod === "SPLIT") {
+    cardPaid = roundCurrency(dto.split?.card ?? 0);
+    transferPaid = roundCurrency(dto.split?.transfer ?? 0);
+    if (cardPaid + transferPaid <= 0) {
+      throw AppError.validation({ split: ["Enter the amount paid by card (or transfer / QR) — the rest is paid in cash"] });
+    }
+    if (cardPaid + transferPaid >= due) {
+      throw AppError.validation({ split: ["The card / transfer part must be less than the amount to pay — for no cash, choose Card or Transfer / QR instead"] });
+    }
+    cashPaid = roundCurrency(due - cardPaid - transferPaid);
+  } else if (dto.paymentMethod === "CASH") {
+    cashPaid = due;
+  } else if (dto.paymentMethod === "CARD") {
+    cardPaid = due;
+  } else {
+    transferPaid = due;
+  }
+  // Cash handed over must cover the cash part; change comes only from cash.
+  const cashTendered = cashPaid > 0 ? roundCurrency(dto.amountReceived ?? Number.NaN) : 0;
+  if (cashPaid > 0 && (!Number.isFinite(cashTendered) || cashTendered < cashPaid)) {
     throw AppError.validation({
-      amountReceived: ["Cash received must be equal to or greater than the sale total"],
+      amountReceived: [dto.paymentMethod === "SPLIT"
+        ? `Cash received must cover the cash part (Rs. ${cashPaid.toLocaleString("en-LK", { minimumFractionDigits: 2 })})`
+        : "Cash received must be equal to or greater than the sale total"],
     });
   }
-  const changeGiven = dto.paymentMethod === "CASH"
-    ? roundCurrency(amountReceived - total)
-    : 0;
+  const changeDue = cashPaid > 0 ? roundCurrency(cashTendered - cashPaid) : 0;
+  // Members can keep some or all of the change in their wallet; that cash stays in the drawer.
+  const walletCredit = roundCurrency(dto.changeToWallet ?? 0);
+  if (walletCredit > 0) {
+    if (!member) throw AppError.validation({ changeToWallet: ["Only registered loyalty members can keep change in a wallet"] });
+    if (walletCredit > changeDue + 0.001) {
+      throw AppError.validation({ changeToWallet: [`Only Rs. ${changeDue.toLocaleString("en-LK", { minimumFractionDigits: 2 })} change is due, so no more can go into the wallet`] });
+    }
+  }
+  /** Cash actually handed back. */
+  const changeGiven = roundCurrency(changeDue - walletCredit);
+  /** Everything the customer handed over: cash given plus the card / transfer parts. */
+  const amountReceived = roundCurrency(cashTendered + cardPaid + transferPaid);
 
   const result = await prisma.$transaction(async (tx) => {
     // The shift may have been closed a moment ago on another till.
@@ -733,21 +910,37 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
 
     // Loyalty: members earn points (rate from Shop Settings) on what they paid, and their visit is recorded.
     const pointsEarned = member ? loyaltyPointsFor(total, settings.loyaltyRupeesPerPoint) : 0;
-    let memberAfter: { loyaltyPoints: number } | null = null;
+    let memberAfter: { loyaltyPoints: number; walletBalance: number } | null = null;
     if (member) {
       memberAfter = await tx.posCustomer.update({
         where: { id: member.id },
         data: {
           loyaltyPoints: { increment: pointsEarned - pointsRedeemed },
+          walletBalance: { increment: roundCurrency(walletCredit - walletUsed) },
           totalSpent: { increment: total },
           visits: { increment: 1 },
           lastVisitAt: new Date(),
         },
-        select: { loyaltyPoints: true },
+        select: { loyaltyPoints: true, walletBalance: true },
       });
-      // Two sales at once must not spend the same points twice.
+      // Two sales at once must not spend the same points or wallet money twice.
       if (memberAfter.loyaltyPoints < 0) {
         throw AppError.validation({ redeemPoints: ["Not enough points — the balance changed. Please try again."] });
+      }
+      if (memberAfter.walletBalance < -0.001) {
+        throw AppError.validation({ walletUse: ["Not enough in the wallet — the balance changed. Please try again."] });
+      }
+      // Wallet history: what was spent, then what was added, each with the balance after it.
+      const finalBalance = roundCurrency(memberAfter.walletBalance);
+      if (walletUsed > 0) {
+        await tx.posWalletTransaction.create({
+          data: { customerId: member.id, type: "DEBIT", amount: -walletUsed, balanceAfter: roundCurrency(finalBalance - walletCredit), invoiceGroupCode, shiftId: shift.id, note: `Paid towards bill ${invoiceGroupCode}`, createdById: cashierId },
+        });
+      }
+      if (walletCredit > 0) {
+        await tx.posWalletTransaction.create({
+          data: { customerId: member.id, type: "CREDIT", amount: walletCredit, balanceAfter: finalBalance, invoiceGroupCode, shiftId: shift.id, note: `Change kept from bill ${invoiceGroupCode}`, createdById: cashierId },
+        });
       }
     }
 
@@ -767,6 +960,7 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
         shiftId: shift.id,
         customerId: member?.id ?? null,
         pointsEarned,
+        pointsRate: member ? settings.loyaltyRupeesPerPoint : null,
         discountType: dto.discount?.type ?? null,
         discountValue: dto.discount?.value ?? 0,
         discountAmount,
@@ -779,6 +973,11 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
         changeGiven,
         paymentMethod: dto.paymentMethod,
         paymentReference: dto.paymentMethod === "CASH" ? null : dto.paymentReference?.trim() || null,
+        cashPaid,
+        cardPaid,
+        transferPaid,
+        walletUsed,
+        walletCredit,
         cashierId,
       },
       select: {
@@ -787,6 +986,9 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
         changeGiven: true,
         paymentMethod: true,
         paymentReference: true,
+        cashPaid: true,
+        cardPaid: true,
+        transferPaid: true,
         createdAt: true,
       },
     });
@@ -801,6 +1003,7 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
             pointsEarned,
             pointsRedeemed,
             pointsBalance: memberAfter?.loyaltyPoints ?? member.loyaltyPoints,
+            walletBalance: roundCurrency(memberAfter?.walletBalance ?? member.walletBalance),
           }
         : null,
       purchases,
@@ -821,6 +1024,13 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
     total,
     amountReceived,
     changeGiven,
+    cashPaid,
+    cardPaid,
+    transferPaid,
+    cashTendered,
+    walletUsed,
+    walletCredit,
+    changeDue,
     itemCount: mergedItems.reduce((sum, item) => sum + item.quantity, 0),
     ...result,
   };
