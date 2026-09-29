@@ -18,23 +18,28 @@ const optionalEmailSchema = z
     return value;
   });
 
+// Optional text: blank input becomes "not provided".
+const optionalText = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .optional()
+    .transform((value) => (value ? value : undefined));
+
+/** Loyalty member: only name and mobile are required. */
 export const createPosUserSchema = z.object({
   firstName: requiredTrimmedText("First name"),
-  lastName: requiredTrimmedText("Last name"),
-  nic: z.string().trim().min(5, "NIC is required").max(40, "NIC is too long"),
+  lastName: z.string().trim().max(120).optional().default(""),
   mobileNumber: z
     .string()
     .trim()
-    .min(7, "Mobile number is required")
-    .max(20, "Mobile number is too long"),
+    .regex(/^[0-9+\s-]{7,20}$/, "Enter a valid mobile number"),
+  nic: optionalText(40),
   email: optionalEmailSchema,
-  province: requiredTrimmedText("Province"),
-  district: requiredTrimmedText("District"),
-  address: z
-    .string()
-    .trim()
-    .min(5, "Address is required")
-    .max(1000, "Address is too long"),
+  province: optionalText(120),
+  district: optionalText(120),
+  address: optionalText(1000),
 });
 
 export const updatePosUserSchema = createPosUserSchema.partial();
@@ -113,12 +118,60 @@ export const checkoutSaleSchema = z.object({
         productId: z.number().int().positive(),
         quantity: z.number().int().min(1).max(999),
         unitPrice: z.number().min(0),
+        // Empty bottles handed back for this product; priced server-side from emptyBottlePrice.
+        emptiesReturned: z.number().int().min(0).max(999).default(0),
       }),
     )
     .min(1, "Add at least one product")
     .max(100),
-  paymentMethod: z.enum(["CASH", "CHEQUE", "BANK_TRANSFER"]).default("CASH"),
+  paymentMethod: z.enum(["CASH", "CHEQUE", "BANK_TRANSFER", "CARD", "SPLIT"]).default("CASH"),
+  /** Card approval code from the card slip, or the bank transfer / QR reference. */
+  paymentReference: z.string().trim().max(60).optional(),
+  /** Cash handed over (cash sales, and the cash part of a split bill). */
   amountReceived: z.number().min(0).optional(),
+  /** Loyalty members only: rupees taken from their wallet to pay part (or all) of the bill. */
+  walletUse: z.number().min(0).max(100_000_000).optional(),
+  /** Loyalty members only: how much of the cash change to keep in their wallet instead of handing it back. */
+  changeToWallet: z.number().min(0).max(100_000_000).optional(),
+  /** SPLIT only: the parts paid by card and by transfer / QR; the rest of the total is paid in cash. */
+  split: z
+    .object({
+      card: z.number().min(0).max(100_000_000).default(0),
+      transfer: z.number().min(0).max(100_000_000).default(0),
+    })
+    .optional(),
+  /** Loyalty member buying; leave out for a walk-in customer. */
+  customerId: z.number().int().positive().optional(),
+  /** Bill discount (only when discounts are switched on in Shop Settings). */
+  discount: z
+    .object({
+      type: z.enum(["PERCENT", "AMOUNT"]),
+      value: z.number().positive("Discount must be more than 0"),
+    })
+    .optional(),
+  /** Loyalty points to spend, 1 point = Rs. 1 (members only, when redemption is switched on). */
+  redeemPoints: z.number().int().min(0).max(10_000_000).optional(),
+});
+
+/** Sales bills list (counter sales). */
+export const salesQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(200).default(30),
+  search: z.string().trim().max(100).optional(),
+  from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  customerId: z.coerce.number().int().positive().optional(),
+  /** "all" = every branch (for people who can switch branches). */
+  branch: z.string().optional(),
+  branchId: z.string().optional(),
+});
+
+/** Dashboard summary for a date range (inclusive, local dates). */
+export const dashboardQuerySchema = z.object({
+  from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  branch: z.string().optional(),
+  branchId: z.string().optional(),
 });
 
 export const purchaseQuerySchema = z.object({
@@ -201,6 +254,8 @@ export type UpdatePosUserDto = z.infer<typeof updatePosUserSchema>;
 export type PosUserQueryDto = z.infer<typeof posUserQuerySchema>;
 export type CreatePurchaseDto = z.infer<typeof createPurchaseSchema>;
 export type CheckoutSaleDto = z.infer<typeof checkoutSaleSchema>;
+export type SalesQueryDto = z.infer<typeof salesQuerySchema>;
+export type DashboardQueryDto = z.infer<typeof dashboardQuerySchema>;
 export type PurchaseQueryDto = z.infer<typeof purchaseQuerySchema>;
 export type SettlePurchaseDto = z.infer<typeof settlePurchaseSchema>;
 export type UpdatePurchaseDto = z.infer<typeof updatePurchaseSchema>;

@@ -1,3 +1,4 @@
+import { requestBranch, requestBranchScope } from "../branches/branch-context";
 import type { NextFunction, Request, Response } from "express";
 import { sendCreated, sendSuccess } from "../../common/utils/response";
 import { AppError, validate } from "../../common/utils/errors";
@@ -7,6 +8,8 @@ import {
   createInvoiceTermSchema,
   createPosUserSchema,
   checkoutSaleSchema,
+  dashboardQuerySchema,
+  salesQuerySchema,
   purchaseQuerySchema,
   posUserQuerySchema,
   settlePurchaseSchema,
@@ -16,6 +19,23 @@ import {
   updatePurchaseSchema,
 } from "./dto/pos-user.dto";
 import * as service from "./pos-user-management.service";
+import * as salesService from "./pos-sales.service";
+
+export async function listSales(req: Request, res: Response, next: NextFunction) {
+  try {
+    return sendSuccess(res, await salesService.listSales(validate(salesQuerySchema, req.query), await requestBranchScope(req)));
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function getDashboard(req: Request, res: Response, next: NextFunction) {
+  try {
+    return sendSuccess(res, await salesService.getDashboardSummary(validate(dashboardQuerySchema, req.query), await requestBranchScope(req)));
+  } catch (error) {
+    return next(error);
+  }
+}
 
 function parsePositiveIntParam(
   paramName: string,
@@ -51,6 +71,14 @@ export async function getPosUsers(
   try {
     const query = validate(posUserQuerySchema, req.query);
     return sendSuccess(res, await service.listPosUsers(query));
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function getMemberHistory(req: Request, res: Response, next: NextFunction) {
+  try {
+    return sendSuccess(res, await service.getMemberHistory(parsePositiveIntParam("id", req.params.id)));
   } catch (error) {
     return next(error);
   }
@@ -118,7 +146,7 @@ export async function createPurchase(
   try {
     const dto = validate(createPurchaseSchema, req.body);
     const id = parsePositiveIntParam("id", req.params.id);
-    const data = await service.createPurchase(id, dto);
+    const data = await service.createPurchase(id, dto, (await requestBranch(req)).id);
     return sendCreated(res, data);
   } catch (error) {
     return next(error);
@@ -132,8 +160,8 @@ export async function checkoutSale(
 ) {
   try {
     const dto = validate(checkoutSaleSchema, req.body);
-    const cashierId = (req as unknown as { user: { id: number } }).user.id;
-    return sendCreated(res, await service.checkoutSale(dto, cashierId));
+    const user = (req as unknown as { user: { id: number; role: string } }).user;
+    return sendCreated(res, await service.checkoutSale(dto, user.id, user.role, (await requestBranch(req)).id));
   } catch (error) {
     return next(error);
   }

@@ -1,4 +1,5 @@
 import "./globals.css";
+import "./lounge.css";
 import type { Metadata } from "next";
 import { ThemeProvider } from "./components/ThemeProvider";
 
@@ -14,7 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem('pos_theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t;}catch(e){}`,
+            __html: `try{var t=localStorage.getItem('pos_theme');document.documentElement.dataset.theme=t==='light'?'light':'dark';}catch(e){document.documentElement.dataset.theme='dark';}`,
           }}
         />
         <ThemeProvider>{children}</ThemeProvider>

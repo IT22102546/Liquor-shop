@@ -1,6 +1,10 @@
 import { Prisma } from "../../generated/prisma";
 import { prisma } from "../../database/prisma.client";
 import { AppError } from "../../common/utils/errors";
+import { loyaltyPointsFor } from "../../config/loyalty";
+import { assertHardLiquorLimit, getSettings } from "../settings/settings.service";
+import { findOpenShift, recordMovements } from "../book/stock-movements";
+import { changeStock, countsAt, forBranch } from "../branches/branch-stock";
 import type {
   CreateInvoiceAccountDto,
   CreateInvoiceTermDto,
@@ -302,19 +306,26 @@ function ensureDistrictInProvince(province: string, district: string) {
   }
 }
 
-function mapCustomer(customer: {
+type CustomerRecord = {
   id: number;
   firstName: string;
   lastName: string;
-  nic: string;
+  nic: string | null;
   mobileNumber: string;
   email: string | null;
-  province: string;
-  district: string;
-  address: string;
+  province: string | null;
+  district: string | null;
+  address: string | null;
+  loyaltyPoints: number;
+  walletBalance: number;
+  totalSpent: number;
+  visits: number;
+  lastVisitAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
-}) {
+};
+
+function mapCustomer(customer: CustomerRecord) {
   return {
     id: customer.id,
     firstName: customer.firstName,
@@ -325,9 +336,25 @@ function mapCustomer(customer: {
     province: customer.province,
     district: customer.district,
     address: customer.address,
+    loyaltyPoints: customer.loyaltyPoints,
+    walletBalance: Math.round(customer.walletBalance * 100) / 100,
+    totalSpent: customer.totalSpent,
+    visits: customer.visits,
+    lastVisitAt: customer.lastVisitAt,
     createdAt: customer.createdAt,
     updatedAt: customer.updatedAt,
   };
+}
+
+/** Shared record used for every sale without a loyalty member. */
+export const WALK_IN_MOBILE = "WALK-IN";
+
+export async function getWalkInCustomer(db: Prisma.TransactionClient | typeof prisma = prisma) {
+  return db.posCustomer.upsert({
+    where: { mobileNumber: WALK_IN_MOBILE },
+    update: {},
+    create: { firstName: "Walk-in", lastName: "Customer", nic: "WALK-IN", mobileNumber: WALK_IN_MOBILE },
+  });
 }
 
 export function getProvinceDistrictMeta() {
@@ -346,19 +373,21 @@ export async function listPosUsers(query: PosUserQueryDto) {
   const skip = (page - 1) * limit;
   const search = normalizeSearch(query.search);
 
-  const where: Prisma.PosCustomerWhereInput = search
-    ? {
-        OR: [
-          { firstName: { contains: search, mode: "insensitive" } },
-          { lastName: { contains: search, mode: "insensitive" } },
-          { nic: { contains: search, mode: "insensitive" } },
-          { mobileNumber: { contains: search, mode: "insensitive" } },
-          { email: { contains: search, mode: "insensitive" } },
-          { province: { contains: search, mode: "insensitive" } },
-          { district: { contains: search, mode: "insensitive" } },
-        ],
-      }
-    : {};
+  // Loyalty members only — the shared walk-in record is not a member.
+  const where: Prisma.PosCustomerWhereInput = {
+    mobileNumber: { not: WALK_IN_MOBILE },
+    ...(search
+      ? {
+          OR: [
+            { firstName: { contains: search, mode: "insensitive" } },
+            { lastName: { contains: search, mode: "insensitive" } },
+            { mobileNumber: { contains: search.replace(/\s+/g, "") } },
+            { nic: { contains: search, mode: "insensitive" } },
+            { email: { contains: search, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+  };
 
   const [users, total] = await Promise.all([
     prisma.posCustomer.findMany({
@@ -378,6 +407,132 @@ export async function listPosUsers(query: PosUserQueryDto) {
   };
 }
 
+/**
+ * A member's full account: every bill they were served on (and every refund for bottles they brought
+ * back), with the money added to / spent from their wallet and the points earned (and how they were
+ * worked out), spent or taken back, newest first.
+ */
+export async function getMemberHistory(id: number) {
+  const member = await prisma.posCustomer.findUnique({
+    where: { id },
+    select: { id: true, firstName: true, lastName: true, mobileNumber: true, createdAt: true, loyaltyPoints: true, walletBalance: true, totalSpent: true, visits: true },
+  });
+  if (!member) throw AppError.notFound("Member not found");
+  const [sales, settings] = await Promise.all([
+    prisma.posCounterSale.findMany({
+      where: { customerId: id },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: 1000,
+      select: {
+        id: true, invoiceGroupCode: true, createdAt: true, totalAmount: true, discountAmount: true, emptyDeduction: true,
+        pointsEarned: true, pointsRate: true, pointsRedeemed: true, pointsValue: true, walletUsed: true, walletCredit: true,
+        cashPaid: true, cardPaid: true, transferPaid: true, amountReceived: true, changeGiven: true, shiftId: true, cashierId: true,
+        cashier: { select: { name: true } }, shift: { select: { shiftNo: true } },
+      },
+    }),
+    getSettings(),
+  ]);
+  const round = (value: number) => Math.round(value * 100) / 100;
+  // Refunds for bottles brought back: one entry per return (its lines share a return number).
+  const returnRows = await prisma.posReturn.findMany({
+    where: { customerId: id, type: "REFUND" },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    include: { shift: { select: { shiftNo: true } } },
+  });
+  const returnStaff = new Map((await prisma.posAdmin.findMany({ where: { id: { in: [...new Set(returnRows.map((row) => row.createdById))] } }, select: { id: true, name: true } })).map((row) => [row.id, row.name]));
+  const refunds = [...new Set(returnRows.map((row) => row.returnNo))].map((returnNo) => {
+    const rows = returnRows.filter((row) => row.returnNo === returnNo);
+    return {
+      id: -rows[0].id, time: rows[0].createdAt, returnNo, billNo: rows[0].invoiceGroupCode ?? "", shiftNo: rows[0].shift?.shiftNo ?? null,
+      by: returnStaff.get(rows[0].createdById) ?? "—", method: rows[0].refundMethod, reason: rows[0].reason,
+      items: rows.map((row) => `${row.quantity} × ${row.productName}`).join(", "),
+      amount: round(rows.reduce((sum, row) => sum + row.refundAmount, 0)),
+      points: rows.reduce((sum, row) => sum + row.pointsReversed, 0),
+    };
+  });
+  // Points and wallet only change on counter bills and refunds, so walk back from today's balances to get each entry's "after".
+  let pointsAfter = member.loyaltyPoints;
+  let walletAfter = round(member.walletBalance);
+  const entries = [
+    ...sales.map((sale) => ({ kind: "BILL" as const, time: sale.createdAt, sale })),
+    ...refunds.map((refund) => ({ kind: "RETURN" as const, time: refund.time, refund })),
+  ].sort((a, b) => b.time.getTime() - a.time.getTime());
+  const bills = entries.map((entry) => {
+    if (entry.kind === "RETURN") {
+      const { refund } = entry;
+      const toWallet = refund.method === "WALLET" ? refund.amount : 0;
+      const row = {
+        kind: "RETURN" as const,
+        id: refund.id, time: refund.time, billNo: refund.billNo, returnNo: refund.returnNo, shiftNo: refund.shiftNo, by: refund.by,
+        returnedItems: refund.items, refundAmount: refund.amount, refundMethod: refund.method, reason: refund.reason,
+        billTotal: 0, discount: 0, paid: { cash: 0, card: 0, transfer: 0, wallet: 0 }, cashReceived: 0, changeGiven: 0,
+        walletAdded: toWallet, walletSpent: 0, walletAfter,
+        pointsEarned: 0, pointsRate: null, pointsUsed: 0, pointsUsedValue: 0, pointsTakenBack: refund.points, pointsAfter,
+      };
+      pointsAfter += refund.points;
+      walletAfter = round(walletAfter - toWallet);
+      return row;
+    }
+    const { sale } = entry;
+    const row = {
+      kind: "BILL" as const,
+      returnNo: null, returnedItems: null, refundAmount: 0, refundMethod: null, reason: null, pointsTakenBack: 0,
+      id: sale.id,
+      time: sale.createdAt,
+      billNo: sale.invoiceGroupCode,
+      shiftNo: sale.shift?.shiftNo ?? null,
+      by: sale.cashier.name,
+      billTotal: round(sale.totalAmount),
+      discount: round(sale.discountAmount),
+      paid: { cash: round(sale.cashPaid), card: round(sale.cardPaid), transfer: round(sale.transferPaid), wallet: round(sale.walletUsed) },
+      // Cash handed over (amountReceived also counts the card / QR parts).
+      cashReceived: round(sale.amountReceived - sale.cardPaid - sale.transferPaid),
+      changeGiven: round(sale.changeGiven),
+      walletAdded: round(sale.walletCredit),
+      walletSpent: round(sale.walletUsed),
+      walletAfter,
+      pointsEarned: sale.pointsEarned,
+      // Rupees per point on the day of the bill; older bills did not keep it.
+      pointsRate: sale.pointsRate,
+      pointsUsed: sale.pointsRedeemed,
+      pointsUsedValue: round(sale.pointsValue),
+      pointsAfter,
+    };
+    pointsAfter = pointsAfter - sale.pointsEarned + sale.pointsRedeemed;
+    walletAfter = round(walletAfter - sale.walletCredit + sale.walletUsed);
+    return row;
+  });
+  return {
+    member: {
+      id: member.id, name: `${member.firstName} ${member.lastName}`.trim(), mobile: member.mobileNumber,
+      joined: member.createdAt, visits: member.visits, totalSpent: round(member.totalSpent),
+    },
+    wallet: {
+      balance: round(member.walletBalance),
+      // Change kept, plus refunds for returned bottles paid into the wallet.
+      added: round(sales.reduce((sum, sale) => sum + sale.walletCredit, 0) + refunds.filter((refund) => refund.method === "WALLET").reduce((sum, refund) => sum + refund.amount, 0)),
+      addedBills: sales.filter((sale) => sale.walletCredit > 0).length + refunds.filter((refund) => refund.method === "WALLET").length,
+      refunded: round(refunds.filter((refund) => refund.method === "WALLET").reduce((sum, refund) => sum + refund.amount, 0)),
+      spent: round(sales.reduce((sum, sale) => sum + sale.walletUsed, 0)),
+      spentBills: sales.filter((sale) => sale.walletUsed > 0).length,
+    },
+    points: {
+      balance: member.loyaltyPoints,
+      balanceValue: round(member.loyaltyPoints * settings.loyaltyPointValue),
+      earned: sales.reduce((sum, sale) => sum + sale.pointsEarned, 0),
+      earnedBills: sales.filter((sale) => sale.pointsEarned > 0).length,
+      used: sales.reduce((sum, sale) => sum + sale.pointsRedeemed, 0),
+      usedValue: round(sales.reduce((sum, sale) => sum + sale.pointsValue, 0)),
+      /** Taken back because bottles were returned and refunded. */
+      takenBack: refunds.reduce((sum, refund) => sum + refund.points, 0),
+      // Today's rules, to explain how points are earned and what they are worth.
+      rupeesPerPoint: settings.loyaltyRupeesPerPoint,
+      pointValue: settings.loyaltyPointValue,
+    },
+    bills,
+  };
+}
+
 export async function getPosUser(id: number) {
   const user = await prisma.posCustomer.findUnique({
     where: { id },
@@ -387,15 +542,15 @@ export async function getPosUser(id: number) {
 }
 
 export async function createPosUser(dto: CreatePosUserDto) {
-  ensureDistrictInProvince(dto.province, dto.district);
+  if (dto.province && dto.district) ensureDistrictInProvince(dto.province, dto.district);
 
   try {
     const created = await prisma.posCustomer.create({
       data: {
         firstName: dto.firstName,
-        lastName: dto.lastName,
-        nic: dto.nic,
-        mobileNumber: dto.mobileNumber,
+        lastName: dto.lastName ?? "",
+        nic: dto.nic ?? null,
+        mobileNumber: dto.mobileNumber.replace(/\s+/g, ""),
         email: dto.email,
         province: dto.province,
         district: dto.district,
@@ -428,8 +583,9 @@ export async function updatePosUser(id: number, dto: UpdatePosUserDto) {
   if (dto.lastName !== undefined) updateData.lastName = dto.lastName;
   if (dto.nic !== undefined) updateData.nic = dto.nic;
   if (dto.mobileNumber !== undefined)
-    updateData.mobileNumber = dto.mobileNumber;
+    updateData.mobileNumber = dto.mobileNumber.replace(/\s+/g, "");
   if (dto.email !== undefined) updateData.email = dto.email ?? null;
+  if (dto.nic !== undefined) updateData.nic = dto.nic ?? null;
   if (dto.province !== undefined) updateData.province = dto.province;
   if (dto.district !== undefined) updateData.district = dto.district;
   if (dto.address !== undefined) updateData.address = dto.address;
@@ -444,10 +600,9 @@ export async function updatePosUser(id: number, dto: UpdatePosUserDto) {
       select: { province: true, district: true },
     });
     if (!current) throw AppError.notFound("User not found");
-    ensureDistrictInProvince(
-      effectiveProvince ?? current.province,
-      effectiveDistrict ?? current.district,
-    );
+    const province = effectiveProvince ?? current.province;
+    const district = effectiveDistrict ?? current.district;
+    if (province && district) ensureDistrictInProvince(province, district);
   }
 
   try {
@@ -470,18 +625,32 @@ export async function updatePosUser(id: number, dto: UpdatePosUserDto) {
 export async function deletePosUser(id: number) {
   const existing = await prisma.posCustomer.findUnique({
     where: { id },
-    select: { id: true },
+    select: { id: true, mobileNumber: true, firstName: true, walletBalance: true },
   });
   if (!existing) throw AppError.notFound("User not found");
-  await prisma.posCustomer.delete({ where: { id } });
+  if (existing.mobileNumber === WALK_IN_MOBILE) {
+    throw new AppError("The walk-in customer can't be deleted", 400);
+  }
+  if (existing.walletBalance > 0.004) {
+    throw new AppError(`${existing.firstName} still has Rs. ${existing.walletBalance.toLocaleString("en-LK", { minimumFractionDigits: 2 })} in their wallet. Let them spend it first.`, 409);
+  }
+  // Keep the shop's sales history: move the member's sales to the walk-in customer first
+  // (deleting a customer would otherwise delete their purchase records too).
+  await prisma.$transaction(async (tx) => {
+    const walkIn = await getWalkInCustomer(tx);
+    await tx.posCustomerPurchase.updateMany({ where: { customerId: id }, data: { customerId: walkIn.id } });
+    await tx.posCounterSale.updateMany({ where: { customerId: id }, data: { customerId: null } });
+    await tx.posCustomer.delete({ where: { id } });
+  });
 }
 
-export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
+export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cashierRole: string, branchId: number) {
   const mergedItems = Array.from(
     dto.items.reduce((items, item) => {
       const existing = items.get(item.productId);
       if (existing) {
         existing.quantity += item.quantity;
+        existing.emptiesReturned += item.emptiesReturned;
         existing.unitPrice = item.unitPrice;
       } else {
         items.set(item.productId, { ...item });
@@ -492,79 +661,214 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
 
   const products = await prisma.inventoryProduct.findMany({
     where: { id: { in: mergedItems.map((item) => item.productId) } },
-    select: { id: true, name: true, displayId: true, quantity: true },
+    select: { id: true, name: true, displayId: true, quantity: true, emptyBottlePrice: true, categoryId: true, isHardLiquor: true },
   });
   if (products.length !== mergedItems.length) {
     throw AppError.validation({ items: ["One or more products no longer exist"] });
   }
-  const productById = new Map(products.map((product) => [product.id, product]));
+  // Sri Lankan rule: only so many bottles of hard liquor on one bill (beer doesn't count).
+  await assertHardLiquorLimit(mergedItems.map((item) => ({
+    isHardLiquor: products.find((product) => product.id === item.productId)!.isHardLiquor,
+    quantity: item.quantity,
+  })));
+  // Sold from this branch's shelf.
+  const productById = new Map((await forBranch(branchId, products.map((product) => ({ ...product, damagedQuantity: 0, emptyBottlesOnHand: 0 })))).map((product) => [product.id, product]));
   for (const item of mergedItems) {
     const product = productById.get(item.productId)!;
     if (item.quantity > product.quantity) {
       throw AppError.validation({
-        items: [`Only ${product.quantity} unit(s) of ${product.name} are available`],
+        items: [`Only ${product.quantity} unit(s) of ${product.name} are available at this branch`],
+      });
+    }
+    if (item.emptiesReturned > 0 && !(product.emptyBottlePrice && product.emptyBottlePrice > 0)) {
+      throw AppError.validation({
+        items: [`${product.name} has no empty bottle price, so empties can't be deducted`],
+      });
+    }
+    if (item.emptiesReturned > item.quantity) {
+      throw AppError.validation({
+        items: [`Empties for ${product.name} can't be more than the ${item.quantity} bottle(s) bought`],
       });
     }
   }
 
-  const invoiceGroupCode = `POS-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
-  const total = roundCurrency(
-    mergedItems.reduce(
-      (sum, item) => sum + item.unitPrice * item.quantity,
-      0,
-    ),
-  );
-  const amountReceived = dto.paymentMethod === "CASH"
-    ? roundCurrency(dto.amountReceived ?? Number.NaN)
-    : total;
-  if (!Number.isFinite(amountReceived) || amountReceived < total) {
+  // Empty-bottle deduction is priced from the product record, never from the client.
+  const lines = mergedItems.map((item) => {
+    const product = productById.get(item.productId)!;
+    const grossTotal = roundCurrency(item.unitPrice * item.quantity);
+    const emptyDeduction = roundCurrency(item.emptiesReturned * (product.emptyBottlePrice ?? 0));
+    return { ...item, grossTotal, emptyDeduction, lineTotal: roundCurrency(grossTotal - emptyDeduction) };
+  });
+  const negativeLine = lines.find((line) => line.lineTotal < 0);
+  if (negativeLine) {
     throw AppError.validation({
-      amountReceived: ["Cash received must be equal to or greater than the sale total"],
+      items: [`Empty bottle deduction is more than the price of ${productById.get(negativeLine.productId)!.name}`],
     });
   }
-  const changeGiven = dto.paymentMethod === "CASH"
-    ? roundCurrency(amountReceived - total)
-    : 0;
+
+  const member = dto.customerId
+    ? await prisma.posCustomer.findUnique({ where: { id: dto.customerId } })
+    : null;
+  if (dto.customerId && (!member || member.mobileNumber === WALK_IN_MOBILE)) {
+    throw AppError.validation({ customerId: ["Loyalty member not found"] });
+  }
+
+  const invoiceGroupCode = `POS-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+  const subtotal = roundCurrency(lines.reduce((sum, line) => sum + line.grossTotal, 0));
+  const emptyDeductionTotal = roundCurrency(lines.reduce((sum, line) => sum + line.emptyDeduction, 0));
+  const emptiesReturnedTotal = lines.reduce((sum, line) => sum + line.emptiesReturned, 0);
+  const afterEmpties = roundCurrency(subtotal - emptyDeductionTotal);
+  const settings = await getSettings();
+
+  // Every sale belongs to the open till shift (for book balancing / the Z report).
+  const shift = await findOpenShift(prisma, branchId);
+  if (!shift) {
+    throw AppError.validation({ shift: ["Start a shift at this branch before selling — open Day End or use “Start shift” on the counter"] });
+  }
+
+  // ── Bill discount (switched on/off in Shop Settings; cashiers are capped) ──
+  let discountAmount = 0;
+  if (dto.discount) {
+    if (!settings.discountsEnabled) {
+      throw AppError.validation({ discount: ["Discounts are switched off in Shop Settings"] });
+    }
+    if (dto.discount.type === "PERCENT" && dto.discount.value > 100) {
+      throw AppError.validation({ discount: ["A percentage discount can't be more than 100%"] });
+    }
+    discountAmount = roundCurrency(
+      dto.discount.type === "PERCENT" ? (afterEmpties * dto.discount.value) / 100 : dto.discount.value,
+    );
+    if (discountAmount > afterEmpties) {
+      throw AppError.validation({ discount: ["The discount can't be more than the bill"] });
+    }
+    const percentOfBill = afterEmpties > 0 ? (discountAmount / afterEmpties) * 100 : 0;
+    if (cashierRole !== "ADMIN" && percentOfBill > settings.maxCashierDiscountPercent + 0.001) {
+      throw AppError.validation({
+        discount: [`Cashiers can give up to ${settings.maxCashierDiscountPercent}% discount. Ask an administrator for more.`],
+      });
+    }
+  }
+  const afterDiscount = roundCurrency(afterEmpties - discountAmount);
+
+  // ── Loyalty points (registered members only; value per point from Shop Settings) ──
+  const pointsRedeemed = dto.redeemPoints ?? 0;
+  if (pointsRedeemed > 0) {
+    if (!settings.loyaltyRedemptionEnabled) {
+      throw AppError.validation({ redeemPoints: ["Using loyalty points is switched off in Shop Settings"] });
+    }
+    if (!member) {
+      throw AppError.validation({ redeemPoints: ["Only registered loyalty members can use points"] });
+    }
+    if (pointsRedeemed > member.loyaltyPoints) {
+      throw AppError.validation({ redeemPoints: [`${member.firstName} has only ${member.loyaltyPoints} points`] });
+    }
+    if (roundCurrency(pointsRedeemed * settings.loyaltyPointValue) > afterDiscount) {
+      throw AppError.validation({ redeemPoints: ["Points can't be more than the bill"] });
+    }
+  }
+  // Rupee value at today's rate is stored on the sale, so later rate changes don't alter old bills.
+  const pointsValue = roundCurrency(pointsRedeemed * settings.loyaltyPointValue);
+  const total = roundCurrency(afterDiscount - pointsValue);
+
+  // Share the bill-level reduction across the lines by value, so each product's revenue is right.
+  const billReduction = roundCurrency(discountAmount + pointsValue);
+  let reductionLeft = billReduction;
+  const lineShares = lines.map((line, index) => {
+    const share = index === lines.length - 1
+      ? reductionLeft
+      : afterEmpties > 0 ? roundCurrency((billReduction * line.lineTotal) / afterEmpties) : 0;
+    reductionLeft = roundCurrency(reductionLeft - share);
+    return share;
+  });
+
+  // ── Wallet (members only): money kept at the shop on an earlier bill can pay this one ──
+  const walletUsed = roundCurrency(dto.walletUse ?? 0);
+  if (walletUsed > 0) {
+    if (!member) throw AppError.validation({ walletUse: ["Only registered loyalty members have a wallet"] });
+    if (walletUsed > member.walletBalance + 0.001) {
+      throw AppError.validation({ walletUse: [`${member.firstName}'s wallet has only Rs. ${member.walletBalance.toLocaleString("en-LK", { minimumFractionDigits: 2 })}`] });
+    }
+    if (walletUsed > total + 0.001) throw AppError.validation({ walletUse: ["The wallet can't pay more than the bill"] });
+  }
+  /** What is still to pay after the wallet: paid by cash, card, transfer / QR or split. */
+  const due = roundCurrency(total - walletUsed);
+
+  // ── How the rest is paid: cash, card, transfer / QR, or split across cash and card / transfer ──
+  let cashPaid = 0;
+  let cardPaid = 0;
+  let transferPaid = 0;
+  if (due <= 0) {
+    // The wallet paid the whole bill.
+  } else if (dto.paymentMethod === "SPLIT") {
+    cardPaid = roundCurrency(dto.split?.card ?? 0);
+    transferPaid = roundCurrency(dto.split?.transfer ?? 0);
+    if (cardPaid + transferPaid <= 0) {
+      throw AppError.validation({ split: ["Enter the amount paid by card (or transfer / QR) — the rest is paid in cash"] });
+    }
+    if (cardPaid + transferPaid >= due) {
+      throw AppError.validation({ split: ["The card / transfer part must be less than the amount to pay — for no cash, choose Card or Transfer / QR instead"] });
+    }
+    cashPaid = roundCurrency(due - cardPaid - transferPaid);
+  } else if (dto.paymentMethod === "CASH") {
+    cashPaid = due;
+  } else if (dto.paymentMethod === "CARD") {
+    cardPaid = due;
+  } else {
+    transferPaid = due;
+  }
+  // Cash handed over must cover the cash part; change comes only from cash.
+  const cashTendered = cashPaid > 0 ? roundCurrency(dto.amountReceived ?? Number.NaN) : 0;
+  if (cashPaid > 0 && (!Number.isFinite(cashTendered) || cashTendered < cashPaid)) {
+    throw AppError.validation({
+      amountReceived: [dto.paymentMethod === "SPLIT"
+        ? `Cash received must cover the cash part (Rs. ${cashPaid.toLocaleString("en-LK", { minimumFractionDigits: 2 })})`
+        : "Cash received must be equal to or greater than the sale total"],
+    });
+  }
+  const changeDue = cashPaid > 0 ? roundCurrency(cashTendered - cashPaid) : 0;
+  // Members can keep some or all of the change in their wallet; that cash stays in the drawer.
+  const walletCredit = roundCurrency(dto.changeToWallet ?? 0);
+  if (walletCredit > 0) {
+    if (!member) throw AppError.validation({ changeToWallet: ["Only registered loyalty members can keep change in a wallet"] });
+    if (walletCredit > changeDue + 0.001) {
+      throw AppError.validation({ changeToWallet: [`Only Rs. ${changeDue.toLocaleString("en-LK", { minimumFractionDigits: 2 })} change is due, so no more can go into the wallet`] });
+    }
+  }
+  /** Cash actually handed back. */
+  const changeGiven = roundCurrency(changeDue - walletCredit);
+  /** Everything the customer handed over: cash given plus the card / transfer parts. */
+  const amountReceived = roundCurrency(cashTendered + cardPaid + transferPaid);
 
   const result = await prisma.$transaction(async (tx) => {
-    const customer = await tx.posCustomer.upsert({
-      where: { nic: "WALK-IN" },
-      update: {},
-      create: {
-        firstName: "Walk-in",
-        lastName: "Customer",
-        nic: "WALK-IN",
-        mobileNumber: "WALK-IN",
-        province: "North Western",
-        district: "Kurunegala",
-        address: "Bar Shop counter sale",
-      },
-    });
+    // The shift may have been closed a moment ago on another till.
+    const stillOpen = await tx.posShift.findFirst({ where: { id: shift.id, status: "OPEN" }, select: { id: true } });
+    if (!stillOpen) {
+      throw AppError.validation({ shift: ["This shift was just closed — start a new shift to keep selling"] });
+    }
+    const customer = member ?? (await getWalkInCustomer(tx));
 
     const purchases = [];
-    for (const item of mergedItems) {
+    for (const [lineIndex, item] of lines.entries()) {
       const product = productById.get(item.productId)!;
-      const updated = await tx.inventoryProduct.updateMany({
-        where: { id: item.productId, quantity: { gte: item.quantity } },
-        data: {
-          quantity: { decrement: item.quantity },
-          soldQuantity: { increment: item.quantity },
-          lastSoldAt: new Date(),
-        },
-      });
-      if (updated.count !== 1) {
-        throw new AppError(`${product.name} does not have enough stock`, 409);
-      }
+      const billDiscount = lineShares[lineIndex];
+      // Off this branch's shelf (fails if another till sold them a moment ago); empties handed in stay here.
+      await changeStock(tx, branchId, item.productId, { quantity: -item.quantity, empties: item.emptiesReturned });
+      await tx.inventoryProduct.update({ where: { id: item.productId }, data: { soldQuantity: { increment: item.quantity }, lastSoldAt: new Date() } });
 
-      const lineTotal = roundCurrency(item.unitPrice * item.quantity);
+      const lineTotal = roundCurrency(item.lineTotal - billDiscount);
       const purchase = await tx.posCustomerPurchase.create({
         data: {
           customerId: customer.id,
           itemType: "INVENTORY",
-          purchaseMode: mergedItems.length > 1 ? "BULK" : "SINGLE",
+          purchaseMode: lines.length > 1 ? "BULK" : "SINGLE",
           invoiceGroupCode,
           inventoryProductId: item.productId,
+          // Recorded on the line, so reports keep what counted at the time of sale.
+          isHardLiquor: products.find((row) => row.id === item.productId)?.isHardLiquor ?? false,
           quantity: item.quantity,
+          emptiesReturned: item.emptiesReturned,
+          emptyDeduction: item.emptyDeduction,
+          billDiscount,
           currentSellingPrice: item.unitPrice,
           finalSellingPrice: lineTotal,
           paymentType: "DIRECT",
@@ -591,17 +895,85 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
         name: product.name,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
-        lineTotal,
+        emptiesReturned: item.emptiesReturned,
+        emptyDeduction: item.emptyDeduction,
+        // Line amount after empties; the bill discount/points are shown once at the bottom.
+        lineTotal: item.lineTotal,
+        billDiscount,
       });
     }
+
+    // Loyalty: members earn points (rate from Shop Settings) on what they paid, and their visit is recorded.
+    const pointsEarned = member ? loyaltyPointsFor(total, settings.loyaltyRupeesPerPoint) : 0;
+    let memberAfter: { loyaltyPoints: number; walletBalance: number } | null = null;
+    if (member) {
+      memberAfter = await tx.posCustomer.update({
+        where: { id: member.id },
+        data: {
+          loyaltyPoints: { increment: pointsEarned - pointsRedeemed },
+          walletBalance: { increment: roundCurrency(walletCredit - walletUsed) },
+          totalSpent: { increment: total },
+          visits: { increment: 1 },
+          lastVisitAt: new Date(),
+        },
+        select: { loyaltyPoints: true, walletBalance: true },
+      });
+      // Two sales at once must not spend the same points or wallet money twice.
+      if (memberAfter.loyaltyPoints < 0) {
+        throw AppError.validation({ redeemPoints: ["Not enough points — the balance changed. Please try again."] });
+      }
+      if (memberAfter.walletBalance < -0.001) {
+        throw AppError.validation({ walletUse: ["Not enough in the wallet — the balance changed. Please try again."] });
+      }
+      // Wallet history: what was spent, then what was added, each with the balance after it.
+      const finalBalance = roundCurrency(memberAfter.walletBalance);
+      if (walletUsed > 0) {
+        await tx.posWalletTransaction.create({
+          data: { customerId: member.id, type: "DEBIT", amount: -walletUsed, balanceAfter: roundCurrency(finalBalance - walletCredit), invoiceGroupCode, shiftId: shift.id, note: `Paid towards bill ${invoiceGroupCode}`, createdById: cashierId },
+        });
+      }
+      if (walletCredit > 0) {
+        await tx.posWalletTransaction.create({
+          data: { customerId: member.id, type: "CREDIT", amount: walletCredit, balanceAfter: finalBalance, invoiceGroupCode, shiftId: shift.id, note: `Change kept from bill ${invoiceGroupCode}`, createdById: cashierId },
+        });
+      }
+    }
+
+    // Stock day book: bottles sold and empties collected on this bill.
+    await recordMovements(
+      tx,
+      lines.flatMap((line) => [
+        { productId: line.productId, kind: "STOCK" as const, type: "SOLD" as const, quantity: -line.quantity, reference: invoiceGroupCode, createdById: cashierId },
+        { productId: line.productId, kind: "EMPTIES" as const, type: "COLLECTED" as const, quantity: line.emptiesReturned, reference: invoiceGroupCode, createdById: cashierId },
+      ]),
+      { branchId, shiftId: shift.id },
+    );
 
     const counterSale = await tx.posCounterSale.create({
       data: {
         invoiceGroupCode,
+        shiftId: shift.id,
+        branchId,
+        customerId: member?.id ?? null,
+        pointsEarned,
+        pointsRate: member ? settings.loyaltyRupeesPerPoint : null,
+        discountType: dto.discount?.type ?? null,
+        discountValue: dto.discount?.value ?? 0,
+        discountAmount,
+        pointsRedeemed,
+        pointsValue,
         totalAmount: total,
+        emptyDeduction: emptyDeductionTotal,
+        emptiesReturned: emptiesReturnedTotal,
         amountReceived,
         changeGiven,
         paymentMethod: dto.paymentMethod,
+        paymentReference: dto.paymentMethod === "CASH" ? null : dto.paymentReference?.trim() || null,
+        cashPaid,
+        cardPaid,
+        transferPaid,
+        walletUsed,
+        walletCredit,
         cashierId,
       },
       select: {
@@ -609,19 +981,52 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number) {
         amountReceived: true,
         changeGiven: true,
         paymentMethod: true,
+        paymentReference: true,
+        cashPaid: true,
+        cardPaid: true,
+        transferPaid: true,
         createdAt: true,
       },
     });
 
-    return { customerId: customer.id, purchases, counterSale };
+    return {
+      customerId: customer.id,
+      member: member
+        ? {
+            id: member.id,
+            name: [member.firstName, member.lastName].filter(Boolean).join(" "),
+            mobileNumber: member.mobileNumber,
+            pointsEarned,
+            pointsRedeemed,
+            pointsBalance: memberAfter?.loyaltyPoints ?? member.loyaltyPoints,
+            walletBalance: roundCurrency(memberAfter?.walletBalance ?? member.walletBalance),
+          }
+        : null,
+      purchases,
+      counterSale,
+    };
   });
 
   return {
     invoiceGroupCode,
     paymentMethod: dto.paymentMethod,
+    paymentReference: dto.paymentMethod === "CASH" ? null : dto.paymentReference?.trim() || null,
+    subtotal,
+    emptyDeduction: emptyDeductionTotal,
+    emptiesReturned: emptiesReturnedTotal,
+    discount: dto.discount ? { type: dto.discount.type, value: dto.discount.value, amount: discountAmount } : null,
+    pointsRedeemed,
+    pointsValue,
     total,
     amountReceived,
     changeGiven,
+    cashPaid,
+    cardPaid,
+    transferPaid,
+    cashTendered,
+    walletUsed,
+    walletCredit,
+    changeDue,
     itemCount: mergedItems.reduce((sum, item) => sum + item.quantity, 0),
     ...result,
   };
@@ -730,6 +1135,7 @@ async function createInstallmentScheduleAndApplyDownPayment(
 export async function createPurchase(
   customerId: number,
   dto: CreatePurchaseDto,
+  branchId: number,
 ) {
   const customer = await prisma.posCustomer.findUnique({
     where: { id: customerId },
@@ -805,9 +1211,10 @@ export async function createPurchase(
     });
 
     if (!product) throw AppError.notFound("Selected inventory product not found");
-    if ((dto.quantity ?? 1) > product.quantity) {
+    const hereQuantity = (await countsAt(branchId, productId)).quantity;
+    if ((dto.quantity ?? 1) > hereQuantity) {
       throw AppError.validation({
-        quantity: [`Only ${product.quantity} item(s) available`],
+        quantity: [`Only ${hereQuantity} item(s) available at this branch`],
       });
     }
 
@@ -846,10 +1253,10 @@ export async function createPurchase(
         );
       }
 
+      await changeStock(tx, branchId, productId, { quantity: -(dto.quantity ?? 1) });
       await tx.inventoryProduct.update({
         where: { id: productId },
         data: {
-          quantity: { decrement: dto.quantity ?? 1 },
           soldQuantity: { increment: dto.quantity ?? 1 },
           lastSoldAt: new Date(),
           sellingPrice: dto.finalSellingPrice,

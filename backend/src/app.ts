@@ -15,6 +15,14 @@ import contactRequestsPosRouter, {
   publicContactRequestsRouter,
 } from "./modules/contact-requests/contact-requests.routes";
 import accountsRouter from "./modules/accounts/accounts.routes";
+import activityLogRouter from "./modules/activity-log/activity-log.routes";
+import settingsRouter from "./modules/settings/settings.routes";
+import { cashBookRouter, reportRouter, shiftRouter } from "./modules/book/book.routes";
+import purchaseOrderRouter from "./modules/purchase-orders/purchase-orders.routes";
+import returnsRouter from "./modules/returns/returns.routes";
+import branchesRouter from "./modules/branches/branches.routes";
+import { grnRouter, gtnRouter } from "./modules/goods/goods.routes";
+import { recordPosActivity } from "./modules/activity-log/activity-log.middleware";
 
 const app = express();
 
@@ -41,6 +49,10 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
+/* ──────────────────── Activity log ──────────────────────── */
+// Records who changed what for every POS write; must be mounted before the POS routers.
+app.use("/api/pos", recordPosActivity);
+
 /* ──────────────────── API Routes ────────────────────────── */
 app.use("/api/auth", authRoutes);
 app.use("/api/bikes", bikesRoutes);
@@ -50,6 +62,16 @@ app.use("/api/pos/user-management", posUserManagementRoutes);
 app.use("/api/contact-requests", publicContactRequestsRouter);
 app.use("/api/pos/contact-requests", contactRequestsPosRouter);
 app.use("/api/pos/accounts", accountsRouter);
+app.use("/api/pos/activity-logs", activityLogRouter);
+app.use("/api/pos/settings", settingsRouter);
+app.use("/api/pos/shifts", shiftRouter);
+app.use("/api/pos/cash-book", cashBookRouter);
+app.use("/api/pos/reports", reportRouter);
+app.use("/api/pos/purchase-orders", purchaseOrderRouter);
+app.use("/api/pos/returns", returnsRouter);
+app.use("/api/pos/branches", branchesRouter);
+app.use("/api/pos/grns", grnRouter);
+app.use("/api/pos/gtns", gtnRouter);
 
 /* ──────────────────── Error handling ────────────────────── */
 app.use(notFoundHandler);

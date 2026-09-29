@@ -5,17 +5,24 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   IconAccess,
-  IconAccounts,
+  // IconAccounts, // used by the hidden "Invoice Bank Details" / "Manage Accounts" links
+  IconActivity,
   IconBar,
   IconBottle,
   IconChevronLeft,
   IconChevronRight,
-  IconContactRequests,
+  IconClock,
+  // IconContactRequests, // used by the hidden "Supplier Requests" link
   IconDashboard,
   IconInventory,
   IconInvoice,
   IconReceipt,
+  IconReturns,
+  IconBoxInNav,
+  IconTransfer,
+  IconBranch,
   IconSupplier,
+  IconTrend,
   IconUsers,
 } from "../lib/icons";
 import { useAdmin } from "./AdminContext";
@@ -31,42 +38,56 @@ const NAV_SECTIONS: { title: string; links: NavLink[] }[] = [
     links: [
       { label: "Bar Counter", href: "/dashboard/inventory", Icon: IconBottle },
       { label: "Sold Products", href: "/dashboard/inventory/sold", Icon: IconReceipt },
+      { label: "Returns & Damages", href: "/dashboard/returns", Icon: IconReturns },
     ],
   },
   {
     title: "Overview",
-    links: [{ label: "Dashboard", href: "/dashboard", Icon: IconDashboard }],
+    links: [
+      { label: "Dashboard", href: "/dashboard", Icon: IconDashboard },
+      { label: "Activity Log", href: "/dashboard/logs", Icon: IconActivity },
+      { label: "Shop Settings", href: "/dashboard/settings", Icon: IconAccess },
+      { label: "Branches", href: "/dashboard/branches", Icon: IconBranch },
+    ],
   },
   {
     title: "Stock",
     links: [
       { label: "Product Setup", href: "/dashboard/inventory/manage", Icon: IconInventory },
       { label: "Suppliers", href: "/dashboard/suppliers", Icon: IconSupplier },
-      { label: "Supplier Requests", href: "/dashboard/purchasing-requests", Icon: IconContactRequests },
+      { label: "Purchase Orders", href: "/dashboard/purchase-orders", Icon: IconInvoice },
+      { label: "Goods Received (GRN)", href: "/dashboard/grn", Icon: IconBoxInNav },
+      { label: "Branch Transfers (GTN)", href: "/dashboard/transfers", Icon: IconTransfer },
+      // Hidden from the sidebar for now; the page still exists.
+      // { label: "Supplier Requests", href: "/dashboard/purchasing-requests", Icon: IconContactRequests },
     ],
   },
   {
     title: "People",
     links: [
-      { label: "Customers", href: "/dashboard/users", Icon: IconUsers },
+      { label: "Loyalty Customers", href: "/dashboard/users", Icon: IconUsers },
       { label: "Staff & Roles", href: "/dashboard/staff", Icon: IconAccess },
     ],
   },
   {
-    title: "Invoices",
+    title: "Billing",
     links: [
-      { label: "Invoices", href: "/dashboard/invoices", Icon: IconInvoice },
-      { label: "Invoice Bank Details", href: "/dashboard/invoices/accounts", Icon: IconAccounts },
-      { label: "Terms & Conditions", href: "/dashboard/invoices/terms", Icon: IconReceipt },
+      { label: "Sales Bills", href: "/dashboard/sales", Icon: IconInvoice },
+      // Hidden from the sidebar (left over from the old invoice system); the pages still exist.
+      // { label: "Invoice Bank Details", href: "/dashboard/invoices/accounts", Icon: IconAccounts },
+      // { label: "Terms & Conditions", href: "/dashboard/invoices/terms", Icon: IconReceipt },
     ],
   },
   {
-    title: "Accounts",
+    title: "Book Keeping",
     links: [
-      { label: "Receipts", href: "/dashboard/accounts/receipts", Icon: IconReceipt },
-      { label: "Vouchers", href: "/dashboard/accounts/vouchers", Icon: IconInvoice },
-      { label: "General Ledger", href: "/dashboard/accounts/ledger", Icon: IconBar },
-      { label: "Manage Accounts", href: "/dashboard/accounts", Icon: IconAccounts },
+      { label: "Day End", href: "/dashboard/day-end", Icon: IconClock },
+      { label: "Expenses (Vouchers)", href: "/dashboard/accounts/vouchers", Icon: IconInvoice },
+      { label: "Money In (Receipts)", href: "/dashboard/accounts/receipts", Icon: IconReceipt },
+      { label: "Reports", href: "/dashboard/reports", Icon: IconTrend },
+      // Old invoice-style ledger pages, replaced by Day End + the cash book. Pages still exist.
+      // { label: "General Ledger", href: "/dashboard/accounts/ledger", Icon: IconBar },
+      // { label: "Manage Accounts", href: "/dashboard/accounts", Icon: IconAccounts },
     ],
   },
 ];
@@ -129,7 +150,7 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {!collapsed && <div className="sidebar-footer"><span>BAR SHOP POS</span><span>Operations</span></div>}
+      {!collapsed && <div className="sidebar-footer"><span>BAR SHOP POS</span><span>v1.0.0</span></div>}
     </aside>
   );
 }

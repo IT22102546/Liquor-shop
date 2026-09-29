@@ -112,7 +112,19 @@ const staffSelect = {
   isActive: true,
   lastLoginAt: true,
   createdAt: true,
+  branchId: true,
 } as const;
+
+/** Cashiers work at one branch; others may be fixed to one or switch freely (null). */
+async function resolveBranch(role: string, branchId: number | null | undefined) {
+  if (branchId) {
+    const branch = await prisma.branch.findFirst({ where: { id: branchId, isActive: true } });
+    if (!branch) throw AppError.validation({ branchId: ["Choose an open branch"] });
+    return branch.id;
+  }
+  if (role === "CASHIER") throw AppError.validation({ branchId: ["Choose the branch this cashier works at"] });
+  return null;
+}
 
 export function listPosStaff() {
   return prisma.posAdmin.findMany({
@@ -124,11 +136,13 @@ export function listPosStaff() {
 export async function createPosStaff(dto: CreatePosStaffDto) {
   const existing = await prisma.posAdmin.findUnique({ where: { email: dto.email } });
   if (existing) throw AppError.conflict("A staff account with this email already exists");
+  const branchId = await resolveBranch(dto.role, dto.branchId);
   return prisma.posAdmin.create({
     data: {
       name: dto.name,
       email: dto.email,
       role: dto.role,
+      branchId,
       passwordHash: await bcrypt.hash(dto.password, 12),
     },
     select: staffSelect,
@@ -145,9 +159,14 @@ export async function updatePosStaff(id: number, currentAdminId: number, dto: Up
     const duplicate = await prisma.posAdmin.findUnique({ where: { email: dto.email } });
     if (duplicate) throw AppError.conflict("A staff account with this email already exists");
   }
+  const role = dto.role ?? existing.role;
+  const branchId = dto.branchId !== undefined || dto.role !== undefined
+    ? await resolveBranch(role, dto.branchId !== undefined ? dto.branchId : existing.branchId)
+    : undefined;
   return prisma.posAdmin.update({
     where: { id },
     data: {
+      ...(branchId !== undefined ? { branchId } : {}),
       name: dto.name,
       email: dto.email,
       role: dto.role,

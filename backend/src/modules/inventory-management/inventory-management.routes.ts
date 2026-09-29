@@ -72,7 +72,11 @@ router.get(   "/products",               productCatalog, ctrl.getProducts);
 router.get(   "/products/health",        inventoryAndAccounts, ctrl.getInventoryHealth);
 router.get(   "/products/:id",           inventoryAndAccounts, ctrl.getProduct);
 router.post(  "/products",               inventory, ctrl.createProduct);
+router.post(  "/products/bulk-price",    inventory, ctrl.bulkUpdatePrices);
 router.patch( "/products/:id",           inventory, ctrl.updateProduct);
+router.post(  "/products/:id/restock",   inventory, ctrl.restockProduct);
+// Cashiers may record empties going back to the supplier (their only change in Product Setup).
+router.post(  "/products/:id/empties/return", authorizePosRoles("ADMIN", "INVENTORY_MANAGER", "CASHIER"), ctrl.returnEmptiesToSupplier);
 router.post(  "/products/:id/sell",      sales, ctrl.recordProductSale);
 router.delete("/products/:id",           inventory, ctrl.deleteProduct);
 

@@ -35,6 +35,10 @@ export const createProductSchema = z.object({
   taxPaid: z.number().min(0).optional(),
   additionalExpenses: z.number().min(0).optional(),
   sellingPrice: z.number().min(0).optional(),
+  // Amount taken off the bill per empty bottle handed back; null/0 = not returnable.
+  emptyBottlePrice: z.union([z.number().min(0), z.null()]).optional(),
+  /** Counts toward the hard liquor limit per bill; left out = decided by the category (Shop Settings). */
+  isHardLiquor: z.boolean().optional(),
   description: z.string().trim().max(3000).optional(),
   descriptionPoints: z
     .array(z.string().trim().min(1).max(500))
@@ -45,6 +49,27 @@ export const createProductSchema = z.object({
 
 export const updateProductSchema = createProductSchema.partial().extend({
   supplierId: z.union([z.number().int().positive(), z.null()]).optional(),
+});
+
+/** Government price change: new selling prices for many products at once, with the reason. */
+export const bulkPriceSchema = z.object({
+  reason: z.string().trim().min(3, "Say why the prices are changing, e.g. excise increase").max(300),
+  changes: z.array(z.object({
+    productId: z.number().int().positive(),
+    sellingPrice: z.number().positive("A price must be more than Rs. 0").max(100_000_000),
+  })).min(1, "Choose at least one product").max(2000),
+});
+export type BulkPriceDto = z.infer<typeof bulkPriceSchema>;
+
+export const restockProductSchema = z.object({
+  quantity: z.number().int().min(1, "Add at least 1 unit").max(100000),
+  // Batch totals for the units being added; blended into the per-unit cost.
+  purchasePrice: z.number().min(0).optional(),
+  taxPaid: z.number().min(0).optional(),
+});
+
+export const returnEmptiesSchema = z.object({
+  quantity: z.number().int().min(1, "Return at least 1 empty bottle").max(100000),
 });
 
 export const recordProductSaleSchema = z.object({
@@ -80,4 +105,6 @@ export type UpdateProductCategoryDto = z.infer<
 export type CreateProductDto = z.infer<typeof createProductSchema>;
 export type UpdateProductDto = z.infer<typeof updateProductSchema>;
 export type RecordProductSaleDto = z.infer<typeof recordProductSaleSchema>;
+export type RestockProductDto = z.infer<typeof restockProductSchema>;
+export type ReturnEmptiesDto = z.infer<typeof returnEmptiesSchema>;
 export type ProductQueryDto = z.infer<typeof productQuerySchema>;

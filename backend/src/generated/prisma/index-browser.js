@@ -135,6 +135,8 @@ exports.Prisma.UserScalarFieldEnum = {
 
 exports.Prisma.PosAdminScalarFieldEnum = {
   id: 'id',
+  branchId: 'branchId',
+  activeBranchId: 'activeBranchId',
   name: 'name',
   email: 'email',
   passwordHash: 'passwordHash',
@@ -147,12 +149,30 @@ exports.Prisma.PosAdminScalarFieldEnum = {
 
 exports.Prisma.PosCounterSaleScalarFieldEnum = {
   id: 'id',
+  branchId: 'branchId',
   invoiceGroupCode: 'invoiceGroupCode',
   totalAmount: 'totalAmount',
+  emptyDeduction: 'emptyDeduction',
+  emptiesReturned: 'emptiesReturned',
   amountReceived: 'amountReceived',
   changeGiven: 'changeGiven',
   paymentMethod: 'paymentMethod',
+  paymentReference: 'paymentReference',
+  cashPaid: 'cashPaid',
+  cardPaid: 'cardPaid',
+  transferPaid: 'transferPaid',
+  walletUsed: 'walletUsed',
+  walletCredit: 'walletCredit',
   cashierId: 'cashierId',
+  customerId: 'customerId',
+  pointsEarned: 'pointsEarned',
+  pointsRate: 'pointsRate',
+  discountType: 'discountType',
+  discountValue: 'discountValue',
+  discountAmount: 'discountAmount',
+  pointsRedeemed: 'pointsRedeemed',
+  pointsValue: 'pointsValue',
+  shiftId: 'shiftId',
   createdAt: 'createdAt'
 };
 
@@ -200,6 +220,10 @@ exports.Prisma.InventoryProductScalarFieldEnum = {
   taxPaid: 'taxPaid',
   additionalExpenses: 'additionalExpenses',
   sellingPrice: 'sellingPrice',
+  emptyBottlePrice: 'emptyBottlePrice',
+  emptyBottlesOnHand: 'emptyBottlesOnHand',
+  isHardLiquor: 'isHardLiquor',
+  damagedQuantity: 'damagedQuantity',
   description: 'description',
   lastSoldAt: 'lastSoldAt',
   createdAt: 'createdAt',
@@ -233,6 +257,11 @@ exports.Prisma.PosCustomerScalarFieldEnum = {
   province: 'province',
   district: 'district',
   address: 'address',
+  loyaltyPoints: 'loyaltyPoints',
+  totalSpent: 'totalSpent',
+  visits: 'visits',
+  lastVisitAt: 'lastVisitAt',
+  walletBalance: 'walletBalance',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -259,6 +288,10 @@ exports.Prisma.PosCustomerPurchaseScalarFieldEnum = {
   monthlyInstallmentAmount: 'monthlyInstallmentAmount',
   totalWithInterest: 'totalWithInterest',
   quantity: 'quantity',
+  emptiesReturned: 'emptiesReturned',
+  emptyDeduction: 'emptyDeduction',
+  isHardLiquor: 'isHardLiquor',
+  billDiscount: 'billDiscount',
   purchasedAt: 'purchasedAt'
 };
 
@@ -417,12 +450,288 @@ exports.Prisma.AccountDepositItemScalarFieldEnum = {
   amount: 'amount'
 };
 
+exports.Prisma.ActivityLogScalarFieldEnum = {
+  id: 'id',
+  branchId: 'branchId',
+  actorId: 'actorId',
+  actorName: 'actorName',
+  actorEmail: 'actorEmail',
+  actorRole: 'actorRole',
+  action: 'action',
+  category: 'category',
+  summary: 'summary',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  details: 'details',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.PosSettingScalarFieldEnum = {
+  key: 'key',
+  value: 'value',
+  updatedById: 'updatedById',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PosShiftScalarFieldEnum = {
+  id: 'id',
+  branchId: 'branchId',
+  shiftNo: 'shiftNo',
+  status: 'status',
+  openedById: 'openedById',
+  openedAt: 'openedAt',
+  openingFloat: 'openingFloat',
+  countedCash: 'countedCash',
+  denominations: 'denominations',
+  countedById: 'countedById',
+  countedAt: 'countedAt',
+  expectedCash: 'expectedCash',
+  cashDifference: 'cashDifference',
+  differenceReason: 'differenceReason',
+  cardSlipTotal: 'cardSlipTotal',
+  cardDifferenceReason: 'cardDifferenceReason',
+  floatLeft: 'floatLeft',
+  cashBanked: 'cashBanked',
+  closedById: 'closedById',
+  closedAt: 'closedAt',
+  notes: 'notes',
+  report: 'report'
+};
+
+exports.Prisma.PosCashEntryScalarFieldEnum = {
+  id: 'id',
+  branchId: 'branchId',
+  entryNo: 'entryNo',
+  direction: 'direction',
+  category: 'category',
+  amount: 'amount',
+  source: 'source',
+  party: 'party',
+  reference: 'reference',
+  note: 'note',
+  entryDate: 'entryDate',
+  shiftId: 'shiftId',
+  automatic: 'automatic',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  voided: 'voided',
+  voidReason: 'voidReason',
+  voidedById: 'voidedById',
+  voidedAt: 'voidedAt',
+  bankStatus: 'bankStatus',
+  bankedAt: 'bankedAt',
+  bankedById: 'bankedById',
+  bankReference: 'bankReference'
+};
+
+exports.Prisma.InventoryMovementScalarFieldEnum = {
+  id: 'id',
+  branchId: 'branchId',
+  productId: 'productId',
+  kind: 'kind',
+  type: 'type',
+  quantity: 'quantity',
+  shiftId: 'shiftId',
+  reference: 'reference',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.PurchaseOrderScalarFieldEnum = {
+  id: 'id',
+  branchId: 'branchId',
+  poNumber: 'poNumber',
+  supplierId: 'supplierId',
+  status: 'status',
+  orderDate: 'orderDate',
+  expectedDate: 'expectedDate',
+  notes: 'notes',
+  total: 'total',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  sentAt: 'sentAt',
+  sentById: 'sentById',
+  receivedAt: 'receivedAt',
+  receivedById: 'receivedById',
+  cancelledAt: 'cancelledAt',
+  cancelledById: 'cancelledById',
+  cancelReason: 'cancelReason'
+};
+
+exports.Prisma.PurchaseOrderItemScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  productId: 'productId',
+  description: 'description',
+  quantity: 'quantity',
+  unitCost: 'unitCost',
+  lineTotal: 'lineTotal',
+  receivedQty: 'receivedQty',
+  freeQty: 'freeQty',
+  freeReceived: 'freeReceived'
+};
+
+exports.Prisma.PurchaseOrderEmailScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  toEmail: 'toEmail',
+  ccEmail: 'ccEmail',
+  subject: 'subject',
+  message: 'message',
+  status: 'status',
+  error: 'error',
+  messageId: 'messageId',
+  sentById: 'sentById',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.PosWalletTransactionScalarFieldEnum = {
+  id: 'id',
+  customerId: 'customerId',
+  type: 'type',
+  amount: 'amount',
+  balanceAfter: 'balanceAfter',
+  invoiceGroupCode: 'invoiceGroupCode',
+  shiftId: 'shiftId',
+  note: 'note',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.PosReturnScalarFieldEnum = {
+  id: 'id',
+  branchId: 'branchId',
+  returnNo: 'returnNo',
+  type: 'type',
+  productId: 'productId',
+  productName: 'productName',
+  quantity: 'quantity',
+  condition: 'condition',
+  invoiceGroupCode: 'invoiceGroupCode',
+  customerId: 'customerId',
+  customerName: 'customerName',
+  customerMobile: 'customerMobile',
+  unitPrice: 'unitPrice',
+  refundAmount: 'refundAmount',
+  refundMethod: 'refundMethod',
+  pointsReversed: 'pointsReversed',
+  unitCost: 'unitCost',
+  reason: 'reason',
+  note: 'note',
+  disposal: 'disposal',
+  reference: 'reference',
+  shiftId: 'shiftId',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.BranchScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  address: 'address',
+  phone: 'phone',
+  email: 'email',
+  isMain: 'isMain',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.BranchStockScalarFieldEnum = {
+  id: 'id',
+  branchId: 'branchId',
+  productId: 'productId',
+  quantity: 'quantity',
+  damagedQuantity: 'damagedQuantity',
+  emptyBottlesOnHand: 'emptyBottlesOnHand',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.GrnScalarFieldEnum = {
+  id: 'id',
+  grnNo: 'grnNo',
+  branchId: 'branchId',
+  supplierId: 'supplierId',
+  supplierName: 'supplierName',
+  purchaseOrderId: 'purchaseOrderId',
+  poNumber: 'poNumber',
+  supplierInvoiceNo: 'supplierInvoiceNo',
+  invoiceDate: 'invoiceDate',
+  invoiceTotal: 'invoiceTotal',
+  notes: 'notes',
+  acceptedUnits: 'acceptedUnits',
+  rejectedUnits: 'rejectedUnits',
+  freeUnits: 'freeUnits',
+  freeValue: 'freeValue',
+  totalCost: 'totalCost',
+  shiftId: 'shiftId',
+  receivedById: 'receivedById',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.GrnItemScalarFieldEnum = {
+  id: 'id',
+  grnId: 'grnId',
+  productId: 'productId',
+  description: 'description',
+  purchaseOrderItemId: 'purchaseOrderItemId',
+  orderedQty: 'orderedQty',
+  deliveredQty: 'deliveredQty',
+  acceptedQty: 'acceptedQty',
+  rejectedQty: 'rejectedQty',
+  rejectReason: 'rejectReason',
+  freeQty: 'freeQty',
+  unitCost: 'unitCost',
+  lineTotal: 'lineTotal'
+};
+
+exports.Prisma.GtnScalarFieldEnum = {
+  id: 'id',
+  gtnNo: 'gtnNo',
+  fromBranchId: 'fromBranchId',
+  toBranchId: 'toBranchId',
+  status: 'status',
+  notes: 'notes',
+  carriedBy: 'carriedBy',
+  sentById: 'sentById',
+  sentAt: 'sentAt',
+  sentShiftId: 'sentShiftId',
+  receivedById: 'receivedById',
+  receivedAt: 'receivedAt',
+  receivedShiftId: 'receivedShiftId',
+  receiveNote: 'receiveNote',
+  cancelledById: 'cancelledById',
+  cancelledAt: 'cancelledAt',
+  cancelReason: 'cancelReason'
+};
+
+exports.Prisma.GtnItemScalarFieldEnum = {
+  id: 'id',
+  gtnId: 'gtnId',
+  productId: 'productId',
+  productName: 'productName',
+  sentQty: 'sentQty',
+  receivedQty: 'receivedQty',
+  damagedQty: 'damagedQty',
+  missingQty: 'missingQty',
+  unitCost: 'unitCost'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
 };
 
 exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
+};
+
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull
 };
 
@@ -457,7 +766,9 @@ exports.PosAdminRole = exports.$Enums.PosAdminRole = {
 exports.PaymentMethod = exports.$Enums.PaymentMethod = {
   CASH: 'CASH',
   CHEQUE: 'CHEQUE',
-  BANK_TRANSFER: 'BANK_TRANSFER'
+  BANK_TRANSFER: 'BANK_TRANSFER',
+  CARD: 'CARD',
+  SPLIT: 'SPLIT'
 };
 
 exports.PosPurchaseItemType = exports.$Enums.PosPurchaseItemType = {
@@ -558,7 +869,23 @@ exports.Prisma.ModelName = {
   AccountTransaction: 'AccountTransaction',
   InvoicePayment: 'InvoicePayment',
   AccountDeposit: 'AccountDeposit',
-  AccountDepositItem: 'AccountDepositItem'
+  AccountDepositItem: 'AccountDepositItem',
+  ActivityLog: 'ActivityLog',
+  PosSetting: 'PosSetting',
+  PosShift: 'PosShift',
+  PosCashEntry: 'PosCashEntry',
+  InventoryMovement: 'InventoryMovement',
+  PurchaseOrder: 'PurchaseOrder',
+  PurchaseOrderItem: 'PurchaseOrderItem',
+  PurchaseOrderEmail: 'PurchaseOrderEmail',
+  PosWalletTransaction: 'PosWalletTransaction',
+  PosReturn: 'PosReturn',
+  Branch: 'Branch',
+  BranchStock: 'BranchStock',
+  Grn: 'Grn',
+  GrnItem: 'GrnItem',
+  Gtn: 'Gtn',
+  GtnItem: 'GtnItem'
 };
 
 /**

@@ -14,7 +14,13 @@ type StaffAccount = {
   role: PosAdminRole;
   isActive: boolean;
   lastLoginAt: string | null;
+  /** Fixed branch; null = can switch between branches. */
+  branchId: number | null;
 };
+type BranchOption = { id: number; name: string };
+/** The API's first field error, else its message. */
+const apiError = (payload: { message?: string; errors?: Record<string, string[]> }, fallback: string) =>
+  (payload.errors && Object.values(payload.errors).flat()[0]) ?? payload.message ?? fallback;
 
 const ROLES: PosAdminRole[] = ["CASHIER", "INVENTORY_MANAGER", "ACCOUNTANT", "ADMIN"];
 
@@ -25,6 +31,8 @@ export default function StaffPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<PosAdminRole>("CASHIER");
+  const [branchId, setBranchId] = useState("");
+  const [branches, setBranches] = useState<BranchOption[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -36,6 +44,14 @@ export default function StaffPage() {
     const payload = await response.json() as { data?: StaffAccount[]; message?: string };
     if (!response.ok) throw new Error(payload.message ?? "Unable to load staff accounts");
     setStaff(payload.data ?? []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
+  useEffect(() => {
+    void fetch(`${API_URL}/api/pos/branches`, { headers: auth, cache: "no-store" })
+      .then((response) => response.json())
+      .then((payload: { data?: BranchOption[] }) => { setBranches(payload.data ?? []); setBranchId((current) => current || String(payload.data?.[0]?.id ?? "")); })
+      .catch(() => setBranches([]));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
@@ -52,10 +68,10 @@ export default function StaffPage() {
       const response = await fetch(`${API_URL}/api/pos/auth/staff`, {
         method: "POST",
         headers: { ...auth, "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, role }),
+        body: JSON.stringify({ name, email, password, role, branchId: branchId ? Number(branchId) : null }),
       });
-      const payload = await response.json() as { message?: string };
-      if (!response.ok) throw new Error(payload.message ?? "Unable to create staff account");
+      const payload = await response.json() as { message?: string; errors?: Record<string, string[]> };
+      if (!response.ok) throw new Error(apiError(payload, "Unable to create staff account"));
       setName(""); setEmail(""); setPassword(""); setRole("CASHIER");
       setMessage("Staff account created. They can sign in immediately.");
       await loadStaff();
@@ -75,8 +91,8 @@ export default function StaffPage() {
         headers: { ...auth, "Content-Type": "application/json" },
         body: JSON.stringify(changes),
       });
-      const payload = await response.json() as { message?: string };
-      if (!response.ok) throw new Error(payload.message ?? "Unable to update staff account");
+      const payload = await response.json() as { message?: string; errors?: Record<string, string[]> };
+      if (!response.ok) throw new Error(apiError(payload, "Unable to update staff account"));
       setMessage("Staff access updated.");
       await loadStaff();
     } catch (reason) {
@@ -104,6 +120,14 @@ export default function StaffPage() {
           <div className="bm-field-group"><label>Email</label><input className="bm-input" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></div>
           <div className="bm-field-group"><label>Temporary password</label><input className="bm-input" type="password" minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} required /></div>
           <div className="bm-field-group"><label>Job role</label><select className="bm-select" value={role} onChange={(event) => setRole(event.target.value as PosAdminRole)}>{ROLES.map((value) => <option key={value} value={value}>{ROLE_LABELS[value]}</option>)}</select></div>
+          <div className="bm-field-group">
+            <label>Works at</label>
+            <select className="bm-select" value={branchId} onChange={(event) => setBranchId(event.target.value)}>
+              {role !== "CASHIER" && <option value="">Any branch (can switch)</option>}
+              {branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}
+            </select>
+            <small className="td-muted">{role === "CASHIER" ? "Cashiers sell and close the till at one branch." : "Leave on “Any branch” to let them switch branch from the top bar."}</small>
+          </div>
           <button className="btn-primary" type="submit" disabled={saving}>{saving ? "Creating…" : "Create staff account"}</button>
         </form>
 
@@ -111,11 +135,21 @@ export default function StaffPage() {
           <div className="bm-col-header"><span className="bm-col-title">Current staff</span><span className="bm-col-count">{staff.length}</span></div>
           <div className="data-table-wrap">
             <table className="data-table">
-              <thead><tr><th>Staff member</th><th>Role</th><th>Status</th><th>Access</th></tr></thead>
+              <thead><tr><th>Staff member</th><th>Role</th><th>Branch</th><th>Status</th><th>Access</th></tr></thead>
               <tbody>{staff.map((account) => (
                 <tr key={account.id}>
                   <td><strong>{account.name}</strong><br /><small>{account.email}</small></td>
-                  <td><select className="bm-select bm-input-sm" value={account.role} disabled={account.id === admin.id} onChange={(event) => void updateStaff(account, { role: event.target.value as PosAdminRole })}>{ROLES.map((value) => <option key={value} value={value}>{ROLE_LABELS[value]}</option>)}</select></td>
+                  <td><select className="bm-select bm-input-sm" value={account.role} disabled={account.id === admin.id} onChange={(event) => {
+                    const nextRole = event.target.value as PosAdminRole;
+                    // A cashier needs a branch: keep theirs, or start at the first one (changeable in the Branch column).
+                    void updateStaff(account, nextRole === "CASHIER" && account.branchId == null && branches[0] ? { role: nextRole, branchId: branches[0].id } : { role: nextRole });
+                  }}>{ROLES.map((value) => <option key={value} value={value}>{ROLE_LABELS[value]}</option>)}</select></td>
+                  <td>
+                    <select className="bm-select bm-input-sm" value={account.branchId ?? ""} onChange={(event) => void updateStaff(account, { branchId: event.target.value ? Number(event.target.value) : null })} aria-label={`${account.name}'s branch`}>
+                      {account.role !== "CASHIER" && <option value="">Any branch</option>}
+                      {branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}
+                    </select>
+                  </td>
                   <td><span className={`badge ${account.isActive ? "badge-success" : "badge-warning"}`}>{account.isActive ? "Active" : "Disabled"}</span></td>
                   <td><button type="button" className="btn-outline" disabled={account.id === admin.id} onClick={() => void updateStaff(account, { isActive: !account.isActive })}>{account.isActive ? "Disable" : "Enable"}</button></td>
                 </tr>

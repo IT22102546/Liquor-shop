@@ -16,6 +16,12 @@ router.post("/login", posAuthController.login);
  */
 router.get("/me", posAuthController.me);
 
+/**
+ * POST /api/pos/auth/logout
+ * Records the sign-out in the activity log (the token itself is discarded by the client).
+ */
+router.post("/logout", authenticatePosAdmin, posAuthController.logout);
+
 router.get("/staff", authenticatePosAdmin, authorizePosRoles("ADMIN"), posAuthController.listStaff);
 router.post("/staff", authenticatePosAdmin, authorizePosRoles("ADMIN"), posAuthController.createStaff);
 router.patch("/staff/:id", authenticatePosAdmin, authorizePosRoles("ADMIN"), posAuthController.updateStaff);

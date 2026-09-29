@@ -5,7 +5,7 @@ import type { Theme } from "../lib/types";
 import { STORAGE_THEME } from "../lib/constants";
 
 type ThemeCtxType = { theme: Theme; toggleTheme: () => void };
-const ThemeCtx = createContext<ThemeCtxType>({ theme: "light", toggleTheme: () => {} });
+const ThemeCtx = createContext<ThemeCtxType>({ theme: "dark", toggleTheme: () => {} });
 const CHUNK_RELOAD_KEY = "pos_chunk_reload_attempted";
 
 function isChunkLoadFailure(error: unknown) {
@@ -14,17 +14,24 @@ function isChunkLoadFailure(error: unknown) {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme] = useState<Theme>("dark");
 
+  // The inline script in layout.tsx stamps the saved theme (dark by default) on <html> before paint.
+  // Only read it here; persisting happens in toggleTheme, so a mount never overwrites the saved choice.
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_THEME) as Theme | null;
-    if (saved === "dark" || saved === "light") setTheme(saved);
+    setTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
   }, []);
 
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    localStorage.setItem(STORAGE_THEME, theme);
-  }, [theme]);
+  const toggleTheme = () => {
+    const next: Theme = theme === "light" ? "dark" : "light";
+    document.documentElement.dataset.theme = next;
+    try {
+      localStorage.setItem(STORAGE_THEME, next);
+    } catch {
+      // Storage can be unavailable (private mode); the theme still applies for this visit.
+    }
+    setTheme(next);
+  };
 
   useEffect(() => {
     const reloadOnce = () => {
@@ -61,7 +68,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <ThemeCtx.Provider value={{ theme, toggleTheme: () => setTheme((t) => (t === "light" ? "dark" : "light")) }}>
+    <ThemeCtx.Provider value={{ theme, toggleTheme }}>
       {children}
     </ThemeCtx.Provider>
   );

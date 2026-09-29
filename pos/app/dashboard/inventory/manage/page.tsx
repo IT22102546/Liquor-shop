@@ -4,21 +4,24 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAdmin } from "../../../components/AdminContext";
 import { API_URL } from "../../../lib/constants";
-import { IconActivity, IconInventory, IconInvoice } from "../../../lib/icons";
+import { IconActivity, IconBoxIn, IconCheck, IconInventory, IconInvoice, IconTrend } from "../../../lib/icons";
+import { canAccessPath } from "../../../lib/roles";
+import { AddLiquorModal } from "../../../components/products/AddLiquorModal";
+import { BulkPriceModal } from "../../../components/products/BulkPriceModal";
+import { ProductStockTable } from "../../../components/products/ProductStockTable";
+import type { Product } from "../../../components/products/ProductFormModal";
 import TablePagination, { paginateRows } from "../../../components/TablePagination";
 
 type ProductBrand = { id: number; name: string; _count?: { products: number } };
 type ProductCategory = { id: number; name: string; _count?: { products: number } };
-type Product = {
-  id: number;
-  quantity: number;
-  soldQuantity: number;
-  brand: { id: number; name: string };
-  category: { id: number; name: string };
-};
 
 export default function InventoryManagePage() {
-  const { token } = useAdmin();
+  const { admin, token, logout } = useAdmin();
+  const [showAddLiquor, setShowAddLiquor] = useState(false);
+  const [showBulkPrice, setShowBulkPrice] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+  // Cashiers can view Product Setup; only "Returned to supplier" works for them.
+  const canEdit = admin.role === "ADMIN" || admin.role === "INVENTORY_MANAGER";
   const [brands, setBrands] = useState<ProductBrand[]>([]);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -179,16 +182,33 @@ export default function InventoryManagePage() {
           <div className="page-title-icon"><IconInventory /></div>
           <div>
             <h2 className="page-title">Manage Product Catalog</h2>
-            <p className="page-subtitle">Manage drink brands and categories to keep the bar catalog organized and current.</p>
+            <p className="page-subtitle">
+              {canEdit
+                ? "Add liquor by barcode or by hand, and keep brands and categories organized."
+                : "View products, stock and prices. You can record empty bottles returned to the supplier."}
+            </p>
           </div>
         </div>
+        {canEdit ? (
+          <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
+            <button type="button" className="btn-outline" onClick={() => setShowBulkPrice(true)} title="Change many selling prices at once, e.g. after a government price change">
+              <IconTrend /> Bulk price update
+            </button>
+            <button type="button" className="btn-accent pos-add-liquor" onClick={() => setShowAddLiquor(true)}>
+              <IconBoxIn /> Add liquor
+            </button>
+          </div>
+        ) : (
+          <span className="lx-readonly-pill">View only</span>
+        )}
       </div>
 
-      <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginBottom: "1rem" }}>
-        <Link href="/dashboard/inventory" className="btn-outline">Drink Inventory</Link>
-        <Link href="/dashboard/inventory/sold" className="btn-outline">Sold Drinks</Link>
-        <Link href="/dashboard/inventory/manage" className="btn-accent">Manage Data</Link>
-      </div>
+      {(canAccessPath(admin.role, "/dashboard/inventory") || canAccessPath(admin.role, "/dashboard/inventory/sold")) && (
+        <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+          {canAccessPath(admin.role, "/dashboard/inventory") && <Link href="/dashboard/inventory" className="btn-outline">Bar Counter</Link>}
+          {canAccessPath(admin.role, "/dashboard/inventory/sold") && <Link href="/dashboard/inventory/sold" className="btn-outline">Sold Drinks</Link>}
+        </div>
+      )}
 
       {error && <div className="bm-alert bm-alert-error">{error}</div>}
 
@@ -199,13 +219,24 @@ export default function InventoryManagePage() {
         <div className="bm-stat-card"><div className="bm-stat-head"><span className="bm-stat-icon"><IconActivity /></span><span className="bm-stat-label">Sold Units</span></div><strong className="bm-stat-value">{totalSoldQty}</strong><span className="bm-stat-sub">Recorded from inventory sales</span></div>
       </div>
 
+      <ProductStockTable
+        token={token}
+        products={products}
+        brands={brands}
+        categories={categories}
+        loading={loading}
+        canEdit={canEdit}
+        onChanged={() => void loadData()}
+        onAuthExpired={logout}
+      />
+
       <div className="bm-manage-grid">
         <div className="bm-manage-col">
           <div className="bm-col-header"><span className="bm-col-title">Brand Management</span><span className="bm-col-count">{brands.length}</span></div>
-          <div className="bm-quick-add-row">
+          {canEdit && <div className="bm-quick-add-row">
             <input className="bm-input" value={brandDraft} onChange={(event) => setBrandDraft(event.target.value)} placeholder="Add new brand" />
             <button type="button" className="btn-accent bm-add-btn" onClick={() => void saveBrand()}>Save</button>
-          </div>
+          </div>}
           <div className="bm-list">
             {loading && <div className="bm-table-empty">Loading brands...</div>}
             {!loading && pagedBrands.map((brand) => (
@@ -222,10 +253,10 @@ export default function InventoryManagePage() {
                       <span className="bm-item-name">{brand.name}</span>
                       <span className="bm-item-meta">{brand._count?.products ?? 0} products</span>
                     </div>
-                    <div className="bm-actions">
+                    {canEdit && <div className="bm-actions">
                       <button type="button" className="bm-action-btn bm-edit-btn" onClick={() => { setEditingBrandId(brand.id); setEditingBrandName(brand.name); }}>✎</button>
                       <button type="button" className="bm-action-btn bm-del-btn" onClick={() => void removeBrand(brand.id)}>🗑</button>
-                    </div>
+                    </div>}
                   </>
                 )}
               </div>
@@ -236,10 +267,10 @@ export default function InventoryManagePage() {
 
         <div className="bm-manage-col">
           <div className="bm-col-header"><span className="bm-col-title">Category Management</span><span className="bm-col-count">{categories.length}</span></div>
-          <div className="bm-quick-add-row">
+          {canEdit && <div className="bm-quick-add-row">
             <input className="bm-input" value={categoryDraft} onChange={(event) => setCategoryDraft(event.target.value)} placeholder="Add new category" />
             <button type="button" className="btn-accent bm-add-btn" onClick={() => void saveCategory()}>Save</button>
-          </div>
+          </div>}
           <div className="bm-list">
             {loading && <div className="bm-table-empty">Loading categories...</div>}
             {!loading && pagedCategories.map((category) => (
@@ -256,10 +287,10 @@ export default function InventoryManagePage() {
                       <span className="bm-item-name">{category.name}</span>
                       <span className="bm-item-meta">{category._count?.products ?? 0} products</span>
                     </div>
-                    <div className="bm-actions">
+                    {canEdit && <div className="bm-actions">
                       <button type="button" className="bm-action-btn bm-edit-btn" onClick={() => { setEditingCategoryId(category.id); setEditingCategoryName(category.name); }}>✎</button>
                       <button type="button" className="bm-action-btn bm-del-btn" onClick={() => void removeCategory(category.id)}>🗑</button>
-                    </div>
+                    </div>}
                   </>
                 )}
               </div>
@@ -268,6 +299,25 @@ export default function InventoryManagePage() {
           <TablePagination page={categoryPage} pageSize={pageSize} total={categories.length} onPageChange={setCategoryPage} onPageSizeChange={setPageSize} />
         </div>
       </div>
+      {notice && (
+        <div className="lx-toasts"><div className="lx-toast ok"><span className="lx-toast-icon"><IconCheck size={16} /></span><div><strong>{notice}</strong><span>Recorded in the Activity Log with the old and new prices.</span></div></div></div>
+      )}
+      {canEdit && showBulkPrice && (
+        <BulkPriceModal
+          token={token}
+          products={products}
+          onClose={() => setShowBulkPrice(false)}
+          onDone={(message) => { setShowBulkPrice(false); setNotice(message); window.setTimeout(() => setNotice(null), 4000); void loadData(); }}
+        />
+      )}
+      {canEdit && showAddLiquor && (
+        <AddLiquorModal
+          token={token}
+          onClose={() => setShowAddLiquor(false)}
+          onStockChanged={() => void loadData()}
+          onAuthExpired={logout}
+        />
+      )}
     </div>
   );
 }

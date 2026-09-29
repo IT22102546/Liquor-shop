@@ -1,3 +1,4 @@
+import { requestBranch } from "../branches/branch-context";
 import type { Request, Response, NextFunction } from "express";
 import fs from "fs";
 import { AppError, validate } from "../../common/utils/errors";
@@ -14,9 +15,14 @@ import {
   createProductSchema,
   updateProductSchema,
   recordProductSaleSchema,
+  restockProductSchema,
+  bulkPriceSchema,
+  returnEmptiesSchema,
   productQuerySchema,
 } from "./dto/product.dto";
 import * as service from "./inventory-management.service";
+
+const actorId = (req: Request) => (req as unknown as { user?: { id?: number } }).user?.id;
 
 const MAX_TOTAL_IMAGE_BYTES = 60 * 1024 * 1024;
 
@@ -63,7 +69,7 @@ export async function deleteProductCategory(req: Request, res: Response, next: N
 
 export async function getProducts(req: Request, res: Response, next: NextFunction) {
   try {
-    const result = await service.listProducts(validate(productQuerySchema, req.query));
+    const result = await service.listProducts(validate(productQuerySchema, req.query), (await requestBranch(req)).id);
     const role = (req as unknown as { user?: { role?: string } }).user?.role;
     if (role !== "CASHIER") return sendSuccess(res, result);
 
@@ -81,6 +87,12 @@ export async function getProducts(req: Request, res: Response, next: NextFunctio
         soldQuantity: product.soldQuantity,
         lowStockThreshold: product.lowStockThreshold,
         sellingPrice: product.sellingPrice,
+        emptyBottlePrice: product.emptyBottlePrice,
+        isHardLiquor: product.isHardLiquor,
+        supplierId: product.supplierId,
+        emptyBottlesOnHand: product.emptyBottlesOnHand,
+        damagedQuantity: product.damagedQuantity,
+        totalQuantity: product.totalQuantity,
         description: product.description,
         lastSoldAt: product.lastSoldAt,
         createdAt: product.createdAt,
@@ -92,20 +104,29 @@ export async function getProducts(req: Request, res: Response, next: NextFunctio
     });
   } catch (err) { return next(err); }
 }
-export async function getInventoryHealth(_req: Request, res: Response, next: NextFunction) {
-  try { return sendSuccess(res, await service.getInventoryHealth()); } catch (err) { return next(err); }
+export async function getInventoryHealth(req: Request, res: Response, next: NextFunction) {
+  try { return sendSuccess(res, await service.getInventoryHealth((await requestBranch(req)).id)); } catch (err) { return next(err); }
 }
 export async function getProduct(req: Request, res: Response, next: NextFunction) {
-  try { return sendSuccess(res, await service.getProduct(Number(req.params.id))); } catch (err) { return next(err); }
+  try { return sendSuccess(res, await service.getProductAt(Number(req.params.id), (await requestBranch(req)).id)); } catch (err) { return next(err); }
 }
 export async function createProduct(req: Request, res: Response, next: NextFunction) {
-  try { return sendCreated(res, await service.createProduct(validate(createProductSchema, req.body))); } catch (err) { return next(err); }
+  try { return sendCreated(res, await service.createProduct(validate(createProductSchema, req.body), actorId(req), (await requestBranch(req)).id)); } catch (err) { return next(err); }
 }
 export async function updateProduct(req: Request, res: Response, next: NextFunction) {
-  try { return sendSuccess(res, await service.updateProduct(Number(req.params.id), validate(updateProductSchema, req.body))); } catch (err) { return next(err); }
+  try { return sendSuccess(res, await service.updateProduct(Number(req.params.id), validate(updateProductSchema, req.body), actorId(req), (await requestBranch(req)).id)); } catch (err) { return next(err); }
+}
+export async function restockProduct(req: Request, res: Response, next: NextFunction) {
+  try { return sendSuccess(res, await service.restockProduct(Number(req.params.id), validate(restockProductSchema, req.body), actorId(req), (await requestBranch(req)).id)); } catch (err) { return next(err); }
+}
+export async function bulkUpdatePrices(req: Request, res: Response, next: NextFunction) {
+  try { return sendSuccess(res, await service.bulkUpdatePrices(validate(bulkPriceSchema, req.body))); } catch (err) { return next(err); }
+}
+export async function returnEmptiesToSupplier(req: Request, res: Response, next: NextFunction) {
+  try { return sendSuccess(res, await service.returnEmptiesToSupplier(Number(req.params.id), validate(returnEmptiesSchema, req.body), actorId(req), (await requestBranch(req)).id)); } catch (err) { return next(err); }
 }
 export async function recordProductSale(req: Request, res: Response, next: NextFunction) {
-  try { return sendSuccess(res, await service.recordProductSale(Number(req.params.id), validate(recordProductSaleSchema, req.body))); } catch (err) { return next(err); }
+  try { return sendSuccess(res, await service.recordProductSale(Number(req.params.id), validate(recordProductSaleSchema, req.body), actorId(req), (await requestBranch(req)).id)); } catch (err) { return next(err); }
 }
 export async function deleteProduct(req: Request, res: Response, next: NextFunction) {
   try { await service.deleteProduct(Number(req.params.id)); return sendSuccess(res, { message: "Product deleted" }); } catch (err) { return next(err); }
