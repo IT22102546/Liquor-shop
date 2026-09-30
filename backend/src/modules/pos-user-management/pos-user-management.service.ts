@@ -1,4 +1,5 @@
 import { Prisma } from "../../generated/prisma";
+import { maskCode, redeemVouchers, vouchersForCheckout } from "../gift-vouchers/gift-vouchers.service";
 import { prisma } from "../../database/prisma.client";
 import { AppError } from "../../common/utils/errors";
 import { loyaltyPointsFor } from "../../config/loyalty";
@@ -828,6 +829,17 @@ async function saveCheckout(dto: CheckoutSaleDto, cashierId: number, cashierRole
     return share;
   });
 
+  // ── Gift vouchers: each used once and in full, so the bill must be at least their value ──
+  const giftVouchers = dto.giftVouchers?.length ? await vouchersForCheckout(dto.giftVouchers) : [];
+  if (giftVouchers.length && offline) throw AppError.validation({ giftVouchers: ["Gift vouchers need the connection (to make sure they're used only once)"] });
+  const voucherPaid = roundCurrency(giftVouchers.reduce((sum, voucher) => sum + voucher.amount, 0));
+  const voucherFree = roundCurrency(giftVouchers.filter((voucher) => voucher.kind === "FREE").reduce((sum, voucher) => sum + voucher.amount, 0));
+  if (voucherPaid > total + 0.001) {
+    throw AppError.validation({
+      giftVouchers: [`The bill (Rs. ${total.toLocaleString("en-LK", { minimumFractionDigits: 2 })}) is less than the voucher${giftVouchers.length === 1 ? "" : "s"} (Rs. ${voucherPaid.toLocaleString("en-LK", { minimumFractionDigits: 2 })}). A voucher is used in full — add items or take the voucher off.`],
+    });
+  }
+
   // ── Wallet (members only): money kept at the shop on an earlier bill can pay this one ──
   const walletUsed = roundCurrency(dto.walletUse ?? 0);
   if (walletUsed > 0) {
@@ -835,10 +847,10 @@ async function saveCheckout(dto: CheckoutSaleDto, cashierId: number, cashierRole
     if (walletUsed > member.walletBalance + 0.001) {
       throw AppError.validation({ walletUse: [`${member.firstName}'s wallet has only Rs. ${member.walletBalance.toLocaleString("en-LK", { minimumFractionDigits: 2 })}`] });
     }
-    if (walletUsed > total + 0.001) throw AppError.validation({ walletUse: ["The wallet can't pay more than the bill"] });
+    if (walletUsed > total - voucherPaid + 0.001) throw AppError.validation({ walletUse: ["The wallet can't pay more than the bill (after gift vouchers)"] });
   }
-  /** What is still to pay after the wallet: paid by cash, card, transfer / QR or split. */
-  const due = roundCurrency(total - walletUsed);
+  /** What is still to pay after gift vouchers and the wallet: paid by cash, card, transfer / QR or split. */
+  const due = roundCurrency(total - voucherPaid - walletUsed);
 
   // ── How the rest is paid: cash, card, transfer / QR, or split across cash and card / transfer ──
   let cashPaid = 0;
@@ -893,6 +905,8 @@ async function saveCheckout(dto: CheckoutSaleDto, cashierId: number, cashierRole
       throw AppError.validation({ shift: ["This shift was just closed — start a new shift to keep selling"] });
     }
     const customer = member ?? (await getWalkInCustomer(tx));
+    // Used now, once: a voucher another till used a moment ago stops this bill.
+    await redeemVouchers(tx, giftVouchers, { billNo: invoiceGroupCode, branchId, shiftId: shift.id, actorId: cashierId });
 
     const purchases = [];
     for (const [lineIndex, item] of lines.entries()) {
@@ -952,7 +966,8 @@ async function saveCheckout(dto: CheckoutSaleDto, cashierId: number, cashierRole
     }
 
     // Loyalty: members earn points (rate from Shop Settings) on what they paid, and their visit is recorded.
-    const pointsEarned = member ? loyaltyPointsFor(total, settings.loyaltyRupeesPerPoint) : 0;
+    // Points are earned on what was paid for — not on the part covered by a free voucher.
+    const pointsEarned = member ? loyaltyPointsFor(roundCurrency(total - voucherFree), settings.loyaltyRupeesPerPoint) : 0;
     let memberAfter: { loyaltyPoints: number; walletBalance: number } | null = null;
     if (member) {
       memberAfter = await tx.posCustomer.update({
@@ -1025,6 +1040,8 @@ async function saveCheckout(dto: CheckoutSaleDto, cashierId: number, cashierRole
         walletCredit,
         cashierId,
         soldOffline: Boolean(offline),
+        voucherPaid,
+        voucherFree,
         ...(offline ? { createdAt: offline.soldAt } : {}),
       },
       select: {
@@ -1080,6 +1097,9 @@ async function saveCheckout(dto: CheckoutSaleDto, cashierId: number, cashierRole
     itemCount: mergedItems.reduce((sum, item) => sum + item.quantity, 0),
     soldOffline: Boolean(offline),
     stockShort,
+    voucherPaid,
+    voucherFree,
+    giftVouchers: giftVouchers.map((voucher) => ({ voucherNo: voucher.voucherNo, code: maskCode(voucher.code), amount: voucher.amount, kind: voucher.kind })),
     ...saved,
     };
     // Kept (in the same transaction) so a repeated request with this clientRef gets exactly this answer.

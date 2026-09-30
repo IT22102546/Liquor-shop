@@ -6,6 +6,7 @@ import { findOpenShift } from "./stock-movements";
 import { mainBranch } from "../branches/branch-context";
 import { forBranch } from "../branches/branch-stock";
 import { shiftDrawerOpens } from "./drawer.service";
+import { shiftVouchers } from "../gift-vouchers/gift-vouchers.service";
 import { DISPOSAL_LABELS as RETURN_DISPOSAL_LABELS, TYPE_LABELS as RETURN_TYPE_LABELS } from "../returns/returns.service";
 
 /** Sri Lankan notes and coins counted at the till. */
@@ -14,13 +15,22 @@ export const DENOMINATIONS = [5000, 2000, 1000, 500, 100, 50, 20, 10, 5, 2, 1] a
 const round2 = (value: number) => Math.round(value * 100) / 100;
 const PAYMENT_LABELS: Record<string, string> = { CASH: "Cash", CARD: "Card", BANK_TRANSFER: "Transfer / QR", CHEQUE: "Cheque", SPLIT: "Split" };
 /** The amount paid each way. Card = card machine; transfer = bank transfer / QR / cheque (checked in the bank). */
-type Paid = { cashPaid: number; cardPaid: number; transferPaid: number; walletUsed: number; walletCredit: number; paymentMethod: string };
+type Paid = { cashPaid: number; cardPaid: number; transferPaid: number; walletUsed: number; walletCredit: number; voucherPaid: number; paymentMethod: string };
 /**
  * How a bill was paid, e.g. "Split: cash 1,000 + card 2,650", "Wallet 500 + cash 320",
  * with "· 80 change to wallet" when the member kept change.
  */
 const paymentLabel = (sale: Paid) => {
   const kept = sale.walletCredit > 0 ? ` · ${sale.walletCredit.toLocaleString("en-LK")} change to wallet` : "";
+  if (sale.voucherPaid > 0) {
+    const rest = [
+      sale.walletUsed > 0 ? `wallet ${sale.walletUsed.toLocaleString("en-LK")}` : "",
+      sale.cashPaid > 0 ? `cash ${sale.cashPaid.toLocaleString("en-LK")}` : "",
+      sale.cardPaid > 0 ? `card ${sale.cardPaid.toLocaleString("en-LK")}` : "",
+      sale.transferPaid > 0 ? `QR ${sale.transferPaid.toLocaleString("en-LK")}` : "",
+    ].filter(Boolean);
+    return `Gift voucher ${sale.voucherPaid.toLocaleString("en-LK")}${rest.length ? ` + ${rest.join(" + ")}` : ""}${kept}`;
+  }
   if (sale.walletUsed > 0) {
     const rest = [
       sale.cashPaid > 0 ? `cash ${sale.cashPaid.toLocaleString("en-LK")}` : "",
@@ -54,7 +64,7 @@ export async function summarizeShift(shiftId: number) {
 
   const branch = shift.branchId ? await prisma.branch.findUnique({ where: { id: shift.branchId } }) : await mainBranch();
   if (!branch) throw AppError.notFound("Branch not found");
-  const [sales, entries, movements, allProducts, noSaleOpens] = await Promise.all([
+  const [sales, entries, movements, allProducts, noSaleOpens, gv] = await Promise.all([
     prisma.posCounterSale.findMany({
       where: { shiftId },
       orderBy: { createdAt: "asc" },
@@ -67,6 +77,7 @@ export async function summarizeShift(shiftId: number) {
       orderBy: [{ categoryId: "asc" }, { name: "asc" }],
     }),
     shiftDrawerOpens(shiftId),
+    shiftVouchers(shiftId),
   ]);
   // Stock as this branch holds it (closing = its shelf count now).
   const products = await forBranch(branch.id, allProducts);
@@ -138,7 +149,10 @@ export async function summarizeShift(shiftId: number) {
   // Wallet: bill parts paid from members' wallets (received on earlier bills) and change they kept today.
   const walletUsedTotal = round2(sales.reduce((sum, sale) => sum + sale.walletUsed, 0));
   const walletKept = round2(sales.reduce((sum, sale) => sum + sale.walletCredit, 0));
-  const netSales = round2(cashSales + cardSales + transferSales + walletUsedTotal);
+  // Gift vouchers used on bills count as sales (sold ones were paid for earlier; free ones are a promotion cost).
+  const voucherPaidTotal = round2(sales.reduce((sum, sale) => sum + sale.voucherPaid, 0));
+  const voucherFreeTotal = round2(sales.reduce((sum, sale) => sum + sale.voucherFree, 0));
+  const netSales = round2(cashSales + cardSales + transferSales + walletUsedTotal + voucherPaidTotal);
   // Non-cash payments are recorded automatically at the till; listed so they can be ticked off
   // against the card machine settlement slip and the bank app. A split bill lists only its card / QR part.
   const paymentList = (kind: "card" | "transfer") => sales
@@ -149,8 +163,12 @@ export async function summarizeShift(shiftId: number) {
       reference: sale.paymentReference,
       method: sale.paymentMethod === "SPLIT" ? `Split (of ${sale.totalAmount.toLocaleString("en-LK")})` : PAYMENT_LABELS[sale.paymentMethod] ?? sale.paymentMethod,
     }));
-  const cardPayments = paymentList("card");
-  const transferPayments = paymentList("transfer");
+  // Gift vouchers sold this shift by card / QR go through the same card machine and bank checks.
+  const voucherPayments = (method: "CARD" | "BANK_TRANSFER") => gv.issued
+    .filter((voucher) => voucher.kind === "SOLD" && voucher.paymentMethod === method)
+    .map((voucher) => ({ billNo: voucher.voucherNo, time: voucher.issuedAt, cashier: voucher.issuedBy, amount: voucher.amount, reference: voucher.paymentReference, method: "Gift voucher sold" }));
+  const cardPayments = [...paymentList("card"), ...voucherPayments("CARD")];
+  const transferPayments = [...paymentList("transfer"), ...voucherPayments("BANK_TRANSFER")];
   const emptyDeduction = round2(sales.reduce((sum, sale) => sum + sale.emptyDeduction, 0));
   const discounts = round2(sales.reduce((sum, sale) => sum + sale.discountAmount, 0));
   const pointsValue = round2(sales.reduce((sum, sale) => sum + sale.pointsValue, 0));
@@ -243,7 +261,8 @@ export async function summarizeShift(shiftId: number) {
   };
 
   // Change kept in wallets stayed in the drawer, so it is expected there too; cash refunds came out of it.
-  const expectedCash = round2(shift.openingFloat + cashSales + walletKept + drawerIn - drawerOut - refundsCash);
+  // Gift vouchers sold for cash this shift are in the drawer too (money owed to the holder until used).
+  const expectedCash = round2(shift.openingFloat + cashSales + walletKept + gv.soldCash + drawerIn - drawerOut - refundsCash);
 
   // ── Stock day book: opening + received ± adjusted − sold = closing (per product) ──
   const stockMoves = new Map<number, { received: number; sold: number; adjusted: number; opening: number; returned: number; damaged: number; transferIn: number; transferOut: number }>();
@@ -324,6 +343,8 @@ export async function summarizeShift(shiftId: number) {
     ],
     /** Wallet part of bills (paid with money kept on earlier bills — not new money today). */
     wallet: { bills: sales.filter((sale) => sale.walletUsed > 0).length, amount: walletUsedTotal },
+    /** Gift voucher part of bills (not new money today: paid for when sold, or given free). */
+    vouchers: { bills: sales.filter((sale) => sale.voucherPaid > 0).length, amount: voucherPaidTotal, free: voucherFreeTotal },
     splitBills: splitSales.map((sale) => ({
       billNo: sale.invoiceGroupCode, time: sale.createdAt, cashier: sale.cashier.name,
       total: sale.totalAmount, cash: sale.cashPaid, card: sale.cardPaid, transfer: sale.transferPaid,
@@ -413,7 +434,7 @@ export async function summarizeShift(shiftId: number) {
       createdAt: { gte: shift.openedAt, lte: shift.closedAt ?? new Date() },
       // This branch's actions, plus company-wide ones (prices, settings…) made meanwhile.
       OR: [{ branchId: shift.branchId }, { branchId: null }],
-      NOT: [{ action: "sale.checkout" }, { category: "CASHBOOK" }, { category: "RETURN" }, { category: "GOODS" }],
+      NOT: [{ action: "sale.checkout" }, { category: "CASHBOOK" }, { category: "RETURN" }, { category: "GOODS" }, { category: "VOUCHER" }],
     },
     orderBy: { createdAt: "asc" },
     take: 300,
@@ -450,6 +471,12 @@ export async function summarizeShift(shiftId: number) {
       transferSales,
       walletUsed: walletUsedTotal,
       walletKept,
+      /** Paid with gift vouchers (in net sales), and the free-voucher part of that (a promotion cost). */
+      voucherPaid: voucherPaidTotal,
+      voucherFree: voucherFreeTotal,
+      /** To match against the card machine / bank app: card and QR bills plus gift vouchers sold that way. */
+      cardToSettle: round2(cardSales + gv.soldCard),
+      transferToCheck: round2(transferSales + gv.soldTransfer),
       /** Paid back for returned bottles (cash + wallet), and net sales after that. */
       refunds: returns.refundsTotal,
       netAfterReturns: round2(netSales - returns.refundsTotal),
@@ -471,6 +498,8 @@ export async function summarizeShift(shiftId: number) {
       openingFloat: shift.openingFloat,
       cashSales,
       walletKept,
+      /** Gift vouchers sold for cash this shift (in the drawer; owed to the holder until used). */
+      voucherSalesCash: gv.soldCash,
       drawerIn,
       drawerOut,
       refundsCash,
@@ -485,6 +514,14 @@ export async function summarizeShift(shiftId: number) {
     returns,
     damagedStock,
     goods,
+    /** Gift vouchers issued (sold / free) and used during the shift, with where they came from. */
+    giftVouchers: {
+      issued: gv.issued,
+      used: gv.used,
+      soldCount: gv.soldCount, soldTotal: gv.soldTotal, soldCash: gv.soldCash, soldCard: gv.soldCard, soldTransfer: gv.soldTransfer,
+      freeCount: gv.freeCount, freeTotal: gv.freeTotal,
+      usedTotal: gv.usedTotal, usedFree: gv.usedFree,
+    },
     /** How often the cash drawer opened: once per bill with cash, plus every "no sale" open (with its reason). */
     drawer: {
       cashBills: sales.filter((sale) => sale.cashPaid > 0).length,
@@ -553,8 +590,8 @@ export async function countShift(shiftId: number, counts: Record<string, number>
     countedCash: counted,
     expectedCash: summary.cash.expectedCash,
     difference: round2(counted - summary.cash.expectedCash),
-    cardSales: summary.sales.cardSales,
-    transferSales: summary.sales.transferSales,
+    cardSales: summary.sales.cardToSettle,
+    transferSales: summary.sales.transferToCheck,
     recounts: history.length - 1,
   };
 }
@@ -585,7 +622,7 @@ export async function closeShift(shiftId: number, dto: CloseShiftDto, actorId: n
   if (dto.floatLeft < 0 || dto.floatLeft > shift.countedCash + 0.001) {
     throw AppError.validation({ floatLeft: ["Float left can't be more than the cash counted"] });
   }
-  const cardDifference = dto.cardSlipTotal != null ? round2(dto.cardSlipTotal - summary.sales.cardSales) : null;
+  const cardDifference = dto.cardSlipTotal != null ? round2(dto.cardSlipTotal - summary.sales.cardToSettle) : null;
   if (cardDifference != null && Math.abs(cardDifference) >= 0.01 && !dto.cardDifferenceReason?.trim()) {
     throw AppError.validation({ cardDifferenceReason: [`The card machine total is ${cardDifference > 0 ? "more" : "less"} than the card sales by Rs. ${Math.abs(cardDifference).toLocaleString("en-LK", { minimumFractionDigits: 2 })} — give a reason`] });
   }
@@ -642,8 +679,8 @@ export async function closeShift(shiftId: number, dto: CloseShiftDto, actorId: n
     // Takings go into the receipts book automatically.
     const receipts = [
       { category: "SHIFT_TAKINGS", amount: cashBanked, note: `Cash taken from the drawer at close of ${shift.shiftNo} (float left: Rs. ${round2(dto.floatLeft)}) — in the safe until deposited` },
-      { category: "CARD_SETTLEMENT", amount: summary.sales.cardSales, note: `Card machine sales in ${shift.shiftNo} (${summary.sales.cardPayments.length} payment${summary.sales.cardPayments.length === 1 ? "" : "s"})${dto.cardSlipTotal != null ? ` · settlement slip Rs. ${dto.cardSlipTotal}` : " · not settled at close"}` },
-      { category: "TRANSFER_SALES", amount: summary.sales.transferSales, note: `Bank transfer / QR sales in ${shift.shiftNo} (${summary.sales.transferPayments.length})` },
+      { category: "CARD_SETTLEMENT", amount: summary.sales.cardToSettle, note: `Card machine sales in ${shift.shiftNo} (${summary.sales.cardPayments.length} payment${summary.sales.cardPayments.length === 1 ? "" : "s"})${dto.cardSlipTotal != null ? ` · settlement slip Rs. ${dto.cardSlipTotal}` : " · not settled at close"}` },
+      { category: "TRANSFER_SALES", amount: summary.sales.transferToCheck, note: `Bank transfer / QR sales in ${shift.shiftNo} (${summary.sales.transferPayments.length})` },
     ].filter((row) => row.amount > 0);
     let receiptCount = await tx.posCashEntry.count({ where: { direction: "IN" } });
     for (const receipt of receipts) {
@@ -717,7 +754,7 @@ export async function getShiftReport(shiftId: number, revealCash: boolean) {
     blind: true,
     report: {
       ...summary,
-      cash: { ...summary.cash, cashSales: null, walletKept: null, expectedCash: null, drawerIn: null, drawerOut: null, refundsCash: null },
+      cash: { ...summary.cash, cashSales: null, walletKept: null, voucherSalesCash: null, expectedCash: null, drawerIn: null, drawerOut: null, refundsCash: null },
       // What came back and why stays visible; cash paid back out of the drawer waits for the count.
       returns: {
         ...summary.returns, refundsCash: null, refundsTotal: null,
@@ -745,6 +782,12 @@ export async function getShiftReport(shiftId: number, revealCash: boolean) {
         splitBills: summary.payments.splitBills.map((row) => ({ ...row, total: null, cash: null })),
         changeGiven: null,
         wallet: summary.payments.wallet,
+        vouchers: summary.payments.vouchers,
+      },
+      // Gift vouchers sold for cash went into the drawer: their amounts wait for the count.
+      giftVouchers: {
+        ...summary.giftVouchers, soldCash: null, soldTotal: null,
+        issued: summary.giftVouchers.issued.map((voucher) => (voucher.paymentMethod === "CASH" ? { ...voucher, amount: null } : voucher)),
       },
       // Change kept in wallets went into the drawer, so its amount waits for the count; names and wallet spending stay visible.
       wallet: { ...summary.wallet, kept: null, rows: summary.wallet.rows.map((row) => (row.type === "CREDIT" ? { ...row, amount: null } : row)) },

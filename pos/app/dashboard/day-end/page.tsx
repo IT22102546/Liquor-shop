@@ -16,7 +16,7 @@ type CurrentShift = {
   denominations: number[];
 };
 type ShiftRow = { id: number; shiftNo: string; status: string; openedAt: string; openedBy: string; closedAt: string | null; closedBy: string | null; openingFloat: number; netSales: number | null; bills: number | null; cashDifference: number | null; cashBanked: number | null };
-type ShiftTab = "bills" | "payments" | "wallets" | "returns" | "goods" | "staff" | "items" | "offers" | "cash" | "stock" | "stockin" | "journal" | "drawer";
+type ShiftTab = "bills" | "payments" | "wallets" | "returns" | "goods" | "staff" | "items" | "offers" | "cash" | "stock" | "stockin" | "journal" | "drawer" | "vouchers";
 type CountResult = { countedCash: number; expectedCash: number; difference: number; cardSales: number; recounts: number };
 
 const money = (value: number | null | undefined) => (value == null ? "—" : `Rs. ${value.toLocaleString("en-LK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
@@ -162,13 +162,13 @@ export default function DayEndPage() {
               <div><span>Bills</span><strong>{report.sales.bills}</strong><em>{report.sales.units} units sold</em></div>
               <div><span>Net sales</span><strong>{blind ? "Hidden" : money(report.sales.netSales)}</strong><em>{blind ? "shown after the drawer count" : `cash ${money(report.sales.cashSales)} · card ${money(report.sales.cardSales)}${report.sales.transferSales ? ` · QR ${money(report.sales.transferSales)}` : ""}`}</em></div>
               <div><span>Paid out</span><strong>{money(entries.filter((e) => e.direction === "OUT" && !e.voided).reduce((sum, e) => sum + e.amount, 0))}</strong><em>{entries.filter((e) => e.direction === "OUT" && !e.voided).length} expense(s) this shift</em></div>
-              <div><span>Expected in drawer</span><strong>{blind ? "Hidden" : money(report.cash.expectedCash)}</strong><em>{blind ? "blind count — count first" : `float + cash sales${report.cash.walletKept ? " + wallet change" : ""} + in − out${report.cash.refundsCash ? " − refunds" : ""}`}</em></div>
+              <div><span>Expected in drawer</span><strong>{blind ? "Hidden" : money(report.cash.expectedCash)}</strong><em>{blind ? "blind count — count first" : `float + cash sales${report.cash.walletKept ? " + wallet change" : ""}${report.cash.voucherSalesCash ? " + vouchers sold" : ""} + in − out${report.cash.refundsCash ? " − refunds" : ""}`}</em></div>
             </div>
           </section>
 
           <section className="lx-card lx-log-card">
             <div className="lx-seg-plain" role="tablist" style={{ margin: "0.4rem 0.4rem 0.6rem" }}>
-              {([["bills", `Sales (${report.sales.bills})`], ["payments", `Payments${report.payments?.splitBills.length ? ` · ${report.payments.splitBills.length} split` : ""}`], ["wallets", `Customer wallets (${report.wallet?.rows.length ?? 0})`], ["returns", `Returns & damages (${report.returns?.rows.length ?? 0})`], ["goods", `Goods in & out (${(report.goods?.grns.length ?? 0) + (report.goods?.sent.length ?? 0) + (report.goods?.received.length ?? 0)})`], ["staff", "By staff"], ["items", "Items sold"], ["offers", `Discounts & loyalty (${report.sales.loyalty?.rows.length ?? 0})`], ["cash", `Expenses & cash in (${entries.length})`], ["drawer", `Drawer opened${report.drawer ? ` (${report.drawer.noSaleCount} no sale)` : ""}`], ["stock", "Stock book"], ["stockin", `Stock in & changes (${report.stockLog?.length ?? 0})`], ["journal", `Shift journal (${report.journal?.length ?? 0})`]] as const).map(([key, label]) => (
+              {([["bills", `Sales (${report.sales.bills})`], ["payments", `Payments${report.payments?.splitBills.length ? ` · ${report.payments.splitBills.length} split` : ""}`], ["wallets", `Customer wallets (${report.wallet?.rows.length ?? 0})`], ["returns", `Returns & damages (${report.returns?.rows.length ?? 0})`], ["goods", `Goods in & out (${(report.goods?.grns.length ?? 0) + (report.goods?.sent.length ?? 0) + (report.goods?.received.length ?? 0)})`], ["staff", "By staff"], ["items", "Items sold"], ["offers", `Discounts & loyalty (${report.sales.loyalty?.rows.length ?? 0})`], ["cash", `Expenses & cash in (${entries.length})`], ["vouchers", `Gift vouchers (${(report.giftVouchers?.issued.length ?? 0) + (report.giftVouchers?.used.length ?? 0)})`], ["drawer", `Drawer opened${report.drawer ? ` (${report.drawer.noSaleCount} no sale)` : ""}`], ["stock", "Stock book"], ["stockin", `Stock in & changes (${report.stockLog?.length ?? 0})`], ["journal", `Shift journal (${report.journal?.length ?? 0})`]] as const).map(([key, label]) => (
                 <button key={key} type="button" className={tab === key ? "active" : ""} onClick={() => setTab(key)}>{label}</button>
               ))}
             </div>
@@ -301,6 +301,7 @@ function ShiftTables({ report, tab }: { report: ShiftReport; tab: ShiftTab }) {
           <tbody>
             {payments.rows.map((row) => <tr key={row.method}><td><strong>{row.method}</strong></td><td style={{ textAlign: "right" }}>{row.bills}</td><td style={{ textAlign: "right" }}>{money(row.amount)}</td></tr>)}
             {payments.wallet && payments.wallet.amount > 0 && <tr><td><strong>Part paid from customer wallets</strong></td><td style={{ textAlign: "right" }}>{payments.wallet.bills}</td><td style={{ textAlign: "right" }}>{money(payments.wallet.amount)}</td></tr>}
+            {payments.vouchers && payments.vouchers.amount > 0 && <tr><td><strong>Part paid with gift vouchers</strong>{payments.vouchers.free > 0 && <div className="td-muted">of which free vouchers {money(payments.vouchers.free)}</div>}</td><td style={{ textAlign: "right" }}>{payments.vouchers.bills}</td><td style={{ textAlign: "right" }}>{money(payments.vouchers.amount)}</td></tr>}
             <tr><td className="td-muted">Money actually received</td><td /><td style={{ textAlign: "right" }} className="td-muted">cash {money(report.sales.cashSales)} · card {money(report.sales.cardSales)} · QR {money(report.sales.transferSales ?? 0)}</td></tr>
             {(report.sales.walletKept ?? 0) !== 0 && <tr><td className="td-muted">Change kept in customer wallets (stayed in the drawer)</td><td /><td style={{ textAlign: "right" }} className="td-muted">{money(report.sales.walletKept)}</td></tr>}
             <tr><td className="td-muted">Change given back</td><td /><td style={{ textAlign: "right" }} className="td-muted">{money(payments.changeGiven)}</td></tr>
@@ -489,6 +490,51 @@ function ShiftTables({ report, tab }: { report: ShiftReport; tab: ShiftTab }) {
                 <td style={{ textAlign: "right" }}>{row.pointsRedeemed ? <><span className="lx-amount-out">{row.pointsRedeemed}</span><div className="td-muted">−{money(row.pointsValue)}</div></> : "—"}</td>
                 <td style={{ textAlign: "right" }}>{row.pointsEarned ? <span className="lx-amount-in">+{row.pointsEarned}</span> : "—"}</td>
                 <td style={{ textAlign: "right" }}>{money(row.total)}</td>
+              </tr>
+            ))}</tbody>
+          </table></div>
+        )}
+      </>
+    );
+  }
+  if (tab === "vouchers") {
+    const gv = report.giftVouchers;
+    if (!gv) return <div className="lx-empty">Gift vouchers weren't recorded for this shift (closed before they were added).</div>;
+    if (!gv.issued.length && !gv.used.length) return <div className="lx-empty">No gift vouchers were sold, given or used in this shift.</div>;
+    return (
+      <>
+        <div className="rt-kpis" style={{ margin: "0 0.4rem 0.8rem" }}>
+          <div className="rt-kpi"><span>Sold</span><strong>{gv.soldTotal == null ? "Hidden" : money(gv.soldTotal)}</strong><em>{gv.soldCount} voucher(s){gv.soldCash ? ` · cash ${money(gv.soldCash)}` : ""}{gv.soldCard ? ` · card ${money(gv.soldCard)}` : ""}{gv.soldTransfer ? ` · QR ${money(gv.soldTransfer)}` : ""}</em></div>
+          <div className="rt-kpi"><span>Given free</span><strong>{money(gv.freeTotal)}</strong><em>{gv.freeCount} voucher(s)</em></div>
+          <div className="rt-kpi"><span>Used on bills</span><strong>{money(gv.usedTotal)}</strong><em>{gv.used.length} voucher(s){gv.usedFree ? ` · free ${money(gv.usedFree)}` : ""}</em></div>
+        </div>
+        {gv.issued.length > 0 && (
+          <div className="data-table-wrap"><table className="data-table">
+            <thead><tr><th>Issued</th><th>Voucher</th><th>Type</th><th>For</th><th>By</th><th style={{ textAlign: "right" }}>Amount</th></tr></thead>
+            <tbody>{gv.issued.map((row) => (
+              <tr key={`i-${row.voucherNo}`}>
+                <td className="td-muted">{hhmm(row.issuedAt)}</td>
+                <td><strong>{row.voucherNo}</strong><div className="td-muted">{row.code}</div></td>
+                <td>{row.kind === "FREE" ? <>Free<div className="td-muted">{row.note}</div></> : <>Sold · {row.paymentLabel}{row.paymentReference ? <div className="td-muted">{row.paymentReference}</div> : null}</>}</td>
+                <td>{row.issuedTo ?? "—"}</td>
+                <td>{row.issuedBy}</td>
+                <td style={{ textAlign: "right" }}>{row.amount == null ? "—" : money(row.amount)}</td>
+              </tr>
+            ))}</tbody>
+          </table></div>
+        )}
+        {gv.used.length > 0 && (
+          <div className="data-table-wrap" style={{ marginTop: "0.8rem" }}><table className="data-table">
+            <thead><tr><th>Used</th><th>Voucher</th><th>Type</th><th>Bill</th><th>Issued at</th><th>Cashier</th><th style={{ textAlign: "right" }}>Amount</th></tr></thead>
+            <tbody>{gv.used.map((row) => (
+              <tr key={`u-${row.voucherNo}`}>
+                <td className="td-muted">{row.redeemedAt ? hhmm(row.redeemedAt) : ""}</td>
+                <td><strong>{row.voucherNo}</strong><div className="td-muted">{row.code}</div></td>
+                <td>{row.kind === "FREE" ? "Free" : "Sold"}</td>
+                <td className="td-muted">{row.redeemedBillNo}</td>
+                <td>{row.issueBranch}{row.issueBranch !== row.redeemedBranch ? <div className="td-muted">other branch</div> : null}</td>
+                <td>{row.redeemedBy}</td>
+                <td style={{ textAlign: "right" }}>{row.amount == null ? "—" : money(row.amount)}</td>
               </tr>
             ))}</tbody>
           </table></div>

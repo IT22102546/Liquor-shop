@@ -220,6 +220,12 @@ export type Gtn = $Result.DefaultSelection<Prisma.$GtnPayload>
  */
 export type GtnItem = $Result.DefaultSelection<Prisma.$GtnItemPayload>
 /**
+ * Model GiftVoucher
+ * A gift voucher: a fixed amount, used once and in full on a bill at any branch.
+ * SOLD = the customer paid for it (money in when issued, owed until used); FREE = given by the shop.
+ */
+export type GiftVoucher = $Result.DefaultSelection<Prisma.$GiftVoucherPayload>
+/**
  * Model DeployMigration
  * Database changes applied by scripts/deploy.sh (one row per backend/prisma/migrations folder).
  */
@@ -962,6 +968,16 @@ export class PrismaClient<
   get gtnItem(): Prisma.GtnItemDelegate<ExtArgs>;
 
   /**
+   * `prisma.giftVoucher`: Exposes CRUD operations for the **GiftVoucher** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more GiftVouchers
+    * const giftVouchers = await prisma.giftVoucher.findMany()
+    * ```
+    */
+  get giftVoucher(): Prisma.GiftVoucherDelegate<ExtArgs>;
+
+  /**
    * `prisma.deployMigration`: Exposes CRUD operations for the **DeployMigration** model.
     * Example usage:
     * ```ts
@@ -1451,6 +1467,7 @@ export namespace Prisma {
     GrnItem: 'GrnItem',
     Gtn: 'Gtn',
     GtnItem: 'GtnItem',
+    GiftVoucher: 'GiftVoucher',
     DeployMigration: 'DeployMigration'
   };
 
@@ -1467,7 +1484,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "posAdmin" | "posCounterSale" | "supplier" | "inventoryBrand" | "inventoryCategory" | "inventoryProduct" | "inventoryProductExpense" | "inventoryProductImage" | "posCustomer" | "posCustomerPurchase" | "posInvoiceTerm" | "posInstallment" | "posInstallmentPayment" | "contactRequest" | "account" | "accountRelationship" | "accountReceipt" | "accountVoucher" | "accountTransaction" | "invoicePayment" | "accountDeposit" | "accountDepositItem" | "activityLog" | "posSetting" | "posShift" | "posCashEntry" | "posDrawerOpen" | "inventoryMovement" | "purchaseOrder" | "purchaseOrderItem" | "purchaseOrderEmail" | "posWalletTransaction" | "posReturn" | "branch" | "branchStock" | "grn" | "grnItem" | "gtn" | "gtnItem" | "deployMigration"
+      modelProps: "user" | "posAdmin" | "posCounterSale" | "supplier" | "inventoryBrand" | "inventoryCategory" | "inventoryProduct" | "inventoryProductExpense" | "inventoryProductImage" | "posCustomer" | "posCustomerPurchase" | "posInvoiceTerm" | "posInstallment" | "posInstallmentPayment" | "contactRequest" | "account" | "accountRelationship" | "accountReceipt" | "accountVoucher" | "accountTransaction" | "invoicePayment" | "accountDeposit" | "accountDepositItem" | "activityLog" | "posSetting" | "posShift" | "posCashEntry" | "posDrawerOpen" | "inventoryMovement" | "purchaseOrder" | "purchaseOrderItem" | "purchaseOrderEmail" | "posWalletTransaction" | "posReturn" | "branch" | "branchStock" | "grn" | "grnItem" | "gtn" | "gtnItem" | "giftVoucher" | "deployMigration"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4268,6 +4285,76 @@ export namespace Prisma {
           count: {
             args: Prisma.GtnItemCountArgs<ExtArgs>
             result: $Utils.Optional<GtnItemCountAggregateOutputType> | number
+          }
+        }
+      }
+      GiftVoucher: {
+        payload: Prisma.$GiftVoucherPayload<ExtArgs>
+        fields: Prisma.GiftVoucherFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.GiftVoucherFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GiftVoucherPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.GiftVoucherFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GiftVoucherPayload>
+          }
+          findFirst: {
+            args: Prisma.GiftVoucherFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GiftVoucherPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.GiftVoucherFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GiftVoucherPayload>
+          }
+          findMany: {
+            args: Prisma.GiftVoucherFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GiftVoucherPayload>[]
+          }
+          create: {
+            args: Prisma.GiftVoucherCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GiftVoucherPayload>
+          }
+          createMany: {
+            args: Prisma.GiftVoucherCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.GiftVoucherCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GiftVoucherPayload>[]
+          }
+          delete: {
+            args: Prisma.GiftVoucherDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GiftVoucherPayload>
+          }
+          update: {
+            args: Prisma.GiftVoucherUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GiftVoucherPayload>
+          }
+          deleteMany: {
+            args: Prisma.GiftVoucherDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.GiftVoucherUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.GiftVoucherUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GiftVoucherPayload>
+          }
+          aggregate: {
+            args: Prisma.GiftVoucherAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGiftVoucher>
+          }
+          groupBy: {
+            args: Prisma.GiftVoucherGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GiftVoucherGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.GiftVoucherCountArgs<ExtArgs>
+            result: $Utils.Optional<GiftVoucherCountAggregateOutputType> | number
           }
         }
       }
@@ -7302,6 +7389,8 @@ export namespace Prisma {
   export type PosCounterSaleAvgAggregateOutputType = {
     id: number | null
     branchId: number | null
+    voucherPaid: number | null
+    voucherFree: number | null
     totalAmount: number | null
     emptyDeduction: number | null
     emptiesReturned: number | null
@@ -7326,6 +7415,8 @@ export namespace Prisma {
   export type PosCounterSaleSumAggregateOutputType = {
     id: number | null
     branchId: number | null
+    voucherPaid: number | null
+    voucherFree: number | null
     totalAmount: number | null
     emptyDeduction: number | null
     emptiesReturned: number | null
@@ -7353,6 +7444,8 @@ export namespace Prisma {
     invoiceGroupCode: string | null
     clientRef: string | null
     soldOffline: boolean | null
+    voucherPaid: number | null
+    voucherFree: number | null
     totalAmount: number | null
     emptyDeduction: number | null
     emptiesReturned: number | null
@@ -7384,6 +7477,8 @@ export namespace Prisma {
     invoiceGroupCode: string | null
     clientRef: string | null
     soldOffline: boolean | null
+    voucherPaid: number | null
+    voucherFree: number | null
     totalAmount: number | null
     emptyDeduction: number | null
     emptiesReturned: number | null
@@ -7416,6 +7511,8 @@ export namespace Prisma {
     clientRef: number
     checkoutResult: number
     soldOffline: number
+    voucherPaid: number
+    voucherFree: number
     totalAmount: number
     emptyDeduction: number
     emptiesReturned: number
@@ -7446,6 +7543,8 @@ export namespace Prisma {
   export type PosCounterSaleAvgAggregateInputType = {
     id?: true
     branchId?: true
+    voucherPaid?: true
+    voucherFree?: true
     totalAmount?: true
     emptyDeduction?: true
     emptiesReturned?: true
@@ -7470,6 +7569,8 @@ export namespace Prisma {
   export type PosCounterSaleSumAggregateInputType = {
     id?: true
     branchId?: true
+    voucherPaid?: true
+    voucherFree?: true
     totalAmount?: true
     emptyDeduction?: true
     emptiesReturned?: true
@@ -7497,6 +7598,8 @@ export namespace Prisma {
     invoiceGroupCode?: true
     clientRef?: true
     soldOffline?: true
+    voucherPaid?: true
+    voucherFree?: true
     totalAmount?: true
     emptyDeduction?: true
     emptiesReturned?: true
@@ -7528,6 +7631,8 @@ export namespace Prisma {
     invoiceGroupCode?: true
     clientRef?: true
     soldOffline?: true
+    voucherPaid?: true
+    voucherFree?: true
     totalAmount?: true
     emptyDeduction?: true
     emptiesReturned?: true
@@ -7560,6 +7665,8 @@ export namespace Prisma {
     clientRef?: true
     checkoutResult?: true
     soldOffline?: true
+    voucherPaid?: true
+    voucherFree?: true
     totalAmount?: true
     emptyDeduction?: true
     emptiesReturned?: true
@@ -7679,6 +7786,8 @@ export namespace Prisma {
     clientRef: string | null
     checkoutResult: JsonValue | null
     soldOffline: boolean
+    voucherPaid: number
+    voucherFree: number
     totalAmount: number
     emptyDeduction: number
     emptiesReturned: number
@@ -7730,6 +7839,8 @@ export namespace Prisma {
     clientRef?: boolean
     checkoutResult?: boolean
     soldOffline?: boolean
+    voucherPaid?: boolean
+    voucherFree?: boolean
     totalAmount?: boolean
     emptyDeduction?: boolean
     emptiesReturned?: boolean
@@ -7765,6 +7876,8 @@ export namespace Prisma {
     clientRef?: boolean
     checkoutResult?: boolean
     soldOffline?: boolean
+    voucherPaid?: boolean
+    voucherFree?: boolean
     totalAmount?: boolean
     emptyDeduction?: boolean
     emptiesReturned?: boolean
@@ -7800,6 +7913,8 @@ export namespace Prisma {
     clientRef?: boolean
     checkoutResult?: boolean
     soldOffline?: boolean
+    voucherPaid?: boolean
+    voucherFree?: boolean
     totalAmount?: boolean
     emptyDeduction?: boolean
     emptiesReturned?: boolean
@@ -7863,6 +7978,14 @@ export namespace Prisma {
        * Rung up on the till while the connection was down, and uploaded later (createdAt = time sold).
        */
       soldOffline: boolean
+      /**
+       * Paid with gift vouchers (their full value; a voucher is used once and in full). Counts as sales.
+       */
+      voucherPaid: number
+      /**
+       * Of voucherPaid, the part from FREE (promotional) vouchers — money never received; a promotion cost.
+       */
+      voucherFree: number
       totalAmount: number
       /**
        * Total deducted for empty bottles returned (already subtracted from totalAmount).
@@ -8318,6 +8441,8 @@ export namespace Prisma {
     readonly clientRef: FieldRef<"PosCounterSale", 'String'>
     readonly checkoutResult: FieldRef<"PosCounterSale", 'Json'>
     readonly soldOffline: FieldRef<"PosCounterSale", 'Boolean'>
+    readonly voucherPaid: FieldRef<"PosCounterSale", 'Float'>
+    readonly voucherFree: FieldRef<"PosCounterSale", 'Float'>
     readonly totalAmount: FieldRef<"PosCounterSale", 'Float'>
     readonly emptyDeduction: FieldRef<"PosCounterSale", 'Float'>
     readonly emptiesReturned: FieldRef<"PosCounterSale", 'Int'>
@@ -49543,6 +49668,1200 @@ export namespace Prisma {
 
 
   /**
+   * Model GiftVoucher
+   */
+
+  export type AggregateGiftVoucher = {
+    _count: GiftVoucherCountAggregateOutputType | null
+    _avg: GiftVoucherAvgAggregateOutputType | null
+    _sum: GiftVoucherSumAggregateOutputType | null
+    _min: GiftVoucherMinAggregateOutputType | null
+    _max: GiftVoucherMaxAggregateOutputType | null
+  }
+
+  export type GiftVoucherAvgAggregateOutputType = {
+    id: number | null
+    amount: number | null
+    customerId: number | null
+    issuedById: number | null
+    issueBranchId: number | null
+    issueShiftId: number | null
+    redeemedById: number | null
+    redeemedBranchId: number | null
+    redeemedShiftId: number | null
+    cancelledById: number | null
+  }
+
+  export type GiftVoucherSumAggregateOutputType = {
+    id: number | null
+    amount: number | null
+    customerId: number | null
+    issuedById: number | null
+    issueBranchId: number | null
+    issueShiftId: number | null
+    redeemedById: number | null
+    redeemedBranchId: number | null
+    redeemedShiftId: number | null
+    cancelledById: number | null
+  }
+
+  export type GiftVoucherMinAggregateOutputType = {
+    id: number | null
+    voucherNo: string | null
+    code: string | null
+    amount: number | null
+    kind: string | null
+    status: string | null
+    expiresAt: Date | null
+    issuedTo: string | null
+    issuedPhone: string | null
+    customerId: number | null
+    note: string | null
+    issuedById: number | null
+    issuedAt: Date | null
+    issueBranchId: number | null
+    issueShiftId: number | null
+    paymentMethod: string | null
+    paymentReference: string | null
+    redeemedAt: Date | null
+    redeemedById: number | null
+    redeemedBranchId: number | null
+    redeemedShiftId: number | null
+    redeemedBillNo: string | null
+    cancelledAt: Date | null
+    cancelledById: number | null
+    cancelReason: string | null
+  }
+
+  export type GiftVoucherMaxAggregateOutputType = {
+    id: number | null
+    voucherNo: string | null
+    code: string | null
+    amount: number | null
+    kind: string | null
+    status: string | null
+    expiresAt: Date | null
+    issuedTo: string | null
+    issuedPhone: string | null
+    customerId: number | null
+    note: string | null
+    issuedById: number | null
+    issuedAt: Date | null
+    issueBranchId: number | null
+    issueShiftId: number | null
+    paymentMethod: string | null
+    paymentReference: string | null
+    redeemedAt: Date | null
+    redeemedById: number | null
+    redeemedBranchId: number | null
+    redeemedShiftId: number | null
+    redeemedBillNo: string | null
+    cancelledAt: Date | null
+    cancelledById: number | null
+    cancelReason: string | null
+  }
+
+  export type GiftVoucherCountAggregateOutputType = {
+    id: number
+    voucherNo: number
+    code: number
+    amount: number
+    kind: number
+    status: number
+    expiresAt: number
+    issuedTo: number
+    issuedPhone: number
+    customerId: number
+    note: number
+    issuedById: number
+    issuedAt: number
+    issueBranchId: number
+    issueShiftId: number
+    paymentMethod: number
+    paymentReference: number
+    redeemedAt: number
+    redeemedById: number
+    redeemedBranchId: number
+    redeemedShiftId: number
+    redeemedBillNo: number
+    cancelledAt: number
+    cancelledById: number
+    cancelReason: number
+    _all: number
+  }
+
+
+  export type GiftVoucherAvgAggregateInputType = {
+    id?: true
+    amount?: true
+    customerId?: true
+    issuedById?: true
+    issueBranchId?: true
+    issueShiftId?: true
+    redeemedById?: true
+    redeemedBranchId?: true
+    redeemedShiftId?: true
+    cancelledById?: true
+  }
+
+  export type GiftVoucherSumAggregateInputType = {
+    id?: true
+    amount?: true
+    customerId?: true
+    issuedById?: true
+    issueBranchId?: true
+    issueShiftId?: true
+    redeemedById?: true
+    redeemedBranchId?: true
+    redeemedShiftId?: true
+    cancelledById?: true
+  }
+
+  export type GiftVoucherMinAggregateInputType = {
+    id?: true
+    voucherNo?: true
+    code?: true
+    amount?: true
+    kind?: true
+    status?: true
+    expiresAt?: true
+    issuedTo?: true
+    issuedPhone?: true
+    customerId?: true
+    note?: true
+    issuedById?: true
+    issuedAt?: true
+    issueBranchId?: true
+    issueShiftId?: true
+    paymentMethod?: true
+    paymentReference?: true
+    redeemedAt?: true
+    redeemedById?: true
+    redeemedBranchId?: true
+    redeemedShiftId?: true
+    redeemedBillNo?: true
+    cancelledAt?: true
+    cancelledById?: true
+    cancelReason?: true
+  }
+
+  export type GiftVoucherMaxAggregateInputType = {
+    id?: true
+    voucherNo?: true
+    code?: true
+    amount?: true
+    kind?: true
+    status?: true
+    expiresAt?: true
+    issuedTo?: true
+    issuedPhone?: true
+    customerId?: true
+    note?: true
+    issuedById?: true
+    issuedAt?: true
+    issueBranchId?: true
+    issueShiftId?: true
+    paymentMethod?: true
+    paymentReference?: true
+    redeemedAt?: true
+    redeemedById?: true
+    redeemedBranchId?: true
+    redeemedShiftId?: true
+    redeemedBillNo?: true
+    cancelledAt?: true
+    cancelledById?: true
+    cancelReason?: true
+  }
+
+  export type GiftVoucherCountAggregateInputType = {
+    id?: true
+    voucherNo?: true
+    code?: true
+    amount?: true
+    kind?: true
+    status?: true
+    expiresAt?: true
+    issuedTo?: true
+    issuedPhone?: true
+    customerId?: true
+    note?: true
+    issuedById?: true
+    issuedAt?: true
+    issueBranchId?: true
+    issueShiftId?: true
+    paymentMethod?: true
+    paymentReference?: true
+    redeemedAt?: true
+    redeemedById?: true
+    redeemedBranchId?: true
+    redeemedShiftId?: true
+    redeemedBillNo?: true
+    cancelledAt?: true
+    cancelledById?: true
+    cancelReason?: true
+    _all?: true
+  }
+
+  export type GiftVoucherAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GiftVoucher to aggregate.
+     */
+    where?: GiftVoucherWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GiftVouchers to fetch.
+     */
+    orderBy?: GiftVoucherOrderByWithRelationInput | GiftVoucherOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: GiftVoucherWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GiftVouchers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GiftVouchers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned GiftVouchers
+    **/
+    _count?: true | GiftVoucherCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: GiftVoucherAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: GiftVoucherSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GiftVoucherMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GiftVoucherMaxAggregateInputType
+  }
+
+  export type GetGiftVoucherAggregateType<T extends GiftVoucherAggregateArgs> = {
+        [P in keyof T & keyof AggregateGiftVoucher]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGiftVoucher[P]>
+      : GetScalarType<T[P], AggregateGiftVoucher[P]>
+  }
+
+
+
+
+  export type GiftVoucherGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GiftVoucherWhereInput
+    orderBy?: GiftVoucherOrderByWithAggregationInput | GiftVoucherOrderByWithAggregationInput[]
+    by: GiftVoucherScalarFieldEnum[] | GiftVoucherScalarFieldEnum
+    having?: GiftVoucherScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GiftVoucherCountAggregateInputType | true
+    _avg?: GiftVoucherAvgAggregateInputType
+    _sum?: GiftVoucherSumAggregateInputType
+    _min?: GiftVoucherMinAggregateInputType
+    _max?: GiftVoucherMaxAggregateInputType
+  }
+
+  export type GiftVoucherGroupByOutputType = {
+    id: number
+    voucherNo: string
+    code: string
+    amount: number
+    kind: string
+    status: string
+    expiresAt: Date | null
+    issuedTo: string | null
+    issuedPhone: string | null
+    customerId: number | null
+    note: string | null
+    issuedById: number
+    issuedAt: Date
+    issueBranchId: number | null
+    issueShiftId: number | null
+    paymentMethod: string | null
+    paymentReference: string | null
+    redeemedAt: Date | null
+    redeemedById: number | null
+    redeemedBranchId: number | null
+    redeemedShiftId: number | null
+    redeemedBillNo: string | null
+    cancelledAt: Date | null
+    cancelledById: number | null
+    cancelReason: string | null
+    _count: GiftVoucherCountAggregateOutputType | null
+    _avg: GiftVoucherAvgAggregateOutputType | null
+    _sum: GiftVoucherSumAggregateOutputType | null
+    _min: GiftVoucherMinAggregateOutputType | null
+    _max: GiftVoucherMaxAggregateOutputType | null
+  }
+
+  type GetGiftVoucherGroupByPayload<T extends GiftVoucherGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GiftVoucherGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GiftVoucherGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GiftVoucherGroupByOutputType[P]>
+            : GetScalarType<T[P], GiftVoucherGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type GiftVoucherSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    voucherNo?: boolean
+    code?: boolean
+    amount?: boolean
+    kind?: boolean
+    status?: boolean
+    expiresAt?: boolean
+    issuedTo?: boolean
+    issuedPhone?: boolean
+    customerId?: boolean
+    note?: boolean
+    issuedById?: boolean
+    issuedAt?: boolean
+    issueBranchId?: boolean
+    issueShiftId?: boolean
+    paymentMethod?: boolean
+    paymentReference?: boolean
+    redeemedAt?: boolean
+    redeemedById?: boolean
+    redeemedBranchId?: boolean
+    redeemedShiftId?: boolean
+    redeemedBillNo?: boolean
+    cancelledAt?: boolean
+    cancelledById?: boolean
+    cancelReason?: boolean
+  }, ExtArgs["result"]["giftVoucher"]>
+
+  export type GiftVoucherSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    voucherNo?: boolean
+    code?: boolean
+    amount?: boolean
+    kind?: boolean
+    status?: boolean
+    expiresAt?: boolean
+    issuedTo?: boolean
+    issuedPhone?: boolean
+    customerId?: boolean
+    note?: boolean
+    issuedById?: boolean
+    issuedAt?: boolean
+    issueBranchId?: boolean
+    issueShiftId?: boolean
+    paymentMethod?: boolean
+    paymentReference?: boolean
+    redeemedAt?: boolean
+    redeemedById?: boolean
+    redeemedBranchId?: boolean
+    redeemedShiftId?: boolean
+    redeemedBillNo?: boolean
+    cancelledAt?: boolean
+    cancelledById?: boolean
+    cancelReason?: boolean
+  }, ExtArgs["result"]["giftVoucher"]>
+
+  export type GiftVoucherSelectScalar = {
+    id?: boolean
+    voucherNo?: boolean
+    code?: boolean
+    amount?: boolean
+    kind?: boolean
+    status?: boolean
+    expiresAt?: boolean
+    issuedTo?: boolean
+    issuedPhone?: boolean
+    customerId?: boolean
+    note?: boolean
+    issuedById?: boolean
+    issuedAt?: boolean
+    issueBranchId?: boolean
+    issueShiftId?: boolean
+    paymentMethod?: boolean
+    paymentReference?: boolean
+    redeemedAt?: boolean
+    redeemedById?: boolean
+    redeemedBranchId?: boolean
+    redeemedShiftId?: boolean
+    redeemedBillNo?: boolean
+    cancelledAt?: boolean
+    cancelledById?: boolean
+    cancelReason?: boolean
+  }
+
+
+  export type $GiftVoucherPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "GiftVoucher"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      /**
+       * Record number, e.g. GV-00001
+       */
+      voucherNo: string
+      /**
+       * What is typed or scanned at the counter (random, hard to guess), e.g. 7K3M-9QX2-HT4P
+       */
+      code: string
+      amount: number
+      kind: string
+      status: string
+      expiresAt: Date | null
+      issuedTo: string | null
+      issuedPhone: string | null
+      customerId: number | null
+      note: string | null
+      issuedById: number
+      issuedAt: Date
+      issueBranchId: number | null
+      issueShiftId: number | null
+      paymentMethod: string | null
+      paymentReference: string | null
+      redeemedAt: Date | null
+      redeemedById: number | null
+      redeemedBranchId: number | null
+      redeemedShiftId: number | null
+      redeemedBillNo: string | null
+      cancelledAt: Date | null
+      cancelledById: number | null
+      cancelReason: string | null
+    }, ExtArgs["result"]["giftVoucher"]>
+    composites: {}
+  }
+
+  type GiftVoucherGetPayload<S extends boolean | null | undefined | GiftVoucherDefaultArgs> = $Result.GetResult<Prisma.$GiftVoucherPayload, S>
+
+  type GiftVoucherCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<GiftVoucherFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: GiftVoucherCountAggregateInputType | true
+    }
+
+  export interface GiftVoucherDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['GiftVoucher'], meta: { name: 'GiftVoucher' } }
+    /**
+     * Find zero or one GiftVoucher that matches the filter.
+     * @param {GiftVoucherFindUniqueArgs} args - Arguments to find a GiftVoucher
+     * @example
+     * // Get one GiftVoucher
+     * const giftVoucher = await prisma.giftVoucher.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends GiftVoucherFindUniqueArgs>(args: SelectSubset<T, GiftVoucherFindUniqueArgs<ExtArgs>>): Prisma__GiftVoucherClient<$Result.GetResult<Prisma.$GiftVoucherPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one GiftVoucher that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {GiftVoucherFindUniqueOrThrowArgs} args - Arguments to find a GiftVoucher
+     * @example
+     * // Get one GiftVoucher
+     * const giftVoucher = await prisma.giftVoucher.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends GiftVoucherFindUniqueOrThrowArgs>(args: SelectSubset<T, GiftVoucherFindUniqueOrThrowArgs<ExtArgs>>): Prisma__GiftVoucherClient<$Result.GetResult<Prisma.$GiftVoucherPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first GiftVoucher that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GiftVoucherFindFirstArgs} args - Arguments to find a GiftVoucher
+     * @example
+     * // Get one GiftVoucher
+     * const giftVoucher = await prisma.giftVoucher.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends GiftVoucherFindFirstArgs>(args?: SelectSubset<T, GiftVoucherFindFirstArgs<ExtArgs>>): Prisma__GiftVoucherClient<$Result.GetResult<Prisma.$GiftVoucherPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first GiftVoucher that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GiftVoucherFindFirstOrThrowArgs} args - Arguments to find a GiftVoucher
+     * @example
+     * // Get one GiftVoucher
+     * const giftVoucher = await prisma.giftVoucher.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends GiftVoucherFindFirstOrThrowArgs>(args?: SelectSubset<T, GiftVoucherFindFirstOrThrowArgs<ExtArgs>>): Prisma__GiftVoucherClient<$Result.GetResult<Prisma.$GiftVoucherPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more GiftVouchers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GiftVoucherFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all GiftVouchers
+     * const giftVouchers = await prisma.giftVoucher.findMany()
+     * 
+     * // Get first 10 GiftVouchers
+     * const giftVouchers = await prisma.giftVoucher.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const giftVoucherWithIdOnly = await prisma.giftVoucher.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends GiftVoucherFindManyArgs>(args?: SelectSubset<T, GiftVoucherFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GiftVoucherPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a GiftVoucher.
+     * @param {GiftVoucherCreateArgs} args - Arguments to create a GiftVoucher.
+     * @example
+     * // Create one GiftVoucher
+     * const GiftVoucher = await prisma.giftVoucher.create({
+     *   data: {
+     *     // ... data to create a GiftVoucher
+     *   }
+     * })
+     * 
+     */
+    create<T extends GiftVoucherCreateArgs>(args: SelectSubset<T, GiftVoucherCreateArgs<ExtArgs>>): Prisma__GiftVoucherClient<$Result.GetResult<Prisma.$GiftVoucherPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many GiftVouchers.
+     * @param {GiftVoucherCreateManyArgs} args - Arguments to create many GiftVouchers.
+     * @example
+     * // Create many GiftVouchers
+     * const giftVoucher = await prisma.giftVoucher.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends GiftVoucherCreateManyArgs>(args?: SelectSubset<T, GiftVoucherCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many GiftVouchers and returns the data saved in the database.
+     * @param {GiftVoucherCreateManyAndReturnArgs} args - Arguments to create many GiftVouchers.
+     * @example
+     * // Create many GiftVouchers
+     * const giftVoucher = await prisma.giftVoucher.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many GiftVouchers and only return the `id`
+     * const giftVoucherWithIdOnly = await prisma.giftVoucher.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends GiftVoucherCreateManyAndReturnArgs>(args?: SelectSubset<T, GiftVoucherCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GiftVoucherPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a GiftVoucher.
+     * @param {GiftVoucherDeleteArgs} args - Arguments to delete one GiftVoucher.
+     * @example
+     * // Delete one GiftVoucher
+     * const GiftVoucher = await prisma.giftVoucher.delete({
+     *   where: {
+     *     // ... filter to delete one GiftVoucher
+     *   }
+     * })
+     * 
+     */
+    delete<T extends GiftVoucherDeleteArgs>(args: SelectSubset<T, GiftVoucherDeleteArgs<ExtArgs>>): Prisma__GiftVoucherClient<$Result.GetResult<Prisma.$GiftVoucherPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one GiftVoucher.
+     * @param {GiftVoucherUpdateArgs} args - Arguments to update one GiftVoucher.
+     * @example
+     * // Update one GiftVoucher
+     * const giftVoucher = await prisma.giftVoucher.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends GiftVoucherUpdateArgs>(args: SelectSubset<T, GiftVoucherUpdateArgs<ExtArgs>>): Prisma__GiftVoucherClient<$Result.GetResult<Prisma.$GiftVoucherPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more GiftVouchers.
+     * @param {GiftVoucherDeleteManyArgs} args - Arguments to filter GiftVouchers to delete.
+     * @example
+     * // Delete a few GiftVouchers
+     * const { count } = await prisma.giftVoucher.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends GiftVoucherDeleteManyArgs>(args?: SelectSubset<T, GiftVoucherDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GiftVouchers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GiftVoucherUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many GiftVouchers
+     * const giftVoucher = await prisma.giftVoucher.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends GiftVoucherUpdateManyArgs>(args: SelectSubset<T, GiftVoucherUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one GiftVoucher.
+     * @param {GiftVoucherUpsertArgs} args - Arguments to update or create a GiftVoucher.
+     * @example
+     * // Update or create a GiftVoucher
+     * const giftVoucher = await prisma.giftVoucher.upsert({
+     *   create: {
+     *     // ... data to create a GiftVoucher
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the GiftVoucher we want to update
+     *   }
+     * })
+     */
+    upsert<T extends GiftVoucherUpsertArgs>(args: SelectSubset<T, GiftVoucherUpsertArgs<ExtArgs>>): Prisma__GiftVoucherClient<$Result.GetResult<Prisma.$GiftVoucherPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of GiftVouchers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GiftVoucherCountArgs} args - Arguments to filter GiftVouchers to count.
+     * @example
+     * // Count the number of GiftVouchers
+     * const count = await prisma.giftVoucher.count({
+     *   where: {
+     *     // ... the filter for the GiftVouchers we want to count
+     *   }
+     * })
+    **/
+    count<T extends GiftVoucherCountArgs>(
+      args?: Subset<T, GiftVoucherCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GiftVoucherCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a GiftVoucher.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GiftVoucherAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GiftVoucherAggregateArgs>(args: Subset<T, GiftVoucherAggregateArgs>): Prisma.PrismaPromise<GetGiftVoucherAggregateType<T>>
+
+    /**
+     * Group by GiftVoucher.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GiftVoucherGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends GiftVoucherGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: GiftVoucherGroupByArgs['orderBy'] }
+        : { orderBy?: GiftVoucherGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, GiftVoucherGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGiftVoucherGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the GiftVoucher model
+   */
+  readonly fields: GiftVoucherFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for GiftVoucher.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__GiftVoucherClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the GiftVoucher model
+   */ 
+  interface GiftVoucherFieldRefs {
+    readonly id: FieldRef<"GiftVoucher", 'Int'>
+    readonly voucherNo: FieldRef<"GiftVoucher", 'String'>
+    readonly code: FieldRef<"GiftVoucher", 'String'>
+    readonly amount: FieldRef<"GiftVoucher", 'Float'>
+    readonly kind: FieldRef<"GiftVoucher", 'String'>
+    readonly status: FieldRef<"GiftVoucher", 'String'>
+    readonly expiresAt: FieldRef<"GiftVoucher", 'DateTime'>
+    readonly issuedTo: FieldRef<"GiftVoucher", 'String'>
+    readonly issuedPhone: FieldRef<"GiftVoucher", 'String'>
+    readonly customerId: FieldRef<"GiftVoucher", 'Int'>
+    readonly note: FieldRef<"GiftVoucher", 'String'>
+    readonly issuedById: FieldRef<"GiftVoucher", 'Int'>
+    readonly issuedAt: FieldRef<"GiftVoucher", 'DateTime'>
+    readonly issueBranchId: FieldRef<"GiftVoucher", 'Int'>
+    readonly issueShiftId: FieldRef<"GiftVoucher", 'Int'>
+    readonly paymentMethod: FieldRef<"GiftVoucher", 'String'>
+    readonly paymentReference: FieldRef<"GiftVoucher", 'String'>
+    readonly redeemedAt: FieldRef<"GiftVoucher", 'DateTime'>
+    readonly redeemedById: FieldRef<"GiftVoucher", 'Int'>
+    readonly redeemedBranchId: FieldRef<"GiftVoucher", 'Int'>
+    readonly redeemedShiftId: FieldRef<"GiftVoucher", 'Int'>
+    readonly redeemedBillNo: FieldRef<"GiftVoucher", 'String'>
+    readonly cancelledAt: FieldRef<"GiftVoucher", 'DateTime'>
+    readonly cancelledById: FieldRef<"GiftVoucher", 'Int'>
+    readonly cancelReason: FieldRef<"GiftVoucher", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * GiftVoucher findUnique
+   */
+  export type GiftVoucherFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GiftVoucher
+     */
+    select?: GiftVoucherSelect<ExtArgs> | null
+    /**
+     * Filter, which GiftVoucher to fetch.
+     */
+    where: GiftVoucherWhereUniqueInput
+  }
+
+  /**
+   * GiftVoucher findUniqueOrThrow
+   */
+  export type GiftVoucherFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GiftVoucher
+     */
+    select?: GiftVoucherSelect<ExtArgs> | null
+    /**
+     * Filter, which GiftVoucher to fetch.
+     */
+    where: GiftVoucherWhereUniqueInput
+  }
+
+  /**
+   * GiftVoucher findFirst
+   */
+  export type GiftVoucherFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GiftVoucher
+     */
+    select?: GiftVoucherSelect<ExtArgs> | null
+    /**
+     * Filter, which GiftVoucher to fetch.
+     */
+    where?: GiftVoucherWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GiftVouchers to fetch.
+     */
+    orderBy?: GiftVoucherOrderByWithRelationInput | GiftVoucherOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GiftVouchers.
+     */
+    cursor?: GiftVoucherWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GiftVouchers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GiftVouchers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GiftVouchers.
+     */
+    distinct?: GiftVoucherScalarFieldEnum | GiftVoucherScalarFieldEnum[]
+  }
+
+  /**
+   * GiftVoucher findFirstOrThrow
+   */
+  export type GiftVoucherFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GiftVoucher
+     */
+    select?: GiftVoucherSelect<ExtArgs> | null
+    /**
+     * Filter, which GiftVoucher to fetch.
+     */
+    where?: GiftVoucherWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GiftVouchers to fetch.
+     */
+    orderBy?: GiftVoucherOrderByWithRelationInput | GiftVoucherOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GiftVouchers.
+     */
+    cursor?: GiftVoucherWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GiftVouchers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GiftVouchers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GiftVouchers.
+     */
+    distinct?: GiftVoucherScalarFieldEnum | GiftVoucherScalarFieldEnum[]
+  }
+
+  /**
+   * GiftVoucher findMany
+   */
+  export type GiftVoucherFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GiftVoucher
+     */
+    select?: GiftVoucherSelect<ExtArgs> | null
+    /**
+     * Filter, which GiftVouchers to fetch.
+     */
+    where?: GiftVoucherWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GiftVouchers to fetch.
+     */
+    orderBy?: GiftVoucherOrderByWithRelationInput | GiftVoucherOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing GiftVouchers.
+     */
+    cursor?: GiftVoucherWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GiftVouchers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GiftVouchers.
+     */
+    skip?: number
+    distinct?: GiftVoucherScalarFieldEnum | GiftVoucherScalarFieldEnum[]
+  }
+
+  /**
+   * GiftVoucher create
+   */
+  export type GiftVoucherCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GiftVoucher
+     */
+    select?: GiftVoucherSelect<ExtArgs> | null
+    /**
+     * The data needed to create a GiftVoucher.
+     */
+    data: XOR<GiftVoucherCreateInput, GiftVoucherUncheckedCreateInput>
+  }
+
+  /**
+   * GiftVoucher createMany
+   */
+  export type GiftVoucherCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many GiftVouchers.
+     */
+    data: GiftVoucherCreateManyInput | GiftVoucherCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GiftVoucher createManyAndReturn
+   */
+  export type GiftVoucherCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GiftVoucher
+     */
+    select?: GiftVoucherSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many GiftVouchers.
+     */
+    data: GiftVoucherCreateManyInput | GiftVoucherCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GiftVoucher update
+   */
+  export type GiftVoucherUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GiftVoucher
+     */
+    select?: GiftVoucherSelect<ExtArgs> | null
+    /**
+     * The data needed to update a GiftVoucher.
+     */
+    data: XOR<GiftVoucherUpdateInput, GiftVoucherUncheckedUpdateInput>
+    /**
+     * Choose, which GiftVoucher to update.
+     */
+    where: GiftVoucherWhereUniqueInput
+  }
+
+  /**
+   * GiftVoucher updateMany
+   */
+  export type GiftVoucherUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update GiftVouchers.
+     */
+    data: XOR<GiftVoucherUpdateManyMutationInput, GiftVoucherUncheckedUpdateManyInput>
+    /**
+     * Filter which GiftVouchers to update
+     */
+    where?: GiftVoucherWhereInput
+  }
+
+  /**
+   * GiftVoucher upsert
+   */
+  export type GiftVoucherUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GiftVoucher
+     */
+    select?: GiftVoucherSelect<ExtArgs> | null
+    /**
+     * The filter to search for the GiftVoucher to update in case it exists.
+     */
+    where: GiftVoucherWhereUniqueInput
+    /**
+     * In case the GiftVoucher found by the `where` argument doesn't exist, create a new GiftVoucher with this data.
+     */
+    create: XOR<GiftVoucherCreateInput, GiftVoucherUncheckedCreateInput>
+    /**
+     * In case the GiftVoucher was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<GiftVoucherUpdateInput, GiftVoucherUncheckedUpdateInput>
+  }
+
+  /**
+   * GiftVoucher delete
+   */
+  export type GiftVoucherDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GiftVoucher
+     */
+    select?: GiftVoucherSelect<ExtArgs> | null
+    /**
+     * Filter which GiftVoucher to delete.
+     */
+    where: GiftVoucherWhereUniqueInput
+  }
+
+  /**
+   * GiftVoucher deleteMany
+   */
+  export type GiftVoucherDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GiftVouchers to delete
+     */
+    where?: GiftVoucherWhereInput
+  }
+
+  /**
+   * GiftVoucher without action
+   */
+  export type GiftVoucherDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GiftVoucher
+     */
+    select?: GiftVoucherSelect<ExtArgs> | null
+  }
+
+
+  /**
    * Model DeployMigration
    */
 
@@ -50436,6 +51755,8 @@ export namespace Prisma {
     clientRef: 'clientRef',
     checkoutResult: 'checkoutResult',
     soldOffline: 'soldOffline',
+    voucherPaid: 'voucherPaid',
+    voucherFree: 'voucherFree',
     totalAmount: 'totalAmount',
     emptyDeduction: 'emptyDeduction',
     emptiesReturned: 'emptiesReturned',
@@ -51130,6 +52451,37 @@ export namespace Prisma {
   export type GtnItemScalarFieldEnum = (typeof GtnItemScalarFieldEnum)[keyof typeof GtnItemScalarFieldEnum]
 
 
+  export const GiftVoucherScalarFieldEnum: {
+    id: 'id',
+    voucherNo: 'voucherNo',
+    code: 'code',
+    amount: 'amount',
+    kind: 'kind',
+    status: 'status',
+    expiresAt: 'expiresAt',
+    issuedTo: 'issuedTo',
+    issuedPhone: 'issuedPhone',
+    customerId: 'customerId',
+    note: 'note',
+    issuedById: 'issuedById',
+    issuedAt: 'issuedAt',
+    issueBranchId: 'issueBranchId',
+    issueShiftId: 'issueShiftId',
+    paymentMethod: 'paymentMethod',
+    paymentReference: 'paymentReference',
+    redeemedAt: 'redeemedAt',
+    redeemedById: 'redeemedById',
+    redeemedBranchId: 'redeemedBranchId',
+    redeemedShiftId: 'redeemedShiftId',
+    redeemedBillNo: 'redeemedBillNo',
+    cancelledAt: 'cancelledAt',
+    cancelledById: 'cancelledById',
+    cancelReason: 'cancelReason'
+  };
+
+  export type GiftVoucherScalarFieldEnum = (typeof GiftVoucherScalarFieldEnum)[keyof typeof GiftVoucherScalarFieldEnum]
+
+
   export const DeployMigrationScalarFieldEnum: {
     name: 'name',
     appliedAt: 'appliedAt'
@@ -51654,6 +53006,8 @@ export namespace Prisma {
     clientRef?: StringNullableFilter<"PosCounterSale"> | string | null
     checkoutResult?: JsonNullableFilter<"PosCounterSale">
     soldOffline?: BoolFilter<"PosCounterSale"> | boolean
+    voucherPaid?: FloatFilter<"PosCounterSale"> | number
+    voucherFree?: FloatFilter<"PosCounterSale"> | number
     totalAmount?: FloatFilter<"PosCounterSale"> | number
     emptyDeduction?: FloatFilter<"PosCounterSale"> | number
     emptiesReturned?: IntFilter<"PosCounterSale"> | number
@@ -51689,6 +53043,8 @@ export namespace Prisma {
     clientRef?: SortOrderInput | SortOrder
     checkoutResult?: SortOrderInput | SortOrder
     soldOffline?: SortOrder
+    voucherPaid?: SortOrder
+    voucherFree?: SortOrder
     totalAmount?: SortOrder
     emptyDeduction?: SortOrder
     emptiesReturned?: SortOrder
@@ -51727,6 +53083,8 @@ export namespace Prisma {
     branchId?: IntNullableFilter<"PosCounterSale"> | number | null
     checkoutResult?: JsonNullableFilter<"PosCounterSale">
     soldOffline?: BoolFilter<"PosCounterSale"> | boolean
+    voucherPaid?: FloatFilter<"PosCounterSale"> | number
+    voucherFree?: FloatFilter<"PosCounterSale"> | number
     totalAmount?: FloatFilter<"PosCounterSale"> | number
     emptyDeduction?: FloatFilter<"PosCounterSale"> | number
     emptiesReturned?: IntFilter<"PosCounterSale"> | number
@@ -51762,6 +53120,8 @@ export namespace Prisma {
     clientRef?: SortOrderInput | SortOrder
     checkoutResult?: SortOrderInput | SortOrder
     soldOffline?: SortOrder
+    voucherPaid?: SortOrder
+    voucherFree?: SortOrder
     totalAmount?: SortOrder
     emptyDeduction?: SortOrder
     emptiesReturned?: SortOrder
@@ -51802,6 +53162,8 @@ export namespace Prisma {
     clientRef?: StringNullableWithAggregatesFilter<"PosCounterSale"> | string | null
     checkoutResult?: JsonNullableWithAggregatesFilter<"PosCounterSale">
     soldOffline?: BoolWithAggregatesFilter<"PosCounterSale"> | boolean
+    voucherPaid?: FloatWithAggregatesFilter<"PosCounterSale"> | number
+    voucherFree?: FloatWithAggregatesFilter<"PosCounterSale"> | number
     totalAmount?: FloatWithAggregatesFilter<"PosCounterSale"> | number
     emptyDeduction?: FloatWithAggregatesFilter<"PosCounterSale"> | number
     emptiesReturned?: IntWithAggregatesFilter<"PosCounterSale"> | number
@@ -55386,6 +56748,160 @@ export namespace Prisma {
     unitCost?: FloatNullableWithAggregatesFilter<"GtnItem"> | number | null
   }
 
+  export type GiftVoucherWhereInput = {
+    AND?: GiftVoucherWhereInput | GiftVoucherWhereInput[]
+    OR?: GiftVoucherWhereInput[]
+    NOT?: GiftVoucherWhereInput | GiftVoucherWhereInput[]
+    id?: IntFilter<"GiftVoucher"> | number
+    voucherNo?: StringFilter<"GiftVoucher"> | string
+    code?: StringFilter<"GiftVoucher"> | string
+    amount?: FloatFilter<"GiftVoucher"> | number
+    kind?: StringFilter<"GiftVoucher"> | string
+    status?: StringFilter<"GiftVoucher"> | string
+    expiresAt?: DateTimeNullableFilter<"GiftVoucher"> | Date | string | null
+    issuedTo?: StringNullableFilter<"GiftVoucher"> | string | null
+    issuedPhone?: StringNullableFilter<"GiftVoucher"> | string | null
+    customerId?: IntNullableFilter<"GiftVoucher"> | number | null
+    note?: StringNullableFilter<"GiftVoucher"> | string | null
+    issuedById?: IntFilter<"GiftVoucher"> | number
+    issuedAt?: DateTimeFilter<"GiftVoucher"> | Date | string
+    issueBranchId?: IntNullableFilter<"GiftVoucher"> | number | null
+    issueShiftId?: IntNullableFilter<"GiftVoucher"> | number | null
+    paymentMethod?: StringNullableFilter<"GiftVoucher"> | string | null
+    paymentReference?: StringNullableFilter<"GiftVoucher"> | string | null
+    redeemedAt?: DateTimeNullableFilter<"GiftVoucher"> | Date | string | null
+    redeemedById?: IntNullableFilter<"GiftVoucher"> | number | null
+    redeemedBranchId?: IntNullableFilter<"GiftVoucher"> | number | null
+    redeemedShiftId?: IntNullableFilter<"GiftVoucher"> | number | null
+    redeemedBillNo?: StringNullableFilter<"GiftVoucher"> | string | null
+    cancelledAt?: DateTimeNullableFilter<"GiftVoucher"> | Date | string | null
+    cancelledById?: IntNullableFilter<"GiftVoucher"> | number | null
+    cancelReason?: StringNullableFilter<"GiftVoucher"> | string | null
+  }
+
+  export type GiftVoucherOrderByWithRelationInput = {
+    id?: SortOrder
+    voucherNo?: SortOrder
+    code?: SortOrder
+    amount?: SortOrder
+    kind?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrderInput | SortOrder
+    issuedTo?: SortOrderInput | SortOrder
+    issuedPhone?: SortOrderInput | SortOrder
+    customerId?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    issuedById?: SortOrder
+    issuedAt?: SortOrder
+    issueBranchId?: SortOrderInput | SortOrder
+    issueShiftId?: SortOrderInput | SortOrder
+    paymentMethod?: SortOrderInput | SortOrder
+    paymentReference?: SortOrderInput | SortOrder
+    redeemedAt?: SortOrderInput | SortOrder
+    redeemedById?: SortOrderInput | SortOrder
+    redeemedBranchId?: SortOrderInput | SortOrder
+    redeemedShiftId?: SortOrderInput | SortOrder
+    redeemedBillNo?: SortOrderInput | SortOrder
+    cancelledAt?: SortOrderInput | SortOrder
+    cancelledById?: SortOrderInput | SortOrder
+    cancelReason?: SortOrderInput | SortOrder
+  }
+
+  export type GiftVoucherWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    voucherNo?: string
+    code?: string
+    AND?: GiftVoucherWhereInput | GiftVoucherWhereInput[]
+    OR?: GiftVoucherWhereInput[]
+    NOT?: GiftVoucherWhereInput | GiftVoucherWhereInput[]
+    amount?: FloatFilter<"GiftVoucher"> | number
+    kind?: StringFilter<"GiftVoucher"> | string
+    status?: StringFilter<"GiftVoucher"> | string
+    expiresAt?: DateTimeNullableFilter<"GiftVoucher"> | Date | string | null
+    issuedTo?: StringNullableFilter<"GiftVoucher"> | string | null
+    issuedPhone?: StringNullableFilter<"GiftVoucher"> | string | null
+    customerId?: IntNullableFilter<"GiftVoucher"> | number | null
+    note?: StringNullableFilter<"GiftVoucher"> | string | null
+    issuedById?: IntFilter<"GiftVoucher"> | number
+    issuedAt?: DateTimeFilter<"GiftVoucher"> | Date | string
+    issueBranchId?: IntNullableFilter<"GiftVoucher"> | number | null
+    issueShiftId?: IntNullableFilter<"GiftVoucher"> | number | null
+    paymentMethod?: StringNullableFilter<"GiftVoucher"> | string | null
+    paymentReference?: StringNullableFilter<"GiftVoucher"> | string | null
+    redeemedAt?: DateTimeNullableFilter<"GiftVoucher"> | Date | string | null
+    redeemedById?: IntNullableFilter<"GiftVoucher"> | number | null
+    redeemedBranchId?: IntNullableFilter<"GiftVoucher"> | number | null
+    redeemedShiftId?: IntNullableFilter<"GiftVoucher"> | number | null
+    redeemedBillNo?: StringNullableFilter<"GiftVoucher"> | string | null
+    cancelledAt?: DateTimeNullableFilter<"GiftVoucher"> | Date | string | null
+    cancelledById?: IntNullableFilter<"GiftVoucher"> | number | null
+    cancelReason?: StringNullableFilter<"GiftVoucher"> | string | null
+  }, "id" | "voucherNo" | "code">
+
+  export type GiftVoucherOrderByWithAggregationInput = {
+    id?: SortOrder
+    voucherNo?: SortOrder
+    code?: SortOrder
+    amount?: SortOrder
+    kind?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrderInput | SortOrder
+    issuedTo?: SortOrderInput | SortOrder
+    issuedPhone?: SortOrderInput | SortOrder
+    customerId?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    issuedById?: SortOrder
+    issuedAt?: SortOrder
+    issueBranchId?: SortOrderInput | SortOrder
+    issueShiftId?: SortOrderInput | SortOrder
+    paymentMethod?: SortOrderInput | SortOrder
+    paymentReference?: SortOrderInput | SortOrder
+    redeemedAt?: SortOrderInput | SortOrder
+    redeemedById?: SortOrderInput | SortOrder
+    redeemedBranchId?: SortOrderInput | SortOrder
+    redeemedShiftId?: SortOrderInput | SortOrder
+    redeemedBillNo?: SortOrderInput | SortOrder
+    cancelledAt?: SortOrderInput | SortOrder
+    cancelledById?: SortOrderInput | SortOrder
+    cancelReason?: SortOrderInput | SortOrder
+    _count?: GiftVoucherCountOrderByAggregateInput
+    _avg?: GiftVoucherAvgOrderByAggregateInput
+    _max?: GiftVoucherMaxOrderByAggregateInput
+    _min?: GiftVoucherMinOrderByAggregateInput
+    _sum?: GiftVoucherSumOrderByAggregateInput
+  }
+
+  export type GiftVoucherScalarWhereWithAggregatesInput = {
+    AND?: GiftVoucherScalarWhereWithAggregatesInput | GiftVoucherScalarWhereWithAggregatesInput[]
+    OR?: GiftVoucherScalarWhereWithAggregatesInput[]
+    NOT?: GiftVoucherScalarWhereWithAggregatesInput | GiftVoucherScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"GiftVoucher"> | number
+    voucherNo?: StringWithAggregatesFilter<"GiftVoucher"> | string
+    code?: StringWithAggregatesFilter<"GiftVoucher"> | string
+    amount?: FloatWithAggregatesFilter<"GiftVoucher"> | number
+    kind?: StringWithAggregatesFilter<"GiftVoucher"> | string
+    status?: StringWithAggregatesFilter<"GiftVoucher"> | string
+    expiresAt?: DateTimeNullableWithAggregatesFilter<"GiftVoucher"> | Date | string | null
+    issuedTo?: StringNullableWithAggregatesFilter<"GiftVoucher"> | string | null
+    issuedPhone?: StringNullableWithAggregatesFilter<"GiftVoucher"> | string | null
+    customerId?: IntNullableWithAggregatesFilter<"GiftVoucher"> | number | null
+    note?: StringNullableWithAggregatesFilter<"GiftVoucher"> | string | null
+    issuedById?: IntWithAggregatesFilter<"GiftVoucher"> | number
+    issuedAt?: DateTimeWithAggregatesFilter<"GiftVoucher"> | Date | string
+    issueBranchId?: IntNullableWithAggregatesFilter<"GiftVoucher"> | number | null
+    issueShiftId?: IntNullableWithAggregatesFilter<"GiftVoucher"> | number | null
+    paymentMethod?: StringNullableWithAggregatesFilter<"GiftVoucher"> | string | null
+    paymentReference?: StringNullableWithAggregatesFilter<"GiftVoucher"> | string | null
+    redeemedAt?: DateTimeNullableWithAggregatesFilter<"GiftVoucher"> | Date | string | null
+    redeemedById?: IntNullableWithAggregatesFilter<"GiftVoucher"> | number | null
+    redeemedBranchId?: IntNullableWithAggregatesFilter<"GiftVoucher"> | number | null
+    redeemedShiftId?: IntNullableWithAggregatesFilter<"GiftVoucher"> | number | null
+    redeemedBillNo?: StringNullableWithAggregatesFilter<"GiftVoucher"> | string | null
+    cancelledAt?: DateTimeNullableWithAggregatesFilter<"GiftVoucher"> | Date | string | null
+    cancelledById?: IntNullableWithAggregatesFilter<"GiftVoucher"> | number | null
+    cancelReason?: StringNullableWithAggregatesFilter<"GiftVoucher"> | string | null
+  }
+
   export type DeployMigrationWhereInput = {
     AND?: DeployMigrationWhereInput | DeployMigrationWhereInput[]
     OR?: DeployMigrationWhereInput[]
@@ -55602,6 +57118,8 @@ export namespace Prisma {
     clientRef?: string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: boolean
+    voucherPaid?: number
+    voucherFree?: number
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -55634,6 +57152,8 @@ export namespace Prisma {
     clientRef?: string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: boolean
+    voucherPaid?: number
+    voucherFree?: number
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -55665,6 +57185,8 @@ export namespace Prisma {
     clientRef?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: BoolFieldUpdateOperationsInput | boolean
+    voucherPaid?: FloatFieldUpdateOperationsInput | number
+    voucherFree?: FloatFieldUpdateOperationsInput | number
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -55697,6 +57219,8 @@ export namespace Prisma {
     clientRef?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: BoolFieldUpdateOperationsInput | boolean
+    voucherPaid?: FloatFieldUpdateOperationsInput | number
+    voucherFree?: FloatFieldUpdateOperationsInput | number
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -55729,6 +57253,8 @@ export namespace Prisma {
     clientRef?: string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: boolean
+    voucherPaid?: number
+    voucherFree?: number
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -55760,6 +57286,8 @@ export namespace Prisma {
     clientRef?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: BoolFieldUpdateOperationsInput | boolean
+    voucherPaid?: FloatFieldUpdateOperationsInput | number
+    voucherFree?: FloatFieldUpdateOperationsInput | number
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -55789,6 +57317,8 @@ export namespace Prisma {
     clientRef?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: BoolFieldUpdateOperationsInput | boolean
+    voucherPaid?: FloatFieldUpdateOperationsInput | number
+    voucherFree?: FloatFieldUpdateOperationsInput | number
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -59731,6 +61261,199 @@ export namespace Prisma {
     unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
   }
 
+  export type GiftVoucherCreateInput = {
+    voucherNo: string
+    code: string
+    amount: number
+    kind: string
+    status?: string
+    expiresAt?: Date | string | null
+    issuedTo?: string | null
+    issuedPhone?: string | null
+    customerId?: number | null
+    note?: string | null
+    issuedById: number
+    issuedAt?: Date | string
+    issueBranchId?: number | null
+    issueShiftId?: number | null
+    paymentMethod?: string | null
+    paymentReference?: string | null
+    redeemedAt?: Date | string | null
+    redeemedById?: number | null
+    redeemedBranchId?: number | null
+    redeemedShiftId?: number | null
+    redeemedBillNo?: string | null
+    cancelledAt?: Date | string | null
+    cancelledById?: number | null
+    cancelReason?: string | null
+  }
+
+  export type GiftVoucherUncheckedCreateInput = {
+    id?: number
+    voucherNo: string
+    code: string
+    amount: number
+    kind: string
+    status?: string
+    expiresAt?: Date | string | null
+    issuedTo?: string | null
+    issuedPhone?: string | null
+    customerId?: number | null
+    note?: string | null
+    issuedById: number
+    issuedAt?: Date | string
+    issueBranchId?: number | null
+    issueShiftId?: number | null
+    paymentMethod?: string | null
+    paymentReference?: string | null
+    redeemedAt?: Date | string | null
+    redeemedById?: number | null
+    redeemedBranchId?: number | null
+    redeemedShiftId?: number | null
+    redeemedBillNo?: string | null
+    cancelledAt?: Date | string | null
+    cancelledById?: number | null
+    cancelReason?: string | null
+  }
+
+  export type GiftVoucherUpdateInput = {
+    voucherNo?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    issuedTo?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedById?: IntFieldUpdateOperationsInput | number
+    issuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    issueBranchId?: NullableIntFieldUpdateOperationsInput | number | null
+    issueShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    paymentMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    redeemedById?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedBranchId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedBillNo?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledById?: NullableIntFieldUpdateOperationsInput | number | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type GiftVoucherUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    voucherNo?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    issuedTo?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedById?: IntFieldUpdateOperationsInput | number
+    issuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    issueBranchId?: NullableIntFieldUpdateOperationsInput | number | null
+    issueShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    paymentMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    redeemedById?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedBranchId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedBillNo?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledById?: NullableIntFieldUpdateOperationsInput | number | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type GiftVoucherCreateManyInput = {
+    id?: number
+    voucherNo: string
+    code: string
+    amount: number
+    kind: string
+    status?: string
+    expiresAt?: Date | string | null
+    issuedTo?: string | null
+    issuedPhone?: string | null
+    customerId?: number | null
+    note?: string | null
+    issuedById: number
+    issuedAt?: Date | string
+    issueBranchId?: number | null
+    issueShiftId?: number | null
+    paymentMethod?: string | null
+    paymentReference?: string | null
+    redeemedAt?: Date | string | null
+    redeemedById?: number | null
+    redeemedBranchId?: number | null
+    redeemedShiftId?: number | null
+    redeemedBillNo?: string | null
+    cancelledAt?: Date | string | null
+    cancelledById?: number | null
+    cancelReason?: string | null
+  }
+
+  export type GiftVoucherUpdateManyMutationInput = {
+    voucherNo?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    issuedTo?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedById?: IntFieldUpdateOperationsInput | number
+    issuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    issueBranchId?: NullableIntFieldUpdateOperationsInput | number | null
+    issueShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    paymentMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    redeemedById?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedBranchId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedBillNo?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledById?: NullableIntFieldUpdateOperationsInput | number | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type GiftVoucherUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    voucherNo?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    issuedTo?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedById?: IntFieldUpdateOperationsInput | number
+    issuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    issueBranchId?: NullableIntFieldUpdateOperationsInput | number | null
+    issueShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    paymentMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentReference?: NullableStringFieldUpdateOperationsInput | string | null
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    redeemedById?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedBranchId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedShiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedBillNo?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledById?: NullableIntFieldUpdateOperationsInput | number | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
   export type DeployMigrationCreateInput = {
     name: string
     appliedAt?: Date | string
@@ -60166,6 +61889,8 @@ export namespace Prisma {
     clientRef?: SortOrder
     checkoutResult?: SortOrder
     soldOffline?: SortOrder
+    voucherPaid?: SortOrder
+    voucherFree?: SortOrder
     totalAmount?: SortOrder
     emptyDeduction?: SortOrder
     emptiesReturned?: SortOrder
@@ -60194,6 +61919,8 @@ export namespace Prisma {
   export type PosCounterSaleAvgOrderByAggregateInput = {
     id?: SortOrder
     branchId?: SortOrder
+    voucherPaid?: SortOrder
+    voucherFree?: SortOrder
     totalAmount?: SortOrder
     emptyDeduction?: SortOrder
     emptiesReturned?: SortOrder
@@ -60221,6 +61948,8 @@ export namespace Prisma {
     invoiceGroupCode?: SortOrder
     clientRef?: SortOrder
     soldOffline?: SortOrder
+    voucherPaid?: SortOrder
+    voucherFree?: SortOrder
     totalAmount?: SortOrder
     emptyDeduction?: SortOrder
     emptiesReturned?: SortOrder
@@ -60252,6 +61981,8 @@ export namespace Prisma {
     invoiceGroupCode?: SortOrder
     clientRef?: SortOrder
     soldOffline?: SortOrder
+    voucherPaid?: SortOrder
+    voucherFree?: SortOrder
     totalAmount?: SortOrder
     emptyDeduction?: SortOrder
     emptiesReturned?: SortOrder
@@ -60280,6 +62011,8 @@ export namespace Prisma {
   export type PosCounterSaleSumOrderByAggregateInput = {
     id?: SortOrder
     branchId?: SortOrder
+    voucherPaid?: SortOrder
+    voucherFree?: SortOrder
     totalAmount?: SortOrder
     emptyDeduction?: SortOrder
     emptiesReturned?: SortOrder
@@ -63305,6 +65038,116 @@ export namespace Prisma {
     damagedQty?: SortOrder
     missingQty?: SortOrder
     unitCost?: SortOrder
+  }
+
+  export type GiftVoucherCountOrderByAggregateInput = {
+    id?: SortOrder
+    voucherNo?: SortOrder
+    code?: SortOrder
+    amount?: SortOrder
+    kind?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    issuedTo?: SortOrder
+    issuedPhone?: SortOrder
+    customerId?: SortOrder
+    note?: SortOrder
+    issuedById?: SortOrder
+    issuedAt?: SortOrder
+    issueBranchId?: SortOrder
+    issueShiftId?: SortOrder
+    paymentMethod?: SortOrder
+    paymentReference?: SortOrder
+    redeemedAt?: SortOrder
+    redeemedById?: SortOrder
+    redeemedBranchId?: SortOrder
+    redeemedShiftId?: SortOrder
+    redeemedBillNo?: SortOrder
+    cancelledAt?: SortOrder
+    cancelledById?: SortOrder
+    cancelReason?: SortOrder
+  }
+
+  export type GiftVoucherAvgOrderByAggregateInput = {
+    id?: SortOrder
+    amount?: SortOrder
+    customerId?: SortOrder
+    issuedById?: SortOrder
+    issueBranchId?: SortOrder
+    issueShiftId?: SortOrder
+    redeemedById?: SortOrder
+    redeemedBranchId?: SortOrder
+    redeemedShiftId?: SortOrder
+    cancelledById?: SortOrder
+  }
+
+  export type GiftVoucherMaxOrderByAggregateInput = {
+    id?: SortOrder
+    voucherNo?: SortOrder
+    code?: SortOrder
+    amount?: SortOrder
+    kind?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    issuedTo?: SortOrder
+    issuedPhone?: SortOrder
+    customerId?: SortOrder
+    note?: SortOrder
+    issuedById?: SortOrder
+    issuedAt?: SortOrder
+    issueBranchId?: SortOrder
+    issueShiftId?: SortOrder
+    paymentMethod?: SortOrder
+    paymentReference?: SortOrder
+    redeemedAt?: SortOrder
+    redeemedById?: SortOrder
+    redeemedBranchId?: SortOrder
+    redeemedShiftId?: SortOrder
+    redeemedBillNo?: SortOrder
+    cancelledAt?: SortOrder
+    cancelledById?: SortOrder
+    cancelReason?: SortOrder
+  }
+
+  export type GiftVoucherMinOrderByAggregateInput = {
+    id?: SortOrder
+    voucherNo?: SortOrder
+    code?: SortOrder
+    amount?: SortOrder
+    kind?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    issuedTo?: SortOrder
+    issuedPhone?: SortOrder
+    customerId?: SortOrder
+    note?: SortOrder
+    issuedById?: SortOrder
+    issuedAt?: SortOrder
+    issueBranchId?: SortOrder
+    issueShiftId?: SortOrder
+    paymentMethod?: SortOrder
+    paymentReference?: SortOrder
+    redeemedAt?: SortOrder
+    redeemedById?: SortOrder
+    redeemedBranchId?: SortOrder
+    redeemedShiftId?: SortOrder
+    redeemedBillNo?: SortOrder
+    cancelledAt?: SortOrder
+    cancelledById?: SortOrder
+    cancelReason?: SortOrder
+  }
+
+  export type GiftVoucherSumOrderByAggregateInput = {
+    id?: SortOrder
+    amount?: SortOrder
+    customerId?: SortOrder
+    issuedById?: SortOrder
+    issueBranchId?: SortOrder
+    issueShiftId?: SortOrder
+    redeemedById?: SortOrder
+    redeemedBranchId?: SortOrder
+    redeemedShiftId?: SortOrder
+    cancelledById?: SortOrder
   }
 
   export type DeployMigrationCountOrderByAggregateInput = {
@@ -66585,6 +68428,8 @@ export namespace Prisma {
     clientRef?: string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: boolean
+    voucherPaid?: number
+    voucherFree?: number
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -66616,6 +68461,8 @@ export namespace Prisma {
     clientRef?: string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: boolean
+    voucherPaid?: number
+    voucherFree?: number
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -66676,6 +68523,8 @@ export namespace Prisma {
     clientRef?: StringNullableFilter<"PosCounterSale"> | string | null
     checkoutResult?: JsonNullableFilter<"PosCounterSale">
     soldOffline?: BoolFilter<"PosCounterSale"> | boolean
+    voucherPaid?: FloatFilter<"PosCounterSale"> | number
+    voucherFree?: FloatFilter<"PosCounterSale"> | number
     totalAmount?: FloatFilter<"PosCounterSale"> | number
     emptyDeduction?: FloatFilter<"PosCounterSale"> | number
     emptiesReturned?: IntFilter<"PosCounterSale"> | number
@@ -68350,6 +70199,8 @@ export namespace Prisma {
     clientRef?: string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: boolean
+    voucherPaid?: number
+    voucherFree?: number
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -68381,6 +70232,8 @@ export namespace Prisma {
     clientRef?: string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: boolean
+    voucherPaid?: number
+    voucherFree?: number
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -71656,6 +73509,8 @@ export namespace Prisma {
     clientRef?: string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: boolean
+    voucherPaid?: number
+    voucherFree?: number
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -71687,6 +73542,8 @@ export namespace Prisma {
     clientRef?: string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: boolean
+    voucherPaid?: number
+    voucherFree?: number
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -74521,6 +76378,8 @@ export namespace Prisma {
     clientRef?: string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: boolean
+    voucherPaid?: number
+    voucherFree?: number
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -74551,6 +76410,8 @@ export namespace Prisma {
     clientRef?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: BoolFieldUpdateOperationsInput | boolean
+    voucherPaid?: FloatFieldUpdateOperationsInput | number
+    voucherFree?: FloatFieldUpdateOperationsInput | number
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -74582,6 +76443,8 @@ export namespace Prisma {
     clientRef?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: BoolFieldUpdateOperationsInput | boolean
+    voucherPaid?: FloatFieldUpdateOperationsInput | number
+    voucherFree?: FloatFieldUpdateOperationsInput | number
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -74613,6 +76476,8 @@ export namespace Prisma {
     clientRef?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: BoolFieldUpdateOperationsInput | boolean
+    voucherPaid?: FloatFieldUpdateOperationsInput | number
+    voucherFree?: FloatFieldUpdateOperationsInput | number
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -75452,6 +77317,8 @@ export namespace Prisma {
     clientRef?: string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: boolean
+    voucherPaid?: number
+    voucherFree?: number
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -75609,6 +77476,8 @@ export namespace Prisma {
     clientRef?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: BoolFieldUpdateOperationsInput | boolean
+    voucherPaid?: FloatFieldUpdateOperationsInput | number
+    voucherFree?: FloatFieldUpdateOperationsInput | number
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -75640,6 +77509,8 @@ export namespace Prisma {
     clientRef?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: BoolFieldUpdateOperationsInput | boolean
+    voucherPaid?: FloatFieldUpdateOperationsInput | number
+    voucherFree?: FloatFieldUpdateOperationsInput | number
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -75671,6 +77542,8 @@ export namespace Prisma {
     clientRef?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: BoolFieldUpdateOperationsInput | boolean
+    voucherPaid?: FloatFieldUpdateOperationsInput | number
+    voucherFree?: FloatFieldUpdateOperationsInput | number
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -76658,6 +78531,8 @@ export namespace Prisma {
     clientRef?: string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: boolean
+    voucherPaid?: number
+    voucherFree?: number
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -76760,6 +78635,8 @@ export namespace Prisma {
     clientRef?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: BoolFieldUpdateOperationsInput | boolean
+    voucherPaid?: FloatFieldUpdateOperationsInput | number
+    voucherFree?: FloatFieldUpdateOperationsInput | number
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -76791,6 +78668,8 @@ export namespace Prisma {
     clientRef?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: BoolFieldUpdateOperationsInput | boolean
+    voucherPaid?: FloatFieldUpdateOperationsInput | number
+    voucherFree?: FloatFieldUpdateOperationsInput | number
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -76822,6 +78701,8 @@ export namespace Prisma {
     clientRef?: NullableStringFieldUpdateOperationsInput | string | null
     checkoutResult?: NullableJsonNullValueInput | InputJsonValue
     soldOffline?: BoolFieldUpdateOperationsInput | boolean
+    voucherPaid?: FloatFieldUpdateOperationsInput | number
+    voucherFree?: FloatFieldUpdateOperationsInput | number
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -77765,6 +79646,10 @@ export namespace Prisma {
      * @deprecated Use GtnItemDefaultArgs instead
      */
     export type GtnItemArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = GtnItemDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use GiftVoucherDefaultArgs instead
+     */
+    export type GiftVoucherArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = GiftVoucherDefaultArgs<ExtArgs>
     /**
      * @deprecated Use DeployMigrationDefaultArgs instead
      */

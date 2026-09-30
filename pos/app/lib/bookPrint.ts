@@ -19,6 +19,14 @@ export const discountText = (row: Pick<AdjustmentRow, "discountType" | "discount
 export type PaymentRow = { billNo: string; time: string; cashier: string; amount: number; reference: string | null; method: string };
 
 /** Z report data as returned by /api/pos/shifts/:id/report (closed shifts include `close`). */
+/** A gift voucher as the Day End lists it. amount is null in the cashier's blind view for cash-sold vouchers. */
+export type GiftVoucherRow = {
+  voucherNo: string; code: string; amount: number | null; kind: "SOLD" | "FREE"; status: string;
+  issuedAt: string; issuedBy: string; issueBranch: string; paymentLabel: string | null; paymentReference: string | null;
+  issuedTo: string | null; note: string | null;
+  redeemedAt: string | null; redeemedBy: string | null; redeemedBranch: string | null; redeemedBillNo: string | null;
+};
+
 export type ShiftReport = {
   shift: { id: number; shiftNo: string; status: string; branch?: { id: number; code: string; name: string; address: string | null; phone: string | null }; openedAt: string; openedBy: string; openingFloat: number; countedAt: string | null; countedBy: string | null; closedAt: string | null; closedBy: string | null };
   sales: {
@@ -29,6 +37,12 @@ export type ShiftReport = {
     /** Bill parts paid from members' wallets, and change members kept in them. */
     walletUsed?: number | null;
     walletKept?: number | null;
+    /** Paid with gift vouchers (in net sales), and the free-voucher part (a promotion cost). */
+    voucherPaid?: number | null;
+    voucherFree?: number | null;
+    /** For the card machine / bank checks: card and QR bills plus gift vouchers sold that way. */
+    cardToSettle?: number;
+    transferToCheck?: number;
     /** Paid back for returned bottles (cash + wallet), and net sales after that. */
     refunds?: number | null;
     netAfterReturns?: number | null;
@@ -46,6 +60,8 @@ export type ShiftReport = {
   };
   cash: {
     openingFloat: number; cashSales: number | null; walletKept?: number | null; drawerIn: number | null; drawerOut: number | null;
+    /** Gift vouchers sold for cash this shift (in the drawer; owed to the holder until used). */
+    voucherSalesCash?: number | null;
     /** Cash paid back from the drawer for returned bottles. */
     refundsCash?: number | null;
     expectedCash: number | null; expensesAll: number;
@@ -60,6 +76,14 @@ export type ShiftReport = {
     splitBills: Array<{ billNo: string; time: string; cashier: string; total: number | null; cash: number | null; card: number; transfer: number; reference: string | null; change: number }>;
     changeGiven: number | null;
     wallet?: { bills: number; amount: number };
+    vouchers?: { bills: number; amount: number; free: number };
+  };
+  /** Gift vouchers issued (sold / free) and used during the shift (older reports don't have it). */
+  giftVouchers?: {
+    issued: GiftVoucherRow[];
+    used: GiftVoucherRow[];
+    soldCount: number; soldTotal: number | null; soldCash: number | null; soldCard: number; soldTransfer: number;
+    freeCount: number; freeTotal: number; usedTotal: number; usedFree: number;
   };
   /** Customer wallets: change kept and wallet money spent during the shift, member by member. */
   wallet?: {
@@ -154,6 +178,7 @@ export function buildZReportHtml(report: ShiftReport) {
     ${sales.pointsValue ? `<div class="row"><span>Loyalty points (${sales.pointsRedeemed})</span><span>−${amt(sales.pointsValue)}</span></div>` : ""}
     <div class="box"><div class="row"><span>NET SALES</span><span>${amt(sales.netSales)}</span></div></div>
     ${sales.walletUsed ? `<div class="row"><span>Customer wallets</span><span>${amt(sales.walletUsed)}</span></div>` : ""}
+    ${sales.voucherPaid ? `<div class="row"><span>Gift vouchers used${sales.voucherFree ? ` (free ${amt(sales.voucherFree)})` : ""}</span><span>${amt(sales.voucherPaid)}</span></div>` : ""}
     <div class="row"><span>Cash</span><span>${amt(sales.cashSales)}</span></div>
     <div class="row"><span>Card</span><span>${amt(sales.cardSales)}</span></div>
     ${sales.transferSales ? `<div class="row"><span>Transfer / QR</span><span>${amt(sales.transferSales)}</span></div>` : ""}
@@ -207,6 +232,7 @@ export function buildZReportHtml(report: ShiftReport) {
     <div class="row"><span>Opening float</span><span>${amt(cash.openingFloat)}</span></div>
     <div class="row"><span>+ Cash sales</span><span>${amt(cash.cashSales)}</span></div>
     ${cash.walletKept !== undefined && cash.walletKept !== 0 ? `<div class="row"><span>+ Change kept in wallets</span><span>${amt(cash.walletKept)}</span></div>` : ""}
+    ${cash.voucherSalesCash !== undefined && cash.voucherSalesCash !== 0 ? `<div class="row"><span>+ Gift vouchers sold (cash)</span><span>${amt(cash.voucherSalesCash)}</span></div>` : ""}
     <div class="row"><span>+ Cash in</span><span>${amt(cash.drawerIn)}</span></div>
     <div class="row"><span>− Paid out (expenses)</span><span>${amt(cash.drawerOut)}</span></div>
     ${cash.refundsCash !== undefined && cash.refundsCash !== 0 ? `<div class="row"><span>− Cash refunds (returns)</span><span>${amt(cash.refundsCash)}</span></div>` : ""}
@@ -221,6 +247,14 @@ export function buildZReportHtml(report: ShiftReport) {
       ${close.cardDifferenceReason ? `<div class="small">Card: ${esc(close.cardDifferenceReason)}</div>` : ""}
       ${close.denominations?.counts && Object.keys(close.denominations.counts).length ? `<div class="small" style="margin-top:3px">Notes/coins: ${Object.entries(close.denominations.counts).sort((a, b) => Number(b[0]) - Number(a[0])).map(([note, qty]) => `${note}×${qty}`).join("  ")}</div>` : ""}
     ` : ""}
+
+    ${report.giftVouchers && (report.giftVouchers.issued.length || report.giftVouchers.used.length) ? `
+    <div class="head">Gift vouchers</div>
+    ${report.giftVouchers.soldCount ? `<div class="row"><span>Sold (${report.giftVouchers.soldCount})</span><span>${amt(report.giftVouchers.soldTotal)}</span></div>` : ""}
+    ${report.giftVouchers.freeCount ? `<div class="row"><span>Given free (${report.giftVouchers.freeCount})</span><span>${amt(report.giftVouchers.freeTotal)}</span></div>` : ""}
+    ${report.giftVouchers.used.length ? `<div class="row"><span>Used on bills (${report.giftVouchers.used.length})</span><span>${amt(report.giftVouchers.usedTotal)}</span></div>` : ""}
+    ${report.giftVouchers.issued.map((row) => `<div class="small">+ ${esc(row.voucherNo)} ${row.kind === "FREE" ? "free" : `sold · ${esc(row.paymentLabel ?? "")}`} ${amt(row.amount)}</div>`).join("")}
+    ${report.giftVouchers.used.map((row) => `<div class="small">− ${esc(row.voucherNo)} used ${amt(row.amount)} · bill ${esc((row.redeemedBillNo ?? "").slice(-9))}${row.issueBranch !== row.redeemedBranch ? ` · from ${esc(row.issueBranch)}` : ""}</div>`).join("")}` : ""}
 
     ${report.drawer ? `
     <div class="head">Drawer opened</div>

@@ -154,6 +154,8 @@ exports.Prisma.PosCounterSaleScalarFieldEnum = {
   clientRef: 'clientRef',
   checkoutResult: 'checkoutResult',
   soldOffline: 'soldOffline',
+  voucherPaid: 'voucherPaid',
+  voucherFree: 'voucherFree',
   totalAmount: 'totalAmount',
   emptyDeduction: 'emptyDeduction',
   emptiesReturned: 'emptiesReturned',
@@ -734,6 +736,34 @@ exports.Prisma.GtnItemScalarFieldEnum = {
   unitCost: 'unitCost'
 };
 
+exports.Prisma.GiftVoucherScalarFieldEnum = {
+  id: 'id',
+  voucherNo: 'voucherNo',
+  code: 'code',
+  amount: 'amount',
+  kind: 'kind',
+  status: 'status',
+  expiresAt: 'expiresAt',
+  issuedTo: 'issuedTo',
+  issuedPhone: 'issuedPhone',
+  customerId: 'customerId',
+  note: 'note',
+  issuedById: 'issuedById',
+  issuedAt: 'issuedAt',
+  issueBranchId: 'issueBranchId',
+  issueShiftId: 'issueShiftId',
+  paymentMethod: 'paymentMethod',
+  paymentReference: 'paymentReference',
+  redeemedAt: 'redeemedAt',
+  redeemedById: 'redeemedById',
+  redeemedBranchId: 'redeemedBranchId',
+  redeemedShiftId: 'redeemedShiftId',
+  redeemedBillNo: 'redeemedBillNo',
+  cancelledAt: 'cancelledAt',
+  cancelledById: 'cancelledById',
+  cancelReason: 'cancelReason'
+};
+
 exports.Prisma.DeployMigrationScalarFieldEnum = {
   name: 'name',
   appliedAt: 'appliedAt'
@@ -905,6 +935,7 @@ exports.Prisma.ModelName = {
   GrnItem: 'GrnItem',
   Gtn: 'Gtn',
   GtnItem: 'GtnItem',
+  GiftVoucher: 'GiftVoucher',
   DeployMigration: 'DeployMigration'
 };
 

@@ -153,6 +153,7 @@ export function buildDayEndReportHtml(report: ShiftReport) {
         ${sales.byType ? `<tr><td class="muted">of which hard liquor (${sales.byType.hardLiquor.units} btl)</td><td class="r muted">${amt(sales.byType.hardLiquor.amount)}</td></tr>
         <tr><td class="muted">of which beer, wine &amp; others (${sales.byType.other.units})</td><td class="r muted">${amt(sales.byType.other.amount)}</td></tr>` : ""}
         ${sales.walletUsed ? `<tr><td>Paid from customer wallets</td><td class="r">${amt(sales.walletUsed)}</td></tr>` : ""}
+        ${sales.voucherPaid ? `<tr><td>Paid with gift vouchers${sales.voucherFree ? ` (of which free: ${amt(sales.voucherFree)})` : ""}</td><td class="r">${amt(sales.voucherPaid)}</td></tr>` : ""}
         <tr><td>Received in cash</td><td class="r">${amt(sales.cashSales)}</td></tr>
         <tr><td>Received by card</td><td class="r">${amt(sales.cardSales)}</td></tr>
         ${sales.transferSales != null ? `<tr><td>Received by bank transfer / QR</td><td class="r">${amt(sales.transferSales)}</td></tr>` : ""}
@@ -165,6 +166,7 @@ export function buildDayEndReportHtml(report: ShiftReport) {
       <table class="ledger">
         <tr><td>Opening float</td><td class="r">${amt(cash.openingFloat)}</td></tr>
         <tr><td>Add: cash sales</td><td class="r plus">+${amt(cash.cashSales)}</td></tr>
+        ${cash.voucherSalesCash !== undefined && cash.voucherSalesCash !== 0 ? `<tr><td>Add: gift vouchers sold for cash</td><td class="r plus">${cash.voucherSalesCash == null ? "—" : `+${amt(cash.voucherSalesCash)}`}</td></tr>` : ""}
         ${cash.walletKept !== undefined && cash.walletKept !== 0 ? `<tr><td>Add: change kept in customer wallets</td><td class="r plus">${cash.walletKept == null ? "—" : `+${amt(cash.walletKept)}`}</td></tr>` : ""}
         <tr><td>Add: cash in</td><td class="r plus">+${amt(cash.drawerIn)}</td></tr>
         <tr><td>Less: paid out from drawer</td><td class="r minus">−${amt(cash.drawerOut)}</td></tr>
@@ -179,6 +181,19 @@ export function buildDayEndReportHtml(report: ShiftReport) {
       ${close.differenceReason ? `<div class="reason"><b>Reason:</b> ${esc(close.differenceReason)}</div>` : ""}` : ""}
     </section>
   </div>
+
+  ${report.giftVouchers && (report.giftVouchers.issued.length || report.giftVouchers.used.length) ? `
+  <section class="keep">
+    <h2>Gift vouchers <small>${report.giftVouchers.soldCount} sold${report.giftVouchers.soldTotal != null ? ` (${amt(report.giftVouchers.soldTotal)})` : ""} · ${report.giftVouchers.freeCount} free (${amt(report.giftVouchers.freeTotal)}) · ${report.giftVouchers.used.length} used on bills (${amt(report.giftVouchers.usedTotal)})</small></h2>
+    ${report.giftVouchers.issued.length ? `<table>
+      <thead><tr><th>Issued</th><th>Voucher</th><th>Type</th><th>For</th><th>By</th><th class="r">Amount</th></tr></thead>
+      ${report.giftVouchers.issued.map((row) => `<tr><td>${timeOnly(row.issuedAt)}</td><td>${esc(row.voucherNo)}</td><td>${row.kind === "FREE" ? `Free${row.note ? ` — ${esc(row.note)}` : ""}` : `Sold · ${esc(row.paymentLabel ?? "")}${row.paymentReference ? ` (${esc(row.paymentReference)})` : ""}`}</td><td>${esc(row.issuedTo ?? "—")}</td><td>${esc(row.issuedBy)}</td><td class="r">${amt(row.amount)}</td></tr>`).join("")}
+    </table>` : ""}
+    ${report.giftVouchers.used.length ? `<table style="margin-top:6px">
+      <thead><tr><th>Used</th><th>Voucher</th><th>Type</th><th>Bill</th><th>Issued at</th><th>By</th><th class="r">Amount</th></tr></thead>
+      ${report.giftVouchers.used.map((row) => `<tr><td>${row.redeemedAt ? timeOnly(row.redeemedAt) : ""}</td><td>${esc(row.voucherNo)}</td><td>${row.kind === "FREE" ? "Free" : "Sold"}</td><td>${esc(row.redeemedBillNo ?? "")}</td><td>${esc(row.issueBranch)}${row.issueBranch !== row.redeemedBranch ? " (other branch)" : ""}</td><td>${esc(row.redeemedBy ?? "")}</td><td class="r">${amt(row.amount)}</td></tr>`).join("")}
+    </table>` : ""}
+  </section>` : ""}
 
   ${report.drawer ? `
   <section class="keep">
@@ -206,6 +221,7 @@ export function buildDayEndReportHtml(report: ShiftReport) {
       <thead><tr><th>Paid by</th><th class="r">Bills</th><th class="r">Amount</th></tr></thead>
       ${report.payments.rows.map((row) => `<tr><td>${esc(row.method)}</td><td class="r">${row.bills}</td><td class="r">${amt(row.amount)}</td></tr>`).join("")}
       ${report.payments.wallet?.amount ? `<tr><td>Part paid from customer wallets</td><td class="r">${report.payments.wallet.bills}</td><td class="r">${amt(report.payments.wallet.amount)}</td></tr>` : ""}
+      ${report.payments.vouchers?.amount ? `<tr><td>Part paid with gift vouchers${report.payments.vouchers.free ? ` (free ${amt(report.payments.vouchers.free)})` : ""}</td><td class="r">${report.payments.vouchers.bills}</td><td class="r">${amt(report.payments.vouchers.amount)}</td></tr>` : ""}
       <tr class="total"><td>Total</td><td class="r">${report.payments.rows.reduce((sum, row) => sum + row.bills, 0)}</td><td class="r">${amt(sales.netSales)}</td></tr>
     </table>
     <div class="note" style="margin-top:4px;font-size:8pt;color:#666">Money actually received: cash ${amt(sales.cashSales)} · card ${amt(sales.cardSales)} · transfer / QR ${amt(sales.transferSales ?? 0)} · change given back ${amt(report.payments.changeGiven)}</div>

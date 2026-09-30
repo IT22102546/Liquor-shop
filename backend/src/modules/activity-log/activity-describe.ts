@@ -147,7 +147,7 @@ export function describePosChange(method: string, path: string, body: Body, resp
       category: "SALE",
       entityType: "sale",
       entityId: str(data.invoiceGroupCode),
-      summary: `Sold ${soldText || `${itemCount} items`} for ${money(data.total)} · ${str(data.paymentMethod) === "SPLIT" ? `split: ${[Number(data.cashPaid) > 0 ? `cash ${money(data.cashPaid)}` : "", Number(data.cardPaid) > 0 ? `card ${money(data.cardPaid)}` : "", Number(data.transferPaid) > 0 ? `QR ${money(data.transferPaid)}` : ""].filter(Boolean).join(" + ")}` : payment(data.paymentMethod)}${empties > 0 ? ` · ${empties} empt${empties === 1 ? "y" : "ies"} returned` : ""}${member.name ? ` · ${str(member.name)}` : ""}${obj(data.discount).amount ? ` · discount −${money(obj(data.discount).amount)}` : ""}${Number(data.pointsRedeemed) > 0 ? ` · ${str(data.pointsRedeemed)} points used` : ""}${Number(data.walletUsed) > 0 ? ` · ${money(data.walletUsed)} from wallet` : ""}${Number(data.walletCredit) > 0 ? ` · ${money(data.walletCredit)} change kept in wallet` : ""}${data.soldOffline ? ` · sold OFFLINE at ${new Date(obj(data.counterSale).createdAt as string | Date).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Colombo" })}, uploaded later` : ""}${Array.isArray(data.stockShort) && data.stockShort.length ? ` · shelf count was short` : ""}`,
+      summary: `Sold ${soldText || `${itemCount} items`} for ${money(data.total)} · ${str(data.paymentMethod) === "SPLIT" ? `split: ${[Number(data.cashPaid) > 0 ? `cash ${money(data.cashPaid)}` : "", Number(data.cardPaid) > 0 ? `card ${money(data.cardPaid)}` : "", Number(data.transferPaid) > 0 ? `QR ${money(data.transferPaid)}` : ""].filter(Boolean).join(" + ")}` : payment(data.paymentMethod)}${empties > 0 ? ` · ${empties} empt${empties === 1 ? "y" : "ies"} returned` : ""}${member.name ? ` · ${str(member.name)}` : ""}${obj(data.discount).amount ? ` · discount −${money(obj(data.discount).amount)}` : ""}${Number(data.pointsRedeemed) > 0 ? ` · ${str(data.pointsRedeemed)} points used` : ""}${Number(data.walletUsed) > 0 ? ` · ${money(data.walletUsed)} from wallet` : ""}${Number(data.walletCredit) > 0 ? ` · ${money(data.walletCredit)} change kept in wallet` : ""}${Number(data.voucherPaid) > 0 ? ` · ${money(data.voucherPaid)} by gift voucher ${Array.isArray(data.giftVouchers) ? (data.giftVouchers as Body[]).map((voucher) => str(voucher.voucherNo)).join(", ") : ""}` : ""}${data.soldOffline ? ` · sold OFFLINE at ${new Date(obj(data.counterSale).createdAt as string | Date).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Colombo" })}, uploaded later` : ""}${Array.isArray(data.stockShort) && data.stockShort.length ? ` · shelf count was short` : ""}`,
       details: {
         items: lines.map((line) => ({
           name: str(line.name),
@@ -176,6 +176,7 @@ export function describePosChange(method: string, path: string, body: Body, resp
                 ...(Number(data.transferPaid) > 0 ? [fact("Paid by transfer / QR", money(data.transferPaid))] : []),
               ]
             : []),
+          ...(Array.isArray(data.giftVouchers) ? (data.giftVouchers as Body[]).map((voucher) => fact("Paid by gift voucher", `${str(voucher.voucherNo)} (${str(voucher.code)}) · ${money(voucher.amount)} · ${str(voucher.kind) === "FREE" ? "free voucher" : "sold voucher"}`)) : []),
           ...(Number(data.walletUsed) > 0 ? [fact("Paid from wallet", money(data.walletUsed))] : []),
           ...(Number(data.cashPaid) > 0 ? [fact("Cash received", money(data.cashTendered ?? data.amountReceived)), fact("Change given", money(data.changeGiven))] : []),
           ...(Number(data.walletCredit) > 0 ? [fact("Change kept in wallet", money(data.walletCredit))] : []),
@@ -310,6 +311,39 @@ export function describePosChange(method: string, path: string, body: Body, resp
   }
 
   // ── Returns & damages ────────────────────────────────────────────────────
+  // ── Gift vouchers ────────────────────────────────────────────────────────
+  if (module === "gift-vouchers" && method === "POST") {
+    if (!resource) {
+      const vouchers = Array.isArray(data.vouchers) ? (data.vouchers as Body[]) : [];
+      if (!vouchers.length) return { action: "voucher.create", category: "VOUCHER", entityType: "gift voucher", summary: `Tried to create ${str(obj(body).kind) === "FREE" ? "free" : "sold"} gift voucher(s) of ${money(obj(body).amount)}` };
+      const numbers = vouchers.map((voucher) => str(voucher.voucherNo));
+      const sold = str(data.kind) === "SOLD";
+      return {
+        action: "voucher.create", category: "VOUCHER", entityType: "gift voucher", entityId: numbers.length === 1 ? numbers[0] : `${numbers[0]}…${numbers[numbers.length - 1]}`,
+        summary: `Issued ${vouchers.length} ${sold ? "sold" : "FREE"} gift voucher${vouchers.length === 1 ? "" : "s"} of ${money(data.amount)}${vouchers.length > 1 ? ` (total ${money(data.total)})` : ""}${sold ? ` · paid by ${payment(data.paymentMethod)}` : ""}${str(vouchers[0].issuedTo) ? ` · for ${str(vouchers[0].issuedTo)}` : ""}`,
+        details: {
+          facts: [
+            fact("Vouchers", numbers.join(", ")),
+            fact("Each worth", money(data.amount)),
+            fact("Type", sold ? "Sold (customer paid — owed until used)" : "Free (promotion cost when used)"),
+            ...(sold ? [fact("Paid by", payment(data.paymentMethod)), fact("Shift", data.shiftNo)] : []),
+            ...(str(vouchers[0].issuedTo) ? [fact("Given to", `${str(vouchers[0].issuedTo)}${str(vouchers[0].issuedPhone) ? ` (${str(vouchers[0].issuedPhone)})` : ""}`)] : []),
+            ...(vouchers[0].expiresAt ? [fact("Expires", new Date(vouchers[0].expiresAt as string).toLocaleDateString("en-GB", { timeZone: "Asia/Colombo" }))] : []),
+            ...(str(vouchers[0].note) ? [fact("Note", vouchers[0].note)] : []),
+          ],
+        },
+      };
+    }
+    if (id === "cancel") {
+      if (!str(data.voucherNo)) return { action: "voucher.cancel", category: "VOUCHER", entityType: "gift voucher", summary: `Tried to cancel a gift voucher${str(obj(body).reason) ? ` · “${str(obj(body).reason)}”` : ""}` };
+      return {
+        action: "voucher.cancel", category: "VOUCHER", entityType: "gift voucher", entityId: str(data.voucherNo),
+        summary: `Cancelled gift voucher ${str(data.voucherNo)} (${money(data.amount)}) · “${str(data.cancelReason)}”`,
+        details: { facts: [fact("Voucher", data.voucherNo), fact("Amount", money(data.amount)), fact("Type", str(data.kind) === "FREE" ? "Free" : "Sold"), fact("Reason", data.cancelReason)] },
+      };
+    }
+  }
+
   if (module === "returns" && method === "POST") {
     const lines = Array.isArray(data.lines) ? (data.lines as Body[]) : [];
     const what = lines.map((line) => `${str(line.quantity)} × ${str(line.product)}`).join(", ");

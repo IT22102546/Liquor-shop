@@ -121,7 +121,7 @@ export default function ReportsPage() {
             <div><span>Net sales</span><strong>{money(report.sales.netSales)}</strong><em>{report.sales.bills} bills · {report.sales.units} units · avg {money(report.sales.averageBill)}</em></div>
             <div><span>Gross profit</span><strong>{money(report.profit.grossProfit)}</strong><em>{report.profit.margin}% margin · cost {money(report.profit.costOfSales)}</em></div>
             <div><span>Running expenses</span><strong>{money(report.profit.operatingExpenses)}</strong><em>All paid out {money(report.cashBook.expensesAll)}</em></div>
-            <div className={report.profit.netProfit >= 0 ? "lx-kpi-good" : "lx-kpi-bad"}><span>Net profit</span><strong>{money(report.profit.netProfit)}</strong><em>after running expenses</em></div>
+            <div className={report.profit.netProfit >= 0 ? "lx-kpi-good" : "lx-kpi-bad"}><span>Net profit</span><strong>{money(report.profit.netProfit)}</strong><em>after running expenses{report.profit.freeVouchers ? ` & free vouchers ${money(report.profit.freeVouchers)}` : ""}</em></div>
           </div>
 
           <div className="lx-period-grid">
@@ -253,6 +253,27 @@ export default function ReportsPage() {
                   <span>Free bottles received<b>{report.stock.freeIssues.units}</b></span>
                   <span>Worth at the unit prices<b>{money(report.stock.freeIssues.value)}</b></span>
                 </div>
+              </section>
+            )}
+            {report.giftVouchers && (report.giftVouchers.issued.soldCount + report.giftVouchers.issued.freeCount + report.giftVouchers.used.count + report.giftVouchers.outstandingNow.owedCount + report.giftVouchers.outstandingNow.freeCount > 0) && (
+              <section className="lx-card">
+                <div className="lx-card-head"><div><div className="lx-card-title">Gift vouchers</div><div className="lx-card-sub">{report.giftVouchers.used.count} used on bills · {report.giftVouchers.used.atOtherBranch} at a different branch from where they were issued</div></div></div>
+                <div className="lx-book-totals">
+                  <span>Sold ({report.giftVouchers.issued.soldCount})<b>{money(report.giftVouchers.issued.soldValue)}</b></span>
+                  <span>Given free ({report.giftVouchers.issued.freeCount})<b>{money(report.giftVouchers.issued.freeValue)}</b></span>
+                  <span>Used ({report.giftVouchers.used.count})<b>{money(report.giftVouchers.used.value)}</b></span>
+                  <span>Free used — promotion cost<b>{money(report.giftVouchers.used.freeValue)}</b></span>
+                  <span>Sold, not used yet (owed)<b>{money(report.giftVouchers.outstandingNow.owedValue)}</b></span>
+                  <span>Expired · cancelled<b>{report.giftVouchers.expired.count} · {report.giftVouchers.cancelled.count}</b></span>
+                </div>
+                {report.giftVouchers.byBranch.length > 0 && (
+                  <div className="data-table-wrap" style={{ marginTop: "0.8rem" }}><table className="data-table gv-branch-table">
+                    <thead><tr><th>Branch</th><th style={{ textAlign: "right" }}>Issued</th><th style={{ textAlign: "right" }}>Used</th><th style={{ textAlign: "right" }}>Used from other branches</th></tr></thead>
+                    <tbody>{report.giftVouchers.byBranch.map((row) => (
+                      <tr key={row.branch}><td><strong>{row.branch}</strong></td><td style={{ textAlign: "right" }}>{row.issuedCount} · {money(row.issuedValue)}</td><td style={{ textAlign: "right" }}>{row.usedCount} · {money(row.usedValue)}</td><td style={{ textAlign: "right" }}>{row.usedFromOtherBranches}</td></tr>
+                    ))}</tbody>
+                  </table></div>
+                )}
               </section>
             )}
             {report.returns && (

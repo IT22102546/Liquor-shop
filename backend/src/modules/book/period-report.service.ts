@@ -4,6 +4,7 @@ import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "./cash-book.service";
 import { forBranch } from "../branches/branch-stock";
 import { getSettings } from "../settings/settings.service";
 import { drawerOpensInPeriod } from "./drawer.service";
+import { periodVouchers } from "../gift-vouchers/gift-vouchers.service";
 
 /**
  * Daily / weekly / monthly / yearly report for any date range, built from every counter sale,
@@ -50,7 +51,7 @@ export async function getPeriodReport(fromText: string, toText: string, branchId
       where: { createdAt: { gte: from, lte: to }, ...inBranch },
       orderBy: { createdAt: "asc" },
       select: {
-        invoiceGroupCode: true, totalAmount: true, paymentMethod: true, cashPaid: true, cardPaid: true, transferPaid: true, walletUsed: true, walletCredit: true, createdAt: true, customerId: true,
+        invoiceGroupCode: true, totalAmount: true, paymentMethod: true, cashPaid: true, cardPaid: true, transferPaid: true, walletUsed: true, walletCredit: true, voucherPaid: true, voucherFree: true, createdAt: true, customerId: true,
         emptyDeduction: true, emptiesReturned: true, discountAmount: true, discountType: true, discountValue: true, pointsValue: true, pointsRedeemed: true, pointsEarned: true,
         cashier: { select: { name: true } },
         customer: { select: { id: true, firstName: true, lastName: true } },
@@ -155,7 +156,11 @@ export async function getPeriodReport(fromText: string, toText: string, branchId
 
   const walletUsed = round2(sales.reduce((sum, sale) => sum + sale.walletUsed, 0));
   const walletKept = round2(sales.reduce((sum, sale) => sum + sale.walletCredit, 0));
-  const netSales = round2(pay.cash + pay.card + pay.transfer + walletUsed);
+  // Gift vouchers used count as sales; the free ones among them are a promotion cost (in the profit & loss).
+  const voucherPaid = round2(sales.reduce((sum, sale) => sum + sale.voucherPaid, 0));
+  const voucherFreeUsed = round2(sales.reduce((sum, sale) => sum + sale.voucherFree, 0));
+  const netSales = round2(pay.cash + pay.card + pay.transfer + walletUsed + voucherPaid);
+  const giftVouchers = await periodVouchers(from, to, branchId);
   const emptyDeduction = round2(sales.reduce((sum, sale) => sum + sale.emptyDeduction, 0));
   const discounts = round2(sales.reduce((sum, sale) => sum + sale.discountAmount, 0));
   const pointsValue = round2(sales.reduce((sum, sale) => sum + sale.pointsValue, 0));
@@ -299,14 +304,19 @@ export async function getPeriodReport(fromText: string, toText: string, branchId
       cash: round2(pay.cash), card: round2(pay.card), transfer: round2(pay.transfer),
       cashBills: payCount.cash, cardBills: payCount.card, transferBills: payCount.transfer, splitBills,
       memberBills: sales.filter((sale) => sale.customerId != null).length,
+      voucherPaid,
+      voucherBills: sales.filter((sale) => sale.voucherPaid > 0).length,
     },
+    giftVouchers,
     profit: {
       costOfSales: round2(cost - shelfReturnedCost),
       grossProfit,
       margin: netSales - refunds > 0 ? round2((grossProfit / (netSales - refunds)) * 100) : 0,
       operatingExpenses,
       damageLoss,
-      netProfit: round2(grossProfit - operatingExpenses - damageLoss +[...otherIncome.values()].filter((row) => row.category !== "OWNER_CASH_IN").reduce((sum, row) => sum + row.amount, 0)),
+      /** Free gift vouchers used on bills: goods given for nothing, so a promotion cost. */
+      freeVouchers: voucherFreeUsed,
+      netProfit: round2(grossProfit - operatingExpenses - damageLoss - voucherFreeUsed + [...otherIncome.values()].filter((row) => row.category !== "OWNER_CASH_IN").reduce((sum, row) => sum + row.amount, 0)),
     },
     trend: [...buckets.entries()].map(([key, row]) => ({
       key, bills: row.bills, netSales: round2(row.netSales), cash: round2(row.cash), card: round2(row.card), transfer: round2(row.transfer),

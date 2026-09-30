@@ -66,6 +66,15 @@ export const IconBranch = () => (
 );
 
 /** Returns & damages: a bottle with a return arrow. */
+export const IconGift = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="8" width="18" height="4" rx="1" />
+    <path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8" />
+    <path d="M12 8v13" />
+    <path d="M12 8S10.5 3.5 8 4.2C6 4.8 6.8 8 9 8h3ZM12 8s1.5-4.5 4-3.8c2 .6 1.2 3.8-1 3.8h-3Z" />
+  </svg>
+);
+
 export const IconReturns = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M14 3h3v3l1.5 2.5V20a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V8.5L14 6V3Z" />

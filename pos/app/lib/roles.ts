@@ -33,6 +33,7 @@ const ROLE_PATHS: Record<PosAdminRole, string[]> = {
     "/dashboard/sales",
     "/dashboard/grn",
     "/dashboard/transfers",
+    "/dashboard/gift-vouchers",
   ],
 };
 

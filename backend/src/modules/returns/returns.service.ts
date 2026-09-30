@@ -162,7 +162,7 @@ export async function getBillForReturn(billNo: string, db: Tx | typeof prisma = 
   const sale = await db.posCounterSale.findUnique({
     where: { invoiceGroupCode: billNo },
     select: {
-      invoiceGroupCode: true, createdAt: true, totalAmount: true, discountAmount: true, pointsValue: true, pointsEarned: true, pointsRate: true, paymentMethod: true,
+      invoiceGroupCode: true, createdAt: true, totalAmount: true, discountAmount: true, pointsValue: true, pointsEarned: true, pointsRate: true, paymentMethod: true, voucherFree: true,
       cashier: { select: { name: true } }, customer: { select: { id: true, firstName: true, lastName: true, mobileNumber: true, loyaltyPoints: true } },
     },
   });
@@ -190,7 +190,9 @@ export async function getBillForReturn(billNo: string, db: Tx | typeof prisma = 
     cashier: sale.cashier.name,
     total: sale.totalAmount,
     refundedSoFar: refunded,
-    refundableLeft: round2(Math.max(0, sale.totalAmount - refunded)),
+    // The part paid with a free gift voucher was never paid in money, so it isn't refunded.
+    refundableLeft: round2(Math.max(0, sale.totalAmount - sale.voucherFree - refunded)),
+    freeVoucher: sale.voucherFree,
     member: sale.customer
       ? { id: sale.customer.id, name: `${sale.customer.firstName} ${sale.customer.lastName}`.trim(), mobile: sale.customer.mobileNumber, points: sale.customer.loyaltyPoints }
       : null,

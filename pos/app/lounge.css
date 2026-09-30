@@ -1717,3 +1717,43 @@ button.cd-open-btn { font: inherit; font-size: 0.74rem; font-weight: 700; cursor
 .os-row em { font-style: normal; color: var(--danger); }
 .os-row.problem { border-color: var(--danger); }
 .os-row b { white-space: nowrap; }
+
+/* ── Gift vouchers ── */
+.gv-toolbar { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; padding: 0.4rem 0.4rem 0.8rem; }
+.gv-toolbar .gv-kind { width: auto; min-width: 9.5rem; }
+.gv-search { flex: 1 1 240px; display: flex; align-items: center; gap: 0.45rem; color: var(--text-soft); }
+.gv-search .bm-input { flex: 1; }
+.gv-code { font-family: "SF Mono", Menlo, Consolas, monospace; letter-spacing: 0.04em; }
+.gv-status { display: inline-block; padding: 0.18rem 0.55rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; white-space: nowrap; border: 1px solid transparent; }
+.gv-active { color: var(--success); background: var(--success-bg); border-color: color-mix(in srgb, var(--success) 30%, transparent); }
+.gv-used { color: var(--soft-gold-text); background: color-mix(in srgb, var(--accent) 12%, transparent); border-color: var(--soft-gold-border); }
+.gv-expired { color: var(--warning); background: var(--warning-bg); }
+.gv-cancelled { color: var(--danger); background: var(--danger-bg); }
+.gv-actions { white-space: nowrap; }
+.gv-actions .btn-outline { padding: 0.35rem 0.6rem; font-size: 0.76rem; display: inline-flex; align-items: center; gap: 0.3rem; margin-right: 0.3rem; }
+.btn-outline.gv-danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, transparent); }
+.btn-accent.gv-danger-fill { background: var(--danger); border-color: var(--danger); color: #fff; }
+.gv-modal { max-width: 620px; }
+.gv-kind-seg { margin-bottom: 0.2rem; }
+.gv-total { padding: 0.6rem 0.8rem; border-radius: var(--radius-sm); background: var(--panel-2); border: 1px solid var(--panel-border); font-size: 0.86rem; }
+.gv-issued { display: grid; gap: 0.4rem; max-height: 45vh; overflow: auto; }
+.gv-issued-row { display: grid; grid-template-columns: 6rem 1fr auto; gap: 0.6rem; align-items: center; padding: 0.55rem 0.7rem; border-radius: var(--radius-sm); background: var(--panel-2); border: 1px solid var(--panel-border); font-size: 0.84rem; }
+.gv-issued-row code { font: 700 0.95rem "SF Mono", Menlo, Consolas, monospace; letter-spacing: 0.06em; color: var(--text); }
+
+/* Gift vouchers at the counter */
+.pos-adjust-toggles button.voucher { border-color: color-mix(in srgb, var(--accent) 40%, var(--panel-border)); }
+.pos-adjust-toggles button.voucher.active, .pos-adjust-toggles button.voucher:hover { color: var(--soft-gold-text); border-color: var(--soft-gold-border); }
+.pos-adjust-toggles button.voucher.active { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.pos-adjust-toggles button.voucher b { margin-left: 0.3rem; }
+.pos-voucher { display: grid; gap: 0.4rem; }
+.pos-voucher .pos-adjust-row .btn-accent { padding: 0.45rem 0.8rem; font-size: 0.8rem; }
+.pos-voucher-input { font-family: "SF Mono", Menlo, Consolas, monospace; letter-spacing: 0.05em; }
+.pos-voucher-chip { display: grid; grid-template-columns: 1fr auto auto; gap: 0.5rem; align-items: center; padding: 0.4rem 0.55rem; border-radius: var(--radius-sm); border: 1px solid var(--soft-gold-border); background: color-mix(in srgb, var(--accent) 8%, var(--panel)); font-size: 0.78rem; }
+.pos-voucher-chip span { color: var(--text-soft); min-width: 0; overflow-wrap: anywhere; }
+.pos-voucher-chip span b { color: var(--text); }
+.pos-voucher-chip strong { color: var(--soft-gold-text); white-space: nowrap; }
+.pos-voucher-chip button { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--panel-border); background: var(--panel-2); color: var(--text-soft); cursor: pointer; line-height: 1; }
+.pos-voucher-chip button:hover { color: var(--danger); border-color: var(--danger); }
+.pos-voucher .pos-adjust-row .pos-voucher-input { flex: 1 1 150px; width: auto; min-width: 0; font-weight: 700; }
+.lx-gv-strip { display: grid; gap: 0.6rem; margin-bottom: 1rem; }
+.gv-branch-table td, .gv-branch-table th { white-space: nowrap; padding-left: 0.7rem; padding-right: 0.7rem; }

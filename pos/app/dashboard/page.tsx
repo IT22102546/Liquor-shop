@@ -60,6 +60,7 @@ type Summary = {
     watch: Array<{ id: number; name: string; size: string | null; category: string; imageUrl: string | null; quantity: number; lowStockThreshold: number }>;
   };
   recentBills: Array<{ billNo: string; total: number; paymentMethod: string; emptiesReturned: number; soldAt: string; cashier: string; customer: string | null }>;
+  giftVouchers?: { sold: number; soldCount: number; free: number; freeCount: number; used: number; usedCount: number; usedFree: number; owedNow: number; owedCount: number };
 };
 
 // ── Formatting ───────────────────────────────────────────────────────────────
@@ -261,6 +262,19 @@ export default function DashboardPage() {
           </>
         ) : Array.from({ length: 4 }, (_, index) => <div key={index} className="lx-card lx-skel" style={{ height: 176 }} />)}
       </section>
+
+      {summary?.giftVouchers && (summary.giftVouchers.soldCount + summary.giftVouchers.freeCount + summary.giftVouchers.usedCount + summary.giftVouchers.owedCount > 0) && (
+        <section className="lx-card lx-gv-strip">
+          <div className="lx-card-title">Gift vouchers · {rangeText}</div>
+          <div className="lx-book-totals">
+            <span>Used on bills ({summary.giftVouchers.usedCount})<b>{money(summary.giftVouchers.used)}</b></span>
+            <span>Sold ({summary.giftVouchers.soldCount})<b>{money(summary.giftVouchers.sold)}</b></span>
+            <span>Given free ({summary.giftVouchers.freeCount})<b>{money(summary.giftVouchers.free)}</b></span>
+            <span>Free used — promotion cost<b>{money(summary.giftVouchers.usedFree)}</b></span>
+            <span>Sold, not used yet — owed now ({summary.giftVouchers.owedCount})<b>{money(summary.giftVouchers.owedNow)}</b></span>
+          </div>
+        </section>
+      )}
 
       <section className="lx-row-main">
         <div className="lx-card">
