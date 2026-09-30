@@ -10,9 +10,18 @@ export type PeriodReport = {
   branch?: { id: number; name: string; code: string } | null;
   sales: {
     bills: number; units: number; grossSales: number; emptyDeduction: number; emptiesReturned: number; discounts: number; pointsValue: number;
-    netSales: number; byType?: { hardLiquor: { units: number; amount: number }; other: { units: number; amount: number } }; refunds?: number; netAfterReturns?: number; averageBill: number; cash: number; card: number; transfer: number; cashBills: number; cardBills: number; transferBills: number; memberBills: number;
+    netSales: number; byType?: { hardLiquor: { units: number; amount: number }; other: { units: number; amount: number } }; refunds?: number; netAfterReturns?: number; averageBill: number; cash: number; card: number; transfer: number; cashBills: number; cardBills: number; transferBills: number; memberBills: number; voucherPaid?: number; voucherBills?: number;
   };
-  profit: { costOfSales: number; grossProfit: number; margin: number; operatingExpenses: number; damageLoss?: number; netProfit: number };
+  profit: { costOfSales: number; grossProfit: number; margin: number; operatingExpenses: number; damageLoss?: number; freeVouchers?: number; netProfit: number };
+  /** Gift vouchers: issued, used (and where), expired, cancelled, and what's still out (older reports don't have it). */
+  giftVouchers?: {
+    issued: { soldCount: number; soldValue: number; soldCash: number; soldCard: number; soldTransfer: number; freeCount: number; freeValue: number };
+    used: { count: number; value: number; soldValue: number; freeValue: number; atOtherBranch: number };
+    expired: { count: number; value: number };
+    cancelled: { count: number; value: number };
+    outstandingNow: { owedCount: number; owedValue: number; freeCount: number; freeValue: number };
+    byBranch: Array<{ branch: string; issuedCount: number; issuedValue: number; usedCount: number; usedValue: number; usedFromOtherBranches: number }>;
+  };
   /** Returns & damages in the period (older servers don't send it). */
   returns?: {
     refunds: number; refundBills: number; refundUnits: number; refundsCash: number; refundsWallet: number; returnedToShelf: number; returnedDamaged: number;
@@ -182,6 +191,7 @@ export function buildPeriodReportHtml(report: PeriodReport, kind: PeriodKind) {
         <tr><td>Cash (${sales.cashBills} bills)</td><td class="r">${amt(sales.cash)}</td></tr>
         <tr><td>Card (${sales.cardBills} bills)</td><td class="r">${amt(sales.card)}</td></tr>
         <tr><td>Bank transfer / QR (${sales.transferBills} bills)</td><td class="r">${amt(sales.transfer)}</td></tr>
+        ${sales.voucherPaid ? `<tr><td>Paid with gift vouchers (${sales.voucherBills ?? 0} bills)</td><td class="r">${amt(sales.voucherPaid)}</td></tr>` : ""}
         <tr><td>Loyalty member bills</td><td class="r">${sales.memberBills}</td></tr>
         ${sales.byType ? `<tr><td>Hard liquor (${sales.byType.hardLiquor.units} bottles)</td><td class="r">${amt(sales.byType.hardLiquor.amount)}</td></tr>
         <tr><td>Beer, wine &amp; others (${sales.byType.other.units})</td><td class="r">${amt(sales.byType.other.amount)}</td></tr>` : ""}
@@ -198,6 +208,7 @@ export function buildPeriodReportHtml(report: PeriodReport, kind: PeriodKind) {
         <tr class="total"><td>Gross profit (${profit.margin}%)</td><td class="r">${amt(profit.grossProfit)}</td></tr>
         <tr><td>Less: running expenses</td><td class="r minus">−${amt(profit.operatingExpenses)}</td></tr>
         ${profit.damageLoss ? `<tr><td>Less: damaged bottles (at cost)</td><td class="r minus">−${amt(profit.damageLoss)}</td></tr>` : ""}
+        ${profit.freeVouchers ? `<tr><td>Less: free gift vouchers used (promotion)</td><td class="r minus">−${amt(profit.freeVouchers)}</td></tr>` : ""}
         ${otherIncomeCounted ? `<tr><td>Add: other income</td><td class="r plus">+${amt(otherIncomeCounted)}</td></tr>` : ""}
         <tr class="total"><td>Net profit</td><td class="r ${profit.netProfit < 0 ? "minus" : ""}">${amt(profit.netProfit)}</td></tr>
       </table>
@@ -298,6 +309,28 @@ export function buildPeriodReportHtml(report: PeriodReport, kind: PeriodKind) {
       </table>
     </section>
   </div>` : ""}
+
+  ${report.giftVouchers && (report.giftVouchers.issued.soldCount || report.giftVouchers.issued.freeCount || report.giftVouchers.used.count || report.giftVouchers.outstandingNow.owedCount || report.giftVouchers.outstandingNow.freeCount) ? `
+  <section class="keep">
+    <h2>Gift vouchers <small>${report.giftVouchers.used.atOtherBranch} used at a different branch from where they were issued</small></h2>
+    <div class="cols">
+      <table class="ledger">
+        <tr><td>Sold (${report.giftVouchers.issued.soldCount})</td><td class="r">${amt(report.giftVouchers.issued.soldValue)}</td></tr>
+        <tr><td class="muted">cash · card · transfer / QR</td><td class="r muted">${amt(report.giftVouchers.issued.soldCash)} · ${amt(report.giftVouchers.issued.soldCard)} · ${amt(report.giftVouchers.issued.soldTransfer)}</td></tr>
+        <tr><td>Given free (${report.giftVouchers.issued.freeCount})</td><td class="r">${amt(report.giftVouchers.issued.freeValue)}</td></tr>
+        <tr><td>Used on bills (${report.giftVouchers.used.count})</td><td class="r">${amt(report.giftVouchers.used.value)}</td></tr>
+        <tr><td class="muted">sold · free (promotion cost)</td><td class="r muted">${amt(report.giftVouchers.used.soldValue)} · ${amt(report.giftVouchers.used.freeValue)}</td></tr>
+        <tr><td>Expired unused (${report.giftVouchers.expired.count})</td><td class="r">${amt(report.giftVouchers.expired.value)}</td></tr>
+        <tr><td>Cancelled (${report.giftVouchers.cancelled.count})</td><td class="r">${amt(report.giftVouchers.cancelled.value)}</td></tr>
+        <tr class="total"><td>Sold, not used yet (owed now, ${report.giftVouchers.outstandingNow.owedCount})</td><td class="r">${amt(report.giftVouchers.outstandingNow.owedValue)}</td></tr>
+        <tr><td>Free, not used yet (${report.giftVouchers.outstandingNow.freeCount})</td><td class="r">${amt(report.giftVouchers.outstandingNow.freeValue)}</td></tr>
+      </table>
+      <table>
+        <thead><tr><th>Branch</th><th class="r">Issued</th><th class="r">Used</th><th class="r">From other branches</th></tr></thead>
+        ${report.giftVouchers.byBranch.map((row) => `<tr><td>${esc(row.branch)}</td><td class="r">${row.issuedCount} · ${amt(row.issuedValue)}</td><td class="r">${row.usedCount} · ${amt(row.usedValue)}</td><td class="r">${row.usedFromOtherBranches}</td></tr>`).join("") || `<tr><td colspan="4" class="empty">No vouchers issued or used</td></tr>`}
+      </table>
+    </div>
+  </section>` : ""}
 
   <section>
     <h2>Stock movement <small>stock on hand now worth ${rs(stock.stockValueNow)} at cost${stock.freeIssues?.units ? ` · ${stock.freeIssues.units} free-issue bottle(s) received, worth ${rs(stock.freeIssues.value)}` : ""}</small></h2>

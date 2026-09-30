@@ -2,6 +2,7 @@ import { forBranch } from "../branches/branch-stock";
 import { Prisma } from "../../generated/prisma";
 import { prisma } from "../../database/prisma.client";
 import type { DashboardQueryDto, SalesQueryDto } from "./dto/pos-user.dto";
+import { maskCode, periodVouchers } from "../gift-vouchers/gift-vouchers.service";
 
 const round2 = (value: number) => Math.round(value * 100) / 100;
 const startOfDay = (date: string) => new Date(`${date}T00:00:00`);
@@ -75,6 +76,10 @@ export async function listSales(query: SalesQueryDto, branchId: number | null) {
   });
 
   const branchById = new Map((await prisma.branch.findMany({ select: { id: true, name: true, address: true, phone: true } })).map((branch) => [branch.id, branch]));
+  const vouchers = await prisma.giftVoucher.findMany({
+    where: { redeemedBillNo: { in: sales.filter((sale) => sale.voucherPaid > 0).map((sale) => sale.invoiceGroupCode) } },
+    select: { voucherNo: true, code: true, amount: true, kind: true, redeemedBillNo: true },
+  });
   return {
     sales: sales.map((sale) => {
       const items = (linesByBill.get(sale.invoiceGroupCode) ?? []).map((line) => ({
@@ -106,6 +111,9 @@ export async function listSales(query: SalesQueryDto, branchId: number | null) {
         transferPaid: sale.transferPaid,
         walletUsed: sale.walletUsed,
         walletCredit: sale.walletCredit,
+        voucherPaid: sale.voucherPaid,
+        giftVouchers: vouchers.filter((voucher) => voucher.redeemedBillNo === sale.invoiceGroupCode)
+          .map((voucher) => ({ voucherNo: voucher.voucherNo, code: maskCode(voucher.code), amount: voucher.amount, kind: voucher.kind })),
         subtotal: round2(sale.totalAmount + sale.emptyDeduction + sale.discountAmount + sale.pointsValue),
         emptyDeduction: sale.emptyDeduction,
         discount: sale.discountType ? { type: sale.discountType, value: sale.discountValue, amount: sale.discountAmount } : null,
@@ -337,6 +345,11 @@ export async function getDashboardSummary(query: DashboardQueryDto, branchId: nu
     }));
 
   return {
+    // Gift vouchers in the period (sold / given / used) and what's still owed now.
+    giftVouchers: await (async () => {
+      const gv = await periodVouchers(from, to, branchId);
+      return { sold: gv.issued.soldValue, soldCount: gv.issued.soldCount, free: gv.issued.freeValue, freeCount: gv.issued.freeCount, used: gv.used.value, usedCount: gv.used.count, usedFree: gv.used.freeValue, owedNow: gv.outstandingNow.owedValue, owedCount: gv.outstandingNow.owedCount };
+    })(),
     range: { from: query.from, to: query.to, bucketing: mode },
     current: current.figures,
     previous: previous.figures,

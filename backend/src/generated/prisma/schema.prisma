@@ -143,6 +143,10 @@ model PosCounterSale {
   checkoutResult   Json?
   /// Rung up on the till while the connection was down, and uploaded later (createdAt = time sold).
   soldOffline      Boolean       @default(false)
+  /// Paid with gift vouchers (their full value; a voucher is used once and in full). Counts as sales.
+  voucherPaid      Float         @default(0)
+  /// Of voucherPaid, the part from FREE (promotional) vouchers — money never received; a promotion cost.
+  voucherFree      Float         @default(0)
   totalAmount      Float
   /// Total deducted for empty bottles returned (already subtracted from totalAmount).
   emptyDeduction   Float         @default(0)
@@ -1060,6 +1064,49 @@ model GtnItem {
 
   @@index([gtnId])
   @@map("gtn_items")
+}
+
+/// A gift voucher: a fixed amount, used once and in full on a bill at any branch.
+/// SOLD = the customer paid for it (money in when issued, owed until used); FREE = given by the shop.
+model GiftVoucher {
+  id               Int       @id @default(autoincrement())
+  /// Record number, e.g. GV-00001
+  voucherNo        String    @unique
+  /// What is typed or scanned at the counter (random, hard to guess), e.g. 7K3M-9QX2-HT4P
+  code             String    @unique
+  amount           Float
+  kind             String // SOLD | FREE
+  status           String    @default("ACTIVE") // ACTIVE | REDEEMED | CANCELLED
+  expiresAt        DateTime?
+  issuedTo         String?
+  issuedPhone      String?
+  customerId       Int?
+  note             String?
+  // Issued (created) — by whom, where, in which shift; how a SOLD voucher was paid for.
+  issuedById       Int
+  issuedAt         DateTime  @default(now())
+  issueBranchId    Int?
+  issueShiftId     Int?
+  paymentMethod    String? // CASH | CARD | BANK_TRANSFER (SOLD only)
+  paymentReference String?
+  // Used — on which bill, at which branch and shift, by whom.
+  redeemedAt       DateTime?
+  redeemedById     Int?
+  redeemedBranchId Int?
+  redeemedShiftId  Int?
+  redeemedBillNo   String?
+  // Cancelled — only while unused, with a reason.
+  cancelledAt      DateTime?
+  cancelledById    Int?
+  cancelReason     String?
+
+  @@index([status])
+  @@index([issueShiftId])
+  @@index([redeemedShiftId])
+  @@index([redeemedBillNo])
+  @@index([issueBranchId, issuedAt])
+  @@index([redeemedBranchId, redeemedAt])
+  @@map("pos_gift_vouchers")
 }
 
 /// Database changes applied by scripts/deploy.sh (one row per backend/prisma/migrations folder).

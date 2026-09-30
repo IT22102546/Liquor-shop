@@ -45,6 +45,7 @@ const CATEGORIES: Array<{ value: string; label: string; color: string }> = [
   { value: "RETURN", label: "Returns & damages", color: "var(--danger)" },
   { value: "GOODS", label: "GRN & transfers", color: "var(--c2)" },
   { value: "BRANCH", label: "Branches", color: "var(--c4)" },
+  { value: "VOUCHER", label: "Gift vouchers", color: "var(--c3)" },
   { value: "ACCOUNTS", label: "Accounts", color: "var(--c6)" },
   { value: "CUSTOMER", label: "Customers", color: "var(--c3)" },
   { value: "OTHER", label: "Other", color: "var(--text-soft)" },

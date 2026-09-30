@@ -43,6 +43,7 @@ const BREADCRUMBS: Record<string, string> = {
   "/dashboard/reports":    "Book Keeping - Reports",
   "/dashboard/purchase-orders": "Stock - Purchase Orders",
   "/dashboard/returns": "Sales - Returns & Damages",
+  "/dashboard/gift-vouchers": "Sales - Gift Vouchers",
   "/dashboard/grn": "Stock - Goods Received (GRN)",
   "/dashboard/transfers": "Stock - Branch Transfers (GTN)",
   "/dashboard/branches": "Branches",

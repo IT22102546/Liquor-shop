@@ -36,6 +36,8 @@ type Sale = {
   transferPaid?: number;
   walletUsed?: number;
   walletCredit?: number;
+  voucherPaid?: number;
+  giftVouchers?: Array<{ voucherNo: string; code: string; amount: number; kind: string }>;
   subtotal: number;
   emptyDeduction: number;
   emptiesReturned: number;
@@ -76,6 +78,7 @@ function saleToReceipt(sale: Sale): SaleReceipt {
     transferPaid: sale.transferPaid,
     walletUsed: sale.walletUsed,
     walletCredit: sale.walletCredit,
+    giftVouchers: sale.giftVouchers ?? [],
     lines: sale.items.map((item) => ({
       name: item.name,
       hardLiquor: item.hardLiquor === true,
@@ -207,6 +210,7 @@ export default function SalesBillsPage() {
                     {sale.pointsRedeemed > 0 && <> · <b className="member">{sale.pointsRedeemed} pts used</b></>}
                     {(sale.walletUsed ?? 0) > 0 && <> · <b className="member">−{money(sale.walletUsed ?? 0)} from wallet</b></>}
                     {(sale.walletCredit ?? 0) > 0 && <> · <b className="member">+{money(sale.walletCredit ?? 0)} to wallet</b></>}
+                    {(sale.voucherPaid ?? 0) > 0 && <> · <b className="member">{money(sale.voucherPaid ?? 0)} by gift voucher</b></>}
                   </em>
                 </span>
                 <span className={`lx-bill-pay ${sale.paymentMethod === "CASH" ? "cash" : "card"}`}>

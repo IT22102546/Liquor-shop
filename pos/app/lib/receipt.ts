@@ -40,6 +40,8 @@ export type SaleReceipt = {
   /** Member wallet: part of the bill paid from it, and change kept in it. */
   walletUsed?: number;
   walletCredit?: number;
+  /** Gift vouchers used on this bill (each for its full value). */
+  giftVouchers?: Array<{ voucherNo: string; code: string; amount: number }>;
   lines: ReceiptLine[];
   /** The per-bill hard liquor limit at the time (printed next to the count). */
   hardLiquorLimit?: number;
@@ -181,8 +183,9 @@ export function buildReceiptHtml(receipt: SaleReceipt) {
     <div class="total"><div class="row"><span>TOTAL</span><span>Rs. ${amount(receipt.total)}</span></div></div>
 
     <div class="pay">
-      ${receipt.paymentMethod === "SPLIT" || receipt.walletUsed
-        ? `${receipt.walletUsed ? `<div class="row"><span>Paid from wallet</span><span>${amount(receipt.walletUsed)}</span></div>` : ""}
+      ${receipt.paymentMethod === "SPLIT" || receipt.walletUsed || receipt.giftVouchers?.length
+        ? `${(receipt.giftVouchers ?? []).map((voucher) => `<div class="row"><span>Gift voucher ${escape(voucher.voucherNo)} (${escape(voucher.code.slice(-4))})</span><span>${amount(voucher.amount)}</span></div>`).join("")}
+           ${receipt.walletUsed ? `<div class="row"><span>Paid from wallet</span><span>${amount(receipt.walletUsed)}</span></div>` : ""}
            ${receipt.cardPaid ? `<div class="row"><span>Paid by card</span><span>${amount(receipt.cardPaid)}</span></div>` : ""}
            ${receipt.transferPaid ? `<div class="row"><span>Paid by transfer / QR</span><span>${amount(receipt.transferPaid)}</span></div>` : ""}
            ${receipt.cashPaid ? `<div class="row"><span>Cash part</span><span>${amount(receipt.cashPaid)}</span></div>

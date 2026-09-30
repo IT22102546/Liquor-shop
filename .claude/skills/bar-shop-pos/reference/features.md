@@ -89,6 +89,37 @@ Staff without a fixed branch switch branches with the selector in the top bar. T
   - The expected cash is unchanged. Cash going in or out must still be a Money in or Expense entry.
 - **Bill:** an 80mm receipt showing the branch name and address, loyalty points and wallet, and change given or kept.
 
+## Gift vouchers (`/dashboard/gift-vouchers`, `modules/gift-vouchers`)
+
+- **The model:** `GiftVoucher` has `voucherNo` (GV-, lock 740331), a random `code` (XXXX-XXXX-XXXX, no 0/O/1/I; `normalizeCode`, `maskCode`), amount and kind.
+  - **Kinds:** SOLD (paymentMethod CASH | CARD | BANK_TRANSFER) or FREE (reason required).
+  - **Status:** ACTIVE | REDEEMED | CANCELLED. EXPIRED is worked out from `expiresAt`, which is the end of the chosen day, +05:30.
+  - **Issue fields:** issued (branch, shift, by).
+  - **Redeem fields:** branch, shift, by, bill.
+- **Issuing** is ADMIN only.
+  - A SOLD voucher needs an open shift at the working branch. Its money goes into that shift: `expectedCash += soldCash`, and the card and QR parts are added to `cardPayments` / `transferPayments` and to `sales.cardToSettle` / `transferToCheck`, which the close / count checks and settlement receipts use.
+  - It isn't sales until used.
+- **Checkout** takes `giftVouchers: string[]`:
+  - `vouchersForCheckout` checks each one; the total must be ≤ the bill total (used in full), otherwise 422.
+  - Wallet ≤ total − vouchers; due = total − vouchers − wallet.
+  - `redeemVouchers` runs inside the sale transaction (updateMany where ACTIVE and not expired, count 1), so the same voucher can't be used twice at once.
+  - The sale stores `voucherPaid` and `voucherFree`. Points are earned on total − voucherFree.
+  - Vouchers are refused offline.
+- **Money:**
+  - Net sales include `voucherPaid`.
+  - Period P&L: `profit.freeVouchers` = free vouchers used, subtracted from net profit.
+  - Refunds exclude `voucherFree` (`refundableLeft`).
+- **Where it's recorded:**
+  - Day End `giftVouchers` (issued / used; blind view nulls cash amounts), `cash.voucherSalesCash`, `payments.vouchers`, bill payment label "Gift voucher X + cash Y": the tab, the A4 and the Z slip.
+  - Period `giftVouchers` (issued, used, atOtherBranch, expired, cancelled, outstandingNow, byBranch), the dashboard `giftVouchers` strip, and Sales Bills `giftVouchers` for reprints.
+  - The Activity Log category VOUCHER (left out of the shift journal).
+- **Barcodes:** vouchers print a Code 128 set B barcode of the code (`lib/code128.ts`, checked with the ZXing decoder).
+  - On the counter, `sellByBarcode` looks for a product first. If none matches and `isGiftVoucherCode` (XXXX-XXXX-XXXX, dashes optional, at least one letter), it calls `addVoucher(code)` (toast, opens the panel).
+  - The GV- number is never accepted for payment, because it can be guessed.
+- **Counter UI:** a *Gift voucher* toggle opens a code field (type or scan; it's an input, so the global scanner hook ignores it).
+  - The code is checked through `/check/:code` and shown as chips. `voucherOver` disables Complete.
+  - The receipt lists "Gift voucher GV-… (last 4)".
+
 ## Returns & Damages (`/dashboard/returns`)
 
 Numbered RT-00001 and so on. Each return prints an 80mm slip with signature lines.

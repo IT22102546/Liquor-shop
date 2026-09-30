@@ -18,6 +18,7 @@ import {
   IconInvoice,
   IconReceipt,
   IconReturns,
+  IconGift,
   IconBoxInNav,
   IconTransfer,
   IconBranch,
@@ -39,6 +40,7 @@ const NAV_SECTIONS: { title: string; links: NavLink[] }[] = [
       { label: "Bar Counter", href: "/dashboard/inventory", Icon: IconBottle },
       { label: "Sold Products", href: "/dashboard/inventory/sold", Icon: IconReceipt },
       { label: "Returns & Damages", href: "/dashboard/returns", Icon: IconReturns },
+      { label: "Gift Vouchers", href: "/dashboard/gift-vouchers", Icon: IconGift },
     ],
   },
   {

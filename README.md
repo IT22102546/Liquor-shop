@@ -18,25 +18,26 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
 5. [Discounts](#4-discounts)
 6. [Hard liquor limit](#5-hard-liquor-limit-sri-lankan-law)
 7. [Returns & damages](#6-returns--damages)
-8. [Products & stock](#7-product-setup-and-stock)
-9. [Suppliers & purchase orders](#8-suppliers-and-purchase-orders)
-10. [Goods received (GRN) & free issues](#9-goods-received-grn-and-free-issues)
-11. [Branches & branch transfers (GTN)](#10-branches-and-branch-transfers-gtn)
-12. [Day End (shift close & Z report)](#11-day-end-book-keeping)
-13. [Cash book: expenses, money in, banking](#12-cash-book-expenses-money-in-banking)
-14. [Reports](#13-reports-daily--weekly--monthly--yearly)
-15. [Dashboard, Activity Log, Settings](#14-dashboard-activity-log-shop-settings)
-16. [Staff, roles and permissions](#15-staff-roles-and-permissions)
-17. [Printing](#16-printing)
-18. [How money and stock are counted](#how-money-and-stock-are-counted)
-19. [Record-keeping rules](#record-keeping-rules)
-20. [Installation (local)](#installation-local)
-21. [Configuration (.env)](#configuration)
-22. [Database, migrations and backups](#database-migrations-and-backups)
-23. [Production deployment](#production-deployment)
+8. [Gift vouchers](#7-gift-vouchers)
+9. [Products & stock](#8-product-setup-and-stock)
+10. [Suppliers & purchase orders](#9-suppliers-and-purchase-orders)
+11. [Goods received (GRN) & free issues](#10-goods-received-grn-and-free-issues)
+12. [Branches & branch transfers (GTN)](#11-branches-and-branch-transfers-gtn)
+13. [Day End (shift close & Z report)](#12-day-end-book-keeping)
+14. [Cash book: expenses, money in, banking](#13-cash-book-expenses-money-in-banking)
+15. [Reports](#14-reports-daily--weekly--monthly--yearly)
+16. [Dashboard, Activity Log, Settings](#15-dashboard-activity-log-shop-settings)
+17. [Staff, roles and permissions](#16-staff-roles-and-permissions)
+18. [Printing](#17-printing)
+19. [How money and stock are counted](#how-money-and-stock-are-counted)
+20. [Record-keeping rules](#record-keeping-rules)
+21. [Installation (local)](#installation-local)
+22. [Configuration (.env)](#configuration)
+23. [Database, migrations and backups](#database-migrations-and-backups)
+24. [Production deployment](#production-deployment)
     - [Live server & CI/CD pipeline](#live-server--cicd-pipeline)
-24. [Project structure](#project-structure)
-25. [Troubleshooting](#troubleshooting)
+25. [Project structure](#project-structure)
+26. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -50,6 +51,7 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
 | Payments | Cash, card, bank transfer / QR, split (cash + card/QR), wallet; change calculation; approval references |
 | Loyalty | Members by mobile number; points earned per rupee; points redeemed as a discount; wallet for kept change and refunds; full history per member |
 | Hard liquor | Per-product "Hard liquor" tick; max bottles per bill (default 12) enforced at the counter and on the server; printed on the bill |
+| Gift vouchers | Sold or free vouchers with a unique code (`GV-`), used once for the full amount at any branch; the rest of the bill paid any way; recorded where issued and where used |
 | Returns & damages | Damaged bottle exchange, return & refund (cash or wallet), store damage, damaged stock kept aside, clearing to supplier / write-off / back to shelf |
 | Products | Product setup with barcode, size, cost, tax (% or Rs), selling price, empties price, low-stock alert, photos; bulk price update; restock with cost averaging |
 | Suppliers | Supplier records; supplier-filtered product lists everywhere |
@@ -80,6 +82,7 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
 - **Empty bottles handed in.** For returnable bottles, the customer's empties are taken off the bill at the product's *empty bottle price*. The empties are added to the branch's "empties on hand".
 - **Loyalty member** (optional): search by mobile or name, or add a new member without leaving the counter. The member's points and wallet balance are shown.
 - **Points:** use points as a discount (1 point = the value set in Shop Settings). Points are earned on every member bill.
+- **Gift voucher:** type or scan a voucher code; its full value comes off what's due (see §7).
 - **Wallet:**
   - **Use wallet** pays part or all of the bill from money the member kept at the shop.
   - **Keep change in wallet** keeps some or all of the cash change for the member instead of handing it back.
@@ -112,7 +115,7 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
 
 ## 2. Payments and bills
 
-- **Every bill records exactly how it was paid:** cash part, card part, transfer/QR part, wallet used, change kept in wallet, and change given.
+- **Every bill records exactly how it was paid:** cash part, card part, transfer/QR part, wallet used, gift vouchers used (and the free-voucher part), change kept in wallet, and change given.
 - **Bill numbers** are unique (`POS-…`). The till makes the number before sending the bill, so the printed number stays the same even when the bill is sent again or uploaded later from offline. Each bill stores the branch, the shift, the cashier, the member, the discount and points, and each line (quantity, price, empties, share of the discount).
 - **Sales Bills page** (*Billing → Sales Bills*): search and date filters. Open a bill to see the full receipt and reprint it.
 - **The printed bill** (80mm) shows:
@@ -182,7 +185,44 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
   - the member's history
   - the Activity Log
 
-## 7. Product Setup and stock
+## 7. Gift vouchers
+
+*Sales → Gift Vouchers* (administrators issue and cancel; accountants can view; cashiers use them at the counter)
+
+- **Issuing** (administrators): choose the amount and how many (up to 50 at once), then:
+  - **Sold**: the customer pays now by cash, card or transfer / QR (with the reference). The money goes into this branch's open shift (drawer, card machine check or bank check), so a shift must be open. It **isn't a sale yet**: the shop owes the amount until the voucher is used.
+  - **Free**: given by the shop (promotion, apology, reward). A reason is required. No money comes in; when it's used, its value is recorded as a **promotion cost**.
+  - Optional: the customer's phone, a *valid until* date, and a note.
+- **Every voucher has** a record number (`GV-00001`) and a random **code** like `2GRV-QTRE-82HC`. The code is the voucher. It's hard to guess, and there's no 0/O or 1/I, so it can't be misread. Lists and bills show only the last 4 characters; administrators can print the voucher again with the full code.
+- **Printed voucher:** a colour gift card printed at its **real size**, 190 × 86 mm. Each page *is* the voucher, edge to edge, one voucher per page, with no A4 sheet around it.
+  - *Save as PDF* gives voucher-sized pages, ready for a print shop or card stock of that size.
+  - Sold vouchers are **wine red** and free ones are **teal** ("Complimentary Voucher"), both with a gold ribbon and bow.
+  - It shows the shop name, the amount in large gold type, and a cream stub with the code, a **barcode** (Code 128) of the code, the voucher number, value, valid-until date, issue date and branch, an "Authorised by" signature line, and the terms.
+  - Print with "Background graphics" on; Chrome does this automatically. An **80mm slip** version is also available for the till printer.
+- **Using a voucher at the counter** (any branch):
+  - **Scan the voucher's barcode** anywhere on the Bar Counter, like a bottle. The till sees it's a voucher and puts it on the bill ("Gift voucher GV-00001 added"). It works before or after the items, and scanning into the search box works too.
+  - Or tap **Gift voucher** and type or scan the code (upper/lower case, spaces and dashes don't matter).
+  - The voucher **number** (GV-00001) can't be used to pay. It's a record number anyone could guess; only the code on the voucher is accepted.
+  - The till checks it with the server and shows it on the bill with its amount and where it was issued. More than one voucher can go on a bill.
+  - **Each voucher is used once, for its full value.** The bill must be at least the voucher total; the rest is paid by cash, card, QR, split or wallet. Example: a Rs. 5,000 bill with a Rs. 2,000 voucher means Rs. 3,000 still to pay.
+  - If the bill is smaller than the vouchers, the till explains and won't complete the sale.
+  - A voucher that was already used, cancelled or expired is refused with the reason, e.g. "GV-00001 was already used on 30 Sept 2026, 15:51 at Kandy (bill POS-…)".
+  - Two tills trying the same voucher at the same moment: only one bill gets it.
+  - Vouchers need the connection. They can't be used while the till is offline.
+- **Points and refunds:** loyalty points aren't earned on the part paid with a **free** voucher. On a return, that part isn't refunded, because it was never paid in money.
+- **Cancelling** (administrators): only an unused voucher, with a reason. If a sold voucher's money is given back, record it as an Expense.
+- **Page layout:**
+  - KPIs: sold but not used yet (money owed), free not used yet, used, and expired unused.
+  - Status tabs (not used / used / expired / cancelled), a type filter, and search by number, code, name, phone or bill.
+  - Each row shows where and when the voucher was issued and used, by whom, and on which bill, and flags "other branch" when it was used elsewhere.
+- **Where vouchers are recorded:**
+  - **Day End** of the shift where they were issued and where they were used: the **Gift vouchers** tab, the cash drawer ("+ gift vouchers sold (cash)"), the card machine / QR checks, the payments table, the bill list ("Gift voucher 2,000 + cash 3,000"), and the A4 report and Z slip
+  - **Reports:** sold, free, used (sold vs free), expired, cancelled, still owed, and each branch's issued / used / used-from-other-branches; free vouchers used appear in the profit & loss as a promotion cost
+  - **Dashboard:** a gift voucher strip for the chosen dates
+  - **Activity Log:** a *Gift vouchers* category for issuing and cancelling; each sale mentions the vouchers used
+  - **Sales Bills:** the bill and its reprinted receipt show the vouchers
+
+## 8. Product Setup and stock
 
 *Stock → Product Setup*
 
@@ -205,7 +245,7 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
 - **Low-stock notifications** appear in the top bar (the bell).
 - **Cashiers** see Product Setup read-only, except returning empties.
 
-## 8. Suppliers and purchase orders
+## 9. Suppliers and purchase orders
 
 *Stock → Suppliers / Purchase Orders* (purchase orders are for administrators)
 
@@ -222,7 +262,7 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
 - **Print / PDF:** an A4 purchase order with the branch's details and signature lines.
 - **Receiving an order** creates a **GRN** (see below).
 
-## 9. Goods Received (GRN) and free issues
+## 10. Goods Received (GRN) and free issues
 
 *Stock → Goods Received (GRN)*
 
@@ -244,7 +284,7 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
 - **Print:** an A4 GRN with Rejected, Free and "cost each after free" columns, the invoice check, and signatures (driver, receiver, approver).
 - **Recorded in:** the Day End "Goods in & out" tab, the stock book, A4 and Z, the period reports ("Free issues from suppliers"), and the Activity Log.
 
-## 10. Branches and branch transfers (GTN)
+## 11. Branches and branch transfers (GTN)
 
 *Overview → Branches* (administrators), *Stock → Branch Transfers (GTN)*
 
@@ -268,7 +308,7 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
   - **Print:** an A4 transfer note with sent-by, carried-by and received-by signatures.
 - **Recorded in:** the Day End (Goods in & out tab, and From-branch / To-branch columns in the stock book), period reports, the Activity Log, and Product Setup's per-branch counts.
 
-## 11. Day End (book keeping)
+## 12. Day End (book keeping)
 
 *Book Keeping → Day End* — one till session (**shift**) per branch at a time.
 
@@ -290,6 +330,7 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
   | Items sold | Units and amounts; hard liquor vs others |
   | Discounts & loyalty | Discounts, points used and earned, per bill and per staff member |
   | Expenses & cash in | Every drawer entry, including voided ones |
+  | Gift vouchers | Vouchers sold (cash / card / QR) and given free in the shift, and vouchers used on its bills: bill, where each was issued, who |
   | Drawer opened | How often the drawer opened with a cash bill, and every **no-sale** opening (time, `NS-` number, who, reason) |
   | Stock book | Per product: opening + received + from branch − sold − to branch + returned − damaged ± adjusted = closing |
   | Stock in & changes | Every stock movement other than sales, with who did it |
@@ -311,7 +352,7 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
   - Both can be saved as PDF.
 - **Past shifts** are listed per branch; open one to view or print its report.
 
-## 12. Cash book: expenses, money in, banking
+## 13. Cash book: expenses, money in, banking
 
 *Book Keeping → Expenses (Vouchers) / Money In (Receipts)*
 
@@ -325,7 +366,7 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
   - It can be undone if marked by mistake. Takings are never assumed to be banked.
 - **Branches:** each branch has its own entries. Admins and accountants can see all branches.
 
-## 13. Reports (daily / weekly / monthly / yearly)
+## 14. Reports (daily / weekly / monthly / yearly)
 
 *Book Keeping → Reports*
 
@@ -337,22 +378,24 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
   - − running expenses − damage loss + other income = **net profit**
 - **Breakdowns:** by hour, day or month (with a bar chart), by staff, by category, and by product (sales, cost, profit).
 - **Money:** expenses by category, other money in, banked vs waiting to be banked.
+- **Gift vouchers:** sold (by cash / card / QR), given free, used (sold vs free, and how many at a different branch), expired, cancelled, still owed now, and a table per branch. Free vouchers used are subtracted in the profit & loss as a promotion cost.
 - **Shifts:** each closed shift with its drawer result (balanced / over / short) and the reason, plus how many times the drawer was opened **without a sale**, per staff member.
 - **Stock movement:** received (with value), sold, from / to branch, returned, damaged, adjusted, empties, stock on hand now and its value at cost, and **free issues** received with their value.
 - **Returns & damages:** refunds (cash / wallet), bottles back on the shelf or damaged, exchanged, store damage, sent to supplier, written off, **damage loss at cost**, and damaged stock on hand.
 - **Discounts & loyalty:** discount register, points earned, used and held, and wallet money kept, used and held (owed to members).
 - **A4 print / PDF.**
 
-## 14. Dashboard, Activity Log, Shop Settings
+## 15. Dashboard, Activity Log, Shop Settings
 
-- **Dashboard** (*Overview*): sales and profit for a date range compared with the previous period, trend charts, top products and categories, stock alerts, and recent bills. It follows the selected branch, or all branches.
+- **Dashboard** (*Overview*): sales and profit for a date range compared with the previous period, trend charts, top products and categories, stock alerts, recent bills, and a gift voucher strip (used, sold, given free, promotion cost, owed now). It follows the selected branch, or all branches.
 - **Activity Log** (*Overview*, administrators):
   - **Every change** made in the system, with **who** (and their role), **which branch**, when, the IP address, and a plain-language summary.
   - **Details:** before → after values (for example prices and settings), items, amounts and reasons.
   - **Blocked attempts** by someone without permission, and **failed** purchase-order emails.
   - **Cash drawer:** every no-sale opening with its reason.
+  - **Gift vouchers:** issuing (sold / free, amount, paid by) and cancelling, and each sale's vouchers.
   - **Offline sales:** "sold OFFLINE at 09:56, uploaded later", and "shelf count was short" when more bottles were sold than the count showed. A bill sent again by the till is logged once, not per attempt.
-  - **Filters:** category (sign-ins, sales, stock, products, staff, Day End & cash, purchase orders, returns & damages, GRN & transfers, branches, accounts, customers), person, date and text search.
+  - **Filters:** category (sign-ins, sales, stock, products, staff, Day End & cash, purchase orders, returns & damages, GRN & transfers, branches, gift vouchers, accounts, customers), person, date and text search.
   - Entries can't be edited or deleted.
 - **Shop Settings** (administrators):
   - Loyalty: turn point spending on or off, rupees per point, and the value of a point.
@@ -360,30 +403,31 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
   - Business details: name, address, phone and email (used on orders and emails).
   - The hard liquor limit (on/off and the number of bottles), and which categories start new products as hard liquor.
 
-## 15. Staff, roles and permissions
+## 16. Staff, roles and permissions
 
 *People → Staff & Roles* (administrators): create staff with a temporary password, and set each person's role, **branch** and active / disabled status. You can't remove your own administrator access.
 
 | Role | Access |
 |---|---|
-| **Administrator** | Everything: all branches, settings, staff, branches, purchase orders, clearing damaged stock, activity log |
-| **Cashier** | Counter (including offline selling and Open drawer), sold products, sales bills, returns & damages, Day End for their branch (blind count), GRN, GTN send/receive, Product Setup (view; return empties). **Fixed to one branch.** |
+| **Administrator** | Everything: all branches, settings, staff, branches, purchase orders, issuing and cancelling gift vouchers, clearing damaged stock, activity log |
+| **Cashier** | Counter (including offline selling, Open drawer and using gift vouchers), sold products, sales bills, returns & damages, Day End for their branch (blind count), GRN, GTN send/receive, Product Setup (view; return empties). **Fixed to one branch.** |
 | **Inventory Manager** | Product Setup, suppliers, GRN, GTN; can switch branch |
-| **Accountant** | Day End (view), expenses & receipts, banking, reports, sales bills, GRN/GTN (view); can switch branch |
+| **Accountant** | Day End (view), expenses & receipts, banking, reports, sales bills, gift vouchers (view), GRN/GTN (view); can switch branch |
 
 Permissions are checked on the **server** for every request, not just hidden in the screens. Blocked attempts are logged.
 
-## 16. Printing
+## 17. Printing
 
 | Document | Size | Contents |
 |---|---|---|
 | Sales bill | 80mm | Shop + branch header, items, empties, discount, points, wallet, payment, change, hard-liquor count; "Saved offline" note when sold offline |
+| Gift voucher | 190 × 86 mm colour card (one per page) or 80mm | Gift-card design (wine red = sold, teal = free) with the amount, the code in large type, number, branch, expiry, terms; several per print with cut lines |
 | Return / exchange slip | 80mm | RT number, bill, items, refund (cash / wallet), points back, reason, signatures |
 | Z report | 80mm | Shift summary, payments, drawer, drawer openings (no sale), expenses, goods, returns, stock book, bills (offline marked), signatures |
 | Voucher / receipt | 80mm | Cash book entries |
 | No-sale slip | 80mm | NS number, branch, time, who opened the drawer and why (printer-driver drawer setup) |
-| Day End report | A4 | Full shift book (see §11) |
-| Period report | A4 | Full report (see §13) |
+| Day End report | A4 | Full shift book (see §12) |
+| Period report | A4 | Full report (see §14) |
 | Purchase order | A4 | Branch details, supplier, items with free issues, signatures |
 | GRN | A4 | Delivered / rejected / accepted / free, invoice check, signatures |
 | GTN | A4 | Sent / received / damaged / missing, signatures |
@@ -407,6 +451,10 @@ Every print can be saved as PDF from the print dialog.
   - Net after returns = net sales − refunds.
 - **Stock book** (per product, per shift, per branch):
   - `opening + received (incl. free issues) + from other branches + returned by customers − sold − to other branches − damaged ± corrections = closing`
+- **Gift vouchers:**
+  - A **sold** voucher's money is counted when it's sold: its cash is in that shift's expected drawer cash, and card / QR go to the card machine and bank checks. It isn't sales until the voucher is used, and until then it's money owed.
+  - A **used** voucher is a payment on the bill and counts in net sales: `net sales = cash + card + transfer/QR + wallet used + gift vouchers used`.
+  - A **free** voucher used is also a promotion cost: `net profit = … − free gift vouchers used`.
 - **Offline bills** count on the day and time they were really sold, in the shift that is open at the branch when they upload. If more bottles were sold offline than the shelf count showed, the shelf goes below zero until it is counted and corrected (or restocked), and the shortage is flagged.
 - **Cost price:** a weighted average over the stock on hand. A GRN's paid amount is spread over paid + free bottles.
 - **Profit:**
@@ -423,6 +471,7 @@ Every print can be saved as PDF from the print dialog.
   - Cash entries are *voided*, not deleted.
   - Purchase orders are *cancelled*.
   - Closed shifts are frozen.
+- **A gift voucher is used exactly once.** Its number (`GV-`), where and when it was issued, and where, when and on which bill it was used are all recorded.
 - **Opening the cash drawer without a sale** is numbered (`NS-000001`) and saved with the reason before the drawer opens.
 - **A bill is saved exactly once**, even if the till sends it again (weak network) or uploads it later (offline).
 - **What was true at the time of sale** is kept on the bill (points rate, hard-liquor mark), so later changes never rewrite history.
@@ -641,6 +690,7 @@ backend/
     pos-user-management/        counter checkout, loyalty members, sales list, dashboard
     inventory-management/       products, brands, categories, suppliers, restock, bulk price
     returns/                    exchanges, refunds, store damage, damaged stock
+    gift-vouchers/              gift vouchers: issue, check, use (at checkout), cancel, Day End and report figures
     purchase-orders/            purchase orders + supplier email
     goods/                      GRN (goods received) and GTN (branch transfers)
     branches/                   branches, branch stock, working-branch switch
@@ -660,6 +710,7 @@ pos/
   app/lib/safeCheckout.ts       bill reference, automatic retries, "was it saved?" check
   app/lib/offlineSales.ts       bills sold offline (kept in the browser) and their upload
   app/lib/cashDrawer.ts         drawer kick (USB / COM port / printer driver)
+  app/lib/giftVoucherPrint.ts   80mm gift voucher print
   app/lounge.css                design (dark / light themes)
 ```
 
@@ -676,6 +727,8 @@ pos/
 | Cashier sees another branch's data | Check their branch in Staff & Roles (cashiers must have one) |
 | Web app can't reach the API | Check `NEXT_PUBLIC_API_URL` (then rebuild) and `CORS_ORIGIN` |
 | After changing `schema.prisma` | Run `npx prisma generate` (and apply the migration SQL) |
+| Gift voucher refused at the counter | The message says why: already used (where and on which bill), cancelled, expired, or a mistyped code. The bill must be at least the voucher amount |
+| "Issue gift vouchers" says no shift is open | A **sold** voucher's money goes into the Day End, so start a shift at that branch first (free vouchers don't need one) |
 | No "Open drawer" button | It shows only while a shift is open, for administrators and cashiers. Start a shift on the Bar Counter |
 | The drawer doesn't open | *Open drawer → Drawer setup*: choose how it's connected. Use Chrome or Edge for USB / COM port. On Windows, if USB says the printer is busy, use "Printer opens it when printing" and turn on the drawer option in the printer driver |
 | "N bills waiting to upload" stays | The till can't reach the server yet; they upload by themselves every 15 seconds. Click the badge → *Upload now*. Don't clear the browser's data while bills are waiting |

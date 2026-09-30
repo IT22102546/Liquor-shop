@@ -67,6 +67,8 @@ type CheckoutResult = {
   walletUsed?: number;
   walletCredit?: number;
   purchases: Array<{ productId: number; name: string; quantity: number; unitPrice: number; emptiesReturned?: number; emptyDeduction?: number; lineTotal: number }>;
+  voucherPaid?: number;
+  giftVouchers?: Array<{ voucherNo: string; code: string; amount: number; kind?: string }>;
   counterSale?: { createdAt: string };
   member?: { id: number; name: string; mobileNumber: string; pointsEarned: number; pointsRedeemed?: number; pointsBalance: number } | null;
   discount?: { type: "PERCENT" | "AMOUNT"; value: number; amount: number } | null;
@@ -96,6 +98,12 @@ type ScanToast = {
   /** Unknown barcode that a stock manager can add straight away. */
   unknownCode?: string;
 };
+
+/** A gift voucher code as printed / encoded in its barcode: XXXX-XXXX-XXXX (dashes optional), with a letter. */
+function isGiftVoucherCode(value: string) {
+  const code = value.trim().toUpperCase();
+  return /^[A-Z0-9]{4}-?[A-Z0-9]{4}-?[A-Z0-9]{4}$/.test(code) && /[A-Z]/.test(code);
+}
 
 function emptyPriceOf(product: Product) {
   return product.emptyBottlePrice && product.emptyBottlePrice > 0 ? product.emptyBottlePrice : 0;
@@ -187,6 +195,12 @@ export default function InventoryPage() {
   const [walletInput, setWalletInput] = useState("");
   const [keepChangeOn, setKeepChangeOn] = useState(false);
   const [keepChangeInput, setKeepChangeInput] = useState("");
+  // Gift vouchers on this bill: each checked with the server as it's added, used in full at checkout.
+  const [vouchers, setVouchers] = useState<Array<{ code: string; voucherNo: string; amount: number; kind: "SOLD" | "FREE"; issueBranch: string }>>([]);
+  const [voucherOpen, setVoucherOpen] = useState(false);
+  const [voucherInput, setVoucherInput] = useState("");
+  const [voucherChecking, setVoucherChecking] = useState(false);
+  const [voucherError, setVoucherError] = useState<string | null>(null);
   const resetWallet = () => {
     setWalletOn(false);
     setWalletInput("");
@@ -199,6 +213,10 @@ export default function InventoryPage() {
     setRedeemOn(false);
     setRedeemInput("");
     resetWallet();
+    setVouchers([]);
+    setVoucherOpen(false);
+    setVoucherInput("");
+    setVoucherError(null);
   };
   const changeMember = (next: LoyaltyMember | null) => {
     setMember(next);
@@ -431,11 +449,14 @@ export default function InventoryPage() {
   // Wallet: members can pay part or all of the bill with change they kept here before.
   const walletBalance = roundCurrency(member?.walletBalance ?? 0);
   const canUseWallet = Boolean(member) && walletBalance > 0;
-  const maxWallet = roundCurrency(Math.min(walletBalance, cartTotal));
+  /** Gift vouchers are used in full, so the bill must be at least their value. */
+  const voucherTotal = roundCurrency(vouchers.reduce((sum, voucher) => sum + voucher.amount, 0));
+  const voucherOver = voucherTotal > cartTotal + 0.001;
+  const maxWallet = roundCurrency(Math.max(0, Math.min(walletBalance, cartTotal - voucherTotal)));
   const walletUse = canUseWallet && walletOn ? roundCurrency(Math.max(0, Math.min(maxWallet, Number(walletInput) || 0))) : 0;
-  /** Still to pay after the wallet. */
-  const due = roundCurrency(cartTotal - walletUse);
-  const hasAdjustments = cartEmptyDeduction > 0 || discountAmount > 0 || pointsUsed > 0 || walletUse > 0;
+  /** Still to pay after gift vouchers and the wallet. */
+  const due = roundCurrency(Math.max(0, cartTotal - voucherTotal - walletUse));
+  const hasAdjustments = cartEmptyDeduction > 0 || discountAmount > 0 || pointsUsed > 0 || walletUse > 0 || voucherTotal > 0;
   const tendered = Number(amountTendered || "0");
   // Split: card and transfer parts are typed in; cash covers whatever is left.
   const splitCardAmount = roundCurrency(Math.max(0, Number(splitCard) || 0));
@@ -465,6 +486,43 @@ export default function InventoryPage() {
   };
 
   /** Adds one unit; returns false when the product can't be sold right now. */
+  /** Adds a gift voucher from the code box, or straight from a scan (`scanned`). */
+  const addVoucher = async (scanned?: string) => {
+    const typed = (scanned ?? voucherInput).trim();
+    if (!typed) return;
+    const fail = (message: string) => {
+      setVoucherError(message);
+      if (scanned) { beep("error"); showToast({ kind: "error", title: "Gift voucher not accepted", detail: message }); }
+    };
+    if (scanned) { setVoucherOpen(true); setShowReceipt(false); }
+    setVoucherChecking(true);
+    setVoucherError(null);
+    try {
+      const response = await fetch(`${API_URL}/api/pos/gift-vouchers/check/${encodeURIComponent(typed)}`, { headers: auth, cache: "no-store" });
+      const payload = (await response.json().catch(() => null)) as { data?: { code: string; voucherNo: string; amount: number; kind: "SOLD" | "FREE"; issueBranch: string }; message?: string; errors?: Record<string, string[]> } | null;
+      if (response.status === 401) { logout(); return; }
+      if (!response.ok || !payload?.data) {
+        fail((payload?.errors && Object.values(payload.errors)[0]?.[0]) ?? payload?.message ?? "Couldn't check the voucher");
+        return;
+      }
+      const found = payload.data;
+      if (vouchers.some((voucher) => voucher.code === found.code)) { fail(`${found.voucherNo} is already on this bill`); return; }
+      setVouchers((current) => [...current, { code: found.code, voucherNo: found.voucherNo, amount: found.amount, kind: found.kind, issueBranch: found.issueBranch }]);
+      setVoucherInput("");
+      setAmountTendered("");
+      setWalletInput("");
+      setWalletOn(false);
+      if (scanned) {
+        beep("ok");
+        showToast({ kind: "ok", title: `Gift voucher ${found.voucherNo} added`, detail: `${formatCurrency(found.amount)} off this bill${cart.length === 0 ? " — now add the items" : ""}` });
+      }
+    } catch {
+      fail("No connection — gift vouchers can only be used while the till is online");
+    } finally {
+      setVoucherChecking(false);
+    }
+  };
+
   const addToCart = (product: Product) => {
     if (!sellable(product)) return false;
     const inCart = cart.find((line) => line.product.id === product.id)?.quantity ?? 0;
@@ -490,6 +548,11 @@ export default function InventoryPage() {
     setShowReceipt(false); // scanning the next customer's bottle starts a new sale
     const code = rawCode.trim();
     const product = products.find((item) => normalizeBarcode(item.partNumber) === normalizeBarcode(code));
+    // Not a bottle but a gift voucher (its printed barcode / code): put it on the bill.
+    if (!product && isGiftVoucherCode(code)) {
+      void addVoucher(code);
+      return;
+    }
     if (!product) {
       beep("error");
       showToast({ kind: "error", title: `Unknown barcode ${code}`, detail: "This bottle isn't in stock yet.", unknownCode: canManageStock ? code : undefined });
@@ -609,6 +672,7 @@ export default function InventoryPage() {
         paymentMethod,
         amountReceived: cashDue > 0 ? tendered : undefined,
         ...(walletUse > 0 ? { walletUse } : {}),
+        ...(vouchers.length ? { giftVouchers: vouchers.map((voucher) => voucher.code) } : {}),
         ...(changeToWallet > 0 ? { changeToWallet } : {}),
         ...(paymentMethod === "SPLIT" ? { split: { card: splitCardAmount, transfer: splitTransferAmount } } : {}),
         ...(paymentMethod !== "CASH" && paymentReference.trim() ? { paymentReference: paymentReference.trim() } : {}),
@@ -644,9 +708,9 @@ export default function InventoryPage() {
       let sale: CheckoutResult & { replayed?: boolean; soldOffline?: boolean };
       if (sent.kind === "unreachable") {
         // No connection: the sale goes ahead on this till and uploads by itself later.
-        if (walletUse > 0 || pointsUsed > 0) {
+        if (walletUse > 0 || pointsUsed > 0 || vouchers.length > 0) {
           setOfflineMode(true);
-          setError("No connection to the server. Paying from the wallet or with points needs the connection — take them off to sell offline, or press Complete sale again when the connection is back. It will not be saved twice.");
+          setError("No connection to the server. Gift vouchers, the wallet and points need the connection — take them off to sell offline, or press Complete sale again when the connection is back. It will not be saved twice.");
           return;
         }
         const soldAt = new Date().toISOString();
@@ -698,6 +762,7 @@ export default function InventoryPage() {
         transferPaid: sale.transferPaid,
         walletUsed: sale.walletUsed ?? 0,
         walletCredit: sale.walletCredit ?? 0,
+        giftVouchers: sale.giftVouchers ?? [],
         lines: sale.purchases.map((line) => {
           const product = productById.get(line.productId);
           return {
@@ -1001,7 +1066,7 @@ export default function InventoryPage() {
         </div>
 
         <div className="pos-cart-checkout">
-          {cart.length > 0 && (settings.discountsEnabled || canRedeem || canUseWallet) && (
+          {cart.length > 0 && (
             <div className="pos-adjust">
               <div className="pos-adjust-toggles">
                 {settings.discountsEnabled && (
@@ -1019,7 +1084,31 @@ export default function InventoryPage() {
                     Use wallet <b>{formatCurrency(walletBalance)}</b>
                   </button>
                 )}
+                <button type="button" className={`voucher${voucherOpen || vouchers.length ? " active" : ""}`} onClick={() => { setVoucherOpen(!voucherOpen); setVoucherError(null); }}>
+                  Gift voucher{vouchers.length ? <b>{vouchers.length}</b> : null}
+                </button>
               </div>
+
+              {(voucherOpen || vouchers.length > 0 || voucherChecking) && (
+                <div className="pos-voucher">
+                  {voucherOpen && (
+                    <form className="pos-adjust-row" onSubmit={(event) => { event.preventDefault(); void addVoucher(); }}>
+                      <span className="pos-adjust-label">Code</span>
+                      <input className="bm-input pos-voucher-input" value={voucherInput} onChange={(event) => { setVoucherInput(event.target.value.toUpperCase()); setVoucherError(null); }} placeholder="Type or scan the code" aria-label="Gift voucher code" autoFocus autoComplete="off" spellCheck={false} />
+                      <button type="submit" className="btn-accent" disabled={voucherChecking || !voucherInput.trim()}>{voucherChecking ? "Checking…" : "Add"}</button>
+                    </form>
+                  )}
+                  {voucherError && <div className="pos-adjust-warn">{voucherError}</div>}
+                  {vouchers.map((voucher) => (
+                    <div key={voucher.code} className="pos-voucher-chip">
+                      <span><b>{voucher.voucherNo}</b> · {voucher.kind === "FREE" ? "free" : "sold"} at {voucher.issueBranch}</span>
+                      <strong>{formatCurrency(voucher.amount)}</strong>
+                      <button type="button" onClick={() => { setVouchers((current) => current.filter((item) => item.code !== voucher.code)); setAmountTendered(""); }} aria-label={`Take ${voucher.voucherNo} off the bill`}>×</button>
+                    </div>
+                  ))}
+                  {voucherOver && <div className="pos-adjust-warn">A voucher is used in full: the bill ({formatCurrency(cartTotal)}) must be at least {formatCurrency(voucherTotal)}. Add items or take a voucher off.</div>}
+                </div>
+              )}
 
               {settings.discountsEnabled && discountOn && (
                 <div className="pos-adjust-row">
@@ -1095,14 +1184,15 @@ export default function InventoryPage() {
             </div>
           )}
           <div className="pos-cart-total"><span>Total</span><strong><AnimatedMoney value={cartTotal} /></strong></div>
-          {walletUse > 0 && (
+          {(walletUse > 0 || (voucherTotal > 0 && !voucherOver)) && (
             <div className="pos-wallet-line">
-              <span>Paid from wallet</span><b>− {formatCurrency(walletUse)}</b>
+              {voucherTotal > 0 && <><span>Gift voucher{vouchers.length === 1 ? "" : "s"}</span><b>− {formatCurrency(voucherTotal)}</b></>}
+              {walletUse > 0 && <><span>Paid from wallet</span><b>− {formatCurrency(walletUse)}</b></>}
               <span>To pay now</span><strong>{formatCurrency(due)}</strong>
             </div>
           )}
-          {cart.length > 0 && due <= 0 && walletUse > 0 && <div className="pos-wallet-full">Paid in full from {member?.firstName}&apos;s wallet. No cash or card needed.</div>}
-          {!(cart.length > 0 && due <= 0 && walletUse > 0) && <div className="pos-payment-buttons four" aria-label="Payment method">
+          {cart.length > 0 && due <= 0 && (walletUse > 0 || voucherTotal > 0) && !voucherOver && <div className="pos-wallet-full">{voucherTotal > 0 && walletUse === 0 ? "Paid in full by gift voucher." : walletUse > 0 && voucherTotal === 0 ? `Paid in full from ${member?.firstName}'s wallet.` : "Paid in full by gift voucher and wallet."} No cash or card needed.</div>}
+          {!(cart.length > 0 && due <= 0 && (walletUse > 0 || voucherTotal > 0) && !voucherOver) && <div className="pos-payment-buttons four" aria-label="Payment method">
             <button type="button" className={paymentMethod === "CASH" ? "active" : ""} onClick={() => choosePayment("CASH")}><IconCash /> Cash</button>
             <button type="button" className={paymentMethod === "CARD" ? "active" : ""} onClick={() => choosePayment("CARD")}><IconCard /> Card</button>
             <button type="button" className={paymentMethod === "BANK_TRANSFER" ? "active" : ""} onClick={() => choosePayment("BANK_TRANSFER")}><IconQr /> Transfer / QR</button>
@@ -1158,8 +1248,8 @@ export default function InventoryPage() {
               )}
             </div>
           )}
-          <button type="button" className="pos-complete-sale" disabled={cart.length === 0 || checkingOut || shift === null || discountOverLimit || hardLiquorOver || Boolean(splitProblem) || cashShort} onClick={() => void checkout()}>
-            {checkingOut ? (sendAttempt > 1 ? `Weak connection · trying again (${sendAttempt})…` : "Completing…") : shift === null ? "Start a shift to sell" : hardLiquorOver ? `Too much hard liquor (max ${settings.hardLiquorLimit})` : `Complete sale · ${formatCurrency(walletUse > 0 ? due : cartTotal)}`}
+          <button type="button" className="pos-complete-sale" disabled={cart.length === 0 || checkingOut || shift === null || discountOverLimit || hardLiquorOver || voucherOver || Boolean(splitProblem) || cashShort} onClick={() => void checkout()}>
+            {checkingOut ? (sendAttempt > 1 ? `Weak connection · trying again (${sendAttempt})…` : "Completing…") : shift === null ? "Start a shift to sell" : hardLiquorOver ? `Too much hard liquor (max ${settings.hardLiquorLimit})` : voucherOver ? "Bill is less than the voucher" : `Complete sale · ${formatCurrency(walletUse > 0 || voucherTotal > 0 ? due : cartTotal)}`}
           </button>
           <div className="pos-cart-shortcuts">
             <Link href="/dashboard/inventory/sold"><IconReceipt /> Recent sales</Link>
