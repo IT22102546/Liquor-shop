@@ -219,6 +219,11 @@ export type Gtn = $Result.DefaultSelection<Prisma.$GtnPayload>
  * 
  */
 export type GtnItem = $Result.DefaultSelection<Prisma.$GtnItemPayload>
+/**
+ * Model DeployMigration
+ * Database changes applied by scripts/deploy.sh (one row per backend/prisma/migrations folder).
+ */
+export type DeployMigration = $Result.DefaultSelection<Prisma.$DeployMigrationPayload>
 
 /**
  * Enums
@@ -955,6 +960,16 @@ export class PrismaClient<
     * ```
     */
   get gtnItem(): Prisma.GtnItemDelegate<ExtArgs>;
+
+  /**
+   * `prisma.deployMigration`: Exposes CRUD operations for the **DeployMigration** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more DeployMigrations
+    * const deployMigrations = await prisma.deployMigration.findMany()
+    * ```
+    */
+  get deployMigration(): Prisma.DeployMigrationDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -1435,7 +1450,8 @@ export namespace Prisma {
     Grn: 'Grn',
     GrnItem: 'GrnItem',
     Gtn: 'Gtn',
-    GtnItem: 'GtnItem'
+    GtnItem: 'GtnItem',
+    DeployMigration: 'DeployMigration'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1451,7 +1467,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "posAdmin" | "posCounterSale" | "supplier" | "inventoryBrand" | "inventoryCategory" | "inventoryProduct" | "inventoryProductExpense" | "inventoryProductImage" | "posCustomer" | "posCustomerPurchase" | "posInvoiceTerm" | "posInstallment" | "posInstallmentPayment" | "contactRequest" | "account" | "accountRelationship" | "accountReceipt" | "accountVoucher" | "accountTransaction" | "invoicePayment" | "accountDeposit" | "accountDepositItem" | "activityLog" | "posSetting" | "posShift" | "posCashEntry" | "posDrawerOpen" | "inventoryMovement" | "purchaseOrder" | "purchaseOrderItem" | "purchaseOrderEmail" | "posWalletTransaction" | "posReturn" | "branch" | "branchStock" | "grn" | "grnItem" | "gtn" | "gtnItem"
+      modelProps: "user" | "posAdmin" | "posCounterSale" | "supplier" | "inventoryBrand" | "inventoryCategory" | "inventoryProduct" | "inventoryProductExpense" | "inventoryProductImage" | "posCustomer" | "posCustomerPurchase" | "posInvoiceTerm" | "posInstallment" | "posInstallmentPayment" | "contactRequest" | "account" | "accountRelationship" | "accountReceipt" | "accountVoucher" | "accountTransaction" | "invoicePayment" | "accountDeposit" | "accountDepositItem" | "activityLog" | "posSetting" | "posShift" | "posCashEntry" | "posDrawerOpen" | "inventoryMovement" | "purchaseOrder" | "purchaseOrderItem" | "purchaseOrderEmail" | "posWalletTransaction" | "posReturn" | "branch" | "branchStock" | "grn" | "grnItem" | "gtn" | "gtnItem" | "deployMigration"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4252,6 +4268,76 @@ export namespace Prisma {
           count: {
             args: Prisma.GtnItemCountArgs<ExtArgs>
             result: $Utils.Optional<GtnItemCountAggregateOutputType> | number
+          }
+        }
+      }
+      DeployMigration: {
+        payload: Prisma.$DeployMigrationPayload<ExtArgs>
+        fields: Prisma.DeployMigrationFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DeployMigrationFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeployMigrationPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DeployMigrationFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeployMigrationPayload>
+          }
+          findFirst: {
+            args: Prisma.DeployMigrationFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeployMigrationPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DeployMigrationFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeployMigrationPayload>
+          }
+          findMany: {
+            args: Prisma.DeployMigrationFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeployMigrationPayload>[]
+          }
+          create: {
+            args: Prisma.DeployMigrationCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeployMigrationPayload>
+          }
+          createMany: {
+            args: Prisma.DeployMigrationCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.DeployMigrationCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeployMigrationPayload>[]
+          }
+          delete: {
+            args: Prisma.DeployMigrationDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeployMigrationPayload>
+          }
+          update: {
+            args: Prisma.DeployMigrationUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeployMigrationPayload>
+          }
+          deleteMany: {
+            args: Prisma.DeployMigrationDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DeployMigrationUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.DeployMigrationUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeployMigrationPayload>
+          }
+          aggregate: {
+            args: Prisma.DeployMigrationAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDeployMigration>
+          }
+          groupBy: {
+            args: Prisma.DeployMigrationGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DeployMigrationGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DeployMigrationCountArgs<ExtArgs>
+            result: $Utils.Optional<DeployMigrationCountAggregateOutputType> | number
           }
         }
       }
@@ -49457,6 +49543,848 @@ export namespace Prisma {
 
 
   /**
+   * Model DeployMigration
+   */
+
+  export type AggregateDeployMigration = {
+    _count: DeployMigrationCountAggregateOutputType | null
+    _min: DeployMigrationMinAggregateOutputType | null
+    _max: DeployMigrationMaxAggregateOutputType | null
+  }
+
+  export type DeployMigrationMinAggregateOutputType = {
+    name: string | null
+    appliedAt: Date | null
+  }
+
+  export type DeployMigrationMaxAggregateOutputType = {
+    name: string | null
+    appliedAt: Date | null
+  }
+
+  export type DeployMigrationCountAggregateOutputType = {
+    name: number
+    appliedAt: number
+    _all: number
+  }
+
+
+  export type DeployMigrationMinAggregateInputType = {
+    name?: true
+    appliedAt?: true
+  }
+
+  export type DeployMigrationMaxAggregateInputType = {
+    name?: true
+    appliedAt?: true
+  }
+
+  export type DeployMigrationCountAggregateInputType = {
+    name?: true
+    appliedAt?: true
+    _all?: true
+  }
+
+  export type DeployMigrationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DeployMigration to aggregate.
+     */
+    where?: DeployMigrationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DeployMigrations to fetch.
+     */
+    orderBy?: DeployMigrationOrderByWithRelationInput | DeployMigrationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: DeployMigrationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DeployMigrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DeployMigrations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned DeployMigrations
+    **/
+    _count?: true | DeployMigrationCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: DeployMigrationMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: DeployMigrationMaxAggregateInputType
+  }
+
+  export type GetDeployMigrationAggregateType<T extends DeployMigrationAggregateArgs> = {
+        [P in keyof T & keyof AggregateDeployMigration]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDeployMigration[P]>
+      : GetScalarType<T[P], AggregateDeployMigration[P]>
+  }
+
+
+
+
+  export type DeployMigrationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DeployMigrationWhereInput
+    orderBy?: DeployMigrationOrderByWithAggregationInput | DeployMigrationOrderByWithAggregationInput[]
+    by: DeployMigrationScalarFieldEnum[] | DeployMigrationScalarFieldEnum
+    having?: DeployMigrationScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DeployMigrationCountAggregateInputType | true
+    _min?: DeployMigrationMinAggregateInputType
+    _max?: DeployMigrationMaxAggregateInputType
+  }
+
+  export type DeployMigrationGroupByOutputType = {
+    name: string
+    appliedAt: Date
+    _count: DeployMigrationCountAggregateOutputType | null
+    _min: DeployMigrationMinAggregateOutputType | null
+    _max: DeployMigrationMaxAggregateOutputType | null
+  }
+
+  type GetDeployMigrationGroupByPayload<T extends DeployMigrationGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DeployMigrationGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DeployMigrationGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DeployMigrationGroupByOutputType[P]>
+            : GetScalarType<T[P], DeployMigrationGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type DeployMigrationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    name?: boolean
+    appliedAt?: boolean
+  }, ExtArgs["result"]["deployMigration"]>
+
+  export type DeployMigrationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    name?: boolean
+    appliedAt?: boolean
+  }, ExtArgs["result"]["deployMigration"]>
+
+  export type DeployMigrationSelectScalar = {
+    name?: boolean
+    appliedAt?: boolean
+  }
+
+
+  export type $DeployMigrationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "DeployMigration"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      name: string
+      appliedAt: Date
+    }, ExtArgs["result"]["deployMigration"]>
+    composites: {}
+  }
+
+  type DeployMigrationGetPayload<S extends boolean | null | undefined | DeployMigrationDefaultArgs> = $Result.GetResult<Prisma.$DeployMigrationPayload, S>
+
+  type DeployMigrationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<DeployMigrationFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: DeployMigrationCountAggregateInputType | true
+    }
+
+  export interface DeployMigrationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['DeployMigration'], meta: { name: 'DeployMigration' } }
+    /**
+     * Find zero or one DeployMigration that matches the filter.
+     * @param {DeployMigrationFindUniqueArgs} args - Arguments to find a DeployMigration
+     * @example
+     * // Get one DeployMigration
+     * const deployMigration = await prisma.deployMigration.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DeployMigrationFindUniqueArgs>(args: SelectSubset<T, DeployMigrationFindUniqueArgs<ExtArgs>>): Prisma__DeployMigrationClient<$Result.GetResult<Prisma.$DeployMigrationPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one DeployMigration that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {DeployMigrationFindUniqueOrThrowArgs} args - Arguments to find a DeployMigration
+     * @example
+     * // Get one DeployMigration
+     * const deployMigration = await prisma.deployMigration.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DeployMigrationFindUniqueOrThrowArgs>(args: SelectSubset<T, DeployMigrationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DeployMigrationClient<$Result.GetResult<Prisma.$DeployMigrationPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first DeployMigration that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeployMigrationFindFirstArgs} args - Arguments to find a DeployMigration
+     * @example
+     * // Get one DeployMigration
+     * const deployMigration = await prisma.deployMigration.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DeployMigrationFindFirstArgs>(args?: SelectSubset<T, DeployMigrationFindFirstArgs<ExtArgs>>): Prisma__DeployMigrationClient<$Result.GetResult<Prisma.$DeployMigrationPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first DeployMigration that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeployMigrationFindFirstOrThrowArgs} args - Arguments to find a DeployMigration
+     * @example
+     * // Get one DeployMigration
+     * const deployMigration = await prisma.deployMigration.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DeployMigrationFindFirstOrThrowArgs>(args?: SelectSubset<T, DeployMigrationFindFirstOrThrowArgs<ExtArgs>>): Prisma__DeployMigrationClient<$Result.GetResult<Prisma.$DeployMigrationPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more DeployMigrations that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeployMigrationFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all DeployMigrations
+     * const deployMigrations = await prisma.deployMigration.findMany()
+     * 
+     * // Get first 10 DeployMigrations
+     * const deployMigrations = await prisma.deployMigration.findMany({ take: 10 })
+     * 
+     * // Only select the `name`
+     * const deployMigrationWithNameOnly = await prisma.deployMigration.findMany({ select: { name: true } })
+     * 
+     */
+    findMany<T extends DeployMigrationFindManyArgs>(args?: SelectSubset<T, DeployMigrationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeployMigrationPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a DeployMigration.
+     * @param {DeployMigrationCreateArgs} args - Arguments to create a DeployMigration.
+     * @example
+     * // Create one DeployMigration
+     * const DeployMigration = await prisma.deployMigration.create({
+     *   data: {
+     *     // ... data to create a DeployMigration
+     *   }
+     * })
+     * 
+     */
+    create<T extends DeployMigrationCreateArgs>(args: SelectSubset<T, DeployMigrationCreateArgs<ExtArgs>>): Prisma__DeployMigrationClient<$Result.GetResult<Prisma.$DeployMigrationPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many DeployMigrations.
+     * @param {DeployMigrationCreateManyArgs} args - Arguments to create many DeployMigrations.
+     * @example
+     * // Create many DeployMigrations
+     * const deployMigration = await prisma.deployMigration.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends DeployMigrationCreateManyArgs>(args?: SelectSubset<T, DeployMigrationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many DeployMigrations and returns the data saved in the database.
+     * @param {DeployMigrationCreateManyAndReturnArgs} args - Arguments to create many DeployMigrations.
+     * @example
+     * // Create many DeployMigrations
+     * const deployMigration = await prisma.deployMigration.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many DeployMigrations and only return the `name`
+     * const deployMigrationWithNameOnly = await prisma.deployMigration.createManyAndReturn({ 
+     *   select: { name: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends DeployMigrationCreateManyAndReturnArgs>(args?: SelectSubset<T, DeployMigrationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeployMigrationPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a DeployMigration.
+     * @param {DeployMigrationDeleteArgs} args - Arguments to delete one DeployMigration.
+     * @example
+     * // Delete one DeployMigration
+     * const DeployMigration = await prisma.deployMigration.delete({
+     *   where: {
+     *     // ... filter to delete one DeployMigration
+     *   }
+     * })
+     * 
+     */
+    delete<T extends DeployMigrationDeleteArgs>(args: SelectSubset<T, DeployMigrationDeleteArgs<ExtArgs>>): Prisma__DeployMigrationClient<$Result.GetResult<Prisma.$DeployMigrationPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one DeployMigration.
+     * @param {DeployMigrationUpdateArgs} args - Arguments to update one DeployMigration.
+     * @example
+     * // Update one DeployMigration
+     * const deployMigration = await prisma.deployMigration.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends DeployMigrationUpdateArgs>(args: SelectSubset<T, DeployMigrationUpdateArgs<ExtArgs>>): Prisma__DeployMigrationClient<$Result.GetResult<Prisma.$DeployMigrationPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more DeployMigrations.
+     * @param {DeployMigrationDeleteManyArgs} args - Arguments to filter DeployMigrations to delete.
+     * @example
+     * // Delete a few DeployMigrations
+     * const { count } = await prisma.deployMigration.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends DeployMigrationDeleteManyArgs>(args?: SelectSubset<T, DeployMigrationDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DeployMigrations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeployMigrationUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many DeployMigrations
+     * const deployMigration = await prisma.deployMigration.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends DeployMigrationUpdateManyArgs>(args: SelectSubset<T, DeployMigrationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one DeployMigration.
+     * @param {DeployMigrationUpsertArgs} args - Arguments to update or create a DeployMigration.
+     * @example
+     * // Update or create a DeployMigration
+     * const deployMigration = await prisma.deployMigration.upsert({
+     *   create: {
+     *     // ... data to create a DeployMigration
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the DeployMigration we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DeployMigrationUpsertArgs>(args: SelectSubset<T, DeployMigrationUpsertArgs<ExtArgs>>): Prisma__DeployMigrationClient<$Result.GetResult<Prisma.$DeployMigrationPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of DeployMigrations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeployMigrationCountArgs} args - Arguments to filter DeployMigrations to count.
+     * @example
+     * // Count the number of DeployMigrations
+     * const count = await prisma.deployMigration.count({
+     *   where: {
+     *     // ... the filter for the DeployMigrations we want to count
+     *   }
+     * })
+    **/
+    count<T extends DeployMigrationCountArgs>(
+      args?: Subset<T, DeployMigrationCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DeployMigrationCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a DeployMigration.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeployMigrationAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends DeployMigrationAggregateArgs>(args: Subset<T, DeployMigrationAggregateArgs>): Prisma.PrismaPromise<GetDeployMigrationAggregateType<T>>
+
+    /**
+     * Group by DeployMigration.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeployMigrationGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends DeployMigrationGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DeployMigrationGroupByArgs['orderBy'] }
+        : { orderBy?: DeployMigrationGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DeployMigrationGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDeployMigrationGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the DeployMigration model
+   */
+  readonly fields: DeployMigrationFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for DeployMigration.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DeployMigrationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the DeployMigration model
+   */ 
+  interface DeployMigrationFieldRefs {
+    readonly name: FieldRef<"DeployMigration", 'String'>
+    readonly appliedAt: FieldRef<"DeployMigration", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * DeployMigration findUnique
+   */
+  export type DeployMigrationFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeployMigration
+     */
+    select?: DeployMigrationSelect<ExtArgs> | null
+    /**
+     * Filter, which DeployMigration to fetch.
+     */
+    where: DeployMigrationWhereUniqueInput
+  }
+
+  /**
+   * DeployMigration findUniqueOrThrow
+   */
+  export type DeployMigrationFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeployMigration
+     */
+    select?: DeployMigrationSelect<ExtArgs> | null
+    /**
+     * Filter, which DeployMigration to fetch.
+     */
+    where: DeployMigrationWhereUniqueInput
+  }
+
+  /**
+   * DeployMigration findFirst
+   */
+  export type DeployMigrationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeployMigration
+     */
+    select?: DeployMigrationSelect<ExtArgs> | null
+    /**
+     * Filter, which DeployMigration to fetch.
+     */
+    where?: DeployMigrationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DeployMigrations to fetch.
+     */
+    orderBy?: DeployMigrationOrderByWithRelationInput | DeployMigrationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DeployMigrations.
+     */
+    cursor?: DeployMigrationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DeployMigrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DeployMigrations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DeployMigrations.
+     */
+    distinct?: DeployMigrationScalarFieldEnum | DeployMigrationScalarFieldEnum[]
+  }
+
+  /**
+   * DeployMigration findFirstOrThrow
+   */
+  export type DeployMigrationFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeployMigration
+     */
+    select?: DeployMigrationSelect<ExtArgs> | null
+    /**
+     * Filter, which DeployMigration to fetch.
+     */
+    where?: DeployMigrationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DeployMigrations to fetch.
+     */
+    orderBy?: DeployMigrationOrderByWithRelationInput | DeployMigrationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DeployMigrations.
+     */
+    cursor?: DeployMigrationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DeployMigrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DeployMigrations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DeployMigrations.
+     */
+    distinct?: DeployMigrationScalarFieldEnum | DeployMigrationScalarFieldEnum[]
+  }
+
+  /**
+   * DeployMigration findMany
+   */
+  export type DeployMigrationFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeployMigration
+     */
+    select?: DeployMigrationSelect<ExtArgs> | null
+    /**
+     * Filter, which DeployMigrations to fetch.
+     */
+    where?: DeployMigrationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DeployMigrations to fetch.
+     */
+    orderBy?: DeployMigrationOrderByWithRelationInput | DeployMigrationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing DeployMigrations.
+     */
+    cursor?: DeployMigrationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DeployMigrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DeployMigrations.
+     */
+    skip?: number
+    distinct?: DeployMigrationScalarFieldEnum | DeployMigrationScalarFieldEnum[]
+  }
+
+  /**
+   * DeployMigration create
+   */
+  export type DeployMigrationCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeployMigration
+     */
+    select?: DeployMigrationSelect<ExtArgs> | null
+    /**
+     * The data needed to create a DeployMigration.
+     */
+    data: XOR<DeployMigrationCreateInput, DeployMigrationUncheckedCreateInput>
+  }
+
+  /**
+   * DeployMigration createMany
+   */
+  export type DeployMigrationCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many DeployMigrations.
+     */
+    data: DeployMigrationCreateManyInput | DeployMigrationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * DeployMigration createManyAndReturn
+   */
+  export type DeployMigrationCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeployMigration
+     */
+    select?: DeployMigrationSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many DeployMigrations.
+     */
+    data: DeployMigrationCreateManyInput | DeployMigrationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * DeployMigration update
+   */
+  export type DeployMigrationUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeployMigration
+     */
+    select?: DeployMigrationSelect<ExtArgs> | null
+    /**
+     * The data needed to update a DeployMigration.
+     */
+    data: XOR<DeployMigrationUpdateInput, DeployMigrationUncheckedUpdateInput>
+    /**
+     * Choose, which DeployMigration to update.
+     */
+    where: DeployMigrationWhereUniqueInput
+  }
+
+  /**
+   * DeployMigration updateMany
+   */
+  export type DeployMigrationUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update DeployMigrations.
+     */
+    data: XOR<DeployMigrationUpdateManyMutationInput, DeployMigrationUncheckedUpdateManyInput>
+    /**
+     * Filter which DeployMigrations to update
+     */
+    where?: DeployMigrationWhereInput
+  }
+
+  /**
+   * DeployMigration upsert
+   */
+  export type DeployMigrationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeployMigration
+     */
+    select?: DeployMigrationSelect<ExtArgs> | null
+    /**
+     * The filter to search for the DeployMigration to update in case it exists.
+     */
+    where: DeployMigrationWhereUniqueInput
+    /**
+     * In case the DeployMigration found by the `where` argument doesn't exist, create a new DeployMigration with this data.
+     */
+    create: XOR<DeployMigrationCreateInput, DeployMigrationUncheckedCreateInput>
+    /**
+     * In case the DeployMigration was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DeployMigrationUpdateInput, DeployMigrationUncheckedUpdateInput>
+  }
+
+  /**
+   * DeployMigration delete
+   */
+  export type DeployMigrationDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeployMigration
+     */
+    select?: DeployMigrationSelect<ExtArgs> | null
+    /**
+     * Filter which DeployMigration to delete.
+     */
+    where: DeployMigrationWhereUniqueInput
+  }
+
+  /**
+   * DeployMigration deleteMany
+   */
+  export type DeployMigrationDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DeployMigrations to delete
+     */
+    where?: DeployMigrationWhereInput
+  }
+
+  /**
+   * DeployMigration without action
+   */
+  export type DeployMigrationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeployMigration
+     */
+    select?: DeployMigrationSelect<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -50200,6 +51128,14 @@ export namespace Prisma {
   };
 
   export type GtnItemScalarFieldEnum = (typeof GtnItemScalarFieldEnum)[keyof typeof GtnItemScalarFieldEnum]
+
+
+  export const DeployMigrationScalarFieldEnum: {
+    name: 'name',
+    appliedAt: 'appliedAt'
+  };
+
+  export type DeployMigrationScalarFieldEnum = (typeof DeployMigrationScalarFieldEnum)[keyof typeof DeployMigrationScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -54448,6 +55384,43 @@ export namespace Prisma {
     damagedQty?: IntWithAggregatesFilter<"GtnItem"> | number
     missingQty?: IntWithAggregatesFilter<"GtnItem"> | number
     unitCost?: FloatNullableWithAggregatesFilter<"GtnItem"> | number | null
+  }
+
+  export type DeployMigrationWhereInput = {
+    AND?: DeployMigrationWhereInput | DeployMigrationWhereInput[]
+    OR?: DeployMigrationWhereInput[]
+    NOT?: DeployMigrationWhereInput | DeployMigrationWhereInput[]
+    name?: StringFilter<"DeployMigration"> | string
+    appliedAt?: DateTimeFilter<"DeployMigration"> | Date | string
+  }
+
+  export type DeployMigrationOrderByWithRelationInput = {
+    name?: SortOrder
+    appliedAt?: SortOrder
+  }
+
+  export type DeployMigrationWhereUniqueInput = Prisma.AtLeast<{
+    name?: string
+    AND?: DeployMigrationWhereInput | DeployMigrationWhereInput[]
+    OR?: DeployMigrationWhereInput[]
+    NOT?: DeployMigrationWhereInput | DeployMigrationWhereInput[]
+    appliedAt?: DateTimeFilter<"DeployMigration"> | Date | string
+  }, "name">
+
+  export type DeployMigrationOrderByWithAggregationInput = {
+    name?: SortOrder
+    appliedAt?: SortOrder
+    _count?: DeployMigrationCountOrderByAggregateInput
+    _max?: DeployMigrationMaxOrderByAggregateInput
+    _min?: DeployMigrationMinOrderByAggregateInput
+  }
+
+  export type DeployMigrationScalarWhereWithAggregatesInput = {
+    AND?: DeployMigrationScalarWhereWithAggregatesInput | DeployMigrationScalarWhereWithAggregatesInput[]
+    OR?: DeployMigrationScalarWhereWithAggregatesInput[]
+    NOT?: DeployMigrationScalarWhereWithAggregatesInput | DeployMigrationScalarWhereWithAggregatesInput[]
+    name?: StringWithAggregatesFilter<"DeployMigration"> | string
+    appliedAt?: DateTimeWithAggregatesFilter<"DeployMigration"> | Date | string
   }
 
   export type UserCreateInput = {
@@ -58758,6 +59731,41 @@ export namespace Prisma {
     unitCost?: NullableFloatFieldUpdateOperationsInput | number | null
   }
 
+  export type DeployMigrationCreateInput = {
+    name: string
+    appliedAt?: Date | string
+  }
+
+  export type DeployMigrationUncheckedCreateInput = {
+    name: string
+    appliedAt?: Date | string
+  }
+
+  export type DeployMigrationUpdateInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    appliedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DeployMigrationUncheckedUpdateInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    appliedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DeployMigrationCreateManyInput = {
+    name: string
+    appliedAt?: Date | string
+  }
+
+  export type DeployMigrationUpdateManyMutationInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    appliedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DeployMigrationUncheckedUpdateManyInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    appliedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -62297,6 +63305,21 @@ export namespace Prisma {
     damagedQty?: SortOrder
     missingQty?: SortOrder
     unitCost?: SortOrder
+  }
+
+  export type DeployMigrationCountOrderByAggregateInput = {
+    name?: SortOrder
+    appliedAt?: SortOrder
+  }
+
+  export type DeployMigrationMaxOrderByAggregateInput = {
+    name?: SortOrder
+    appliedAt?: SortOrder
+  }
+
+  export type DeployMigrationMinOrderByAggregateInput = {
+    name?: SortOrder
+    appliedAt?: SortOrder
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -76742,6 +77765,10 @@ export namespace Prisma {
      * @deprecated Use GtnItemDefaultArgs instead
      */
     export type GtnItemArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = GtnItemDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use DeployMigrationDefaultArgs instead
+     */
+    export type DeployMigrationArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = DeployMigrationDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

@@ -734,6 +734,11 @@ exports.Prisma.GtnItemScalarFieldEnum = {
   unitCost: 'unitCost'
 };
 
+exports.Prisma.DeployMigrationScalarFieldEnum = {
+  name: 'name',
+  appliedAt: 'appliedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -899,7 +904,8 @@ exports.Prisma.ModelName = {
   Grn: 'Grn',
   GrnItem: 'GrnItem',
   Gtn: 'Gtn',
-  GtnItem: 'GtnItem'
+  GtnItem: 'GtnItem',
+  DeployMigration: 'DeployMigration'
 };
 
 /**

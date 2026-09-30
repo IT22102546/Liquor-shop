@@ -1061,3 +1061,11 @@ model GtnItem {
   @@index([gtnId])
   @@map("gtn_items")
 }
+
+/// Database changes applied by scripts/deploy.sh (one row per backend/prisma/migrations folder).
+model DeployMigration {
+  name      String   @id
+  appliedAt DateTime @default(now()) @map("applied_at") @db.Timestamptz(6)
+
+  @@map("_deploy_migrations")
+}

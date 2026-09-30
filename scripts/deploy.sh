@@ -37,7 +37,29 @@ git log -1 --format='%h %s (%an, %ar)'
 step "Backend: install, database schema, build"
 cd "$APP_DIR/backend"
 npm ci --no-audit --no-fund
-# Brings the database up to schema.prisma. Refuses changes that would lose data (the deploy stops).
+
+# Database changes: each backend/prisma/migrations/<name>/migration.sql runs once, in order, in its own
+# transaction, and is recorded in _deploy_migrations. (Hand-written SQL says exactly what changes, where
+# `prisma db push` would stop at warnings such as adding a unique rule to a new, empty column.)
+PSQL=(psql "${DB_URL%%\?*}" -v ON_ERROR_STOP=1 -q -At)
+"${PSQL[@]}" -c 'CREATE TABLE IF NOT EXISTS _deploy_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())'
+if [ "$("${PSQL[@]}" -c 'SELECT count(*) FROM _deploy_migrations')" = "0" ]; then
+  # First run on a database set up with `prisma db push`: everything up to this point is already in it.
+  BASELINE="20260930010000_drawer_opens"
+  for dir in prisma/migrations/*/; do
+    name="$(basename "$dir")"
+    [[ "$name" > "$BASELINE" ]] || "${PSQL[@]}" -c "INSERT INTO _deploy_migrations (name) VALUES ('$name') ON CONFLICT DO NOTHING"
+  done
+fi
+for dir in prisma/migrations/*/; do
+  name="$(basename "$dir")"
+  [ -f "$dir/migration.sql" ] || continue
+  if [ -z "$("${PSQL[@]}" -c "SELECT 1 FROM _deploy_migrations WHERE name = '$name'")" ]; then
+    echo "applying $name"
+    "${PSQL[@]}" -1 -f "$dir/migration.sql" -c "INSERT INTO _deploy_migrations (name) VALUES ('$name')"
+  fi
+done
+# Then a check that the database matches schema.prisma. It refuses anything that would lose data.
 npx prisma db push --skip-generate
 npm run build
 

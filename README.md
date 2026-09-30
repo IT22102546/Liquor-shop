@@ -599,7 +599,7 @@ The shop runs on a Hostinger VPS (Ubuntu 24.04), and every push to `main` is che
 2. **Deploy.** On pushes to `main` (or "Run workflow" in the Actions tab), GitHub connects to the server over SSH and runs [`scripts/deploy.sh`](scripts/deploy.sh). The script:
    1. backs up the database
    2. updates the code to `origin/main`
-   3. brings the database schema up to date with `prisma db push`, which refuses changes that would lose data
+   3. applies each new `backend/prisma/migrations/<name>/migration.sql` once, in order, in its own transaction, and records it in the `_deploy_migrations` table. It then checks the database against `schema.prisma` with `prisma db push`, which refuses anything that would lose data
    4. builds the API and the web app
    5. reloads PM2
    6. waits until both answer
