@@ -49,6 +49,19 @@ Staff without a fixed branch switch branches with the selector in the top bar. T
   - The mark is also saved on each bill line (`PosCustomerPurchase.isHardLiquor`), so reports keep what counted at the time of sale.
   - The printed bill shows "Hard liquor N bottles (limit 12)".
 - **A shift must be open** at the branch before anything can be sold.
+- **Cash drawer** (`lib/cashDrawer.ts`, `components/book/CashDrawerModal.tsx`, backend `book/drawer.service.ts`).
+  - The drawer opens by itself after a bill with `cashPaid > 0` (`kickDrawer({ forSale: true })`).
+  - **Open drawer** (ADMIN, CASHIER; needs an open shift) requires a reason. `POST /api/pos/shifts/drawer-open` saves a `PosDrawerOpen` (`NS-000001`, lock 740321) *before* the drawer opens.
+  - Setup is per computer, in localStorage `pos_cash_drawer`:
+    - `usb`: WebUSB, ESC p to the printer's bulk OUT endpoint
+    - `serial`: Web Serial, 9600 baud
+    - `print`: the printer driver opens the drawer on print; the button prints a NO SALE slip
+    - `off`
+  - It is recorded in:
+    - the Day End `drawer` section (`cashBills`, `noSaleCount`, `noSale[]`): the tab "Drawer opened", the A4 and the Z slip
+    - period `shifts.noSaleOpens` (per staff)
+    - the Activity Log `drawer.no_sale` (CASHBOOK, so it's left out of the shift journal)
+  - The expected cash is unchanged. Cash going in or out must still be a Money in or Expense entry.
 - **Bill:** an 80mm receipt showing the branch name and address, loyalty points and wallet, and change given or kept.
 
 ## Returns & Damages (`/dashboard/returns`)

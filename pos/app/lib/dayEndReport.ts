@@ -180,6 +180,15 @@ export function buildDayEndReportHtml(report: ShiftReport) {
     </section>
   </div>
 
+  ${report.drawer ? `
+  <section class="keep">
+    <h2>Cash drawer opened <small>${report.drawer.cashBills} time${report.drawer.cashBills === 1 ? "" : "s"} with a cash bill · ${report.drawer.noSaleCount} without a sale</small></h2>
+    ${report.drawer.noSale.length ? `<table>
+      <thead><tr><th>Time</th><th>Number</th><th>Opened by</th><th>Reason</th></tr></thead>
+      ${report.drawer.noSale.map((row) => `<tr><td>${timeOnly(row.at)}</td><td>${esc(row.openNo)}</td><td>${esc(row.openedBy)}</td><td>${esc(row.reason)}</td></tr>`).join("")}
+    </table>` : `<p class="muted">The drawer was not opened without a sale.</p>`}
+  </section>` : ""}
+
   ${noteRows.length ? `
   <section class="keep">
     <h2>Cash count <small>notes and coins counted in the drawer</small></h2>

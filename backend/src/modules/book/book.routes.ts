@@ -6,6 +6,7 @@ import { AppError, validate } from "../../common/utils/errors";
 import { sendCreated, sendSuccess } from "../../common/utils/response";
 import { createCashEntry, listCashEntries, markBanked, unmarkBanked, voidCashEntry } from "./cash-book.service";
 import { getPeriodReport } from "./period-report.service";
+import { recordDrawerOpen } from "./drawer.service";
 import { requestBranch, requestBranchScope } from "../branches/branch-context";
 import { closeShift, countShift, DENOMINATIONS, getCurrentShift, getShiftReport, listShifts, openShift } from "./shift.service";
 
@@ -40,6 +41,13 @@ shiftRouter.post("/open", tillStaff, async (req, res, next) => {
   try {
     const dto = validate(z.object({ openingFloat: money }), req.body);
     return sendCreated(res, await openShift(dto.openingFloat, user(req).id, (await requestBranch(req)).id));
+  } catch (error) { return next(error); }
+});
+// "No sale": the cash drawer opened without a bill. Saved with the reason before the drawer opens.
+shiftRouter.post("/drawer-open", tillStaff, async (req, res, next) => {
+  try {
+    const dto = validate(z.object({ reason: z.string().trim().min(3, "Say why the drawer is being opened").max(200) }), req.body);
+    return sendCreated(res, await recordDrawerOpen(dto.reason, user(req).id, (await requestBranch(req)).id));
   } catch (error) { return next(error); }
 });
 shiftRouter.get("/:id/report", bookReaders, async (req, res, next) => {

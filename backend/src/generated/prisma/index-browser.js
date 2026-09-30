@@ -526,6 +526,16 @@ exports.Prisma.PosCashEntryScalarFieldEnum = {
   bankReference: 'bankReference'
 };
 
+exports.Prisma.PosDrawerOpenScalarFieldEnum = {
+  id: 'id',
+  openNo: 'openNo',
+  branchId: 'branchId',
+  shiftId: 'shiftId',
+  reason: 'reason',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.InventoryMovementScalarFieldEnum = {
   id: 'id',
   branchId: 'branchId',
@@ -874,6 +884,7 @@ exports.Prisma.ModelName = {
   PosSetting: 'PosSetting',
   PosShift: 'PosShift',
   PosCashEntry: 'PosCashEntry',
+  PosDrawerOpen: 'PosDrawerOpen',
   InventoryMovement: 'InventoryMovement',
   PurchaseOrder: 'PurchaseOrder',
   PurchaseOrderItem: 'PurchaseOrderItem',

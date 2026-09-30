@@ -20,6 +20,8 @@ import { API_URL } from "../../lib/constants";
 import { beep } from "../../lib/beep";
 import { printReceipt, type SaleReceipt } from "../../lib/receipt";
 import { ReceiptModal } from "../../components/receipt/ReceiptModal";
+import { CashDrawerModal } from "../../components/book/CashDrawerModal";
+import { kickDrawer } from "../../lib/cashDrawer";
 import { ROLE_LABELS } from "../../lib/roles";
 import { useCountUp } from "../../lib/useCountUp";
 import { normalizeBarcode, useBarcodeScanner } from "../../lib/useBarcodeScanner";
@@ -116,6 +118,7 @@ export default function InventoryPage() {
   const [view, setView] = useState<"grid" | "list">("grid");
   const [favourites, setFavourites] = useState<Set<number>>(new Set());
   const [orderMenu, setOrderMenu] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem("pos_counter_view");
@@ -559,6 +562,11 @@ export default function InventoryPage() {
         throw new Error(payload?.message ?? "Checkout failed");
       }
       const sale = payload.data;
+      // Cash changes hands: open the drawer (the bill itself is the record of why).
+      if ((sale.cashPaid ?? 0) > 0) {
+        void kickDrawer({ forSale: true }).catch((kickError: unknown) =>
+          showToast({ kind: "error", title: "The cash drawer didn't open", detail: kickError instanceof Error ? kickError.message : undefined }));
+      }
       // Receipt figures come from the server's record of the sale, not the screen's own maths.
       const productById = new Map(cart.map((line) => [line.product.id, line.product]));
       const receipt: SaleReceipt = {
@@ -635,6 +643,11 @@ export default function InventoryPage() {
         </div>
         <div className="pos-header-actions">
           {shift && <Link href="/dashboard/day-end" className="lx-shift-chip" title="Day End: expenses, drawer count and shift close"><IconClock /> {shift.shiftNo}</Link>}
+          {shift && canStartShift && (
+            <button type="button" className="lx-shift-chip cd-open-btn" title="Open the cash drawer without a sale (recorded with a reason)" onClick={() => setDrawerOpen(true)}>
+              <IconCash size={14} /> Open drawer
+            </button>
+          )}
           <span className="lx-scan-status" title="Scan a barcode anytime on this page to add it to the order"><i /> Scanner ready</span>
           {canManageStock && (
             <button type="button" className="btn-accent pos-add-liquor" onClick={() => setStockIn({})}>
@@ -812,6 +825,7 @@ export default function InventoryPage() {
               <div className="pos-order-menu-list" role="menu">
                 <button type="button" role="menuitem" className="danger" disabled={cart.length === 0 && !member} onClick={() => { setCart([]); setAmountTendered(""); setMember(null); resetAdjustments(); setOrderMenu(false); }}>Clear order</button>
                 <button type="button" role="menuitem" disabled={!completedReceipt} onClick={() => { if (completedReceipt) printReceipt(completedReceipt); setOrderMenu(false); }}>Reprint last receipt</button>
+                {canStartShift && <button type="button" role="menuitem" disabled={!shift} onClick={() => { setDrawerOpen(true); setOrderMenu(false); }}>Open cash drawer</button>}
                 <Link href="/dashboard/inventory/sold" role="menuitem" onClick={() => setOrderMenu(false)}>Recent sales</Link>
                 {canManageStock && <Link href="/dashboard/inventory/manage" role="menuitem" onClick={() => setOrderMenu(false)}>Product setup</Link>}
               </div>
@@ -1056,6 +1070,21 @@ export default function InventoryPage() {
           </div>
         ))}
       </div>
+
+      {drawerOpen && (
+        <CashDrawerModal
+          token={token}
+          staffName={admin.name}
+          branchName={branch?.name}
+          onClose={() => setDrawerOpen(false)}
+          onOpened={({ openNo, warning }) => {
+            setDrawerOpen(false);
+            showToast(warning
+              ? { kind: "error", title: `Recorded ${openNo}, but the drawer didn't open`, detail: warning }
+              : { kind: "ok", title: "Cash drawer opened", detail: `${openNo} · recorded for Day End` });
+          }}
+        />
+      )}
 
       {showReceipt && completedReceipt && (
         <ReceiptModal

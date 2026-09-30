@@ -139,6 +139,7 @@ export default function ReportsPage() {
                 <span>Shifts closed<b>{report.shifts.count}</b></span>
                 <span>Drawer over<b>{money(report.shifts.over)}</b></span>
                 <span>Drawer short<b>{money(Math.abs(report.shifts.short))}</b></span>
+                {report.shifts.noSaleOpens && <span title={report.shifts.noSaleOpens.byStaff.map((row) => `${row.name}: ${row.count}`).join("\n") || undefined}>Drawer opened, no sale<b>{report.shifts.noSaleOpens.count}</b></span>}
                 <span>Waiting to be banked<b>{money(report.cashBook.waiting)}</b></span>
               </div>
             </section>

@@ -3,6 +3,7 @@ import { AppError } from "../../common/utils/errors";
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "./cash-book.service";
 import { forBranch } from "../branches/branch-stock";
 import { getSettings } from "../settings/settings.service";
+import { drawerOpensInPeriod } from "./drawer.service";
 
 /**
  * Daily / weekly / monthly / yearly report for any date range, built from every counter sale,
@@ -328,6 +329,8 @@ export async function getPeriodReport(fromText: string, toText: string, branchId
       net: round2(over + short),
       withDifference: shiftRows.filter((row) => Math.abs(row.cashDifference) > 0.004).length,
       rows: shiftRows,
+      /** Cash drawer opened without a sale ("no sale"), per staff member. */
+      noSaleOpens: await drawerOpensInPeriod(from, new Date(to.getTime() + 1), branchId),
     },
     stock: {
       rows: stockRows,

@@ -16,7 +16,7 @@
 | `/api/pos/inventory-management` | inventory-management | brands, categories, suppliers, products, restock, empties return, bulk price, images |
 | `/api/pos/user-management` | pos-user-management | loyalty members, **checkout**, sales list, dashboard, member wallet & points history `/:id/history` |
 | `/api/pos/settings` | settings | shop settings, `assertHardLiquorLimit` |
-| `/api/pos/shifts` | book (`book.routes.ts`) | current / open / report / count / close (shift.service.ts) |
+| `/api/pos/shifts` | book (`book.routes.ts`) | current / open / report / count / close (shift.service.ts), `drawer-open` (drawer.service.ts) |
 | `/api/pos/cash-book` | book | vouchers & receipts, bank, void (cash-book.service.ts) |
 | `/api/pos/reports/period` | book | period-report.service.ts |
 | `/api/pos/purchase-orders` | purchase-orders | admin only; email via `common/utils/mailer.ts`; receive creates a GRN |
@@ -50,7 +50,7 @@
   - `describePosChange(method, path, body, response, before)` gives `{ action, category, summary, entityType, entityId, details }`.
   - `activity-log.middleware.ts` has `snapshotBefore()` for before → after, and records the branch (null for company-wide paths).
 - **Document numbers** use a `pg_advisory_xact_lock(<unique int>)`, then the last number + 1:
-  - RT- 740301 and 740302, shifts 740303, GRN- 740311, GTN- 740312
+  - RT- 740301 and 740302, shifts 740303, GRN- 740311, GTN- 740312, NS- (no-sale drawer opens) 740321
   - bill numbers are `POS-<base36 time>-<rand>`
   - SH-, VCH-, RCP- and PO- are count-based
   - Use a new lock number for a new sequence.

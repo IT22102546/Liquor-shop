@@ -80,6 +80,12 @@ export type ShiftReport = {
     sent: Array<{ gtnNo: string; time: string; branch: string; status: string; units: number; items: string; by: string }>;
     received: Array<{ gtnNo: string; time: string; branch: string; units: number; damaged: number; missing: number; items: string; note: string | null; by: string }>;
   };
+  /** How often the cash drawer opened: once per cash bill, plus "no sale" opens with the reason. */
+  drawer?: {
+    cashBills: number;
+    noSaleCount: number;
+    noSale: Array<{ openNo: string; at: string; reason: string; openedBy: string }>;
+  };
   /** Damaged bottles kept aside: added and cleared this shift, and on hand. */
   damagedStock?: Array<{ name: string; added: number; cleared: number; onHand: number }>;
   /** Stock received, corrected or returned during the shift, with where it came from and who did it. */
@@ -213,6 +219,12 @@ export function buildZReportHtml(report: ShiftReport) {
       ${close.cardDifferenceReason ? `<div class="small">Card: ${esc(close.cardDifferenceReason)}</div>` : ""}
       ${close.denominations?.counts && Object.keys(close.denominations.counts).length ? `<div class="small" style="margin-top:3px">Notes/coins: ${Object.entries(close.denominations.counts).sort((a, b) => Number(b[0]) - Number(a[0])).map(([note, qty]) => `${note}×${qty}`).join("  ")}</div>` : ""}
     ` : ""}
+
+    ${report.drawer ? `
+    <div class="head">Drawer opened</div>
+    <div class="row"><span>With a cash bill</span><span>${report.drawer.cashBills}</span></div>
+    <div class="row strong"><span>No sale</span><span>${report.drawer.noSaleCount}</span></div>
+    ${report.drawer.noSale.map((row) => `<div class="small">${new Date(row.at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })} ${esc(row.openNo)} · ${esc(row.openedBy)} · ${esc(row.reason)}</div>`).join("")}` : ""}
 
     <div class="head">Expenses &amp; cash in (${entries.length})</div>
     ${entries.map((entry) => `

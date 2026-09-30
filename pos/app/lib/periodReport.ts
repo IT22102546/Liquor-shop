@@ -30,6 +30,8 @@ export type PeriodReport = {
   };
   shifts: {
     count: number; over: number; short: number; net: number; withDifference: number;
+    /** Cash drawer opened without a sale, per staff member. */
+    noSaleOpens?: { count: number; byStaff: Array<{ name: string; count: number }> };
     rows: Array<{ shiftNo: string; openedAt: string; closedAt: string | null; openedBy: string; closedBy: string; bills: number; netSales: number; cashDifference: number; differenceReason: string | null; cardDifference: number | null; cashBanked: number }>;
   };
   stock: { freeIssues?: { grns: number; units: number; value: number }; rows: Array<{ name: string; detail: string; received: number; sold: number; customerReturns?: number; damaged?: number; transferIn?: number; transferOut?: number; adjusted: number; collected: number; returned: number; receivedValue: number; onHand: number }>; stockValueNow: number };
@@ -262,7 +264,7 @@ export function buildPeriodReportHtml(report: PeriodReport, kind: PeriodKind) {
   </div>
 
   <section>
-    <h2>Shifts &amp; cash drawer <small>${shifts.count} closed · ${shifts.withDifference} with a difference</small></h2>
+    <h2>Shifts &amp; cash drawer <small>${shifts.count} closed · ${shifts.withDifference} with a difference${shifts.noSaleOpens ? ` · drawer opened ${shifts.noSaleOpens.count} time${shifts.noSaleOpens.count === 1 ? "" : "s"} without a sale${shifts.noSaleOpens.byStaff.length ? ` (${shifts.noSaleOpens.byStaff.map((row) => `${esc(row.name)} ${row.count}`).join(", ")})` : ""}` : ""}</small></h2>
     <table>
       <thead><tr><th>Shift</th><th>Opened</th><th>Closed</th><th>Closed by</th><th class="r">Bills</th><th class="r">Net sales</th><th class="r">Drawer</th><th class="r">Banked</th></tr></thead>
       ${shifts.rows.map((row) => `<tr><td>${esc(row.shiftNo)}</td><td>${dateTime(row.openedAt)}</td><td>${dateTime(row.closedAt)}</td><td>${esc(row.closedBy)}</td><td class="r">${row.bills}</td><td class="r">${amt(row.netSales)}</td>

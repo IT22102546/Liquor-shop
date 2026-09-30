@@ -85,6 +85,13 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
 - **Payment:** Cash (with quick amounts and change), Card, Transfer / QR, or **Split** (cash + card and/or QR on one bill), with the approval or reference number.
 - **A shift must be open** at the branch before selling. It can be started from the counter.
 - **After the sale**, an on-screen receipt appears, ready to print (80mm), and can be reprinted any time.
+- **Cash drawer.** The drawer opens by itself when a bill with a cash part is completed. The **Open drawer** button (next to the shift number; also in the order ⋮ menu) opens it without a sale: the cashier gives a reason, and it is saved as a numbered **no-sale** record (`NS-000001`) with the name, time, branch and shift, *before* the drawer opens. Card and QR bills don't open it.
+  - **Drawer setup** (once per counter computer, in the same window):
+    - *USB receipt printer*: Chrome or Edge sends the ESC/POS "open drawer" signal to the printer the drawer is plugged into.
+    - *Printer opens it when printing*: turn on "Open cash drawer" in the printer driver; the button prints a small NO SALE slip. Works with any printer, including network ones.
+    - *COM port*: serial printers, or drawers with their own USB cable.
+    - *No drawer*: openings are still recorded.
+  - No-sale opens appear in the Day End (**Drawer opened** tab, A4 report and Z slip), the period reports (count per staff member) and the Activity Log.
 - **Recent sales** and **Sold Products** are one click away.
 
 ## 2. Payments and bills
@@ -353,6 +360,7 @@ Permissions are checked on the **server** for every request, not just hidden in 
 | Return / exchange slip | 80mm | RT number, bill, items, refund (cash / wallet), points back, reason, signatures |
 | Z report | 80mm | Shift summary, payments, drawer, expenses, goods, returns, stock book, signatures |
 | Voucher / receipt | 80mm | Cash book entries |
+| No-sale slip | 80mm | NS number, branch, time, who opened the drawer and why (printer-driver drawer setup) |
 | Day End report | A4 | Full shift book (see §11) |
 | Period report | A4 | Full report (see §13) |
 | Purchase order | A4 | Branch details, supplier, items with free issues, signatures |

@@ -186,6 +186,15 @@ export function describePosChange(method: string, path: string, body: Body, resp
   // ── Day End: shifts ──────────────────────────────────────────────────────
   if (module === "shifts") {
     const shiftNo = str(data.shiftNo) || str(obj(obj(data.report).shift).shiftNo) || `#${resource}`;
+    if (resource === "drawer-open") {
+      const reason = str(data.reason) || str(obj(body).reason);
+      if (!str(data.openNo)) return { action: "drawer.no_sale", category: "CASHBOOK", entityType: "drawer", summary: `Tried to open the cash drawer without a sale${reason ? ` · “${reason}”` : ""}` };
+      return {
+        action: "drawer.no_sale", category: "CASHBOOK", entityType: "drawer", entityId: str(data.openNo),
+        summary: `Opened the cash drawer without a sale · “${reason}”`,
+        details: { facts: [fact("Number", data.openNo), fact("Reason", reason), fact("Shift", data.shiftNo)] },
+      };
+    }
     if (resource === "open") {
       return {
         action: "shift.open", category: "CASHBOOK", entityType: "shift", entityId: str(data.shiftNo),

@@ -150,6 +150,12 @@ export type PosShift = $Result.DefaultSelection<Prisma.$PosShiftPayload>
  */
 export type PosCashEntry = $Result.DefaultSelection<Prisma.$PosCashEntryPayload>
 /**
+ * Model PosDrawerOpen
+ * The cash drawer opened without a sale ("no sale"), with the reason given. Drawer opens for
+ * cash bills are not stored here: every cash bill is already its own record.
+ */
+export type PosDrawerOpen = $Result.DefaultSelection<Prisma.$PosDrawerOpenPayload>
+/**
  * Model InventoryMovement
  * Every change to a product's stock or empties, for the stock day book.
  */
@@ -821,6 +827,16 @@ export class PrismaClient<
   get posCashEntry(): Prisma.PosCashEntryDelegate<ExtArgs>;
 
   /**
+   * `prisma.posDrawerOpen`: Exposes CRUD operations for the **PosDrawerOpen** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PosDrawerOpens
+    * const posDrawerOpens = await prisma.posDrawerOpen.findMany()
+    * ```
+    */
+  get posDrawerOpen(): Prisma.PosDrawerOpenDelegate<ExtArgs>;
+
+  /**
    * `prisma.inventoryMovement`: Exposes CRUD operations for the **InventoryMovement** model.
     * Example usage:
     * ```ts
@@ -1407,6 +1423,7 @@ export namespace Prisma {
     PosSetting: 'PosSetting',
     PosShift: 'PosShift',
     PosCashEntry: 'PosCashEntry',
+    PosDrawerOpen: 'PosDrawerOpen',
     InventoryMovement: 'InventoryMovement',
     PurchaseOrder: 'PurchaseOrder',
     PurchaseOrderItem: 'PurchaseOrderItem',
@@ -1434,7 +1451,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "posAdmin" | "posCounterSale" | "supplier" | "inventoryBrand" | "inventoryCategory" | "inventoryProduct" | "inventoryProductExpense" | "inventoryProductImage" | "posCustomer" | "posCustomerPurchase" | "posInvoiceTerm" | "posInstallment" | "posInstallmentPayment" | "contactRequest" | "account" | "accountRelationship" | "accountReceipt" | "accountVoucher" | "accountTransaction" | "invoicePayment" | "accountDeposit" | "accountDepositItem" | "activityLog" | "posSetting" | "posShift" | "posCashEntry" | "inventoryMovement" | "purchaseOrder" | "purchaseOrderItem" | "purchaseOrderEmail" | "posWalletTransaction" | "posReturn" | "branch" | "branchStock" | "grn" | "grnItem" | "gtn" | "gtnItem"
+      modelProps: "user" | "posAdmin" | "posCounterSale" | "supplier" | "inventoryBrand" | "inventoryCategory" | "inventoryProduct" | "inventoryProductExpense" | "inventoryProductImage" | "posCustomer" | "posCustomerPurchase" | "posInvoiceTerm" | "posInstallment" | "posInstallmentPayment" | "contactRequest" | "account" | "accountRelationship" | "accountReceipt" | "accountVoucher" | "accountTransaction" | "invoicePayment" | "accountDeposit" | "accountDepositItem" | "activityLog" | "posSetting" | "posShift" | "posCashEntry" | "posDrawerOpen" | "inventoryMovement" | "purchaseOrder" | "purchaseOrderItem" | "purchaseOrderEmail" | "posWalletTransaction" | "posReturn" | "branch" | "branchStock" | "grn" | "grnItem" | "gtn" | "gtnItem"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3328,6 +3345,76 @@ export namespace Prisma {
           }
         }
       }
+      PosDrawerOpen: {
+        payload: Prisma.$PosDrawerOpenPayload<ExtArgs>
+        fields: Prisma.PosDrawerOpenFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PosDrawerOpenFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosDrawerOpenPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PosDrawerOpenFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosDrawerOpenPayload>
+          }
+          findFirst: {
+            args: Prisma.PosDrawerOpenFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosDrawerOpenPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PosDrawerOpenFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosDrawerOpenPayload>
+          }
+          findMany: {
+            args: Prisma.PosDrawerOpenFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosDrawerOpenPayload>[]
+          }
+          create: {
+            args: Prisma.PosDrawerOpenCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosDrawerOpenPayload>
+          }
+          createMany: {
+            args: Prisma.PosDrawerOpenCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PosDrawerOpenCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosDrawerOpenPayload>[]
+          }
+          delete: {
+            args: Prisma.PosDrawerOpenDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosDrawerOpenPayload>
+          }
+          update: {
+            args: Prisma.PosDrawerOpenUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosDrawerOpenPayload>
+          }
+          deleteMany: {
+            args: Prisma.PosDrawerOpenDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PosDrawerOpenUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.PosDrawerOpenUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosDrawerOpenPayload>
+          }
+          aggregate: {
+            args: Prisma.PosDrawerOpenAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePosDrawerOpen>
+          }
+          groupBy: {
+            args: Prisma.PosDrawerOpenGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PosDrawerOpenGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PosDrawerOpenCountArgs<ExtArgs>
+            result: $Utils.Optional<PosDrawerOpenCountAggregateOutputType> | number
+          }
+        }
+      }
       InventoryMovement: {
         payload: Prisma.$InventoryMovementPayload<ExtArgs>
         fields: Prisma.InventoryMovementFieldRefs
@@ -4876,6 +4963,7 @@ export namespace Prisma {
     cashEntries: number
     movements: number
     returns: number
+    drawerOpens: number
   }
 
   export type PosShiftCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4883,6 +4971,7 @@ export namespace Prisma {
     cashEntries?: boolean | PosShiftCountOutputTypeCountCashEntriesArgs
     movements?: boolean | PosShiftCountOutputTypeCountMovementsArgs
     returns?: boolean | PosShiftCountOutputTypeCountReturnsArgs
+    drawerOpens?: boolean | PosShiftCountOutputTypeCountDrawerOpensArgs
   }
 
   // Custom InputTypes
@@ -4922,6 +5011,13 @@ export namespace Prisma {
    */
   export type PosShiftCountOutputTypeCountReturnsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PosReturnWhereInput
+  }
+
+  /**
+   * PosShiftCountOutputType without action
+   */
+  export type PosShiftCountOutputTypeCountDrawerOpensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PosDrawerOpenWhereInput
   }
 
 
@@ -32631,6 +32727,7 @@ export namespace Prisma {
     cashEntries?: boolean | PosShift$cashEntriesArgs<ExtArgs>
     movements?: boolean | PosShift$movementsArgs<ExtArgs>
     returns?: boolean | PosShift$returnsArgs<ExtArgs>
+    drawerOpens?: boolean | PosShift$drawerOpensArgs<ExtArgs>
     _count?: boolean | PosShiftCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["posShift"]>
 
@@ -32689,6 +32786,7 @@ export namespace Prisma {
     cashEntries?: boolean | PosShift$cashEntriesArgs<ExtArgs>
     movements?: boolean | PosShift$movementsArgs<ExtArgs>
     returns?: boolean | PosShift$returnsArgs<ExtArgs>
+    drawerOpens?: boolean | PosShift$drawerOpensArgs<ExtArgs>
     _count?: boolean | PosShiftCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type PosShiftIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -32700,6 +32798,7 @@ export namespace Prisma {
       cashEntries: Prisma.$PosCashEntryPayload<ExtArgs>[]
       movements: Prisma.$InventoryMovementPayload<ExtArgs>[]
       returns: Prisma.$PosReturnPayload<ExtArgs>[]
+      drawerOpens: Prisma.$PosDrawerOpenPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -33104,6 +33203,7 @@ export namespace Prisma {
     cashEntries<T extends PosShift$cashEntriesArgs<ExtArgs> = {}>(args?: Subset<T, PosShift$cashEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosCashEntryPayload<ExtArgs>, T, "findMany"> | Null>
     movements<T extends PosShift$movementsArgs<ExtArgs> = {}>(args?: Subset<T, PosShift$movementsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryMovementPayload<ExtArgs>, T, "findMany"> | Null>
     returns<T extends PosShift$returnsArgs<ExtArgs> = {}>(args?: Subset<T, PosShift$returnsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosReturnPayload<ExtArgs>, T, "findMany"> | Null>
+    drawerOpens<T extends PosShift$drawerOpensArgs<ExtArgs> = {}>(args?: Subset<T, PosShift$drawerOpensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosDrawerOpenPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -33546,6 +33646,26 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: PosReturnScalarFieldEnum | PosReturnScalarFieldEnum[]
+  }
+
+  /**
+   * PosShift.drawerOpens
+   */
+  export type PosShift$drawerOpensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosDrawerOpen
+     */
+    select?: PosDrawerOpenSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosDrawerOpenInclude<ExtArgs> | null
+    where?: PosDrawerOpenWhereInput
+    orderBy?: PosDrawerOpenOrderByWithRelationInput | PosDrawerOpenOrderByWithRelationInput[]
+    cursor?: PosDrawerOpenWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PosDrawerOpenScalarFieldEnum | PosDrawerOpenScalarFieldEnum[]
   }
 
   /**
@@ -34795,6 +34915,1027 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: PosCashEntryInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model PosDrawerOpen
+   */
+
+  export type AggregatePosDrawerOpen = {
+    _count: PosDrawerOpenCountAggregateOutputType | null
+    _avg: PosDrawerOpenAvgAggregateOutputType | null
+    _sum: PosDrawerOpenSumAggregateOutputType | null
+    _min: PosDrawerOpenMinAggregateOutputType | null
+    _max: PosDrawerOpenMaxAggregateOutputType | null
+  }
+
+  export type PosDrawerOpenAvgAggregateOutputType = {
+    id: number | null
+    branchId: number | null
+    shiftId: number | null
+    createdById: number | null
+  }
+
+  export type PosDrawerOpenSumAggregateOutputType = {
+    id: number | null
+    branchId: number | null
+    shiftId: number | null
+    createdById: number | null
+  }
+
+  export type PosDrawerOpenMinAggregateOutputType = {
+    id: number | null
+    openNo: string | null
+    branchId: number | null
+    shiftId: number | null
+    reason: string | null
+    createdById: number | null
+    createdAt: Date | null
+  }
+
+  export type PosDrawerOpenMaxAggregateOutputType = {
+    id: number | null
+    openNo: string | null
+    branchId: number | null
+    shiftId: number | null
+    reason: string | null
+    createdById: number | null
+    createdAt: Date | null
+  }
+
+  export type PosDrawerOpenCountAggregateOutputType = {
+    id: number
+    openNo: number
+    branchId: number
+    shiftId: number
+    reason: number
+    createdById: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type PosDrawerOpenAvgAggregateInputType = {
+    id?: true
+    branchId?: true
+    shiftId?: true
+    createdById?: true
+  }
+
+  export type PosDrawerOpenSumAggregateInputType = {
+    id?: true
+    branchId?: true
+    shiftId?: true
+    createdById?: true
+  }
+
+  export type PosDrawerOpenMinAggregateInputType = {
+    id?: true
+    openNo?: true
+    branchId?: true
+    shiftId?: true
+    reason?: true
+    createdById?: true
+    createdAt?: true
+  }
+
+  export type PosDrawerOpenMaxAggregateInputType = {
+    id?: true
+    openNo?: true
+    branchId?: true
+    shiftId?: true
+    reason?: true
+    createdById?: true
+    createdAt?: true
+  }
+
+  export type PosDrawerOpenCountAggregateInputType = {
+    id?: true
+    openNo?: true
+    branchId?: true
+    shiftId?: true
+    reason?: true
+    createdById?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type PosDrawerOpenAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PosDrawerOpen to aggregate.
+     */
+    where?: PosDrawerOpenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosDrawerOpens to fetch.
+     */
+    orderBy?: PosDrawerOpenOrderByWithRelationInput | PosDrawerOpenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PosDrawerOpenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosDrawerOpens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosDrawerOpens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PosDrawerOpens
+    **/
+    _count?: true | PosDrawerOpenCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PosDrawerOpenAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PosDrawerOpenSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PosDrawerOpenMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PosDrawerOpenMaxAggregateInputType
+  }
+
+  export type GetPosDrawerOpenAggregateType<T extends PosDrawerOpenAggregateArgs> = {
+        [P in keyof T & keyof AggregatePosDrawerOpen]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePosDrawerOpen[P]>
+      : GetScalarType<T[P], AggregatePosDrawerOpen[P]>
+  }
+
+
+
+
+  export type PosDrawerOpenGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PosDrawerOpenWhereInput
+    orderBy?: PosDrawerOpenOrderByWithAggregationInput | PosDrawerOpenOrderByWithAggregationInput[]
+    by: PosDrawerOpenScalarFieldEnum[] | PosDrawerOpenScalarFieldEnum
+    having?: PosDrawerOpenScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PosDrawerOpenCountAggregateInputType | true
+    _avg?: PosDrawerOpenAvgAggregateInputType
+    _sum?: PosDrawerOpenSumAggregateInputType
+    _min?: PosDrawerOpenMinAggregateInputType
+    _max?: PosDrawerOpenMaxAggregateInputType
+  }
+
+  export type PosDrawerOpenGroupByOutputType = {
+    id: number
+    openNo: string
+    branchId: number | null
+    shiftId: number | null
+    reason: string
+    createdById: number
+    createdAt: Date
+    _count: PosDrawerOpenCountAggregateOutputType | null
+    _avg: PosDrawerOpenAvgAggregateOutputType | null
+    _sum: PosDrawerOpenSumAggregateOutputType | null
+    _min: PosDrawerOpenMinAggregateOutputType | null
+    _max: PosDrawerOpenMaxAggregateOutputType | null
+  }
+
+  type GetPosDrawerOpenGroupByPayload<T extends PosDrawerOpenGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PosDrawerOpenGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PosDrawerOpenGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PosDrawerOpenGroupByOutputType[P]>
+            : GetScalarType<T[P], PosDrawerOpenGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PosDrawerOpenSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    openNo?: boolean
+    branchId?: boolean
+    shiftId?: boolean
+    reason?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    shift?: boolean | PosDrawerOpen$shiftArgs<ExtArgs>
+  }, ExtArgs["result"]["posDrawerOpen"]>
+
+  export type PosDrawerOpenSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    openNo?: boolean
+    branchId?: boolean
+    shiftId?: boolean
+    reason?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    shift?: boolean | PosDrawerOpen$shiftArgs<ExtArgs>
+  }, ExtArgs["result"]["posDrawerOpen"]>
+
+  export type PosDrawerOpenSelectScalar = {
+    id?: boolean
+    openNo?: boolean
+    branchId?: boolean
+    shiftId?: boolean
+    reason?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+  }
+
+  export type PosDrawerOpenInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    shift?: boolean | PosDrawerOpen$shiftArgs<ExtArgs>
+  }
+  export type PosDrawerOpenIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    shift?: boolean | PosDrawerOpen$shiftArgs<ExtArgs>
+  }
+
+  export type $PosDrawerOpenPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PosDrawerOpen"
+    objects: {
+      shift: Prisma.$PosShiftPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      /**
+       * NS-000123
+       */
+      openNo: string
+      branchId: number | null
+      shiftId: number | null
+      reason: string
+      createdById: number
+      createdAt: Date
+    }, ExtArgs["result"]["posDrawerOpen"]>
+    composites: {}
+  }
+
+  type PosDrawerOpenGetPayload<S extends boolean | null | undefined | PosDrawerOpenDefaultArgs> = $Result.GetResult<Prisma.$PosDrawerOpenPayload, S>
+
+  type PosDrawerOpenCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<PosDrawerOpenFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: PosDrawerOpenCountAggregateInputType | true
+    }
+
+  export interface PosDrawerOpenDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PosDrawerOpen'], meta: { name: 'PosDrawerOpen' } }
+    /**
+     * Find zero or one PosDrawerOpen that matches the filter.
+     * @param {PosDrawerOpenFindUniqueArgs} args - Arguments to find a PosDrawerOpen
+     * @example
+     * // Get one PosDrawerOpen
+     * const posDrawerOpen = await prisma.posDrawerOpen.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PosDrawerOpenFindUniqueArgs>(args: SelectSubset<T, PosDrawerOpenFindUniqueArgs<ExtArgs>>): Prisma__PosDrawerOpenClient<$Result.GetResult<Prisma.$PosDrawerOpenPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one PosDrawerOpen that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {PosDrawerOpenFindUniqueOrThrowArgs} args - Arguments to find a PosDrawerOpen
+     * @example
+     * // Get one PosDrawerOpen
+     * const posDrawerOpen = await prisma.posDrawerOpen.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PosDrawerOpenFindUniqueOrThrowArgs>(args: SelectSubset<T, PosDrawerOpenFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PosDrawerOpenClient<$Result.GetResult<Prisma.$PosDrawerOpenPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first PosDrawerOpen that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosDrawerOpenFindFirstArgs} args - Arguments to find a PosDrawerOpen
+     * @example
+     * // Get one PosDrawerOpen
+     * const posDrawerOpen = await prisma.posDrawerOpen.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PosDrawerOpenFindFirstArgs>(args?: SelectSubset<T, PosDrawerOpenFindFirstArgs<ExtArgs>>): Prisma__PosDrawerOpenClient<$Result.GetResult<Prisma.$PosDrawerOpenPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first PosDrawerOpen that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosDrawerOpenFindFirstOrThrowArgs} args - Arguments to find a PosDrawerOpen
+     * @example
+     * // Get one PosDrawerOpen
+     * const posDrawerOpen = await prisma.posDrawerOpen.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PosDrawerOpenFindFirstOrThrowArgs>(args?: SelectSubset<T, PosDrawerOpenFindFirstOrThrowArgs<ExtArgs>>): Prisma__PosDrawerOpenClient<$Result.GetResult<Prisma.$PosDrawerOpenPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more PosDrawerOpens that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosDrawerOpenFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PosDrawerOpens
+     * const posDrawerOpens = await prisma.posDrawerOpen.findMany()
+     * 
+     * // Get first 10 PosDrawerOpens
+     * const posDrawerOpens = await prisma.posDrawerOpen.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const posDrawerOpenWithIdOnly = await prisma.posDrawerOpen.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PosDrawerOpenFindManyArgs>(args?: SelectSubset<T, PosDrawerOpenFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosDrawerOpenPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a PosDrawerOpen.
+     * @param {PosDrawerOpenCreateArgs} args - Arguments to create a PosDrawerOpen.
+     * @example
+     * // Create one PosDrawerOpen
+     * const PosDrawerOpen = await prisma.posDrawerOpen.create({
+     *   data: {
+     *     // ... data to create a PosDrawerOpen
+     *   }
+     * })
+     * 
+     */
+    create<T extends PosDrawerOpenCreateArgs>(args: SelectSubset<T, PosDrawerOpenCreateArgs<ExtArgs>>): Prisma__PosDrawerOpenClient<$Result.GetResult<Prisma.$PosDrawerOpenPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many PosDrawerOpens.
+     * @param {PosDrawerOpenCreateManyArgs} args - Arguments to create many PosDrawerOpens.
+     * @example
+     * // Create many PosDrawerOpens
+     * const posDrawerOpen = await prisma.posDrawerOpen.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PosDrawerOpenCreateManyArgs>(args?: SelectSubset<T, PosDrawerOpenCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PosDrawerOpens and returns the data saved in the database.
+     * @param {PosDrawerOpenCreateManyAndReturnArgs} args - Arguments to create many PosDrawerOpens.
+     * @example
+     * // Create many PosDrawerOpens
+     * const posDrawerOpen = await prisma.posDrawerOpen.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PosDrawerOpens and only return the `id`
+     * const posDrawerOpenWithIdOnly = await prisma.posDrawerOpen.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PosDrawerOpenCreateManyAndReturnArgs>(args?: SelectSubset<T, PosDrawerOpenCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosDrawerOpenPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a PosDrawerOpen.
+     * @param {PosDrawerOpenDeleteArgs} args - Arguments to delete one PosDrawerOpen.
+     * @example
+     * // Delete one PosDrawerOpen
+     * const PosDrawerOpen = await prisma.posDrawerOpen.delete({
+     *   where: {
+     *     // ... filter to delete one PosDrawerOpen
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PosDrawerOpenDeleteArgs>(args: SelectSubset<T, PosDrawerOpenDeleteArgs<ExtArgs>>): Prisma__PosDrawerOpenClient<$Result.GetResult<Prisma.$PosDrawerOpenPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one PosDrawerOpen.
+     * @param {PosDrawerOpenUpdateArgs} args - Arguments to update one PosDrawerOpen.
+     * @example
+     * // Update one PosDrawerOpen
+     * const posDrawerOpen = await prisma.posDrawerOpen.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PosDrawerOpenUpdateArgs>(args: SelectSubset<T, PosDrawerOpenUpdateArgs<ExtArgs>>): Prisma__PosDrawerOpenClient<$Result.GetResult<Prisma.$PosDrawerOpenPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more PosDrawerOpens.
+     * @param {PosDrawerOpenDeleteManyArgs} args - Arguments to filter PosDrawerOpens to delete.
+     * @example
+     * // Delete a few PosDrawerOpens
+     * const { count } = await prisma.posDrawerOpen.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PosDrawerOpenDeleteManyArgs>(args?: SelectSubset<T, PosDrawerOpenDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PosDrawerOpens.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosDrawerOpenUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PosDrawerOpens
+     * const posDrawerOpen = await prisma.posDrawerOpen.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PosDrawerOpenUpdateManyArgs>(args: SelectSubset<T, PosDrawerOpenUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one PosDrawerOpen.
+     * @param {PosDrawerOpenUpsertArgs} args - Arguments to update or create a PosDrawerOpen.
+     * @example
+     * // Update or create a PosDrawerOpen
+     * const posDrawerOpen = await prisma.posDrawerOpen.upsert({
+     *   create: {
+     *     // ... data to create a PosDrawerOpen
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PosDrawerOpen we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PosDrawerOpenUpsertArgs>(args: SelectSubset<T, PosDrawerOpenUpsertArgs<ExtArgs>>): Prisma__PosDrawerOpenClient<$Result.GetResult<Prisma.$PosDrawerOpenPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of PosDrawerOpens.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosDrawerOpenCountArgs} args - Arguments to filter PosDrawerOpens to count.
+     * @example
+     * // Count the number of PosDrawerOpens
+     * const count = await prisma.posDrawerOpen.count({
+     *   where: {
+     *     // ... the filter for the PosDrawerOpens we want to count
+     *   }
+     * })
+    **/
+    count<T extends PosDrawerOpenCountArgs>(
+      args?: Subset<T, PosDrawerOpenCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PosDrawerOpenCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PosDrawerOpen.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosDrawerOpenAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PosDrawerOpenAggregateArgs>(args: Subset<T, PosDrawerOpenAggregateArgs>): Prisma.PrismaPromise<GetPosDrawerOpenAggregateType<T>>
+
+    /**
+     * Group by PosDrawerOpen.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PosDrawerOpenGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PosDrawerOpenGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PosDrawerOpenGroupByArgs['orderBy'] }
+        : { orderBy?: PosDrawerOpenGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PosDrawerOpenGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPosDrawerOpenGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PosDrawerOpen model
+   */
+  readonly fields: PosDrawerOpenFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PosDrawerOpen.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PosDrawerOpenClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    shift<T extends PosDrawerOpen$shiftArgs<ExtArgs> = {}>(args?: Subset<T, PosDrawerOpen$shiftArgs<ExtArgs>>): Prisma__PosShiftClient<$Result.GetResult<Prisma.$PosShiftPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PosDrawerOpen model
+   */ 
+  interface PosDrawerOpenFieldRefs {
+    readonly id: FieldRef<"PosDrawerOpen", 'Int'>
+    readonly openNo: FieldRef<"PosDrawerOpen", 'String'>
+    readonly branchId: FieldRef<"PosDrawerOpen", 'Int'>
+    readonly shiftId: FieldRef<"PosDrawerOpen", 'Int'>
+    readonly reason: FieldRef<"PosDrawerOpen", 'String'>
+    readonly createdById: FieldRef<"PosDrawerOpen", 'Int'>
+    readonly createdAt: FieldRef<"PosDrawerOpen", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PosDrawerOpen findUnique
+   */
+  export type PosDrawerOpenFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosDrawerOpen
+     */
+    select?: PosDrawerOpenSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosDrawerOpenInclude<ExtArgs> | null
+    /**
+     * Filter, which PosDrawerOpen to fetch.
+     */
+    where: PosDrawerOpenWhereUniqueInput
+  }
+
+  /**
+   * PosDrawerOpen findUniqueOrThrow
+   */
+  export type PosDrawerOpenFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosDrawerOpen
+     */
+    select?: PosDrawerOpenSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosDrawerOpenInclude<ExtArgs> | null
+    /**
+     * Filter, which PosDrawerOpen to fetch.
+     */
+    where: PosDrawerOpenWhereUniqueInput
+  }
+
+  /**
+   * PosDrawerOpen findFirst
+   */
+  export type PosDrawerOpenFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosDrawerOpen
+     */
+    select?: PosDrawerOpenSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosDrawerOpenInclude<ExtArgs> | null
+    /**
+     * Filter, which PosDrawerOpen to fetch.
+     */
+    where?: PosDrawerOpenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosDrawerOpens to fetch.
+     */
+    orderBy?: PosDrawerOpenOrderByWithRelationInput | PosDrawerOpenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PosDrawerOpens.
+     */
+    cursor?: PosDrawerOpenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosDrawerOpens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosDrawerOpens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PosDrawerOpens.
+     */
+    distinct?: PosDrawerOpenScalarFieldEnum | PosDrawerOpenScalarFieldEnum[]
+  }
+
+  /**
+   * PosDrawerOpen findFirstOrThrow
+   */
+  export type PosDrawerOpenFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosDrawerOpen
+     */
+    select?: PosDrawerOpenSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosDrawerOpenInclude<ExtArgs> | null
+    /**
+     * Filter, which PosDrawerOpen to fetch.
+     */
+    where?: PosDrawerOpenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosDrawerOpens to fetch.
+     */
+    orderBy?: PosDrawerOpenOrderByWithRelationInput | PosDrawerOpenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PosDrawerOpens.
+     */
+    cursor?: PosDrawerOpenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosDrawerOpens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosDrawerOpens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PosDrawerOpens.
+     */
+    distinct?: PosDrawerOpenScalarFieldEnum | PosDrawerOpenScalarFieldEnum[]
+  }
+
+  /**
+   * PosDrawerOpen findMany
+   */
+  export type PosDrawerOpenFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosDrawerOpen
+     */
+    select?: PosDrawerOpenSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosDrawerOpenInclude<ExtArgs> | null
+    /**
+     * Filter, which PosDrawerOpens to fetch.
+     */
+    where?: PosDrawerOpenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PosDrawerOpens to fetch.
+     */
+    orderBy?: PosDrawerOpenOrderByWithRelationInput | PosDrawerOpenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PosDrawerOpens.
+     */
+    cursor?: PosDrawerOpenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PosDrawerOpens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PosDrawerOpens.
+     */
+    skip?: number
+    distinct?: PosDrawerOpenScalarFieldEnum | PosDrawerOpenScalarFieldEnum[]
+  }
+
+  /**
+   * PosDrawerOpen create
+   */
+  export type PosDrawerOpenCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosDrawerOpen
+     */
+    select?: PosDrawerOpenSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosDrawerOpenInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PosDrawerOpen.
+     */
+    data: XOR<PosDrawerOpenCreateInput, PosDrawerOpenUncheckedCreateInput>
+  }
+
+  /**
+   * PosDrawerOpen createMany
+   */
+  export type PosDrawerOpenCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PosDrawerOpens.
+     */
+    data: PosDrawerOpenCreateManyInput | PosDrawerOpenCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PosDrawerOpen createManyAndReturn
+   */
+  export type PosDrawerOpenCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosDrawerOpen
+     */
+    select?: PosDrawerOpenSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many PosDrawerOpens.
+     */
+    data: PosDrawerOpenCreateManyInput | PosDrawerOpenCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosDrawerOpenIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PosDrawerOpen update
+   */
+  export type PosDrawerOpenUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosDrawerOpen
+     */
+    select?: PosDrawerOpenSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosDrawerOpenInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PosDrawerOpen.
+     */
+    data: XOR<PosDrawerOpenUpdateInput, PosDrawerOpenUncheckedUpdateInput>
+    /**
+     * Choose, which PosDrawerOpen to update.
+     */
+    where: PosDrawerOpenWhereUniqueInput
+  }
+
+  /**
+   * PosDrawerOpen updateMany
+   */
+  export type PosDrawerOpenUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PosDrawerOpens.
+     */
+    data: XOR<PosDrawerOpenUpdateManyMutationInput, PosDrawerOpenUncheckedUpdateManyInput>
+    /**
+     * Filter which PosDrawerOpens to update
+     */
+    where?: PosDrawerOpenWhereInput
+  }
+
+  /**
+   * PosDrawerOpen upsert
+   */
+  export type PosDrawerOpenUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosDrawerOpen
+     */
+    select?: PosDrawerOpenSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosDrawerOpenInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PosDrawerOpen to update in case it exists.
+     */
+    where: PosDrawerOpenWhereUniqueInput
+    /**
+     * In case the PosDrawerOpen found by the `where` argument doesn't exist, create a new PosDrawerOpen with this data.
+     */
+    create: XOR<PosDrawerOpenCreateInput, PosDrawerOpenUncheckedCreateInput>
+    /**
+     * In case the PosDrawerOpen was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PosDrawerOpenUpdateInput, PosDrawerOpenUncheckedUpdateInput>
+  }
+
+  /**
+   * PosDrawerOpen delete
+   */
+  export type PosDrawerOpenDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosDrawerOpen
+     */
+    select?: PosDrawerOpenSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosDrawerOpenInclude<ExtArgs> | null
+    /**
+     * Filter which PosDrawerOpen to delete.
+     */
+    where: PosDrawerOpenWhereUniqueInput
+  }
+
+  /**
+   * PosDrawerOpen deleteMany
+   */
+  export type PosDrawerOpenDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PosDrawerOpens to delete
+     */
+    where?: PosDrawerOpenWhereInput
+  }
+
+  /**
+   * PosDrawerOpen.shift
+   */
+  export type PosDrawerOpen$shiftArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosShift
+     */
+    select?: PosShiftSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosShiftInclude<ExtArgs> | null
+    where?: PosShiftWhereInput
+  }
+
+  /**
+   * PosDrawerOpen without action
+   */
+  export type PosDrawerOpenDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosDrawerOpen
+     */
+    select?: PosDrawerOpenSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PosDrawerOpenInclude<ExtArgs> | null
   }
 
 
@@ -48772,6 +49913,19 @@ export namespace Prisma {
   export type PosCashEntryScalarFieldEnum = (typeof PosCashEntryScalarFieldEnum)[keyof typeof PosCashEntryScalarFieldEnum]
 
 
+  export const PosDrawerOpenScalarFieldEnum: {
+    id: 'id',
+    openNo: 'openNo',
+    branchId: 'branchId',
+    shiftId: 'shiftId',
+    reason: 'reason',
+    createdById: 'createdById',
+    createdAt: 'createdAt'
+  };
+
+  export type PosDrawerOpenScalarFieldEnum = (typeof PosDrawerOpenScalarFieldEnum)[keyof typeof PosDrawerOpenScalarFieldEnum]
+
+
   export const InventoryMovementScalarFieldEnum: {
     id: 'id',
     branchId: 'branchId',
@@ -51682,6 +52836,7 @@ export namespace Prisma {
     cashEntries?: PosCashEntryListRelationFilter
     movements?: InventoryMovementListRelationFilter
     returns?: PosReturnListRelationFilter
+    drawerOpens?: PosDrawerOpenListRelationFilter
   }
 
   export type PosShiftOrderByWithRelationInput = {
@@ -51711,6 +52866,7 @@ export namespace Prisma {
     cashEntries?: PosCashEntryOrderByRelationAggregateInput
     movements?: InventoryMovementOrderByRelationAggregateInput
     returns?: PosReturnOrderByRelationAggregateInput
+    drawerOpens?: PosDrawerOpenOrderByRelationAggregateInput
   }
 
   export type PosShiftWhereUniqueInput = Prisma.AtLeast<{
@@ -51743,6 +52899,7 @@ export namespace Prisma {
     cashEntries?: PosCashEntryListRelationFilter
     movements?: InventoryMovementListRelationFilter
     returns?: PosReturnListRelationFilter
+    drawerOpens?: PosDrawerOpenListRelationFilter
   }, "id" | "shiftNo">
 
   export type PosShiftOrderByWithAggregationInput = {
@@ -51948,6 +53105,73 @@ export namespace Prisma {
     bankedAt?: DateTimeNullableWithAggregatesFilter<"PosCashEntry"> | Date | string | null
     bankedById?: IntNullableWithAggregatesFilter<"PosCashEntry"> | number | null
     bankReference?: StringNullableWithAggregatesFilter<"PosCashEntry"> | string | null
+  }
+
+  export type PosDrawerOpenWhereInput = {
+    AND?: PosDrawerOpenWhereInput | PosDrawerOpenWhereInput[]
+    OR?: PosDrawerOpenWhereInput[]
+    NOT?: PosDrawerOpenWhereInput | PosDrawerOpenWhereInput[]
+    id?: IntFilter<"PosDrawerOpen"> | number
+    openNo?: StringFilter<"PosDrawerOpen"> | string
+    branchId?: IntNullableFilter<"PosDrawerOpen"> | number | null
+    shiftId?: IntNullableFilter<"PosDrawerOpen"> | number | null
+    reason?: StringFilter<"PosDrawerOpen"> | string
+    createdById?: IntFilter<"PosDrawerOpen"> | number
+    createdAt?: DateTimeFilter<"PosDrawerOpen"> | Date | string
+    shift?: XOR<PosShiftNullableRelationFilter, PosShiftWhereInput> | null
+  }
+
+  export type PosDrawerOpenOrderByWithRelationInput = {
+    id?: SortOrder
+    openNo?: SortOrder
+    branchId?: SortOrderInput | SortOrder
+    shiftId?: SortOrderInput | SortOrder
+    reason?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    shift?: PosShiftOrderByWithRelationInput
+  }
+
+  export type PosDrawerOpenWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    openNo?: string
+    AND?: PosDrawerOpenWhereInput | PosDrawerOpenWhereInput[]
+    OR?: PosDrawerOpenWhereInput[]
+    NOT?: PosDrawerOpenWhereInput | PosDrawerOpenWhereInput[]
+    branchId?: IntNullableFilter<"PosDrawerOpen"> | number | null
+    shiftId?: IntNullableFilter<"PosDrawerOpen"> | number | null
+    reason?: StringFilter<"PosDrawerOpen"> | string
+    createdById?: IntFilter<"PosDrawerOpen"> | number
+    createdAt?: DateTimeFilter<"PosDrawerOpen"> | Date | string
+    shift?: XOR<PosShiftNullableRelationFilter, PosShiftWhereInput> | null
+  }, "id" | "openNo">
+
+  export type PosDrawerOpenOrderByWithAggregationInput = {
+    id?: SortOrder
+    openNo?: SortOrder
+    branchId?: SortOrderInput | SortOrder
+    shiftId?: SortOrderInput | SortOrder
+    reason?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    _count?: PosDrawerOpenCountOrderByAggregateInput
+    _avg?: PosDrawerOpenAvgOrderByAggregateInput
+    _max?: PosDrawerOpenMaxOrderByAggregateInput
+    _min?: PosDrawerOpenMinOrderByAggregateInput
+    _sum?: PosDrawerOpenSumOrderByAggregateInput
+  }
+
+  export type PosDrawerOpenScalarWhereWithAggregatesInput = {
+    AND?: PosDrawerOpenScalarWhereWithAggregatesInput | PosDrawerOpenScalarWhereWithAggregatesInput[]
+    OR?: PosDrawerOpenScalarWhereWithAggregatesInput[]
+    NOT?: PosDrawerOpenScalarWhereWithAggregatesInput | PosDrawerOpenScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"PosDrawerOpen"> | number
+    openNo?: StringWithAggregatesFilter<"PosDrawerOpen"> | string
+    branchId?: IntNullableWithAggregatesFilter<"PosDrawerOpen"> | number | null
+    shiftId?: IntNullableWithAggregatesFilter<"PosDrawerOpen"> | number | null
+    reason?: StringWithAggregatesFilter<"PosDrawerOpen"> | string
+    createdById?: IntWithAggregatesFilter<"PosDrawerOpen"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"PosDrawerOpen"> | Date | string
   }
 
   export type InventoryMovementWhereInput = {
@@ -55698,6 +56922,7 @@ export namespace Prisma {
     cashEntries?: PosCashEntryCreateNestedManyWithoutShiftInput
     movements?: InventoryMovementCreateNestedManyWithoutShiftInput
     returns?: PosReturnCreateNestedManyWithoutShiftInput
+    drawerOpens?: PosDrawerOpenCreateNestedManyWithoutShiftInput
   }
 
   export type PosShiftUncheckedCreateInput = {
@@ -55727,6 +56952,7 @@ export namespace Prisma {
     cashEntries?: PosCashEntryUncheckedCreateNestedManyWithoutShiftInput
     movements?: InventoryMovementUncheckedCreateNestedManyWithoutShiftInput
     returns?: PosReturnUncheckedCreateNestedManyWithoutShiftInput
+    drawerOpens?: PosDrawerOpenUncheckedCreateNestedManyWithoutShiftInput
   }
 
   export type PosShiftUpdateInput = {
@@ -55755,6 +56981,7 @@ export namespace Prisma {
     cashEntries?: PosCashEntryUpdateManyWithoutShiftNestedInput
     movements?: InventoryMovementUpdateManyWithoutShiftNestedInput
     returns?: PosReturnUpdateManyWithoutShiftNestedInput
+    drawerOpens?: PosDrawerOpenUpdateManyWithoutShiftNestedInput
   }
 
   export type PosShiftUncheckedUpdateInput = {
@@ -55784,6 +57011,7 @@ export namespace Prisma {
     cashEntries?: PosCashEntryUncheckedUpdateManyWithoutShiftNestedInput
     movements?: InventoryMovementUncheckedUpdateManyWithoutShiftNestedInput
     returns?: PosReturnUncheckedUpdateManyWithoutShiftNestedInput
+    drawerOpens?: PosDrawerOpenUncheckedUpdateManyWithoutShiftNestedInput
   }
 
   export type PosShiftCreateManyInput = {
@@ -56036,6 +57264,72 @@ export namespace Prisma {
     bankedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankedById?: NullableIntFieldUpdateOperationsInput | number | null
     bankReference?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type PosDrawerOpenCreateInput = {
+    openNo: string
+    branchId?: number | null
+    reason: string
+    createdById: number
+    createdAt?: Date | string
+    shift?: PosShiftCreateNestedOneWithoutDrawerOpensInput
+  }
+
+  export type PosDrawerOpenUncheckedCreateInput = {
+    id?: number
+    openNo: string
+    branchId?: number | null
+    shiftId?: number | null
+    reason: string
+    createdById: number
+    createdAt?: Date | string
+  }
+
+  export type PosDrawerOpenUpdateInput = {
+    openNo?: StringFieldUpdateOperationsInput | string
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    reason?: StringFieldUpdateOperationsInput | string
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    shift?: PosShiftUpdateOneWithoutDrawerOpensNestedInput
+  }
+
+  export type PosDrawerOpenUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    openNo?: StringFieldUpdateOperationsInput | string
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    reason?: StringFieldUpdateOperationsInput | string
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosDrawerOpenCreateManyInput = {
+    id?: number
+    openNo: string
+    branchId?: number | null
+    shiftId?: number | null
+    reason: string
+    createdById: number
+    createdAt?: Date | string
+  }
+
+  export type PosDrawerOpenUpdateManyMutationInput = {
+    openNo?: StringFieldUpdateOperationsInput | string
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    reason?: StringFieldUpdateOperationsInput | string
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosDrawerOpenUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    openNo?: StringFieldUpdateOperationsInput | string
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    shiftId?: NullableIntFieldUpdateOperationsInput | number | null
+    reason?: StringFieldUpdateOperationsInput | string
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type InventoryMovementCreateInput = {
@@ -59741,11 +61035,21 @@ export namespace Prisma {
     none?: InventoryMovementWhereInput
   }
 
+  export type PosDrawerOpenListRelationFilter = {
+    every?: PosDrawerOpenWhereInput
+    some?: PosDrawerOpenWhereInput
+    none?: PosDrawerOpenWhereInput
+  }
+
   export type PosCashEntryOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
   export type InventoryMovementOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type PosDrawerOpenOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -59946,6 +61250,50 @@ export namespace Prisma {
     createdById?: SortOrder
     voidedById?: SortOrder
     bankedById?: SortOrder
+  }
+
+  export type PosDrawerOpenCountOrderByAggregateInput = {
+    id?: SortOrder
+    openNo?: SortOrder
+    branchId?: SortOrder
+    shiftId?: SortOrder
+    reason?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PosDrawerOpenAvgOrderByAggregateInput = {
+    id?: SortOrder
+    branchId?: SortOrder
+    shiftId?: SortOrder
+    createdById?: SortOrder
+  }
+
+  export type PosDrawerOpenMaxOrderByAggregateInput = {
+    id?: SortOrder
+    openNo?: SortOrder
+    branchId?: SortOrder
+    shiftId?: SortOrder
+    reason?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PosDrawerOpenMinOrderByAggregateInput = {
+    id?: SortOrder
+    openNo?: SortOrder
+    branchId?: SortOrder
+    shiftId?: SortOrder
+    reason?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PosDrawerOpenSumOrderByAggregateInput = {
+    id?: SortOrder
+    branchId?: SortOrder
+    shiftId?: SortOrder
+    createdById?: SortOrder
   }
 
   export type InventoryMovementCountOrderByAggregateInput = {
@@ -62787,6 +64135,13 @@ export namespace Prisma {
     connect?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
   }
 
+  export type PosDrawerOpenCreateNestedManyWithoutShiftInput = {
+    create?: XOR<PosDrawerOpenCreateWithoutShiftInput, PosDrawerOpenUncheckedCreateWithoutShiftInput> | PosDrawerOpenCreateWithoutShiftInput[] | PosDrawerOpenUncheckedCreateWithoutShiftInput[]
+    connectOrCreate?: PosDrawerOpenCreateOrConnectWithoutShiftInput | PosDrawerOpenCreateOrConnectWithoutShiftInput[]
+    createMany?: PosDrawerOpenCreateManyShiftInputEnvelope
+    connect?: PosDrawerOpenWhereUniqueInput | PosDrawerOpenWhereUniqueInput[]
+  }
+
   export type PosCounterSaleUncheckedCreateNestedManyWithoutShiftInput = {
     create?: XOR<PosCounterSaleCreateWithoutShiftInput, PosCounterSaleUncheckedCreateWithoutShiftInput> | PosCounterSaleCreateWithoutShiftInput[] | PosCounterSaleUncheckedCreateWithoutShiftInput[]
     connectOrCreate?: PosCounterSaleCreateOrConnectWithoutShiftInput | PosCounterSaleCreateOrConnectWithoutShiftInput[]
@@ -62813,6 +64168,13 @@ export namespace Prisma {
     connectOrCreate?: PosReturnCreateOrConnectWithoutShiftInput | PosReturnCreateOrConnectWithoutShiftInput[]
     createMany?: PosReturnCreateManyShiftInputEnvelope
     connect?: PosReturnWhereUniqueInput | PosReturnWhereUniqueInput[]
+  }
+
+  export type PosDrawerOpenUncheckedCreateNestedManyWithoutShiftInput = {
+    create?: XOR<PosDrawerOpenCreateWithoutShiftInput, PosDrawerOpenUncheckedCreateWithoutShiftInput> | PosDrawerOpenCreateWithoutShiftInput[] | PosDrawerOpenUncheckedCreateWithoutShiftInput[]
+    connectOrCreate?: PosDrawerOpenCreateOrConnectWithoutShiftInput | PosDrawerOpenCreateOrConnectWithoutShiftInput[]
+    createMany?: PosDrawerOpenCreateManyShiftInputEnvelope
+    connect?: PosDrawerOpenWhereUniqueInput | PosDrawerOpenWhereUniqueInput[]
   }
 
   export type PosCounterSaleUpdateManyWithoutShiftNestedInput = {
@@ -62871,6 +64233,20 @@ export namespace Prisma {
     deleteMany?: PosReturnScalarWhereInput | PosReturnScalarWhereInput[]
   }
 
+  export type PosDrawerOpenUpdateManyWithoutShiftNestedInput = {
+    create?: XOR<PosDrawerOpenCreateWithoutShiftInput, PosDrawerOpenUncheckedCreateWithoutShiftInput> | PosDrawerOpenCreateWithoutShiftInput[] | PosDrawerOpenUncheckedCreateWithoutShiftInput[]
+    connectOrCreate?: PosDrawerOpenCreateOrConnectWithoutShiftInput | PosDrawerOpenCreateOrConnectWithoutShiftInput[]
+    upsert?: PosDrawerOpenUpsertWithWhereUniqueWithoutShiftInput | PosDrawerOpenUpsertWithWhereUniqueWithoutShiftInput[]
+    createMany?: PosDrawerOpenCreateManyShiftInputEnvelope
+    set?: PosDrawerOpenWhereUniqueInput | PosDrawerOpenWhereUniqueInput[]
+    disconnect?: PosDrawerOpenWhereUniqueInput | PosDrawerOpenWhereUniqueInput[]
+    delete?: PosDrawerOpenWhereUniqueInput | PosDrawerOpenWhereUniqueInput[]
+    connect?: PosDrawerOpenWhereUniqueInput | PosDrawerOpenWhereUniqueInput[]
+    update?: PosDrawerOpenUpdateWithWhereUniqueWithoutShiftInput | PosDrawerOpenUpdateWithWhereUniqueWithoutShiftInput[]
+    updateMany?: PosDrawerOpenUpdateManyWithWhereWithoutShiftInput | PosDrawerOpenUpdateManyWithWhereWithoutShiftInput[]
+    deleteMany?: PosDrawerOpenScalarWhereInput | PosDrawerOpenScalarWhereInput[]
+  }
+
   export type PosCounterSaleUncheckedUpdateManyWithoutShiftNestedInput = {
     create?: XOR<PosCounterSaleCreateWithoutShiftInput, PosCounterSaleUncheckedCreateWithoutShiftInput> | PosCounterSaleCreateWithoutShiftInput[] | PosCounterSaleUncheckedCreateWithoutShiftInput[]
     connectOrCreate?: PosCounterSaleCreateOrConnectWithoutShiftInput | PosCounterSaleCreateOrConnectWithoutShiftInput[]
@@ -62927,6 +64303,20 @@ export namespace Prisma {
     deleteMany?: PosReturnScalarWhereInput | PosReturnScalarWhereInput[]
   }
 
+  export type PosDrawerOpenUncheckedUpdateManyWithoutShiftNestedInput = {
+    create?: XOR<PosDrawerOpenCreateWithoutShiftInput, PosDrawerOpenUncheckedCreateWithoutShiftInput> | PosDrawerOpenCreateWithoutShiftInput[] | PosDrawerOpenUncheckedCreateWithoutShiftInput[]
+    connectOrCreate?: PosDrawerOpenCreateOrConnectWithoutShiftInput | PosDrawerOpenCreateOrConnectWithoutShiftInput[]
+    upsert?: PosDrawerOpenUpsertWithWhereUniqueWithoutShiftInput | PosDrawerOpenUpsertWithWhereUniqueWithoutShiftInput[]
+    createMany?: PosDrawerOpenCreateManyShiftInputEnvelope
+    set?: PosDrawerOpenWhereUniqueInput | PosDrawerOpenWhereUniqueInput[]
+    disconnect?: PosDrawerOpenWhereUniqueInput | PosDrawerOpenWhereUniqueInput[]
+    delete?: PosDrawerOpenWhereUniqueInput | PosDrawerOpenWhereUniqueInput[]
+    connect?: PosDrawerOpenWhereUniqueInput | PosDrawerOpenWhereUniqueInput[]
+    update?: PosDrawerOpenUpdateWithWhereUniqueWithoutShiftInput | PosDrawerOpenUpdateWithWhereUniqueWithoutShiftInput[]
+    updateMany?: PosDrawerOpenUpdateManyWithWhereWithoutShiftInput | PosDrawerOpenUpdateManyWithWhereWithoutShiftInput[]
+    deleteMany?: PosDrawerOpenScalarWhereInput | PosDrawerOpenScalarWhereInput[]
+  }
+
   export type PosShiftCreateNestedOneWithoutCashEntriesInput = {
     create?: XOR<PosShiftCreateWithoutCashEntriesInput, PosShiftUncheckedCreateWithoutCashEntriesInput>
     connectOrCreate?: PosShiftCreateOrConnectWithoutCashEntriesInput
@@ -62941,6 +64331,22 @@ export namespace Prisma {
     delete?: PosShiftWhereInput | boolean
     connect?: PosShiftWhereUniqueInput
     update?: XOR<XOR<PosShiftUpdateToOneWithWhereWithoutCashEntriesInput, PosShiftUpdateWithoutCashEntriesInput>, PosShiftUncheckedUpdateWithoutCashEntriesInput>
+  }
+
+  export type PosShiftCreateNestedOneWithoutDrawerOpensInput = {
+    create?: XOR<PosShiftCreateWithoutDrawerOpensInput, PosShiftUncheckedCreateWithoutDrawerOpensInput>
+    connectOrCreate?: PosShiftCreateOrConnectWithoutDrawerOpensInput
+    connect?: PosShiftWhereUniqueInput
+  }
+
+  export type PosShiftUpdateOneWithoutDrawerOpensNestedInput = {
+    create?: XOR<PosShiftCreateWithoutDrawerOpensInput, PosShiftUncheckedCreateWithoutDrawerOpensInput>
+    connectOrCreate?: PosShiftCreateOrConnectWithoutDrawerOpensInput
+    upsert?: PosShiftUpsertWithoutDrawerOpensInput
+    disconnect?: PosShiftWhereInput | boolean
+    delete?: PosShiftWhereInput | boolean
+    connect?: PosShiftWhereUniqueInput
+    update?: XOR<XOR<PosShiftUpdateToOneWithWhereWithoutDrawerOpensInput, PosShiftUpdateWithoutDrawerOpensInput>, PosShiftUncheckedUpdateWithoutDrawerOpensInput>
   }
 
   export type PosShiftCreateNestedOneWithoutMovementsInput = {
@@ -64280,6 +65686,7 @@ export namespace Prisma {
     cashEntries?: PosCashEntryCreateNestedManyWithoutShiftInput
     movements?: InventoryMovementCreateNestedManyWithoutShiftInput
     returns?: PosReturnCreateNestedManyWithoutShiftInput
+    drawerOpens?: PosDrawerOpenCreateNestedManyWithoutShiftInput
   }
 
   export type PosShiftUncheckedCreateWithoutSalesInput = {
@@ -64308,6 +65715,7 @@ export namespace Prisma {
     cashEntries?: PosCashEntryUncheckedCreateNestedManyWithoutShiftInput
     movements?: InventoryMovementUncheckedCreateNestedManyWithoutShiftInput
     returns?: PosReturnUncheckedCreateNestedManyWithoutShiftInput
+    drawerOpens?: PosDrawerOpenUncheckedCreateNestedManyWithoutShiftInput
   }
 
   export type PosShiftCreateOrConnectWithoutSalesInput = {
@@ -64443,6 +65851,7 @@ export namespace Prisma {
     cashEntries?: PosCashEntryUpdateManyWithoutShiftNestedInput
     movements?: InventoryMovementUpdateManyWithoutShiftNestedInput
     returns?: PosReturnUpdateManyWithoutShiftNestedInput
+    drawerOpens?: PosDrawerOpenUpdateManyWithoutShiftNestedInput
   }
 
   export type PosShiftUncheckedUpdateWithoutSalesInput = {
@@ -64471,6 +65880,7 @@ export namespace Prisma {
     cashEntries?: PosCashEntryUncheckedUpdateManyWithoutShiftNestedInput
     movements?: InventoryMovementUncheckedUpdateManyWithoutShiftNestedInput
     returns?: PosReturnUncheckedUpdateManyWithoutShiftNestedInput
+    drawerOpens?: PosDrawerOpenUncheckedUpdateManyWithoutShiftNestedInput
   }
 
   export type InventoryProductCreateWithoutSupplierInput = {
@@ -69332,6 +70742,33 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type PosDrawerOpenCreateWithoutShiftInput = {
+    openNo: string
+    branchId?: number | null
+    reason: string
+    createdById: number
+    createdAt?: Date | string
+  }
+
+  export type PosDrawerOpenUncheckedCreateWithoutShiftInput = {
+    id?: number
+    openNo: string
+    branchId?: number | null
+    reason: string
+    createdById: number
+    createdAt?: Date | string
+  }
+
+  export type PosDrawerOpenCreateOrConnectWithoutShiftInput = {
+    where: PosDrawerOpenWhereUniqueInput
+    create: XOR<PosDrawerOpenCreateWithoutShiftInput, PosDrawerOpenUncheckedCreateWithoutShiftInput>
+  }
+
+  export type PosDrawerOpenCreateManyShiftInputEnvelope = {
+    data: PosDrawerOpenCreateManyShiftInput | PosDrawerOpenCreateManyShiftInput[]
+    skipDuplicates?: boolean
+  }
+
   export type PosCounterSaleUpsertWithWhereUniqueWithoutShiftInput = {
     where: PosCounterSaleWhereUniqueInput
     update: XOR<PosCounterSaleUpdateWithoutShiftInput, PosCounterSaleUncheckedUpdateWithoutShiftInput>
@@ -69441,6 +70878,35 @@ export namespace Prisma {
     data: XOR<PosReturnUpdateManyMutationInput, PosReturnUncheckedUpdateManyWithoutShiftInput>
   }
 
+  export type PosDrawerOpenUpsertWithWhereUniqueWithoutShiftInput = {
+    where: PosDrawerOpenWhereUniqueInput
+    update: XOR<PosDrawerOpenUpdateWithoutShiftInput, PosDrawerOpenUncheckedUpdateWithoutShiftInput>
+    create: XOR<PosDrawerOpenCreateWithoutShiftInput, PosDrawerOpenUncheckedCreateWithoutShiftInput>
+  }
+
+  export type PosDrawerOpenUpdateWithWhereUniqueWithoutShiftInput = {
+    where: PosDrawerOpenWhereUniqueInput
+    data: XOR<PosDrawerOpenUpdateWithoutShiftInput, PosDrawerOpenUncheckedUpdateWithoutShiftInput>
+  }
+
+  export type PosDrawerOpenUpdateManyWithWhereWithoutShiftInput = {
+    where: PosDrawerOpenScalarWhereInput
+    data: XOR<PosDrawerOpenUpdateManyMutationInput, PosDrawerOpenUncheckedUpdateManyWithoutShiftInput>
+  }
+
+  export type PosDrawerOpenScalarWhereInput = {
+    AND?: PosDrawerOpenScalarWhereInput | PosDrawerOpenScalarWhereInput[]
+    OR?: PosDrawerOpenScalarWhereInput[]
+    NOT?: PosDrawerOpenScalarWhereInput | PosDrawerOpenScalarWhereInput[]
+    id?: IntFilter<"PosDrawerOpen"> | number
+    openNo?: StringFilter<"PosDrawerOpen"> | string
+    branchId?: IntNullableFilter<"PosDrawerOpen"> | number | null
+    shiftId?: IntNullableFilter<"PosDrawerOpen"> | number | null
+    reason?: StringFilter<"PosDrawerOpen"> | string
+    createdById?: IntFilter<"PosDrawerOpen"> | number
+    createdAt?: DateTimeFilter<"PosDrawerOpen"> | Date | string
+  }
+
   export type PosShiftCreateWithoutCashEntriesInput = {
     branchId?: number | null
     shiftNo: string
@@ -69466,6 +70932,7 @@ export namespace Prisma {
     sales?: PosCounterSaleCreateNestedManyWithoutShiftInput
     movements?: InventoryMovementCreateNestedManyWithoutShiftInput
     returns?: PosReturnCreateNestedManyWithoutShiftInput
+    drawerOpens?: PosDrawerOpenCreateNestedManyWithoutShiftInput
   }
 
   export type PosShiftUncheckedCreateWithoutCashEntriesInput = {
@@ -69494,6 +70961,7 @@ export namespace Prisma {
     sales?: PosCounterSaleUncheckedCreateNestedManyWithoutShiftInput
     movements?: InventoryMovementUncheckedCreateNestedManyWithoutShiftInput
     returns?: PosReturnUncheckedCreateNestedManyWithoutShiftInput
+    drawerOpens?: PosDrawerOpenUncheckedCreateNestedManyWithoutShiftInput
   }
 
   export type PosShiftCreateOrConnectWithoutCashEntriesInput = {
@@ -69537,6 +71005,7 @@ export namespace Prisma {
     sales?: PosCounterSaleUpdateManyWithoutShiftNestedInput
     movements?: InventoryMovementUpdateManyWithoutShiftNestedInput
     returns?: PosReturnUpdateManyWithoutShiftNestedInput
+    drawerOpens?: PosDrawerOpenUpdateManyWithoutShiftNestedInput
   }
 
   export type PosShiftUncheckedUpdateWithoutCashEntriesInput = {
@@ -69563,6 +71032,137 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     report?: NullableJsonNullValueInput | InputJsonValue
     sales?: PosCounterSaleUncheckedUpdateManyWithoutShiftNestedInput
+    movements?: InventoryMovementUncheckedUpdateManyWithoutShiftNestedInput
+    returns?: PosReturnUncheckedUpdateManyWithoutShiftNestedInput
+    drawerOpens?: PosDrawerOpenUncheckedUpdateManyWithoutShiftNestedInput
+  }
+
+  export type PosShiftCreateWithoutDrawerOpensInput = {
+    branchId?: number | null
+    shiftNo: string
+    status?: string
+    openedById: number
+    openedAt?: Date | string
+    openingFloat: number
+    countedCash?: number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: number | null
+    countedAt?: Date | string | null
+    expectedCash?: number | null
+    cashDifference?: number | null
+    differenceReason?: string | null
+    cardSlipTotal?: number | null
+    cardDifferenceReason?: string | null
+    floatLeft?: number | null
+    cashBanked?: number | null
+    closedById?: number | null
+    closedAt?: Date | string | null
+    notes?: string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    sales?: PosCounterSaleCreateNestedManyWithoutShiftInput
+    cashEntries?: PosCashEntryCreateNestedManyWithoutShiftInput
+    movements?: InventoryMovementCreateNestedManyWithoutShiftInput
+    returns?: PosReturnCreateNestedManyWithoutShiftInput
+  }
+
+  export type PosShiftUncheckedCreateWithoutDrawerOpensInput = {
+    id?: number
+    branchId?: number | null
+    shiftNo: string
+    status?: string
+    openedById: number
+    openedAt?: Date | string
+    openingFloat: number
+    countedCash?: number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: number | null
+    countedAt?: Date | string | null
+    expectedCash?: number | null
+    cashDifference?: number | null
+    differenceReason?: string | null
+    cardSlipTotal?: number | null
+    cardDifferenceReason?: string | null
+    floatLeft?: number | null
+    cashBanked?: number | null
+    closedById?: number | null
+    closedAt?: Date | string | null
+    notes?: string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    sales?: PosCounterSaleUncheckedCreateNestedManyWithoutShiftInput
+    cashEntries?: PosCashEntryUncheckedCreateNestedManyWithoutShiftInput
+    movements?: InventoryMovementUncheckedCreateNestedManyWithoutShiftInput
+    returns?: PosReturnUncheckedCreateNestedManyWithoutShiftInput
+  }
+
+  export type PosShiftCreateOrConnectWithoutDrawerOpensInput = {
+    where: PosShiftWhereUniqueInput
+    create: XOR<PosShiftCreateWithoutDrawerOpensInput, PosShiftUncheckedCreateWithoutDrawerOpensInput>
+  }
+
+  export type PosShiftUpsertWithoutDrawerOpensInput = {
+    update: XOR<PosShiftUpdateWithoutDrawerOpensInput, PosShiftUncheckedUpdateWithoutDrawerOpensInput>
+    create: XOR<PosShiftCreateWithoutDrawerOpensInput, PosShiftUncheckedCreateWithoutDrawerOpensInput>
+    where?: PosShiftWhereInput
+  }
+
+  export type PosShiftUpdateToOneWithWhereWithoutDrawerOpensInput = {
+    where?: PosShiftWhereInput
+    data: XOR<PosShiftUpdateWithoutDrawerOpensInput, PosShiftUncheckedUpdateWithoutDrawerOpensInput>
+  }
+
+  export type PosShiftUpdateWithoutDrawerOpensInput = {
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    shiftNo?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    openedById?: IntFieldUpdateOperationsInput | number
+    openedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    openingFloat?: FloatFieldUpdateOperationsInput | number
+    countedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: NullableIntFieldUpdateOperationsInput | number | null
+    countedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expectedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashDifference?: NullableFloatFieldUpdateOperationsInput | number | null
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cardSlipTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    cardDifferenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    floatLeft?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashBanked?: NullableFloatFieldUpdateOperationsInput | number | null
+    closedById?: NullableIntFieldUpdateOperationsInput | number | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    sales?: PosCounterSaleUpdateManyWithoutShiftNestedInput
+    cashEntries?: PosCashEntryUpdateManyWithoutShiftNestedInput
+    movements?: InventoryMovementUpdateManyWithoutShiftNestedInput
+    returns?: PosReturnUpdateManyWithoutShiftNestedInput
+  }
+
+  export type PosShiftUncheckedUpdateWithoutDrawerOpensInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    shiftNo?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    openedById?: IntFieldUpdateOperationsInput | number
+    openedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    openingFloat?: FloatFieldUpdateOperationsInput | number
+    countedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    denominations?: NullableJsonNullValueInput | InputJsonValue
+    countedById?: NullableIntFieldUpdateOperationsInput | number | null
+    countedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expectedCash?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashDifference?: NullableFloatFieldUpdateOperationsInput | number | null
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cardSlipTotal?: NullableFloatFieldUpdateOperationsInput | number | null
+    cardDifferenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    floatLeft?: NullableFloatFieldUpdateOperationsInput | number | null
+    cashBanked?: NullableFloatFieldUpdateOperationsInput | number | null
+    closedById?: NullableIntFieldUpdateOperationsInput | number | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    report?: NullableJsonNullValueInput | InputJsonValue
+    sales?: PosCounterSaleUncheckedUpdateManyWithoutShiftNestedInput
+    cashEntries?: PosCashEntryUncheckedUpdateManyWithoutShiftNestedInput
     movements?: InventoryMovementUncheckedUpdateManyWithoutShiftNestedInput
     returns?: PosReturnUncheckedUpdateManyWithoutShiftNestedInput
   }
@@ -69592,6 +71192,7 @@ export namespace Prisma {
     sales?: PosCounterSaleCreateNestedManyWithoutShiftInput
     cashEntries?: PosCashEntryCreateNestedManyWithoutShiftInput
     returns?: PosReturnCreateNestedManyWithoutShiftInput
+    drawerOpens?: PosDrawerOpenCreateNestedManyWithoutShiftInput
   }
 
   export type PosShiftUncheckedCreateWithoutMovementsInput = {
@@ -69620,6 +71221,7 @@ export namespace Prisma {
     sales?: PosCounterSaleUncheckedCreateNestedManyWithoutShiftInput
     cashEntries?: PosCashEntryUncheckedCreateNestedManyWithoutShiftInput
     returns?: PosReturnUncheckedCreateNestedManyWithoutShiftInput
+    drawerOpens?: PosDrawerOpenUncheckedCreateNestedManyWithoutShiftInput
   }
 
   export type PosShiftCreateOrConnectWithoutMovementsInput = {
@@ -69663,6 +71265,7 @@ export namespace Prisma {
     sales?: PosCounterSaleUpdateManyWithoutShiftNestedInput
     cashEntries?: PosCashEntryUpdateManyWithoutShiftNestedInput
     returns?: PosReturnUpdateManyWithoutShiftNestedInput
+    drawerOpens?: PosDrawerOpenUpdateManyWithoutShiftNestedInput
   }
 
   export type PosShiftUncheckedUpdateWithoutMovementsInput = {
@@ -69691,6 +71294,7 @@ export namespace Prisma {
     sales?: PosCounterSaleUncheckedUpdateManyWithoutShiftNestedInput
     cashEntries?: PosCashEntryUncheckedUpdateManyWithoutShiftNestedInput
     returns?: PosReturnUncheckedUpdateManyWithoutShiftNestedInput
+    drawerOpens?: PosDrawerOpenUncheckedUpdateManyWithoutShiftNestedInput
   }
 
   export type SupplierCreateWithoutPurchaseOrdersInput = {
@@ -70475,6 +72079,7 @@ export namespace Prisma {
     sales?: PosCounterSaleCreateNestedManyWithoutShiftInput
     cashEntries?: PosCashEntryCreateNestedManyWithoutShiftInput
     movements?: InventoryMovementCreateNestedManyWithoutShiftInput
+    drawerOpens?: PosDrawerOpenCreateNestedManyWithoutShiftInput
   }
 
   export type PosShiftUncheckedCreateWithoutReturnsInput = {
@@ -70503,6 +72108,7 @@ export namespace Prisma {
     sales?: PosCounterSaleUncheckedCreateNestedManyWithoutShiftInput
     cashEntries?: PosCashEntryUncheckedCreateNestedManyWithoutShiftInput
     movements?: InventoryMovementUncheckedCreateNestedManyWithoutShiftInput
+    drawerOpens?: PosDrawerOpenUncheckedCreateNestedManyWithoutShiftInput
   }
 
   export type PosShiftCreateOrConnectWithoutReturnsInput = {
@@ -70672,6 +72278,7 @@ export namespace Prisma {
     sales?: PosCounterSaleUpdateManyWithoutShiftNestedInput
     cashEntries?: PosCashEntryUpdateManyWithoutShiftNestedInput
     movements?: InventoryMovementUpdateManyWithoutShiftNestedInput
+    drawerOpens?: PosDrawerOpenUpdateManyWithoutShiftNestedInput
   }
 
   export type PosShiftUncheckedUpdateWithoutReturnsInput = {
@@ -70700,6 +72307,7 @@ export namespace Prisma {
     sales?: PosCounterSaleUncheckedUpdateManyWithoutShiftNestedInput
     cashEntries?: PosCashEntryUncheckedUpdateManyWithoutShiftNestedInput
     movements?: InventoryMovementUncheckedUpdateManyWithoutShiftNestedInput
+    drawerOpens?: PosDrawerOpenUncheckedUpdateManyWithoutShiftNestedInput
   }
 
   export type BranchStockCreateWithoutBranchInput = {
@@ -73978,6 +75586,15 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
+  export type PosDrawerOpenCreateManyShiftInput = {
+    id?: number
+    openNo: string
+    branchId?: number | null
+    reason: string
+    createdById: number
+    createdAt?: Date | string
+  }
+
   export type PosCounterSaleUpdateWithoutShiftInput = {
     branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
@@ -74243,6 +75860,32 @@ export namespace Prisma {
     note?: NullableStringFieldUpdateOperationsInput | string | null
     disposal?: NullableStringFieldUpdateOperationsInput | string | null
     reference?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosDrawerOpenUpdateWithoutShiftInput = {
+    openNo?: StringFieldUpdateOperationsInput | string
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    reason?: StringFieldUpdateOperationsInput | string
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosDrawerOpenUncheckedUpdateWithoutShiftInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    openNo?: StringFieldUpdateOperationsInput | string
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    reason?: StringFieldUpdateOperationsInput | string
+    createdById?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PosDrawerOpenUncheckedUpdateManyWithoutShiftInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    openNo?: StringFieldUpdateOperationsInput | string
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    reason?: StringFieldUpdateOperationsInput | string
     createdById?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -74902,6 +76545,10 @@ export namespace Prisma {
      * @deprecated Use PosCashEntryDefaultArgs instead
      */
     export type PosCashEntryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PosCashEntryDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use PosDrawerOpenDefaultArgs instead
+     */
+    export type PosDrawerOpenArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PosDrawerOpenDefaultArgs<ExtArgs>
     /**
      * @deprecated Use InventoryMovementDefaultArgs instead
      */

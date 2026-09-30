@@ -5,6 +5,7 @@ import { EXPENSE_CATEGORIES, HOLDING_SOURCE, INCOME_CATEGORIES, SOURCE_LABELS } 
 import { findOpenShift } from "./stock-movements";
 import { mainBranch } from "../branches/branch-context";
 import { forBranch } from "../branches/branch-stock";
+import { shiftDrawerOpens } from "./drawer.service";
 import { DISPOSAL_LABELS as RETURN_DISPOSAL_LABELS, TYPE_LABELS as RETURN_TYPE_LABELS } from "../returns/returns.service";
 
 /** Sri Lankan notes and coins counted at the till. */
@@ -53,7 +54,7 @@ export async function summarizeShift(shiftId: number) {
 
   const branch = shift.branchId ? await prisma.branch.findUnique({ where: { id: shift.branchId } }) : await mainBranch();
   if (!branch) throw AppError.notFound("Branch not found");
-  const [sales, entries, movements, allProducts] = await Promise.all([
+  const [sales, entries, movements, allProducts, noSaleOpens] = await Promise.all([
     prisma.posCounterSale.findMany({
       where: { shiftId },
       orderBy: { createdAt: "asc" },
@@ -65,6 +66,7 @@ export async function summarizeShift(shiftId: number) {
       select: { id: true, name: true, compatibleWith: true, quantity: true, emptyBottlesOnHand: true, damagedQuantity: true, sellingPrice: true, brand: { select: { name: true } }, category: { select: { name: true } } },
       orderBy: [{ categoryId: "asc" }, { name: "asc" }],
     }),
+    shiftDrawerOpens(shiftId),
   ]);
   // Stock as this branch holds it (closing = its shelf count now).
   const products = await forBranch(branch.id, allProducts);
@@ -479,6 +481,12 @@ export async function summarizeShift(shiftId: number) {
     returns,
     damagedStock,
     goods,
+    /** How often the cash drawer opened: once per bill with cash, plus every "no sale" open (with its reason). */
+    drawer: {
+      cashBills: sales.filter((sale) => sale.cashPaid > 0).length,
+      noSaleCount: noSaleOpens.length,
+      noSale: noSaleOpens,
+    },
     stockLog,
     journal,
   };

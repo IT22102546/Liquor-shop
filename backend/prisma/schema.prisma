@@ -681,6 +681,7 @@ model PosShift {
   cashEntries          PosCashEntry[]
   movements            InventoryMovement[]
   returns              PosReturn[]
+  drawerOpens          PosDrawerOpen[]
 
   @@index([status])
   @@index([openedAt])
@@ -725,6 +726,24 @@ model PosCashEntry {
   @@index([shiftId])
   @@index([branchId])
   @@map("pos_cash_entries")
+}
+
+/// The cash drawer opened without a sale ("no sale"), with the reason given. Drawer opens for
+/// cash bills are not stored here: every cash bill is already its own record.
+model PosDrawerOpen {
+  id          Int       @id @default(autoincrement())
+  /// NS-000123
+  openNo      String    @unique
+  branchId    Int?
+  shiftId     Int?
+  shift       PosShift? @relation(fields: [shiftId], references: [id])
+  reason      String
+  createdById Int
+  createdAt   DateTime  @default(now())
+
+  @@index([shiftId])
+  @@index([branchId, createdAt])
+  @@map("pos_drawer_opens")
 }
 
 /// Every change to a product's stock or empties, for the stock day book.

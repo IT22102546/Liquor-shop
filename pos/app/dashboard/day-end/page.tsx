@@ -15,7 +15,7 @@ type CurrentShift = {
   denominations: number[];
 };
 type ShiftRow = { id: number; shiftNo: string; status: string; openedAt: string; openedBy: string; closedAt: string | null; closedBy: string | null; openingFloat: number; netSales: number | null; bills: number | null; cashDifference: number | null; cashBanked: number | null };
-type ShiftTab = "bills" | "payments" | "wallets" | "returns" | "goods" | "staff" | "items" | "offers" | "cash" | "stock" | "stockin" | "journal";
+type ShiftTab = "bills" | "payments" | "wallets" | "returns" | "goods" | "staff" | "items" | "offers" | "cash" | "stock" | "stockin" | "journal" | "drawer";
 type CountResult = { countedCash: number; expectedCash: number; difference: number; cardSales: number; recounts: number };
 
 const money = (value: number | null | undefined) => (value == null ? "—" : `Rs. ${value.toLocaleString("en-LK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
@@ -160,7 +160,7 @@ export default function DayEndPage() {
 
           <section className="lx-card lx-log-card">
             <div className="lx-seg-plain" role="tablist" style={{ margin: "0.4rem 0.4rem 0.6rem" }}>
-              {([["bills", `Sales (${report.sales.bills})`], ["payments", `Payments${report.payments?.splitBills.length ? ` · ${report.payments.splitBills.length} split` : ""}`], ["wallets", `Customer wallets (${report.wallet?.rows.length ?? 0})`], ["returns", `Returns & damages (${report.returns?.rows.length ?? 0})`], ["goods", `Goods in & out (${(report.goods?.grns.length ?? 0) + (report.goods?.sent.length ?? 0) + (report.goods?.received.length ?? 0)})`], ["staff", "By staff"], ["items", "Items sold"], ["offers", `Discounts & loyalty (${report.sales.loyalty?.rows.length ?? 0})`], ["cash", `Expenses & cash in (${entries.length})`], ["stock", "Stock book"], ["stockin", `Stock in & changes (${report.stockLog?.length ?? 0})`], ["journal", `Shift journal (${report.journal?.length ?? 0})`]] as const).map(([key, label]) => (
+              {([["bills", `Sales (${report.sales.bills})`], ["payments", `Payments${report.payments?.splitBills.length ? ` · ${report.payments.splitBills.length} split` : ""}`], ["wallets", `Customer wallets (${report.wallet?.rows.length ?? 0})`], ["returns", `Returns & damages (${report.returns?.rows.length ?? 0})`], ["goods", `Goods in & out (${(report.goods?.grns.length ?? 0) + (report.goods?.sent.length ?? 0) + (report.goods?.received.length ?? 0)})`], ["staff", "By staff"], ["items", "Items sold"], ["offers", `Discounts & loyalty (${report.sales.loyalty?.rows.length ?? 0})`], ["cash", `Expenses & cash in (${entries.length})`], ["drawer", `Drawer opened${report.drawer ? ` (${report.drawer.noSaleCount} no sale)` : ""}`], ["stock", "Stock book"], ["stockin", `Stock in & changes (${report.stockLog?.length ?? 0})`], ["journal", `Shift journal (${report.journal?.length ?? 0})`]] as const).map(([key, label]) => (
                 <button key={key} type="button" className={tab === key ? "active" : ""} onClick={() => setTab(key)}>{label}</button>
               ))}
             </div>
@@ -481,6 +481,31 @@ function ShiftTables({ report, tab }: { report: ShiftReport; tab: ShiftTab }) {
                 <td style={{ textAlign: "right" }}>{row.pointsRedeemed ? <><span className="lx-amount-out">{row.pointsRedeemed}</span><div className="td-muted">−{money(row.pointsValue)}</div></> : "—"}</td>
                 <td style={{ textAlign: "right" }}>{row.pointsEarned ? <span className="lx-amount-in">+{row.pointsEarned}</span> : "—"}</td>
                 <td style={{ textAlign: "right" }}>{money(row.total)}</td>
+              </tr>
+            ))}</tbody>
+          </table></div>
+        )}
+      </>
+    );
+  }
+  if (tab === "drawer") {
+    const drawer = report.drawer;
+    if (!drawer) return <div className="lx-empty">Drawer openings were not recorded for this shift (closed before this was added).</div>;
+    return (
+      <>
+        <div className="rt-kpis" style={{ margin: "0 0.4rem 0.8rem" }}>
+          <div className="rt-kpi"><span>With a cash bill</span><strong>{drawer.cashBills}</strong></div>
+          <div className={`rt-kpi${drawer.noSaleCount ? " warn" : ""}`}><span>Without a sale</span><strong>{drawer.noSaleCount}</strong></div>
+        </div>
+        {drawer.noSale.length === 0 ? <div className="lx-empty">The drawer was not opened without a sale this shift.</div> : (
+          <div className="data-table-wrap"><table className="data-table">
+            <thead><tr><th>Time</th><th>No</th><th>Opened by</th><th>Reason</th></tr></thead>
+            <tbody>{[...drawer.noSale].reverse().map((row) => (
+              <tr key={row.openNo}>
+                <td className="td-muted">{hhmm(row.at)}</td>
+                <td className="td-muted">{row.openNo}</td>
+                <td>{row.openedBy}</td>
+                <td><strong>{row.reason}</strong></td>
               </tr>
             ))}</tbody>
           </table></div>

@@ -1678,3 +1678,22 @@ html:not([data-theme="dark"]) .sidebar .nav-section-divider { background: #efe4c
 .staff-table td:first-child { min-width: 11rem; }
 .staff-table .bm-select { min-width: 9.5rem; }
 @media (max-width: 1320px) { .staff-grid { grid-template-columns: 1fr; } .staff-grid > form { min-height: 0; } }
+
+/* ── Cash drawer (no sale) ── */
+button.cd-open-btn { font: inherit; font-size: 0.74rem; font-weight: 700; cursor: pointer; }
+.cd-modal { max-width: 560px; }
+.cd-tabs { margin: 0.2rem 0 0.4rem; }
+.cd-status { display: flex; align-items: center; gap: 0.45rem; font-size: 0.82rem; color: var(--text-soft); margin: 0.2rem 0 0; flex-wrap: wrap; }
+.cd-status b { color: var(--text); }
+.cd-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.cd-dot.on { background: var(--success); box-shadow: 0 0 0 3px var(--success-bg); }
+.cd-dot.off { background: var(--text-xsoft); }
+.cd-hint { font-size: 0.78rem; margin: 0; }
+.cd-modes { display: grid; gap: 0.55rem; }
+.cd-mode { display: grid; gap: 0.2rem; text-align: left; padding: 0.75rem 0.9rem; border-radius: var(--radius-sm); border: 1.5px solid var(--panel-border); background: var(--panel-2); color: var(--text); font: inherit; cursor: pointer; transition: border-color var(--transition), background var(--transition); }
+.cd-mode strong { font-size: 0.88rem; }
+.cd-mode strong em { font-style: normal; font-weight: 600; color: var(--soft-gold-text); }
+.cd-mode span { font-size: 0.78rem; color: var(--text-soft); line-height: 1.4; }
+.cd-mode:hover:not(:disabled) { border-color: var(--soft-gold-border); }
+.cd-mode.active { border-color: var(--accent); background: var(--accent-bg); }
+.cd-mode:disabled { opacity: 0.5; cursor: not-allowed; }
