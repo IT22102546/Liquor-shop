@@ -93,6 +93,8 @@ export async function summarizeShift(shiftId: number) {
       discountAmount: sale.discountAmount,
       pointsValue: sale.pointsValue,
       total: sale.totalAmount,
+      /** Rung up while the till had no connection, uploaded later. */
+      offline: sale.soldOffline,
     };
   });
 
@@ -462,6 +464,8 @@ export async function summarizeShift(shiftId: number) {
         other: { units: lines.filter((line) => !line.isHardLiquor).reduce((sum, line) => sum + line.quantity, 0), amount: round2(lines.filter((line) => !line.isHardLiquor).reduce((sum, line) => sum + line.finalSellingPrice, 0)) },
       },
       billList: bills,
+      /** Bills rung up while the till was offline and uploaded later. */
+      offlineBills: sales.filter((sale) => sale.soldOffline).length,
     },
     cash: {
       openingFloat: shift.openingFloat,

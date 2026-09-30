@@ -167,6 +167,20 @@ export async function checkoutSale(
   }
 }
 
+/** Was a bill with this till reference saved? (Asked after a connection drop.) 404 = not saved. */
+export async function getCheckoutByClientRef(req: Request, res: Response, next: NextFunction) {
+  try {
+    const clientRef = String(req.params.clientRef ?? "");
+    if (!/^[A-Za-z0-9-]{8,64}$/.test(clientRef)) throw AppError.validation({ clientRef: ["Invalid bill reference"] });
+    const user = (req as unknown as { user: { id: number } }).user;
+    const saved = await service.findCheckoutByClientRef(clientRef, user.id);
+    if (!saved) throw AppError.notFound("This bill was not saved");
+    return sendSuccess(res, saved);
+  } catch (error) {
+    return next(error);
+  }
+}
+
 export async function getPurchases(
   req: Request,
   res: Response,

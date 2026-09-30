@@ -11,7 +11,7 @@ export type BranchCounts = { quantity: number; damaged: number; empties: number 
  * company-wide totals move with them in the same transaction. Taking more than a branch has fails
  * (another till may have sold the bottles a moment ago).
  */
-export async function changeStock(db: Db, branchId: number, productId: number, delta: StockDelta, what = "bottles") {
+export async function changeStock(db: Db, branchId: number, productId: number, delta: StockDelta, what = "bottles", options: { allowShortShelf?: boolean } = {}) {
   const quantity = delta.quantity ?? 0;
   const damaged = delta.damaged ?? 0;
   const empties = delta.empties ?? 0;
@@ -21,7 +21,8 @@ export async function changeStock(db: Db, branchId: number, productId: number, d
     where: {
       branchId,
       productId,
-      ...(quantity < 0 ? { quantity: { gte: -quantity } } : {}),
+      // A sale made offline already happened: the shelf may go below zero, showing the count was wrong.
+      ...(quantity < 0 && !options.allowShortShelf ? { quantity: { gte: -quantity } } : {}),
       ...(damaged < 0 ? { damagedQuantity: { gte: -damaged } } : {}),
       ...(empties < 0 ? { emptyBottlesOnHand: { gte: -empties } } : {}),
     },

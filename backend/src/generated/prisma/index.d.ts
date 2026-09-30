@@ -7265,6 +7265,8 @@ export namespace Prisma {
     id: number | null
     branchId: number | null
     invoiceGroupCode: string | null
+    clientRef: string | null
+    soldOffline: boolean | null
     totalAmount: number | null
     emptyDeduction: number | null
     emptiesReturned: number | null
@@ -7294,6 +7296,8 @@ export namespace Prisma {
     id: number | null
     branchId: number | null
     invoiceGroupCode: string | null
+    clientRef: string | null
+    soldOffline: boolean | null
     totalAmount: number | null
     emptyDeduction: number | null
     emptiesReturned: number | null
@@ -7323,6 +7327,9 @@ export namespace Prisma {
     id: number
     branchId: number
     invoiceGroupCode: number
+    clientRef: number
+    checkoutResult: number
+    soldOffline: number
     totalAmount: number
     emptyDeduction: number
     emptiesReturned: number
@@ -7402,6 +7409,8 @@ export namespace Prisma {
     id?: true
     branchId?: true
     invoiceGroupCode?: true
+    clientRef?: true
+    soldOffline?: true
     totalAmount?: true
     emptyDeduction?: true
     emptiesReturned?: true
@@ -7431,6 +7440,8 @@ export namespace Prisma {
     id?: true
     branchId?: true
     invoiceGroupCode?: true
+    clientRef?: true
+    soldOffline?: true
     totalAmount?: true
     emptyDeduction?: true
     emptiesReturned?: true
@@ -7460,6 +7471,9 @@ export namespace Prisma {
     id?: true
     branchId?: true
     invoiceGroupCode?: true
+    clientRef?: true
+    checkoutResult?: true
+    soldOffline?: true
     totalAmount?: true
     emptyDeduction?: true
     emptiesReturned?: true
@@ -7576,6 +7590,9 @@ export namespace Prisma {
     id: number
     branchId: number | null
     invoiceGroupCode: string
+    clientRef: string | null
+    checkoutResult: JsonValue | null
+    soldOffline: boolean
     totalAmount: number
     emptyDeduction: number
     emptiesReturned: number
@@ -7624,6 +7641,9 @@ export namespace Prisma {
     id?: boolean
     branchId?: boolean
     invoiceGroupCode?: boolean
+    clientRef?: boolean
+    checkoutResult?: boolean
+    soldOffline?: boolean
     totalAmount?: boolean
     emptyDeduction?: boolean
     emptiesReturned?: boolean
@@ -7656,6 +7676,9 @@ export namespace Prisma {
     id?: boolean
     branchId?: boolean
     invoiceGroupCode?: boolean
+    clientRef?: boolean
+    checkoutResult?: boolean
+    soldOffline?: boolean
     totalAmount?: boolean
     emptyDeduction?: boolean
     emptiesReturned?: boolean
@@ -7688,6 +7711,9 @@ export namespace Prisma {
     id?: boolean
     branchId?: boolean
     invoiceGroupCode?: boolean
+    clientRef?: boolean
+    checkoutResult?: boolean
+    soldOffline?: boolean
     totalAmount?: boolean
     emptyDeduction?: boolean
     emptiesReturned?: boolean
@@ -7738,6 +7764,19 @@ export namespace Prisma {
        */
       branchId: number | null
       invoiceGroupCode: string
+      /**
+       * Made by the till before sending the bill. If the same bill arrives twice (weak network,
+       * automatic retry), the second request gets the first result instead of a second sale.
+       */
+      clientRef: string | null
+      /**
+       * What checkout answered the first time, sent back unchanged for a repeated request.
+       */
+      checkoutResult: Prisma.JsonValue | null
+      /**
+       * Rung up on the till while the connection was down, and uploaded later (createdAt = time sold).
+       */
+      soldOffline: boolean
       totalAmount: number
       /**
        * Total deducted for empty bottles returned (already subtracted from totalAmount).
@@ -8190,6 +8229,9 @@ export namespace Prisma {
     readonly id: FieldRef<"PosCounterSale", 'Int'>
     readonly branchId: FieldRef<"PosCounterSale", 'Int'>
     readonly invoiceGroupCode: FieldRef<"PosCounterSale", 'String'>
+    readonly clientRef: FieldRef<"PosCounterSale", 'String'>
+    readonly checkoutResult: FieldRef<"PosCounterSale", 'Json'>
+    readonly soldOffline: FieldRef<"PosCounterSale", 'Boolean'>
     readonly totalAmount: FieldRef<"PosCounterSale", 'Float'>
     readonly emptyDeduction: FieldRef<"PosCounterSale", 'Float'>
     readonly emptiesReturned: FieldRef<"PosCounterSale", 'Int'>
@@ -49463,6 +49505,9 @@ export namespace Prisma {
     id: 'id',
     branchId: 'branchId',
     invoiceGroupCode: 'invoiceGroupCode',
+    clientRef: 'clientRef',
+    checkoutResult: 'checkoutResult',
+    soldOffline: 'soldOffline',
     totalAmount: 'totalAmount',
     emptyDeduction: 'emptyDeduction',
     emptiesReturned: 'emptiesReturned',
@@ -50165,19 +50210,19 @@ export namespace Prisma {
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
-  export const JsonNullValueInput: {
-    JsonNull: typeof JsonNull
-  };
-
-  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
-
-
   export const NullableJsonNullValueInput: {
     DbNull: typeof DbNull,
     JsonNull: typeof JsonNull
   };
 
   export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+  export const JsonNullValueInput: {
+    JsonNull: typeof JsonNull
+  };
+
+  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
   export const QueryMode: {
@@ -50288,6 +50333,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -50382,13 +50434,6 @@ export namespace Prisma {
    * Reference to a field of type 'PosPurchaseChannel[]'
    */
   export type ListEnumPosPurchaseChannelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PosPurchaseChannel[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Json'
-   */
-  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
     
 
 
@@ -50670,6 +50715,9 @@ export namespace Prisma {
     id?: IntFilter<"PosCounterSale"> | number
     branchId?: IntNullableFilter<"PosCounterSale"> | number | null
     invoiceGroupCode?: StringFilter<"PosCounterSale"> | string
+    clientRef?: StringNullableFilter<"PosCounterSale"> | string | null
+    checkoutResult?: JsonNullableFilter<"PosCounterSale">
+    soldOffline?: BoolFilter<"PosCounterSale"> | boolean
     totalAmount?: FloatFilter<"PosCounterSale"> | number
     emptyDeduction?: FloatFilter<"PosCounterSale"> | number
     emptiesReturned?: IntFilter<"PosCounterSale"> | number
@@ -50702,6 +50750,9 @@ export namespace Prisma {
     id?: SortOrder
     branchId?: SortOrderInput | SortOrder
     invoiceGroupCode?: SortOrder
+    clientRef?: SortOrderInput | SortOrder
+    checkoutResult?: SortOrderInput | SortOrder
+    soldOffline?: SortOrder
     totalAmount?: SortOrder
     emptyDeduction?: SortOrder
     emptiesReturned?: SortOrder
@@ -50733,10 +50784,13 @@ export namespace Prisma {
   export type PosCounterSaleWhereUniqueInput = Prisma.AtLeast<{
     id?: number
     invoiceGroupCode?: string
+    clientRef?: string
     AND?: PosCounterSaleWhereInput | PosCounterSaleWhereInput[]
     OR?: PosCounterSaleWhereInput[]
     NOT?: PosCounterSaleWhereInput | PosCounterSaleWhereInput[]
     branchId?: IntNullableFilter<"PosCounterSale"> | number | null
+    checkoutResult?: JsonNullableFilter<"PosCounterSale">
+    soldOffline?: BoolFilter<"PosCounterSale"> | boolean
     totalAmount?: FloatFilter<"PosCounterSale"> | number
     emptyDeduction?: FloatFilter<"PosCounterSale"> | number
     emptiesReturned?: IntFilter<"PosCounterSale"> | number
@@ -50763,12 +50817,15 @@ export namespace Prisma {
     cashier?: XOR<PosAdminRelationFilter, PosAdminWhereInput>
     customer?: XOR<PosCustomerNullableRelationFilter, PosCustomerWhereInput> | null
     shift?: XOR<PosShiftNullableRelationFilter, PosShiftWhereInput> | null
-  }, "id" | "invoiceGroupCode">
+  }, "id" | "invoiceGroupCode" | "clientRef">
 
   export type PosCounterSaleOrderByWithAggregationInput = {
     id?: SortOrder
     branchId?: SortOrderInput | SortOrder
     invoiceGroupCode?: SortOrder
+    clientRef?: SortOrderInput | SortOrder
+    checkoutResult?: SortOrderInput | SortOrder
+    soldOffline?: SortOrder
     totalAmount?: SortOrder
     emptyDeduction?: SortOrder
     emptiesReturned?: SortOrder
@@ -50806,6 +50863,9 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"PosCounterSale"> | number
     branchId?: IntNullableWithAggregatesFilter<"PosCounterSale"> | number | null
     invoiceGroupCode?: StringWithAggregatesFilter<"PosCounterSale"> | string
+    clientRef?: StringNullableWithAggregatesFilter<"PosCounterSale"> | string | null
+    checkoutResult?: JsonNullableWithAggregatesFilter<"PosCounterSale">
+    soldOffline?: BoolWithAggregatesFilter<"PosCounterSale"> | boolean
     totalAmount?: FloatWithAggregatesFilter<"PosCounterSale"> | number
     emptyDeduction?: FloatWithAggregatesFilter<"PosCounterSale"> | number
     emptiesReturned?: IntWithAggregatesFilter<"PosCounterSale"> | number
@@ -54566,6 +54626,9 @@ export namespace Prisma {
   export type PosCounterSaleCreateInput = {
     branchId?: number | null
     invoiceGroupCode: string
+    clientRef?: string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: boolean
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -54595,6 +54658,9 @@ export namespace Prisma {
     id?: number
     branchId?: number | null
     invoiceGroupCode: string
+    clientRef?: string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: boolean
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -54623,6 +54689,9 @@ export namespace Prisma {
   export type PosCounterSaleUpdateInput = {
     branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    clientRef?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: BoolFieldUpdateOperationsInput | boolean
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -54652,6 +54721,9 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    clientRef?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: BoolFieldUpdateOperationsInput | boolean
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -54681,6 +54753,9 @@ export namespace Prisma {
     id?: number
     branchId?: number | null
     invoiceGroupCode: string
+    clientRef?: string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: boolean
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -54709,6 +54784,9 @@ export namespace Prisma {
   export type PosCounterSaleUpdateManyMutationInput = {
     branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    clientRef?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: BoolFieldUpdateOperationsInput | boolean
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -54735,6 +54813,9 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    clientRef?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: BoolFieldUpdateOperationsInput | boolean
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -59003,6 +59084,28 @@ export namespace Prisma {
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
+  export type JsonNullableFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type FloatFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
@@ -59052,6 +59155,9 @@ export namespace Prisma {
     id?: SortOrder
     branchId?: SortOrder
     invoiceGroupCode?: SortOrder
+    clientRef?: SortOrder
+    checkoutResult?: SortOrder
+    soldOffline?: SortOrder
     totalAmount?: SortOrder
     emptyDeduction?: SortOrder
     emptiesReturned?: SortOrder
@@ -59105,6 +59211,8 @@ export namespace Prisma {
     id?: SortOrder
     branchId?: SortOrder
     invoiceGroupCode?: SortOrder
+    clientRef?: SortOrder
+    soldOffline?: SortOrder
     totalAmount?: SortOrder
     emptyDeduction?: SortOrder
     emptiesReturned?: SortOrder
@@ -59134,6 +59242,8 @@ export namespace Prisma {
     id?: SortOrder
     branchId?: SortOrder
     invoiceGroupCode?: SortOrder
+    clientRef?: SortOrder
+    soldOffline?: SortOrder
     totalAmount?: SortOrder
     emptyDeduction?: SortOrder
     emptiesReturned?: SortOrder
@@ -59181,6 +59291,31 @@ export namespace Prisma {
     pointsRedeemed?: SortOrder
     pointsValue?: SortOrder
     shiftId?: SortOrder
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type FloatWithAggregatesFilter<$PrismaModel = never> = {
@@ -60884,28 +61019,6 @@ export namespace Prisma {
     receiptId?: SortOrder
     amount?: SortOrder
   }
-  export type JsonNullableFilter<$PrismaModel = never> = 
-    | PatchUndefined<
-        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
 
   export type ActivityLogCountOrderByAggregateInput = {
     id?: SortOrder
@@ -60969,31 +61082,6 @@ export namespace Prisma {
     id?: SortOrder
     branchId?: SortOrder
     actorId?: SortOrder
-  }
-  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> = 
-    | PatchUndefined<
-        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedJsonNullableFilter<$PrismaModel>
-    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type PosSettingCountOrderByAggregateInput = {
@@ -65160,6 +65248,28 @@ export namespace Prisma {
     notIn?: $Enums.PaymentMethod[] | ListEnumPaymentMethodFieldRefInput<$PrismaModel>
     not?: NestedEnumPaymentMethodFilter<$PrismaModel> | $Enums.PaymentMethod
   }
+  export type NestedJsonNullableFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
@@ -65445,32 +65555,13 @@ export namespace Prisma {
     _min?: NestedEnumTransactionDirectionFilter<$PrismaModel>
     _max?: NestedEnumTransactionDirectionFilter<$PrismaModel>
   }
-  export type NestedJsonNullableFilter<$PrismaModel = never> = 
-    | PatchUndefined<
-        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<NestedJsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
 
   export type PosCounterSaleCreateWithoutCashierInput = {
     branchId?: number | null
     invoiceGroupCode: string
+    clientRef?: string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: boolean
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -65499,6 +65590,9 @@ export namespace Prisma {
     id?: number
     branchId?: number | null
     invoiceGroupCode: string
+    clientRef?: string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: boolean
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -65556,6 +65650,9 @@ export namespace Prisma {
     id?: IntFilter<"PosCounterSale"> | number
     branchId?: IntNullableFilter<"PosCounterSale"> | number | null
     invoiceGroupCode?: StringFilter<"PosCounterSale"> | string
+    clientRef?: StringNullableFilter<"PosCounterSale"> | string | null
+    checkoutResult?: JsonNullableFilter<"PosCounterSale">
+    soldOffline?: BoolFilter<"PosCounterSale"> | boolean
     totalAmount?: FloatFilter<"PosCounterSale"> | number
     emptyDeduction?: FloatFilter<"PosCounterSale"> | number
     emptiesReturned?: IntFilter<"PosCounterSale"> | number
@@ -67227,6 +67324,9 @@ export namespace Prisma {
   export type PosCounterSaleCreateWithoutCustomerInput = {
     branchId?: number | null
     invoiceGroupCode: string
+    clientRef?: string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: boolean
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -67255,6 +67355,9 @@ export namespace Prisma {
     id?: number
     branchId?: number | null
     invoiceGroupCode: string
+    clientRef?: string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: boolean
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -70527,6 +70630,9 @@ export namespace Prisma {
   export type PosCounterSaleCreateWithoutShiftInput = {
     branchId?: number | null
     invoiceGroupCode: string
+    clientRef?: string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: boolean
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -70555,6 +70661,9 @@ export namespace Prisma {
     id?: number
     branchId?: number | null
     invoiceGroupCode: string
+    clientRef?: string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: boolean
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -73386,6 +73495,9 @@ export namespace Prisma {
     id?: number
     branchId?: number | null
     invoiceGroupCode: string
+    clientRef?: string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: boolean
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -73413,6 +73525,9 @@ export namespace Prisma {
   export type PosCounterSaleUpdateWithoutCashierInput = {
     branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    clientRef?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: BoolFieldUpdateOperationsInput | boolean
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -73441,6 +73556,9 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    clientRef?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: BoolFieldUpdateOperationsInput | boolean
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -73469,6 +73587,9 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    clientRef?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: BoolFieldUpdateOperationsInput | boolean
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -74305,6 +74426,9 @@ export namespace Prisma {
     id?: number
     branchId?: number | null
     invoiceGroupCode: string
+    clientRef?: string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: boolean
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -74459,6 +74583,9 @@ export namespace Prisma {
   export type PosCounterSaleUpdateWithoutCustomerInput = {
     branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    clientRef?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: BoolFieldUpdateOperationsInput | boolean
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -74487,6 +74614,9 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    clientRef?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: BoolFieldUpdateOperationsInput | boolean
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -74515,6 +74645,9 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    clientRef?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: BoolFieldUpdateOperationsInput | boolean
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -75499,6 +75632,9 @@ export namespace Prisma {
     id?: number
     branchId?: number | null
     invoiceGroupCode: string
+    clientRef?: string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: boolean
     totalAmount: number
     emptyDeduction?: number
     emptiesReturned?: number
@@ -75598,6 +75734,9 @@ export namespace Prisma {
   export type PosCounterSaleUpdateWithoutShiftInput = {
     branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    clientRef?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: BoolFieldUpdateOperationsInput | boolean
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -75626,6 +75765,9 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    clientRef?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: BoolFieldUpdateOperationsInput | boolean
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number
@@ -75654,6 +75796,9 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     branchId?: NullableIntFieldUpdateOperationsInput | number | null
     invoiceGroupCode?: StringFieldUpdateOperationsInput | string
+    clientRef?: NullableStringFieldUpdateOperationsInput | string | null
+    checkoutResult?: NullableJsonNullValueInput | InputJsonValue
+    soldOffline?: BoolFieldUpdateOperationsInput | boolean
     totalAmount?: FloatFieldUpdateOperationsInput | number
     emptyDeduction?: FloatFieldUpdateOperationsInput | number
     emptiesReturned?: IntFieldUpdateOperationsInput | number

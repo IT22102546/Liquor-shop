@@ -45,6 +45,8 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
 | Area | What it does |
 |---|---|
 | Counter | Fast selling with barcode scanner, product grid, cart, empties, discounts, loyalty points, wallet, split payments, 80mm bill |
+| Weak / no internet | Bills are never saved twice (safe automatic retries); selling carries on offline and bills upload by themselves when the connection is back |
+| Cash drawer | Opens on cash bills; "Open drawer" (no sale) needs a reason and is recorded (`NS-`); works with a USB receipt printer, the printer driver or a COM port |
 | Payments | Cash, card, bank transfer / QR, split (cash + card/QR), wallet; change calculation; approval references |
 | Loyalty | Members by mobile number; points earned per rupee; points redeemed as a discount; wallet for kept change and refunds; full history per member |
 | Hard liquor | Per-product "Hard liquor" tick; max bottles per bill (default 12) enforced at the counter and on the server; printed on the bill |
@@ -55,10 +57,11 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
 | GRN | Goods received notes with supplier invoice check, rejected items, free issues, A4 print |
 | Branches | Any number of branches, each with its own stock, till, Day End, cash drawer and reports; branch switcher |
 | GTN | Branch-to-branch transfers: send, receive (good / damaged / missing), cancel, A4 print |
-| Day End | Shift open with float, expenses & cash in, blind cash count, card machine check, stock count, close with Z report; A4 Day End report |
+| Day End | Shift open with float, expenses & cash in, blind cash count, card machine check, stock count, drawer openings, offline bills, close with Z report; A4 Day End report |
 | Cash book | Vouchers (money out), receipts (money in), void with reason, "waiting to be banked" → banked |
 | Reports | Daily, weekly, monthly, yearly, custom; per branch or all branches; profit & loss; A4 print |
 | Activity Log | Every change, who / role / branch / when, plain-language summary, before → after, blocked attempts |
+| Hosting & deploys | Live on a VPS (PM2 + Nginx + HTTPS); every push to `main` is checked and deployed by GitHub Actions |
 | Staff & roles | Administrator, Cashier, Inventory Manager, Accountant; cashiers tied to a branch |
 
 ---
@@ -85,7 +88,19 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
 - **Payment:** Cash (with quick amounts and change), Card, Transfer / QR, or **Split** (cash + card and/or QR on one bill), with the approval or reference number.
 - **A shift must be open** at the branch before selling. It can be started from the counter.
 - **After the sale**, an on-screen receipt appears, ready to print (80mm), and can be reprinted any time.
-- **Cash drawer.** The drawer opens by itself when a bill with a cash part is completed. The **Open drawer** button (next to the shift number; also in the order ⋮ menu) opens it without a sale: the cashier gives a reason, and it is saved as a numbered **no-sale** record (`NS-000001`) with the name, time, branch and shift, *before* the drawer opens. Card and QR bills don't open it.
+- **Weak or dropping internet is safe.** Each bill carries its own reference from the till. If the connection drops or the reply is lost, the till tries again by itself ("Weak connection · trying again…"), and the server never saves the same bill twice. A bill that still can't be confirmed stays on screen with a clear message: press Complete sale again when the connection is back. If the order was changed in the meantime, or the page was reloaded, the till first checks whether the earlier bill was saved and tells the cashier.
+- **Selling continues when the internet is down.** If a bill can't reach the server, the till completes the sale anyway:
+  - the bill is saved on that computer and the receipt prints with a "Saved offline" note
+  - the drawer opens, and the stock on screen goes down
+  - a badge shows "N bills waiting to upload"
+  - after the first failure, each sale takes only a second or two
+
+  When the connection returns, the bills upload by themselves in order, with their real sale time, into the stock, the Day End (marked **Offline**) and the Activity Log. Each one is saved exactly once.
+  - Paying from a wallet or with points needs the connection; earning points is fine.
+  - If more bottles were sold offline than the shelf count showed, the sale is still recorded and the shortage is flagged.
+  - The shift can't be closed on a till that still has bills waiting.
+  - Keep the Bar Counter page open: reloading it while offline doesn't work yet.
+- **Cash drawer.** The drawer opens by itself when a bill with a cash part is completed. The **Open drawer** button opens it without a sale. It appears once a shift is open (next to the shift number in the header, and as *Open cash drawer* in the order ⋮ menu), for administrators and cashiers. Pressing it asks for a reason, and the opening is saved as a numbered **no-sale** record (`NS-000001`) with the name, time, branch and shift, *before* the drawer opens. Card and QR bills don't open it.
   - **Drawer setup** (once per counter computer, in the same window):
     - *USB receipt printer*: Chrome or Edge sends the ESC/POS "open drawer" signal to the printer the drawer is plugged into.
     - *Printer opens it when printing*: turn on "Open cash drawer" in the printer driver; the button prints a small NO SALE slip. Works with any printer, including network ones.
@@ -93,11 +108,12 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
     - *No drawer*: openings are still recorded.
   - No-sale opens appear in the Day End (**Drawer opened** tab, A4 report and Z slip), the period reports (count per staff member) and the Activity Log.
 - **Recent sales** and **Sold Products** are one click away.
+- **Sold Products** (*Sales → Sold Products*) lists every item sold: bill number, date, product, category, brand, customer, quantity and final price, with search and a date range.
 
 ## 2. Payments and bills
 
 - **Every bill records exactly how it was paid:** cash part, card part, transfer/QR part, wallet used, change kept in wallet, and change given.
-- **Bill numbers** are unique (`POS-…`). Each bill stores the branch, the shift, the cashier, the member, the discount and points, and each line (quantity, price, empties, share of the discount).
+- **Bill numbers** are unique (`POS-…`). The till makes the number before sending the bill, so the printed number stays the same even when the bill is sent again or uploaded later from offline. Each bill stores the branch, the shift, the cashier, the member, the discount and points, and each line (quantity, price, empties, share of the discount).
 - **Sales Bills page** (*Billing → Sales Bills*): search and date filters. Open a bill to see the full receipt and reprint it.
 - **The printed bill** (80mm) shows:
   - the shop name, and the branch name, address and phone
@@ -105,6 +121,7 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
   - how it was paid, cash received and change given, change kept in wallet
   - points earned and the new balance, wallet balance
   - the hard-liquor bottle count against the limit
+  - "Saved offline" for a bill rung up without a connection (member points are added when it uploads)
 
 ## 3. Loyalty customers, points and wallet
 
@@ -264,7 +281,7 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
 
   | Tab | Contents |
   |---|---|
-  | Sales | Each bill: time, number, cashier, customer, items, payment, total |
+  | Sales | Each bill: time, number, cashier, customer, items, payment, total. Bills rung up offline carry an **Offline** badge |
   | Payments | Cash, card, transfer / QR, split, and wallet; every split bill spelled out |
   | Customer wallets | Change kept, wallet spent, and refunds into wallets |
   | Returns & damages | Each exchange, refund, store damage and clearing; damaged stock |
@@ -273,6 +290,7 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
   | Items sold | Units and amounts; hard liquor vs others |
   | Discounts & loyalty | Discounts, points used and earned, per bill and per staff member |
   | Expenses & cash in | Every drawer entry, including voided ones |
+  | Drawer opened | How often the drawer opened with a cash bill, and every **no-sale** opening (time, `NS-` number, who, reason) |
   | Stock book | Per product: opening + received + from branch − sold − to branch + returned − damaged ± adjusted = closing |
   | Stock in & changes | Every stock movement other than sales, with who did it |
   | Shift journal | Everything else done during the shift (price changes, orders, settings, sign-ins…) |
@@ -283,12 +301,13 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
   3. **Check:** over or short against the expected cash. Any difference needs a reason.
   4. **Stock count:** ✓ when the shelf count matches, otherwise type the count. Differences are shown.
   5. **Close:** choose the float left for the next shift. The rest is cash banked or put in the safe.
+- **Close shift is blocked** on a computer that still has bills sold offline waiting to upload, so the Day End can't miss them. Let them upload first (the badge at the bottom shows them).
 - **On close:**
   - The **Z report** is frozen and can never change.
   - Takings are added to the cash book as receipts **waiting to be banked**.
 - **Prints:**
-  - **80mm Z slip.**
-  - **A4 Day End report:** KPIs, sales summary (with refunds and net sales after returns), cash drawer ledger, cash count by note, payments, card and QR lists, staff, discounts & loyalty, expenses, items, stock book, empties, damaged stock, bills, wallets, goods in & out, returns, stock log, journal and signatures.
+  - **80mm Z slip**, including "Drawer opened" (with a cash bill / no sale, with reasons) and the number of offline bills.
+  - **A4 Day End report:** KPIs, sales summary (with refunds and net sales after returns), cash drawer ledger, cash count by note, payments, card and QR lists, staff, discounts & loyalty, expenses, items, stock book, empties, damaged stock, bills (offline ones marked), cash drawer openings, wallets, goods in & out, returns, stock log, journal and signatures.
   - Both can be saved as PDF.
 - **Past shifts** are listed per branch; open one to view or print its report.
 
@@ -318,7 +337,7 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
   - − running expenses − damage loss + other income = **net profit**
 - **Breakdowns:** by hour, day or month (with a bar chart), by staff, by category, and by product (sales, cost, profit).
 - **Money:** expenses by category, other money in, banked vs waiting to be banked.
-- **Shifts:** each closed shift with its drawer result (balanced / over / short) and the reason.
+- **Shifts:** each closed shift with its drawer result (balanced / over / short) and the reason, plus how many times the drawer was opened **without a sale**, per staff member.
 - **Stock movement:** received (with value), sold, from / to branch, returned, damaged, adjusted, empties, stock on hand now and its value at cost, and **free issues** received with their value.
 - **Returns & damages:** refunds (cash / wallet), bottles back on the shelf or damaged, exchanged, store damage, sent to supplier, written off, **damage loss at cost**, and damaged stock on hand.
 - **Discounts & loyalty:** discount register, points earned, used and held, and wallet money kept, used and held (owed to members).
@@ -331,6 +350,8 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
   - **Every change** made in the system, with **who** (and their role), **which branch**, when, the IP address, and a plain-language summary.
   - **Details:** before → after values (for example prices and settings), items, amounts and reasons.
   - **Blocked attempts** by someone without permission, and **failed** purchase-order emails.
+  - **Cash drawer:** every no-sale opening with its reason.
+  - **Offline sales:** "sold OFFLINE at 09:56, uploaded later", and "shelf count was short" when more bottles were sold than the count showed. A bill sent again by the till is logged once, not per attempt.
   - **Filters:** category (sign-ins, sales, stock, products, staff, Day End & cash, purchase orders, returns & damages, GRN & transfers, branches, accounts, customers), person, date and text search.
   - Entries can't be edited or deleted.
 - **Shop Settings** (administrators):
@@ -346,7 +367,7 @@ Built for LKR (Rs.). It enforces the Sri Lankan per-bill hard-liquor limit, and 
 | Role | Access |
 |---|---|
 | **Administrator** | Everything: all branches, settings, staff, branches, purchase orders, clearing damaged stock, activity log |
-| **Cashier** | Counter, sold products, sales bills, returns & damages, Day End for their branch (blind count), GRN, GTN send/receive, Product Setup (view; return empties). **Fixed to one branch.** |
+| **Cashier** | Counter (including offline selling and Open drawer), sold products, sales bills, returns & damages, Day End for their branch (blind count), GRN, GTN send/receive, Product Setup (view; return empties). **Fixed to one branch.** |
 | **Inventory Manager** | Product Setup, suppliers, GRN, GTN; can switch branch |
 | **Accountant** | Day End (view), expenses & receipts, banking, reports, sales bills, GRN/GTN (view); can switch branch |
 
@@ -356,9 +377,9 @@ Permissions are checked on the **server** for every request, not just hidden in 
 
 | Document | Size | Contents |
 |---|---|---|
-| Sales bill | 80mm | Shop + branch header, items, empties, discount, points, wallet, payment, change, hard-liquor count |
+| Sales bill | 80mm | Shop + branch header, items, empties, discount, points, wallet, payment, change, hard-liquor count; "Saved offline" note when sold offline |
 | Return / exchange slip | 80mm | RT number, bill, items, refund (cash / wallet), points back, reason, signatures |
-| Z report | 80mm | Shift summary, payments, drawer, expenses, goods, returns, stock book, signatures |
+| Z report | 80mm | Shift summary, payments, drawer, drawer openings (no sale), expenses, goods, returns, stock book, bills (offline marked), signatures |
 | Voucher / receipt | 80mm | Cash book entries |
 | No-sale slip | 80mm | NS number, branch, time, who opened the drawer and why (printer-driver drawer setup) |
 | Day End report | A4 | Full shift book (see §11) |
@@ -380,11 +401,13 @@ Every print can be saved as PDF from the print dialog.
 - **Expected cash in the drawer:**
   - `opening float + cash parts of bills + change kept in wallets + cash in − paid out − cash refunds`
   - Wallet spending is sales, but not new cash.
+  - Opening the drawer without a sale changes nothing here. Cash put in or taken out must be recorded as **Cash in** or an **Expense**.
 - **Net sales:**
   - `cash + card + transfer/QR + wallet used`
   - Net after returns = net sales − refunds.
 - **Stock book** (per product, per shift, per branch):
   - `opening + received (incl. free issues) + from other branches + returned by customers − sold − to other branches − damaged ± corrections = closing`
+- **Offline bills** count on the day and time they were really sold, in the shift that is open at the branch when they upload. If more bottles were sold offline than the shelf count showed, the shelf goes below zero until it is counted and corrected (or restocked), and the shortage is flagged.
 - **Cost price:** a weighted average over the stock on hand. A GRN's paid amount is spread over paid + free bottles.
 - **Profit:**
   - `net sales − refunds − cost of bottles sold (less bottles back on the shelf) − running expenses − damage loss (at cost) + other income`
@@ -400,6 +423,8 @@ Every print can be saved as PDF from the print dialog.
   - Cash entries are *voided*, not deleted.
   - Purchase orders are *cancelled*.
   - Closed shifts are frozen.
+- **Opening the cash drawer without a sale** is numbered (`NS-000001`) and saved with the reason before the drawer opens.
+- **A bill is saved exactly once**, even if the till sends it again (weak network) or uploads it later (offline).
 - **What was true at the time of sale** is kept on the bill (points rate, hard-liquor mark), so later changes never rewrite history.
 
 ---
@@ -545,6 +570,13 @@ cd ../pos && npm ci && npm run build && pm2 restart bar-shop-web
 
 All branches use the same web address. Staff sign in from any browser. The counter works on a PC, laptop or tablet with a USB/Bluetooth barcode scanner and an 80mm receipt printer.
 
+**Counter hardware:**
+- An 80mm thermal receipt printer with a **cash drawer port (RJ11)**, and a cash drawer plugged into it. This is the standard setup, e.g. Xprinter XP-80 or Epson TM-T82.
+- Use **Google Chrome or Microsoft Edge** at the counter. They can send the "open drawer" signal straight to a USB printer or COM port.
+- On Windows, the printer driver option ("open cash drawer when printing") is usually the simplest.
+- Set the drawer up once per counter computer: *Open drawer → Drawer setup*.
+- A **4G backup router** with automatic failover keeps the counter online when the main line drops. Offline selling covers the rest.
+
 ### Live server & CI/CD pipeline
 
 The shop runs on a Hostinger VPS (Ubuntu 24.04), and every push to `main` is checked and deployed automatically.
@@ -612,14 +644,22 @@ backend/
     purchase-orders/            purchase orders + supplier email
     goods/                      GRN (goods received) and GTN (branch transfers)
     branches/                   branches, branch stock, working-branch switch
-    book/                       shifts / Day End, cash book, period reports, stock movements
+    book/                       shifts / Day End, cash book, period reports, stock movements, cash drawer (no sale)
     settings/                   shop settings, hard-liquor limit
     activity-log/               activity log (who / what / where)
   src/common/utils/mailer.ts    SMTP email (Nodemailer)
+ecosystem.config.cjs            PM2 processes for the server
+scripts/deploy.sh               server deploy (backup, update, build, reload, health check)
+.github/workflows/deploy.yml    CI/CD: check on every push/PR, deploy pushes to main
 pos/
   app/dashboard/<page>/         one folder per screen
   app/components/               sidebar, top bar (branch switcher), shared UI
+  app/components/OfflineSync.tsx       "bills waiting to upload" badge + automatic upload
+  app/components/book/CashDrawerModal.tsx  Open drawer (no sale) + drawer setup
   app/lib/                      prints (receipt, Z, Day End A4, reports, PO, GRN, GTN), roles, hooks
+  app/lib/safeCheckout.ts       bill reference, automatic retries, "was it saved?" check
+  app/lib/offlineSales.ts       bills sold offline (kept in the browser) and their upload
+  app/lib/cashDrawer.ts         drawer kick (USB / COM port / printer driver)
   app/lounge.css                design (dark / light themes)
 ```
 
@@ -636,3 +676,10 @@ pos/
 | Cashier sees another branch's data | Check their branch in Staff & Roles (cashiers must have one) |
 | Web app can't reach the API | Check `NEXT_PUBLIC_API_URL` (then rebuild) and `CORS_ORIGIN` |
 | After changing `schema.prisma` | Run `npx prisma generate` (and apply the migration SQL) |
+| No "Open drawer" button | It shows only while a shift is open, for administrators and cashiers. Start a shift on the Bar Counter |
+| The drawer doesn't open | *Open drawer → Drawer setup*: choose how it's connected. Use Chrome or Edge for USB / COM port. On Windows, if USB says the printer is busy, use "Printer opens it when printing" and turn on the drawer option in the printer driver |
+| "N bills waiting to upload" stays | The till can't reach the server yet; they upload by themselves every 15 seconds. Click the badge → *Upload now*. Don't clear the browser's data while bills are waiting |
+| An offline bill "needs attention" | The server refused it (the reason is shown, e.g. a product was deleted). Fix the cause and press *Upload now*; the bill is never dropped |
+| Close shift is greyed out | Bills sold offline on this computer are still waiting to upload |
+| "Weak connection · trying again" | The till is retrying; the bill won't be saved twice. If the connection stays down it's saved offline |
+| GitHub Actions: "account is locked due to a billing issue" | GitHub → Settings → Billing: pay or clear the amount due and set all budgets to $0 with "stop usage", then re-run the failed job. Or deploy by hand (see *Everyday use*) |

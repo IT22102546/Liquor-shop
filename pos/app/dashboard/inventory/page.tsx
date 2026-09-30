@@ -22,6 +22,8 @@ import { printReceipt, type SaleReceipt } from "../../lib/receipt";
 import { ReceiptModal } from "../../components/receipt/ReceiptModal";
 import { CashDrawerModal } from "../../components/book/CashDrawerModal";
 import { kickDrawer } from "../../lib/cashDrawer";
+import { checkPendingBill, clearPendingBill, loadPendingBill, newBillRef, savePendingBill, sendBill } from "../../lib/safeCheckout";
+import { addOfflineBill, newBillNo } from "../../lib/offlineSales";
 import { ROLE_LABELS } from "../../lib/roles";
 import { useCountUp } from "../../lib/useCountUp";
 import { normalizeBarcode, useBarcodeScanner } from "../../lib/useBarcodeScanner";
@@ -165,6 +167,10 @@ export default function InventoryPage() {
   };
   const [amountTendered, setAmountTendered] = useState("");
   const [checkingOut, setCheckingOut] = useState(false);
+  /** Which try the bill is on while the connection is weak (1 = first). */
+  const [sendAttempt, setSendAttempt] = useState(1);
+  /** The last bill couldn't reach the server: try once, quickly, then sell offline. */
+  const [offlineMode, setOfflineMode] = useState(false);
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [completedReceipt, setCompletedReceipt] = useState<SaleReceipt | null>(null);
   const [showReceipt, setShowReceipt] = useState(false);
@@ -232,6 +238,17 @@ export default function InventoryPage() {
     }
   };
   const [toasts, setToasts] = useState<ScanToast[]>([]);
+  // A bill left unconfirmed (connection dropped, then the page was reloaded): say what happened to it.
+  useEffect(() => {
+    const pending = loadPendingBill(admin.id);
+    if (!pending) return;
+    void checkPendingBill<CheckoutResult>(token, pending.ref).then((earlier) => {
+      if (earlier.kind === "unknown") return; // still offline; checked again at the next sale
+      clearPendingBill();
+      if (earlier.kind === "saved") setCheckoutMessage(`Bill ${earlier.data.invoiceGroupCode} (${formatCurrency(earlier.data.total)}) was saved before the connection dropped`);
+      else setError("A bill that couldn't be sent before (no connection) was not saved. Ring it up again if the customer is still here.");
+    });
+  }, [admin.id, token]);
   const [bumpedId, setBumpedId] = useState<number | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const registerRef = useRef<HTMLDivElement>(null);
@@ -521,6 +538,52 @@ export default function InventoryPage() {
       : line));
   };
 
+  /** The bill as the server would have answered, worked out on the till (for a sale made offline). */
+  const offlineResult = (billNo: string, soldAt: string): CheckoutResult & { soldOffline: true } => {
+    const cardPart = paymentMethod === "CARD" ? due : paymentMethod === "SPLIT" ? splitCardAmount : 0;
+    const transferPart = paymentMethod === "BANK_TRANSFER" ? due : paymentMethod === "SPLIT" ? splitTransferAmount : 0;
+    return {
+      invoiceGroupCode: billNo,
+      paymentMethod,
+      paymentReference: paymentMethod !== "CASH" && paymentReference.trim() ? paymentReference.trim() : null,
+      subtotal: cartSubtotal,
+      emptyDeduction: cartEmptyDeduction,
+      emptiesReturned: cartEmptiesCount,
+      total: cartTotal,
+      cashPaid: cashDue,
+      cardPaid: cardPart,
+      transferPaid: transferPart,
+      amountReceived: roundCurrency((cashDue > 0 ? tendered : 0) + cardPart + transferPart),
+      changeGiven: handBack,
+      walletUsed: 0,
+      walletCredit: changeToWallet,
+      purchases: cart.map((line) => {
+        const unitPrice = line.product.sellingPrice ?? 0;
+        const emptyDeduction = roundCurrency(line.empties * emptyPriceOf(line.product));
+        return { productId: line.product.id, name: line.product.name, quantity: line.quantity, unitPrice, emptiesReturned: line.empties, emptyDeduction, lineTotal: roundCurrency(unitPrice * line.quantity - emptyDeduction) };
+      }),
+      counterSale: { createdAt: soldAt },
+      member: null,
+      discount: discountAmount > 0 ? { type: discountType, value: discountValue, amount: discountAmount } : null,
+      pointsRedeemed: 0,
+      pointsValue: 0,
+      soldOffline: true,
+    };
+  };
+
+  /** A bill from before a page reload that still can't be checked: keep it as sold offline. */
+  const queuePendingAsOffline = (pending: NonNullable<ReturnType<typeof loadPendingBill>>) => {
+    const body = JSON.parse(pending.body) as Record<string, unknown> & { items?: Array<{ productId: number; quantity: number; unitPrice: number; emptiesReturned?: number }> };
+    const items = body.items ?? [];
+    const billNo = pending.billNo ?? newBillNo();
+    addOfflineBill({
+      ref: pending.ref, billNo, soldAt: new Date(pending.at).toISOString(), adminId: admin.id, cashierName: admin.name,
+      total: roundCurrency(items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)),
+      items: items.map((item) => `${item.quantity} × ${products.find((product) => product.id === item.productId)?.name ?? "item"}`).join(", "),
+      body: { ...body, clientRef: pending.ref, billNo, offline: { soldAt: new Date(pending.at).toISOString() } },
+    });
+  };
+
   const checkout = async () => {
     if (cart.length === 0) return;
     if (splitProblem) {
@@ -532,36 +595,85 @@ export default function InventoryPage() {
       return;
     }
     setCheckingOut(true);
+    setSendAttempt(1);
     setError(null);
     setCheckoutMessage(null);
     try {
-      const response = await fetch(`${API_URL}/api/pos/user-management/checkout`, {
-        method: "POST",
-        headers: { ...auth, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: cart.map((line) => ({
-            productId: line.product.id,
-            quantity: line.quantity,
-            unitPrice: line.product.sellingPrice ?? 0,
-            emptiesReturned: line.empties,
-          })),
-          paymentMethod,
-          amountReceived: cashDue > 0 ? tendered : undefined,
-          ...(walletUse > 0 ? { walletUse } : {}),
-          ...(changeToWallet > 0 ? { changeToWallet } : {}),
-          ...(paymentMethod === "SPLIT" ? { split: { card: splitCardAmount, transfer: splitTransferAmount } } : {}),
-          ...(paymentMethod !== "CASH" && paymentReference.trim() ? { paymentReference: paymentReference.trim() } : {}),
-          ...(member ? { customerId: member.id } : {}),
-          ...(discountAmount > 0 ? { discount: { type: discountType, value: discountValue } } : {}),
-          ...(pointsUsed > 0 ? { redeemPoints: pointsUsed } : {}),
-        }),
-      });
-      const payload = await response.json().catch(() => null) as { data?: CheckoutResult; message?: string } | null;
-      if (!response.ok || !payload?.data) {
-        if (response.status === 422) void loadShift();
-        throw new Error(payload?.message ?? "Checkout failed");
+      const bill = {
+        items: cart.map((line) => ({
+          productId: line.product.id,
+          quantity: line.quantity,
+          unitPrice: line.product.sellingPrice ?? 0,
+          emptiesReturned: line.empties,
+        })),
+        paymentMethod,
+        amountReceived: cashDue > 0 ? tendered : undefined,
+        ...(walletUse > 0 ? { walletUse } : {}),
+        ...(changeToWallet > 0 ? { changeToWallet } : {}),
+        ...(paymentMethod === "SPLIT" ? { split: { card: splitCardAmount, transfer: splitTransferAmount } } : {}),
+        ...(paymentMethod !== "CASH" && paymentReference.trim() ? { paymentReference: paymentReference.trim() } : {}),
+        ...(member ? { customerId: member.id } : {}),
+        ...(discountAmount > 0 ? { discount: { type: discountType, value: discountValue } } : {}),
+        ...(pointsUsed > 0 ? { redeemPoints: pointsUsed } : {}),
+      };
+      // Safe retries: the same order keeps the same bill reference until the server confirms it.
+      const body = JSON.stringify(bill);
+      const pending = loadPendingBill(admin.id);
+      let ref = pending?.body === body ? pending.ref : null;
+      if (pending && !ref) {
+        // A different order while an earlier one is unconfirmed: find out what happened to it first.
+        const earlier = await checkPendingBill<CheckoutResult>(token, pending.ref);
+        // Still offline: that bill stays on record as sold offline (it uploads once, whatever happened).
+        if (earlier.kind === "unknown") queuePendingAsOffline(pending);
+        clearPendingBill();
+        if (earlier.kind === "saved") {
+          await loadData(); // its stock is gone from the shelf (this refresh clears messages, so it goes first)
+          setError(`The earlier bill ${earlier.data.invoiceGroupCode} (${formatCurrency(earlier.data.total)}) WAS saved before the connection dropped. Check with the customer so they aren't charged twice, then press Complete sale again for this order.`);
+          return;
+        }
       }
-      const sale = payload.data;
+      const billNo = (ref && pending?.billNo) || newBillNo();
+      ref ??= newBillRef();
+      savePendingBill({ ref, billNo, body, adminId: admin.id, at: Date.now() });
+      const browserOffline = typeof navigator !== "undefined" && navigator.onLine === false;
+      const sent = browserOffline
+        ? ({ kind: "unreachable" } as const)
+        : await sendBill<CheckoutResult & { replayed?: boolean }>(token, { ...bill, clientRef: ref, billNo }, setSendAttempt,
+          offlineMode ? { delays: [0], timeoutMs: 5000 } : { delays: [0, 1000, 2500], timeoutMs: 10000 });
+      if (sent.kind === "signed-out") { logout(); return; }
+      let sale: CheckoutResult & { replayed?: boolean; soldOffline?: boolean };
+      if (sent.kind === "unreachable") {
+        // No connection: the sale goes ahead on this till and uploads by itself later.
+        if (walletUse > 0 || pointsUsed > 0) {
+          setOfflineMode(true);
+          setError("No connection to the server. Paying from the wallet or with points needs the connection — take them off to sell offline, or press Complete sale again when the connection is back. It will not be saved twice.");
+          return;
+        }
+        const soldAt = new Date().toISOString();
+        sale = offlineResult(billNo, soldAt);
+        const stored = addOfflineBill({
+          ref, billNo, soldAt, adminId: admin.id, cashierName: admin.name, total: sale.total,
+          items: cart.map((line) => `${line.quantity} × ${line.product.name}`).join(", "),
+          body: { ...bill, clientRef: ref, billNo, offline: { soldAt } },
+        });
+        if (!stored) {
+          setError("No connection, and this browser can't store the bill offline (storage blocked or full). Don't hand over the goods yet.");
+          return;
+        }
+        clearPendingBill();
+        setOfflineMode(true);
+        // Take the bottles off the shelf on screen, so the counts stay right until the next refresh.
+        const sold = new Map(cart.map((line) => [line.product.id, line.quantity]));
+        setProducts((current) => current.map((product) => (sold.has(product.id) ? { ...product, quantity: product.quantity - sold.get(product.id)! } : product)));
+      } else {
+        clearPendingBill();
+        if (sent.kind === "refused") {
+          if (sent.status === 422) void loadShift();
+          throw new Error(sent.message);
+        }
+        setOfflineMode(false);
+        sale = sent.data;
+      }
       // Cash changes hands: open the drawer (the bill itself is the record of why).
       if ((sale.cashPaid ?? 0) > 0) {
         void kickDrawer({ forSale: true }).catch((kickError: unknown) =>
@@ -607,8 +719,11 @@ export default function InventoryPage() {
         total: sale.total,
         amountReceived: sale.amountReceived,
         change: sale.changeGiven,
+        ...(sale.soldOffline ? { offline: { memberName: member ? `${member.firstName} ${member.lastName ?? ""}`.trim() : null } } : {}),
       };
-      setCheckoutMessage(`Sale complete · ${sale.invoiceGroupCode}`);
+      setCheckoutMessage(sale.soldOffline
+        ? `Saved offline · ${sale.invoiceGroupCode} · it uploads by itself when the connection is back`
+        : `Sale complete · ${sale.invoiceGroupCode}${sale.replayed ? " (confirmed after the connection came back)" : ""}`);
       setCompletedReceipt(receipt);
       setShowReceipt(true);
       setMember(null);
@@ -617,7 +732,7 @@ export default function InventoryPage() {
       setAmountTendered("");
       setPaymentReference("");
       setPaymentMethod("CASH");
-      await loadData();
+      if (!sale.soldOffline) await loadData();
       window.setTimeout(() => printReceipt(receipt), 100);
     } catch (checkoutError) {
       setError(checkoutError instanceof Error ? checkoutError.message : "Checkout failed");
@@ -1044,7 +1159,7 @@ export default function InventoryPage() {
             </div>
           )}
           <button type="button" className="pos-complete-sale" disabled={cart.length === 0 || checkingOut || shift === null || discountOverLimit || hardLiquorOver || Boolean(splitProblem) || cashShort} onClick={() => void checkout()}>
-            {checkingOut ? "Completing…" : shift === null ? "Start a shift to sell" : hardLiquorOver ? `Too much hard liquor (max ${settings.hardLiquorLimit})` : `Complete sale · ${formatCurrency(walletUse > 0 ? due : cartTotal)}`}
+            {checkingOut ? (sendAttempt > 1 ? `Weak connection · trying again (${sendAttempt})…` : "Completing…") : shift === null ? "Start a shift to sell" : hardLiquorOver ? `Too much hard liquor (max ${settings.hardLiquorLimit})` : `Complete sale · ${formatCurrency(walletUse > 0 ? due : cartTotal)}`}
           </button>
           <div className="pos-cart-shortcuts">
             <Link href="/dashboard/inventory/sold"><IconReceipt /> Recent sales</Link>

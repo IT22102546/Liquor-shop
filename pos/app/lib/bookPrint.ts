@@ -40,7 +40,9 @@ export type ShiftReport = {
     byProduct: Array<{ name: string; units: number; amount: number | null }>;
     /** Hard liquor (ticked on the product) vs beer, wine and other drinks (older reports don't have it). */
     byType?: { hardLiquor: { units: number; amount: number | null }; other: { units: number; amount: number | null } };
-    billList: Array<{ billNo: string; time: string; cashier: string; customer: string; payment: string; reference?: string | null; items: string; units: number; emptyDeduction: number | null; discount: number | null; total: number | null }>;
+    billList: Array<{ billNo: string; time: string; cashier: string; customer: string; payment: string; reference?: string | null; items: string; units: number; emptyDeduction: number | null; discount: number | null; total: number | null; offline?: boolean }>;
+    /** Bills rung up while the till was offline and uploaded later. */
+    offlineBills?: number;
   };
   cash: {
     openingFloat: number; cashSales: number | null; walletKept?: number | null; drawerIn: number | null; drawerOut: number | null;
@@ -266,9 +268,9 @@ export function buildZReportHtml(report: ShiftReport) {
         ${report.damagedStock.map((row) => `<tr><td>${esc(row.name)}</td><td>${row.added}</td><td>${row.cleared}</td><td>${row.onHand}</td></tr>`).join("")}
       </table>` : ""}
 
-    <div class="head">Bills (${sales.billList.length})</div>
+    <div class="head">Bills (${sales.billList.length})${sales.offlineBills ? ` · ${sales.offlineBills} sold offline` : ""}</div>
     <table><tr><th>Time</th><th>Bill · by</th><th>Total</th></tr>
-      ${sales.billList.map((bill) => `<tr><td>${new Date(bill.time).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}</td><td style="text-align:left">${esc(bill.billNo.slice(-9))} · ${esc(bill.cashier)}${bill.payment === "Cash" ? "" : " · card"}</td><td>${amt(bill.total)}</td></tr>`).join("") || `<tr><td colspan="3">No bills</td></tr>`}
+      ${sales.billList.map((bill) => `<tr><td>${new Date(bill.time).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}</td><td style="text-align:left">${esc(bill.billNo.slice(-9))} · ${esc(bill.cashier)}${bill.payment === "Cash" ? "" : " · card"}${bill.offline ? " · OFFLINE" : ""}</td><td>${amt(bill.total)}</td></tr>`).join("") || `<tr><td colspan="3">No bills</td></tr>`}
     </table>
 
     ${close?.notes ? `<div class="head">Notes</div><div class="small">${esc(close.notes)}</div>` : ""}

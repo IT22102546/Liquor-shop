@@ -124,6 +124,12 @@ export const checkoutSaleSchema = z.object({
     )
     .min(1, "Add at least one product")
     .max(100),
+  /** The till's own id for this bill; sending the same bill again returns the first result. */
+  clientRef: z.string().trim().regex(/^[A-Za-z0-9-]{8,64}$/, "Invalid bill reference").optional(),
+  /** Bill number made by the till (printed on the receipt even if the bill is saved later). Needs clientRef. */
+  billNo: z.string().trim().regex(/^POS-[A-Z0-9]{6,12}-[A-Z0-9]{4}$/, "Invalid bill number").optional(),
+  /** Sold while the till had no connection: when it was sold. The sale is accepted even if the shelf count is short. */
+  offline: z.object({ soldAt: z.string().datetime() }).optional(),
   paymentMethod: z.enum(["CASH", "CHEQUE", "BANK_TRANSFER", "CARD", "SPLIT"]).default("CASH"),
   /** Card approval code from the card slip, or the bank transfer / QR reference. */
   paymentReference: z.string().trim().max(60).optional(),

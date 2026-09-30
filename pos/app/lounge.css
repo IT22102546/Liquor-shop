@@ -1697,3 +1697,23 @@ button.cd-open-btn { font: inherit; font-size: 0.74rem; font-weight: 700; cursor
 .cd-mode:hover:not(:disabled) { border-color: var(--soft-gold-border); }
 .cd-mode.active { border-color: var(--accent); background: var(--accent-bg); }
 .cd-mode:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Offline bills (waiting to upload) ── */
+.os-wrap { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 60; display: grid; justify-items: center; gap: 0.5rem; max-width: calc(100vw - 32px); }
+.os-pill { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.55rem 1rem; border-radius: 999px; font: inherit; font-size: 0.82rem; font-weight: 700; cursor: pointer; color: var(--warning); background: var(--panel); border: 1.5px solid var(--warning); box-shadow: var(--shadow-sm); }
+.os-pill i { width: 9px; height: 9px; border-radius: 50%; background: var(--warning); }
+.os-pill i.spin { animation: os-pulse 0.9s ease-in-out infinite alternate; }
+.os-pill.bad { color: var(--danger); border-color: var(--danger); }
+.os-pill.bad i { background: var(--danger); }
+.os-pill.ok { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 60; cursor: default; color: var(--success); border-color: var(--success); }
+@keyframes os-pulse { from { opacity: 0.35; } to { opacity: 1; } }
+.os-panel { width: min(520px, calc(100vw - 32px)); max-height: 60vh; overflow: auto; background: var(--panel); border: 1px solid var(--panel-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 1rem; display: grid; gap: 0.6rem; }
+.os-panel-head { display: flex; align-items: center; justify-content: space-between; }
+.os-panel p { margin: 0; font-size: 0.78rem; }
+.os-list { display: grid; gap: 0.4rem; }
+.os-row { display: flex; justify-content: space-between; gap: 0.8rem; padding: 0.55rem 0.7rem; border-radius: var(--radius-sm); background: var(--panel-2); border: 1px solid var(--panel-border); font-size: 0.8rem; }
+.os-row div { display: grid; gap: 0.1rem; min-width: 0; }
+.os-row span { color: var(--text-soft); overflow-wrap: anywhere; }
+.os-row em { font-style: normal; color: var(--danger); }
+.os-row.problem { border-color: var(--danger); }
+.os-row b { white-space: nowrap; }

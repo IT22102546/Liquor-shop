@@ -12,6 +12,7 @@ const management = authorizePosRoles("ADMIN");
 router.get("/meta/provinces", management, controller.getProvinceDistrictMeta);
 router.get("/purchases", authorizePosRoles("ADMIN", "CASHIER", "ACCOUNTANT"), controller.getPurchases);
 router.post("/checkout", sales, controller.checkoutSale);
+router.get("/checkout/:clientRef", sales, controller.getCheckoutByClientRef);
 router.patch("/purchases/:purchaseId", finance, controller.updatePurchase);
 router.get("/invoice-accounts", finance, controller.getInvoiceAccounts);
 router.post("/invoice-accounts", finance, controller.createInvoiceAccount);

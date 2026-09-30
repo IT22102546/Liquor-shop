@@ -68,6 +68,8 @@ export async function recordPosActivity(req: Request, res: Response, next: NextF
     // A failed purchase order email is recorded too (the attempt matters, not only successes).
     const failedEmail = res.statusCode >= 500 && /^\/purchase-orders\/\d+\/send$/.test(path);
     if (res.statusCode >= 400 && !denied && !failedEmail) return;
+    // A bill sent again by the till (weak network) is the same sale, already logged the first time.
+    if ((responseBody as { data?: { replayed?: boolean } } | undefined)?.data?.replayed) return;
     const body = (req.body && typeof req.body === "object" ? req.body : {}) as Record<string, unknown>;
     let described;
     try {

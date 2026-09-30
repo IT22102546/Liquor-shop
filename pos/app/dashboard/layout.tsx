@@ -6,6 +6,7 @@ import { Sidebar } from "../components/Sidebar";
 import { Topbar } from "../components/Topbar";
 import { AdminCtx } from "../components/AdminContext";
 import { QueryProvider } from "../components/QueryProvider";
+import { OfflineSync } from "../components/OfflineSync";
 import { API_URL, STORAGE_TOKEN, STORAGE_ADMIN } from "../lib/constants";
 import type { PosAdmin } from "../lib/types";
 import { canAccessPath, ROLE_HOME } from "../lib/roles";
@@ -111,6 +112,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Topbar />
             <div className="page-content">{children}</div>
           </div>
+          <OfflineSync />
         </main>
       </AdminCtx.Provider>
     </QueryProvider>

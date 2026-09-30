@@ -136,6 +136,13 @@ model PosCounterSale {
   /// Branch this belongs to (every till, drawer and stock count is per branch).
   branchId         Int?
   invoiceGroupCode String        @unique
+  /// Made by the till before sending the bill. If the same bill arrives twice (weak network,
+  /// automatic retry), the second request gets the first result instead of a second sale.
+  clientRef        String?       @unique
+  /// What checkout answered the first time, sent back unchanged for a repeated request.
+  checkoutResult   Json?
+  /// Rung up on the till while the connection was down, and uploaded later (createdAt = time sold).
+  soldOffline      Boolean       @default(false)
   totalAmount      Float
   /// Total deducted for empty bottles returned (already subtracted from totalAmount).
   emptyDeduction   Float         @default(0)

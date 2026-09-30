@@ -1,5 +1,6 @@
 "use client";
 
+import { loadOfflineBills, onOfflineBillsChange } from "../../lib/offlineSales";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAdmin } from "../../components/AdminContext";
 import { CashEntryModal } from "../../components/book/CashEntryModal";
@@ -35,6 +36,13 @@ export default function DayEndPage() {
   const [busy, setBusy] = useState(false);
   const [entryModal, setEntryModal] = useState<"IN" | "OUT" | null>(null);
   const [tab, setTab] = useState<ShiftTab>("bills");
+  // Bills sold offline on this computer must upload before the shift closes, or they'd miss its Day End.
+  const [offlineWaiting, setOfflineWaiting] = useState(0);
+  useEffect(() => {
+    const refresh = () => setOfflineWaiting(loadOfflineBills().length);
+    refresh();
+    return onOfflineBillsChange(refresh);
+  }, []);
   const [closing, setClosing] = useState(false);
   const [viewing, setViewing] = useState<ShiftReport | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -146,7 +154,7 @@ export default function DayEndPage() {
                   <button type="button" className="btn-outline" onClick={() => setEntryModal("OUT")}><IconPlus /> Record expense</button>
                   <button type="button" className="btn-outline" onClick={() => setEntryModal("IN")}><IconCash size={16} /> Cash in</button>
                   <button type="button" className="btn-outline" onClick={() => setViewing(report)} disabled={blind} title={blind ? "Available after the drawer is counted" : "See and print the figures so far"}><IconPrinter size={16} /> Report so far</button>
-                  <button type="button" className="btn-accent" onClick={() => setClosing(true)}><IconCheck size={16} /> Close shift</button>
+                  <button type="button" className="btn-accent" onClick={() => setClosing(true)} disabled={offlineWaiting > 0} title={offlineWaiting > 0 ? `${offlineWaiting} bill(s) sold offline on this computer are still waiting to upload` : undefined}><IconCheck size={16} /> Close shift</button>
                 </div>
               )}
             </div>
@@ -243,7 +251,7 @@ function ShiftTables({ report, tab }: { report: ShiftReport; tab: ShiftTab }) {
         <tbody>{[...report.sales.billList].reverse().map((bill) => (
           <tr key={bill.billNo}>
             <td className="td-muted">{new Date(bill.time).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</td>
-            <td className="td-muted">{bill.billNo}</td>
+            <td className="td-muted">{bill.billNo}{bill.offline ? <span className="badge badge-warning" style={{ marginLeft: 6 }} title="Rung up while the till had no connection, uploaded later">Offline</span> : null}</td>
             <td><strong>{bill.cashier}</strong></td>
             <td>{bill.customer}</td>
             <td>{bill.items}</td>
