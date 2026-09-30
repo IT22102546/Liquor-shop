@@ -10,6 +10,9 @@
 # Stops at the first error, so a broken build never replaces the running version.
 set -euo pipefail
 
+# Everything is inside main(), called on the last line: bash reads the whole file before running it,
+# so updating the code (which replaces this file) can't change what is already running.
+main() {
 BRANCH="${1:-main}"
 APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$APP_DIR"
@@ -83,3 +86,6 @@ for attempt in $(seq 1 30); do
 done
 echo "Services did not come up in time — see: pm2 logs --lines 100" >&2
 exit 1
+}
+
+main "$@"
