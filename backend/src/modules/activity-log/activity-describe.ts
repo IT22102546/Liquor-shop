@@ -147,7 +147,7 @@ export function describePosChange(method: string, path: string, body: Body, resp
       category: "SALE",
       entityType: "sale",
       entityId: str(data.invoiceGroupCode),
-      summary: `Sold ${soldText || `${itemCount} items`} for ${money(data.total)} · ${str(data.paymentMethod) === "SPLIT" ? `split: ${[Number(data.cashPaid) > 0 ? `cash ${money(data.cashPaid)}` : "", Number(data.cardPaid) > 0 ? `card ${money(data.cardPaid)}` : "", Number(data.transferPaid) > 0 ? `QR ${money(data.transferPaid)}` : ""].filter(Boolean).join(" + ")}` : payment(data.paymentMethod)}${empties > 0 ? ` · ${empties} empt${empties === 1 ? "y" : "ies"} returned` : ""}${member.name ? ` · ${str(member.name)}` : ""}${obj(data.discount).amount ? ` · discount −${money(obj(data.discount).amount)}` : ""}${Number(data.pointsRedeemed) > 0 ? ` · ${str(data.pointsRedeemed)} points used` : ""}${Number(data.walletUsed) > 0 ? ` · ${money(data.walletUsed)} from wallet` : ""}${Number(data.walletCredit) > 0 ? ` · ${money(data.walletCredit)} change kept in wallet` : ""}`,
+      summary: `Sold ${soldText || `${itemCount} items`} for ${money(data.total)} · ${str(data.paymentMethod) === "SPLIT" ? `split: ${[Number(data.cashPaid) > 0 ? `cash ${money(data.cashPaid)}` : "", Number(data.cardPaid) > 0 ? `card ${money(data.cardPaid)}` : "", Number(data.transferPaid) > 0 ? `QR ${money(data.transferPaid)}` : ""].filter(Boolean).join(" + ")}` : payment(data.paymentMethod)}${empties > 0 ? ` · ${empties} empt${empties === 1 ? "y" : "ies"} returned` : ""}${member.name ? ` · ${str(member.name)}` : ""}${obj(data.discount).amount ? ` · discount −${money(obj(data.discount).amount)}` : ""}${Number(data.pointsRedeemed) > 0 ? ` · ${str(data.pointsRedeemed)} points used` : ""}${Number(data.walletUsed) > 0 ? ` · ${money(data.walletUsed)} from wallet` : ""}${Number(data.walletCredit) > 0 ? ` · ${money(data.walletCredit)} change kept in wallet` : ""}${data.soldOffline ? ` · sold OFFLINE at ${new Date(obj(data.counterSale).createdAt as string | Date).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Colombo" })}, uploaded later` : ""}${Array.isArray(data.stockShort) && data.stockShort.length ? ` · shelf count was short` : ""}`,
       details: {
         items: lines.map((line) => ({
           name: str(line.name),
@@ -159,6 +159,8 @@ export function describePosChange(method: string, path: string, body: Body, resp
         })),
         facts: [
           fact("Bill number", data.invoiceGroupCode),
+          ...(data.soldOffline ? [fact("Sold offline", `at ${new Date(obj(data.counterSale).createdAt as string | Date).toLocaleString("en-GB", { timeZone: "Asia/Colombo" })}, uploaded when the connection came back`)] : []),
+          ...(Array.isArray(data.stockShort) ? (data.stockShort as Body[]).map((row) => fact("Shelf count short", `${str(row.name)}: sold ${str(row.short)} more than the count showed — count and correct it`)) : []),
           fact("Customer", member.name ? `${str(member.name)} (loyalty member)` : "Walk-in customer"),
           ...(member.name ? [fact("Points earned", `${str(member.pointsEarned)} (balance ${str(member.pointsBalance)})`)] : []),
           fact("Payment", payment(data.paymentMethod)),

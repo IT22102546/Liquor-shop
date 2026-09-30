@@ -49,6 +49,31 @@ Staff without a fixed branch switch branches with the selector in the top bar. T
   - The mark is also saved on each bill line (`PosCustomerPurchase.isHardLiquor`), so reports keep what counted at the time of sale.
   - The printed bill shows "Hard liquor N bottles (limit 12)".
 - **A shift must be open** at the branch before anything can be sold.
+- **Safe retries on a weak network** (`lib/safeCheckout.ts`).
+  - Every bill carries a `clientRef` made on the till. `PosCounterSale.clientRef` is unique, and `checkoutResult` (JSON, written in the same transaction) is the first answer.
+  - A repeated request gets that answer back with `replayed: true`, and the Activity Log skips it. Parallel duplicates hit P2002 and are answered from the winner.
+  - `GET /api/pos/user-management/checkout/:clientRef` answers "was it saved?" (404 = not saved).
+  - The till retries 6 times over about 30 s (20 s timeout each), on network errors, timeouts, 5xx, 408 and 429. The button shows "Weak connection · trying again (n)…".
+  - Until a bill is confirmed it stays pending in localStorage `pos_pending_bill` (ref + body):
+    - the same order reuses the ref
+    - a different order first checks the pending one, and warns if it WAS saved
+    - a page reload reports what happened to it
+- **Offline selling** (`lib/offlineSales.ts`, `components/OfflineSync.tsx` in the dashboard layout).
+  - When the bill can't reach the server, the counter completes the sale on the till. The till sends its own `billNo` (POS-…) with every bill, so the printed number is final.
+  - What happens on the till:
+    - the bill goes into localStorage `pos_offline_bills`, with a body of `offline: { soldAt }`
+    - the receipt prints with a "Saved offline" note
+    - the drawer opens, and the stock on screen is reduced
+  - After the first failure, the counter makes one 5 s try per sale. When `navigator.onLine` is false, it sells offline straight away.
+  - Wallet use and points redemption need the connection. Earning points is fine (added on upload).
+  - OfflineSync uploads each staff member's own bills every 15 s and on the `online` event, oldest first. A refused bill stays listed with its reason ("needs attention").
+  - Server side:
+    - `offline.soldAt` becomes the createdAt of the sale and the purchasedAt of its lines. It is clamped to now and refused if older than 7 days.
+    - `soldOffline = true`.
+    - The shelf may go below zero (`changeStock(..., { allowShortShelf })`), and the response lists `stockShort`.
+    - The Activity Log says "sold OFFLINE at HH:MM" and "shelf count was short".
+  - Day End: `sales.offlineBills`, plus the `offline` flag on each bill (badge, A4, Z slip). Close shift is disabled on a computer that still has offline bills.
+  - Limitation: the page itself must already be open. Reloading while offline needs a service worker, which isn't built yet.
 - **Cash drawer** (`lib/cashDrawer.ts`, `components/book/CashDrawerModal.tsx`, backend `book/drawer.service.ts`).
   - The drawer opens by itself after a bill with `cashPaid > 0` (`kickDrawer({ forSale: true })`).
   - **Open drawer** (ADMIN, CASHIER; needs an open shift) requires a reason. `POST /api/pos/shifts/drawer-open` saves a `PosDrawerOpen` (`NS-000001`, lock 740321) *before* the drawer opens.

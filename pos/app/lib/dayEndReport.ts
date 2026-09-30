@@ -300,10 +300,10 @@ export function buildDayEndReportHtml(report: ShiftReport) {
   </section>` : ""}
 
   <section>
-    <h2>Bills <small>${sales.billList.length} bill(s)</small></h2>
+    <h2>Bills <small>${sales.billList.length} bill(s)${sales.offlineBills ? ` · ${sales.offlineBills} rung up offline and uploaded later` : ""}</small></h2>
     <table>
       <thead><tr><th>Time</th><th>Bill no</th><th>Sold by</th><th>Customer</th><th>Items</th><th>Payment</th><th class="r">Total</th></tr></thead>
-      ${sales.billList.map((bill) => `<tr><td>${timeOnly(bill.time)}</td><td>${esc(bill.billNo)}</td><td>${esc(bill.cashier)}</td><td>${esc(bill.customer)}</td><td class="muted">${esc(bill.items)}</td><td>${esc(bill.payment)}</td><td class="r">${amt(bill.total)}</td></tr>`).join("") || `<tr><td colspan="7" class="empty">No bills</td></tr>`}
+      ${sales.billList.map((bill) => `<tr><td>${timeOnly(bill.time)}</td><td>${esc(bill.billNo)}${bill.offline ? ` <b>OFFLINE</b>` : ""}</td><td>${esc(bill.cashier)}</td><td>${esc(bill.customer)}</td><td class="muted">${esc(bill.items)}</td><td>${esc(bill.payment)}</td><td class="r">${amt(bill.total)}</td></tr>`).join("") || `<tr><td colspan="7" class="empty">No bills</td></tr>`}
       ${sales.billList.length ? `<tr class="total"><td colspan="6">Total</td><td class="r">${amt(sales.netSales)}</td></tr>` : ""}
     </table>
   </section>

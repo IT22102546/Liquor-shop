@@ -151,6 +151,9 @@ exports.Prisma.PosCounterSaleScalarFieldEnum = {
   id: 'id',
   branchId: 'branchId',
   invoiceGroupCode: 'invoiceGroupCode',
+  clientRef: 'clientRef',
+  checkoutResult: 'checkoutResult',
+  soldOffline: 'soldOffline',
   totalAmount: 'totalAmount',
   emptyDeduction: 'emptyDeduction',
   emptiesReturned: 'emptiesReturned',
@@ -736,12 +739,12 @@ exports.Prisma.SortOrder = {
   desc: 'desc'
 };
 
-exports.Prisma.JsonNullValueInput = {
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull
 };
 
-exports.Prisma.NullableJsonNullValueInput = {
-  DbNull: Prisma.DbNull,
+exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 

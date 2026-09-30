@@ -644,7 +644,50 @@ export async function deletePosUser(id: number) {
   });
 }
 
+/**
+ * A bill the till already sent (same clientRef) — for example the reply was lost on a weak
+ * network and the till tried again. Returns the first answer, or null if it was never saved.
+ */
+export async function findCheckoutByClientRef(clientRef: string, cashierId?: number) {
+  const sale = await prisma.posCounterSale.findUnique({ where: { clientRef }, select: { checkoutResult: true, cashierId: true } });
+  if (!sale?.checkoutResult) return null;
+  if (cashierId != null && sale.cashierId !== cashierId) throw AppError.conflict("That bill reference belongs to another cashier's sale");
+  return { ...(sale.checkoutResult as Record<string, unknown>), replayed: true };
+}
+
 export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cashierRole: string, branchId: number) {
+  if (dto.clientRef) {
+    const saved = await findCheckoutByClientRef(dto.clientRef, cashierId);
+    if (saved) return saved;
+  }
+  try {
+    return await saveCheckout(dto, cashierId, cashierRole, branchId);
+  } catch (error) {
+    // The same bill arrived twice at the same moment: the first one won; answer with its result.
+    if (dto.clientRef && error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      const saved = await findCheckoutByClientRef(dto.clientRef, cashierId);
+      if (saved) return saved;
+    }
+    throw error;
+  }
+}
+
+/** When an offline bill was sold: never in the future, and not older than a week. */
+function offlineSoldAt(text: string) {
+  const soldAt = new Date(text);
+  const now = Date.now();
+  if (soldAt.getTime() > now) return new Date(now);
+  if (soldAt.getTime() < now - 7 * 24 * 60 * 60 * 1000) {
+    throw AppError.validation({ offline: ["This offline bill is more than 7 days old — ask the manager to enter it by hand"] });
+  }
+  return soldAt;
+}
+
+async function saveCheckout(dto: CheckoutSaleDto, cashierId: number, cashierRole: string, branchId: number) {
+  if ((dto.billNo || dto.offline) && !dto.clientRef) throw AppError.validation({ clientRef: ["A bill number from the till needs its bill reference"] });
+  const offline = dto.offline ? { soldAt: offlineSoldAt(dto.offline.soldAt) } : null;
+  /** Offline only: bottles sold beyond what the shelf count said (the count was wrong). */
+  const stockShort: Array<{ productId: number; name: string; short: number }> = [];
   const mergedItems = Array.from(
     dto.items.reduce((items, item) => {
       const existing = items.get(item.productId);
@@ -675,7 +718,10 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
   const productById = new Map((await forBranch(branchId, products.map((product) => ({ ...product, damagedQuantity: 0, emptyBottlesOnHand: 0 })))).map((product) => [product.id, product]));
   for (const item of mergedItems) {
     const product = productById.get(item.productId)!;
-    if (item.quantity > product.quantity) {
+    if (item.quantity > product.quantity && offline) {
+      // The bottles were already handed over while offline: record the sale and flag the count.
+      stockShort.push({ productId: product.id, name: product.name, short: item.quantity - Math.max(0, product.quantity) });
+    } else if (item.quantity > product.quantity) {
       throw AppError.validation({
         items: [`Only ${product.quantity} unit(s) of ${product.name} are available at this branch`],
       });
@@ -713,7 +759,8 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
     throw AppError.validation({ customerId: ["Loyalty member not found"] });
   }
 
-  const invoiceGroupCode = `POS-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+  // The till's own number when it made one (it is already printed on the receipt).
+  const invoiceGroupCode = dto.billNo ?? `POS-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
   const subtotal = roundCurrency(lines.reduce((sum, line) => sum + line.grossTotal, 0));
   const emptyDeductionTotal = roundCurrency(lines.reduce((sum, line) => sum + line.emptyDeduction, 0));
   const emptiesReturnedTotal = lines.reduce((sum, line) => sum + line.emptiesReturned, 0);
@@ -852,7 +899,7 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
       const product = productById.get(item.productId)!;
       const billDiscount = lineShares[lineIndex];
       // Off this branch's shelf (fails if another till sold them a moment ago); empties handed in stay here.
-      await changeStock(tx, branchId, item.productId, { quantity: -item.quantity, empties: item.emptiesReturned });
+      await changeStock(tx, branchId, item.productId, { quantity: -item.quantity, empties: item.emptiesReturned }, "bottles", { allowShortShelf: Boolean(offline) });
       await tx.inventoryProduct.update({ where: { id: item.productId }, data: { soldQuantity: { increment: item.quantity }, lastSoldAt: new Date() } });
 
       const lineTotal = roundCurrency(item.lineTotal - billDiscount);
@@ -876,6 +923,7 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
           remainingAmount: 0,
           settlementStatus: "SETTLED",
           purchaseChannel: "PERSONAL",
+          ...(offline ? { purchasedAt: offline.soldAt } : {}),
         },
       });
       if (lineTotal > 0) {
@@ -952,6 +1000,7 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
     const counterSale = await tx.posCounterSale.create({
       data: {
         invoiceGroupCode,
+        clientRef: dto.clientRef ?? null,
         shiftId: shift.id,
         branchId,
         customerId: member?.id ?? null,
@@ -975,6 +1024,8 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
         walletUsed,
         walletCredit,
         cashierId,
+        soldOffline: Boolean(offline),
+        ...(offline ? { createdAt: offline.soldAt } : {}),
       },
       select: {
         totalAmount: true,
@@ -989,7 +1040,7 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
       },
     });
 
-    return {
+    const saved = {
       customerId: customer.id,
       member: member
         ? {
@@ -1005,9 +1056,8 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
       purchases,
       counterSale,
     };
-  });
 
-  return {
+    const response = {
     invoiceGroupCode,
     paymentMethod: dto.paymentMethod,
     paymentReference: dto.paymentMethod === "CASH" ? null : dto.paymentReference?.trim() || null,
@@ -1028,8 +1078,18 @@ export async function checkoutSale(dto: CheckoutSaleDto, cashierId: number, cash
     walletCredit,
     changeDue,
     itemCount: mergedItems.reduce((sum, item) => sum + item.quantity, 0),
-    ...result,
-  };
+    soldOffline: Boolean(offline),
+    stockShort,
+    ...saved,
+    };
+    // Kept (in the same transaction) so a repeated request with this clientRef gets exactly this answer.
+    if (dto.clientRef) {
+      await tx.posCounterSale.update({ where: { invoiceGroupCode }, data: { checkoutResult: JSON.parse(JSON.stringify(response)) } });
+    }
+    return response;
+  });
+
+  return result;
 }
 
 async function createInvoicePaymentRecord(

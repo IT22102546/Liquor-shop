@@ -43,6 +43,8 @@ export type SaleReceipt = {
   lines: ReceiptLine[];
   /** The per-bill hard liquor limit at the time (printed next to the count). */
   hardLiquorLimit?: number;
+  /** Rung up while the till had no connection; the member's points are added when it uploads. */
+  offline?: { memberName: string | null };
   subtotal: number;
   emptyDeduction: number;
   emptiesReturned: number;
@@ -200,6 +202,8 @@ export function buildReceiptHtml(receipt: SaleReceipt) {
       <div class="row strong"><span>Points balance</span><span>${receipt.member.pointsBalance}</span></div>
       ${receipt.walletUsed || receipt.walletCredit || receipt.member.walletBalance ? `<div class="row strong"><span>Wallet balance</span><span>Rs. ${amount(receipt.member.walletBalance ?? 0)}</span></div>` : ""}
     </div>` : ""}
+
+    ${receipt.offline ? `<div class="saved">Saved offline — recorded when the connection is back${receipt.offline.memberName ? `. Points for ${escape(receipt.offline.memberName)} are added then` : ""}</div>` : ""}
 
     ${totalSaved > 0 ? `<div class="saved">You saved Rs. ${amount(totalSaved)} on this bill</div>` : ""}
 
